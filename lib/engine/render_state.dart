@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import '../models/grid.dart';
 import '../models/component.dart';
-import '../services/logic_engine.dart';
+
 
 class DebugOverlayData {
   final DebugInfo? debugInfo;

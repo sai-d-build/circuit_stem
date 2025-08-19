@@ -54,7 +54,7 @@ class Grid with _$Grid {
           occupied[key] = comp.id;
         }
       }
-      if (comp.type == ComponentType.battery) {
+      if (comp.type == "Component.Battery") {
         if (comp.terminals.length < 2) {
           messages.add('Battery ${comp.id} has fewer than 2 terminals; expected pos & neg.');
         }

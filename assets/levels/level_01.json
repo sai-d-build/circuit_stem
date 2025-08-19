@@ -14,7 +14,7 @@
   "initialComponents": [
     {
       "id": "bat1",
-      "type": "battery",
+      "type": "Component.Battery",
       "position": { "r": 1, "c": 1 },
       "rotation": 0,
       "shapeOffsets": [
@@ -29,7 +29,7 @@
     },
     {
       "id": "switch1",
-      "type": "circuit_switch",
+      "type": "Component.Switch",
       "position": { "r": 3, "c": 4 },
       "rotation": 270,
       "shapeOffsets": [
@@ -43,7 +43,7 @@
     },
     {
       "id": "bulb1",
-      "type": "bulb",
+      "type": "Component.Bulb",
       "position": { "r": 4, "c": 2 },
       "rotation": 0,
       "shapeOffsets": [
@@ -58,7 +58,7 @@
     },
     {
       "id": "timer1",
-      "type": "timer",
+      "type": "Component.Timer",
       "position": { "r": 6, "c": 1 },
       "rotation": 0,
       "shapeOffsets": [
@@ -74,7 +74,7 @@
   "paletteComponents": [
     {
       "id": "wire_straight_palette",
-      "type": "wire_straight",
+      "type": "Component.WireStraight",
       "position": { "r": 0, "c": 0 },
       "rotation": 0,
       "shapeOffsets": [ { "r": 0, "c": 0 } ],
@@ -86,7 +86,7 @@
     },
     {
       "id": "wire_corner_palette",
-      "type": "wire_corner",
+      "type": "Component.WireCorner",
       "position": { "r": 0, "c": 0 },
       "rotation": 0,
       "shapeOffsets": [ { "r": 0, "c": 0 } ],
@@ -98,7 +98,7 @@
     },
     {
       "id": "wire_t_palette",
-      "type": "wire_t",
+      "type": "Component.WireT",
       "position": { "r": 0, "c": 0 },
       "rotation": 0,
       "shapeOffsets": [ { "r": 0, "c": 0 } ],
@@ -126,7 +126,7 @@
     }
   ],
   "goals": [
-    { "type": "power_bulb", "targetId": "bulb1" },
+    { "type": "Goal.PowerBulb", "targetId": "bulb1" },
     { "type": "connect_terminals", "from": "bat1_pos", "to": "bat1_neg" },
     { "type": "activate_component", "targetId": "timer1" }
   ],

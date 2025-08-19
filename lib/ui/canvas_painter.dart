@@ -4,8 +4,7 @@ import '../common/constants.dart';
 import '../engine/render_state.dart';
 import '../models/component.dart';
 import '../services/asset_manager_state.dart';
-
-import 'painters/circuit_component_painter.dart';
+import '../behaviors/drawing_behavior.dart';
 
 class CanvasPainter extends CustomPainter {
   final RenderState? renderState;
@@ -34,14 +33,19 @@ class CanvasPainter extends CustomPainter {
     // Draw all components except dragged preview
     for (final comp in renderState!.grid.componentsById.values) {
       if (comp.id != renderState!.draggedComponentId) {
-        _drawComponent(canvas, comp);
+        final drawingBehavior = comp.getBehavior<DrawingBehavior>();
+        drawingBehavior?.draw(canvas, const Size(cellSize, cellSize), comp, assetState.assetManager!);
       }
     }
 
     // Draw dragged preview
     if (renderState!.draggedComponentId != null && renderState!.dragPosition != null) {
       final comp = renderState!.grid.componentsById[renderState!.draggedComponentId!];
-      if (comp != null) _drawDraggedComponent(canvas, comp, renderState!.dragPosition!);
+      if (comp != null) {
+        // This also needs to be behavior-driven
+        final drawingBehavior = comp.getBehavior<DrawingBehavior>();
+        drawingBehavior?.draw(canvas, const Size(cellSize, cellSize), comp, assetState.assetManager!);
+      }
     }
   }
 
@@ -56,56 +60,6 @@ class CanvasPainter extends CustomPainter {
     }
     for (int j = 0; j <= cols; j++) {
       canvas.drawLine(Offset(j * cw, 0), Offset(j * cw, rows * ch), paint);
-    }
-  }
-
-  void _drawComponent(Canvas canvas, ComponentModel comp) {
-    final isPowered = renderState!.evaluationResult.poweredComponentIds.contains(comp.id);
-    final isSwitchClosed = comp.type == ComponentType.sw ? (comp.state['closed'] == true) : false;
-
-    for (final off in comp.shapeOffsets) {
-      final x = (comp.c + off.dc) * cellSize;
-      final y = (comp.r + off.dr) * cellSize;
-
-      final painter = CircuitComponentPainter(
-        component: comp,
-        isPowered: isPowered,
-        isSwitchClosed: isSwitchClosed,
-        isDark: isDark,
-        partOffset: off,
-      );
-
-      canvas.save();
-      canvas.translate(x, y);
-      painter.paint(canvas, const Size(cellSize, cellSize));
-      canvas.restore();
-    }
-  }
-
-  void _drawDraggedComponent(Canvas canvas, ComponentModel comp, Offset position) {
-    final centerCellX = position.dx;
-    final centerCellY = position.dy;
-    final anchorX = centerCellX - (cellSize / 2);
-    final anchorY = centerCellY - (cellSize / 2);
-
-    for (final off in comp.shapeOffsets) {
-      final x = anchorX + off.dc * cellSize;
-      final y = anchorY + off.dr * cellSize;
-      
-      final painter = CircuitComponentPainter(
-        component: comp,
-        isPowered: false, // No power effect on dragged component
-        isSwitchClosed: false,
-        isDark: isDark,
-        partOffset: off,
-      );
-
-      canvas.save();
-      canvas.translate(x, y);
-      final paint = Paint()..color = draggedComponentBackgroundColor;
-      canvas.drawRect(const Offset(0,0) & const Size(cellSize, cellSize), paint);
-      painter.paint(canvas, const Size(cellSize, cellSize));
-      canvas.restore();
     }
   }
 

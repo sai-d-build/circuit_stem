@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:circuit_stem/models/component.dart';
-import 'package:circuit_stem/ui/painters/circuit_component_painter.dart';
+
 
 class CircuitComponentDisplay extends StatelessWidget {
   final ComponentModel component;
@@ -18,7 +18,7 @@ class CircuitComponentDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isPowered = component.state['isPowered'] == true; // Assuming isPowered is stored in state
-    final isSwitchClosed = component.type == ComponentType.sw ? (component.state['closed'] == true) : false;
+    final isSwitchClosed = component.type == "Component.Switch" ? (component.state['closed'] == true) : false;
 
     return SizedBox(
       width: size,

@@ -385,14 +385,17 @@ abstract class _TerminalSpec implements TerminalSpec {
 /// @nodoc
 mixin _$ComponentModel {
   String get id => throw _privateConstructorUsedError;
-  ComponentType get type => throw _privateConstructorUsedError;
+  String get type => throw _privateConstructorUsedError;
   int get r => throw _privateConstructorUsedError;
   int get c => throw _privateConstructorUsedError;
   int get rotation => throw _privateConstructorUsedError;
+  bool get isPowered => throw _privateConstructorUsedError;
   Map<String, dynamic> get state => throw _privateConstructorUsedError;
   List<CellOffset> get shapeOffsets => throw _privateConstructorUsedError;
   List<TerminalSpec> get terminals => throw _privateConstructorUsedError;
   List<List<int>> get internalConnections => throw _privateConstructorUsedError;
+  List<dynamic> get behaviors => throw _privateConstructorUsedError;
+  bool get isDraggable => throw _privateConstructorUsedError;
 
   /// Create a copy of ComponentModel
   /// with the given fields replaced by the non-null parameter values.
@@ -409,14 +412,17 @@ abstract class $ComponentModelCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      ComponentType type,
+      String type,
       int r,
       int c,
       int rotation,
+      bool isPowered,
       Map<String, dynamic> state,
       List<CellOffset> shapeOffsets,
       List<TerminalSpec> terminals,
-      List<List<int>> internalConnections});
+      List<List<int>> internalConnections,
+      List<dynamic> behaviors,
+      bool isDraggable});
 }
 
 /// @nodoc
@@ -439,10 +445,13 @@ class _$ComponentModelCopyWithImpl<$Res, $Val extends ComponentModel>
     Object? r = null,
     Object? c = null,
     Object? rotation = null,
+    Object? isPowered = null,
     Object? state = null,
     Object? shapeOffsets = null,
     Object? terminals = null,
     Object? internalConnections = null,
+    Object? behaviors = null,
+    Object? isDraggable = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -452,7 +461,7 @@ class _$ComponentModelCopyWithImpl<$Res, $Val extends ComponentModel>
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as ComponentType,
+              as String,
       r: null == r
           ? _value.r
           : r // ignore: cast_nullable_to_non_nullable
@@ -465,6 +474,10 @@ class _$ComponentModelCopyWithImpl<$Res, $Val extends ComponentModel>
           ? _value.rotation
           : rotation // ignore: cast_nullable_to_non_nullable
               as int,
+      isPowered: null == isPowered
+          ? _value.isPowered
+          : isPowered // ignore: cast_nullable_to_non_nullable
+              as bool,
       state: null == state
           ? _value.state
           : state // ignore: cast_nullable_to_non_nullable
@@ -481,6 +494,14 @@ class _$ComponentModelCopyWithImpl<$Res, $Val extends ComponentModel>
           ? _value.internalConnections
           : internalConnections // ignore: cast_nullable_to_non_nullable
               as List<List<int>>,
+      behaviors: null == behaviors
+          ? _value.behaviors
+          : behaviors // ignore: cast_nullable_to_non_nullable
+              as List<dynamic>,
+      isDraggable: null == isDraggable
+          ? _value.isDraggable
+          : isDraggable // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -495,14 +516,17 @@ abstract class _$$ComponentModelImplCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
-      ComponentType type,
+      String type,
       int r,
       int c,
       int rotation,
+      bool isPowered,
       Map<String, dynamic> state,
       List<CellOffset> shapeOffsets,
       List<TerminalSpec> terminals,
-      List<List<int>> internalConnections});
+      List<List<int>> internalConnections,
+      List<dynamic> behaviors,
+      bool isDraggable});
 }
 
 /// @nodoc
@@ -523,10 +547,13 @@ class __$$ComponentModelImplCopyWithImpl<$Res>
     Object? r = null,
     Object? c = null,
     Object? rotation = null,
+    Object? isPowered = null,
     Object? state = null,
     Object? shapeOffsets = null,
     Object? terminals = null,
     Object? internalConnections = null,
+    Object? behaviors = null,
+    Object? isDraggable = null,
   }) {
     return _then(_$ComponentModelImpl(
       id: null == id
@@ -536,7 +563,7 @@ class __$$ComponentModelImplCopyWithImpl<$Res>
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as ComponentType,
+              as String,
       r: null == r
           ? _value.r
           : r // ignore: cast_nullable_to_non_nullable
@@ -549,6 +576,10 @@ class __$$ComponentModelImplCopyWithImpl<$Res>
           ? _value.rotation
           : rotation // ignore: cast_nullable_to_non_nullable
               as int,
+      isPowered: null == isPowered
+          ? _value.isPowered
+          : isPowered // ignore: cast_nullable_to_non_nullable
+              as bool,
       state: null == state
           ? _value._state
           : state // ignore: cast_nullable_to_non_nullable
@@ -565,6 +596,14 @@ class __$$ComponentModelImplCopyWithImpl<$Res>
           ? _value._internalConnections
           : internalConnections // ignore: cast_nullable_to_non_nullable
               as List<List<int>>,
+      behaviors: null == behaviors
+          ? _value._behaviors
+          : behaviors // ignore: cast_nullable_to_non_nullable
+              as List<dynamic>,
+      isDraggable: null == isDraggable
+          ? _value.isDraggable
+          : isDraggable // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -579,23 +618,27 @@ class _$ComponentModelImpl extends _ComponentModel
       required this.r,
       required this.c,
       this.rotation = 0,
+      this.isPowered = false,
       final Map<String, dynamic> state = const {},
       final List<CellOffset> shapeOffsets = const [CellOffset(0, 0)],
       final List<TerminalSpec> terminals = const [
         TerminalSpec(cellIndex: 0, dir: Dir.north),
         TerminalSpec(cellIndex: 0, dir: Dir.south)
       ],
-      final List<List<int>> internalConnections = const []})
+      final List<List<int>> internalConnections = const [],
+      final List<dynamic> behaviors = const [],
+      this.isDraggable = false})
       : _state = state,
         _shapeOffsets = shapeOffsets,
         _terminals = terminals,
         _internalConnections = internalConnections,
+        _behaviors = behaviors,
         super._();
 
   @override
   final String id;
   @override
-  final ComponentType type;
+  final String type;
   @override
   final int r;
   @override
@@ -603,6 +646,9 @@ class _$ComponentModelImpl extends _ComponentModel
   @override
   @JsonKey()
   final int rotation;
+  @override
+  @JsonKey()
+  final bool isPowered;
   final Map<String, dynamic> _state;
   @override
   @JsonKey()
@@ -640,9 +686,22 @@ class _$ComponentModelImpl extends _ComponentModel
     return EqualUnmodifiableListView(_internalConnections);
   }
 
+  final List<dynamic> _behaviors;
+  @override
+  @JsonKey()
+  List<dynamic> get behaviors {
+    if (_behaviors is EqualUnmodifiableListView) return _behaviors;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_behaviors);
+  }
+
+  @override
+  @JsonKey()
+  final bool isDraggable;
+
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'ComponentModel(id: $id, type: $type, r: $r, c: $c, rotation: $rotation, state: $state, shapeOffsets: $shapeOffsets, terminals: $terminals, internalConnections: $internalConnections)';
+    return 'ComponentModel(id: $id, type: $type, r: $r, c: $c, rotation: $rotation, isPowered: $isPowered, state: $state, shapeOffsets: $shapeOffsets, terminals: $terminals, internalConnections: $internalConnections, behaviors: $behaviors, isDraggable: $isDraggable)';
   }
 
   @override
@@ -655,10 +714,13 @@ class _$ComponentModelImpl extends _ComponentModel
       ..add(DiagnosticsProperty('r', r))
       ..add(DiagnosticsProperty('c', c))
       ..add(DiagnosticsProperty('rotation', rotation))
+      ..add(DiagnosticsProperty('isPowered', isPowered))
       ..add(DiagnosticsProperty('state', state))
       ..add(DiagnosticsProperty('shapeOffsets', shapeOffsets))
       ..add(DiagnosticsProperty('terminals', terminals))
-      ..add(DiagnosticsProperty('internalConnections', internalConnections));
+      ..add(DiagnosticsProperty('internalConnections', internalConnections))
+      ..add(DiagnosticsProperty('behaviors', behaviors))
+      ..add(DiagnosticsProperty('isDraggable', isDraggable));
   }
 
   @override
@@ -672,13 +734,19 @@ class _$ComponentModelImpl extends _ComponentModel
             (identical(other.c, c) || other.c == c) &&
             (identical(other.rotation, rotation) ||
                 other.rotation == rotation) &&
+            (identical(other.isPowered, isPowered) ||
+                other.isPowered == isPowered) &&
             const DeepCollectionEquality().equals(other._state, _state) &&
             const DeepCollectionEquality()
                 .equals(other._shapeOffsets, _shapeOffsets) &&
             const DeepCollectionEquality()
                 .equals(other._terminals, _terminals) &&
             const DeepCollectionEquality()
-                .equals(other._internalConnections, _internalConnections));
+                .equals(other._internalConnections, _internalConnections) &&
+            const DeepCollectionEquality()
+                .equals(other._behaviors, _behaviors) &&
+            (identical(other.isDraggable, isDraggable) ||
+                other.isDraggable == isDraggable));
   }
 
   @override
@@ -689,10 +757,13 @@ class _$ComponentModelImpl extends _ComponentModel
       r,
       c,
       rotation,
+      isPowered,
       const DeepCollectionEquality().hash(_state),
       const DeepCollectionEquality().hash(_shapeOffsets),
       const DeepCollectionEquality().hash(_terminals),
-      const DeepCollectionEquality().hash(_internalConnections));
+      const DeepCollectionEquality().hash(_internalConnections),
+      const DeepCollectionEquality().hash(_behaviors),
+      isDraggable);
 
   /// Create a copy of ComponentModel
   /// with the given fields replaced by the non-null parameter values.
@@ -707,26 +778,31 @@ class _$ComponentModelImpl extends _ComponentModel
 abstract class _ComponentModel extends ComponentModel {
   const factory _ComponentModel(
       {required final String id,
-      required final ComponentType type,
+      required final String type,
       required final int r,
       required final int c,
       final int rotation,
+      final bool isPowered,
       final Map<String, dynamic> state,
       final List<CellOffset> shapeOffsets,
       final List<TerminalSpec> terminals,
-      final List<List<int>> internalConnections}) = _$ComponentModelImpl;
+      final List<List<int>> internalConnections,
+      final List<dynamic> behaviors,
+      final bool isDraggable}) = _$ComponentModelImpl;
   const _ComponentModel._() : super._();
 
   @override
   String get id;
   @override
-  ComponentType get type;
+  String get type;
   @override
   int get r;
   @override
   int get c;
   @override
   int get rotation;
+  @override
+  bool get isPowered;
   @override
   Map<String, dynamic> get state;
   @override
@@ -735,6 +811,10 @@ abstract class _ComponentModel extends ComponentModel {
   List<TerminalSpec> get terminals;
   @override
   List<List<int>> get internalConnections;
+  @override
+  List<dynamic> get behaviors;
+  @override
+  bool get isDraggable;
 
   /// Create a copy of ComponentModel
   /// with the given fields replaced by the non-null parameter values.

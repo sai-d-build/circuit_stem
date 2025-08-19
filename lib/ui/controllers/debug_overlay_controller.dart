@@ -1,7 +1,7 @@
 
 // lib/ui/controllers/debug_overlay_controller.dart
 import 'package:flutter/material.dart';
-import '../../services/logic_engine.dart';
+
 
 /// Manages the state and visibility of the debug overlay.
 class DebugOverlayController extends ChangeNotifier {

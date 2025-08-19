@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
-import '../services/logic_engine.dart';
+
 
 part 'component.freezed.dart';
 part 'component.g.dart';
@@ -36,37 +36,6 @@ class TerminalSpec with _$TerminalSpec {
       _$TerminalSpecFromJson(json);
 }
 
-
-
-enum ComponentType {
-  battery,
-  bulb,
-  wireStraight,
-  wireCorner,
-  wireT,
-  wireLong,
-  sw,
-  timer,
-  resistor,
-  blocked,
-  custom,
-  crossWire,
-  buzzer
-}
-
-ComponentType _componentTypeFromString(String type) {
-  if (type == 'circuit_switch') type = 'sw';
-  if (type == 'wire_straight') type = 'wireStraight';
-  if (type == 'wire_corner') type = 'wireCorner';
-  if (type == 'wire_t') type = 'wireT';
-  return ComponentType.values.firstWhere(
-    (e) => e.name == type,
-    orElse: () => ComponentType.custom,
-  );
-}
-
-String _componentTypeToString(ComponentType type) => type.name;
-
 Dir _dirFromString(String dir) {
   final lowerDir = dir.toLowerCase();
   if (lowerDir == 'up') return Dir.north;
@@ -92,10 +61,11 @@ class ComponentModel with _$ComponentModel {
 
   const factory ComponentModel({
     required String id,
-    required ComponentType type,
+    required String type,
     required int r,
     required int c,
     @Default(0) int rotation,
+    @Default(false) bool isPowered,
     @Default({}) Map<String, dynamic> state,
     @Default([CellOffset(0, 0)]) List<CellOffset> shapeOffsets,
     @Default([
@@ -103,54 +73,17 @@ class ComponentModel with _$ComponentModel {
       TerminalSpec(cellIndex: 0, dir: Dir.south)
     ]) List<TerminalSpec> terminals,
     @Default([]) List<List<int>> internalConnections,
+    @Default([]) List<dynamic> behaviors,
+    @Default(false) bool isDraggable,
   }) = _ComponentModel;
 
-  /// Factory: vertical long wire (length cells). Rotation rotates it.
-  factory ComponentModel.longWire({
-    required String id,
-    required int r,
-    required int c,
-    required int length,
-    int rotation = 0,
-  }) {
-    assert(length >= 1);
-    final shape = List<CellOffset>.generate(length, (i) => CellOffset(i, 0));
-    final terms = <TerminalSpec>[
-      const TerminalSpec(cellIndex: 0, dir: Dir.north, label: 'end'),
-      TerminalSpec(cellIndex: length - 1, dir: Dir.south, label: 'end'),
-    ];
-    return ComponentModel(
-      id: id,
-      type: ComponentType.wireLong,
-      r: r,
-      c: c,
-      rotation: rotation,
-      shapeOffsets: shape,
-      terminals: terms,
-    );
-  }
-
-  /// Factory: T-piece (single-cell) default terminals north, east, west.
-  factory ComponentModel.tPiece({
-    required String id,
-    required int r,
-    required int c,
-    int rotation = 0,
-  }) {
-    final terms = [
-      const TerminalSpec(cellIndex: 0, dir: Dir.north, label: 'T1'),
-      const TerminalSpec(cellIndex: 0, dir: Dir.east, label: 'T2'),
-      const TerminalSpec(cellIndex: 0, dir: Dir.west, label: 'T3'),
-    ];
-    return ComponentModel(
-      id: id,
-      type: ComponentType.wireT,
-      r: r,
-      c: c,
-      rotation: rotation,
-      shapeOffsets: const [CellOffset(0, 0)],
-      terminals: terms,
-    );
+  T? getBehavior<T>() {
+    for (final behavior in behaviors) {
+      if (behavior is T) {
+        return behavior;
+      }
+    }
+    return null;
   }
 
   factory ComponentModel.fromJson(Map<String, dynamic> json) {
@@ -187,7 +120,7 @@ class ComponentModel with _$ComponentModel {
 
     return ComponentModel(
       id: json['id'] as String,
-      type: _componentTypeFromString(json['type'] as String),
+      type: json['type'] as String,
       r: (json['position']?['r'] ?? json['r']) as int,
       c: (json['position']?['c'] ?? json['c']) as int,
       rotation: json['rotation'] as int? ?? 0,
@@ -200,11 +133,10 @@ class ComponentModel with _$ComponentModel {
           const [],
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'type': _componentTypeToString(type),
+      'type': type,
       'r': r,
       'c': c,
       'rotation': rotation,
@@ -214,8 +146,6 @@ class ComponentModel with _$ComponentModel {
       'internalConnections': internalConnections,
     };
   }
-
-  bool get isDraggable => type != ComponentType.battery && type != ComponentType.bulb && type != ComponentType.buzzer;
 }
 
 // Type alias for backward compatibility with tests

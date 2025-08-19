@@ -11,7 +11,7 @@
   "initialComponents": [
     {
       "id": "bat1",
-      "type": "battery",
+      "type": "Component.Battery",
       "position": { "r": 1, "c": 1 },
       "rotation": 0,
       "isDraggable": false,
@@ -46,7 +46,7 @@
     },
     {
       "id": "buzzer1",
-      "type": "buzzer",
+      "type": "Component.Buzzer",
       "position": { "r": 4, "c": 1 },
       "rotation": 0,
       "isDraggable": false,
@@ -56,7 +56,7 @@
     },
     {
       "id": "wire_rotatable",
-      "type": "wire_straight",
+      "type": "Component.WireStraight",
       "position": { "r": 2, "c": 2 },
       "rotation": 0,
       "isDraggable": true,
@@ -73,7 +73,7 @@
   "paletteComponents": [
     {
       "id": "wire_straight_palette",
-      "type": "wire_straight",
+      "type": "Component.WireStraight",
       "position": { "r": 0, "c": 0 },
       "rotation": 0,
       "shapeOffsets": [ { "r": 0, "c": 0 } ],
@@ -85,7 +85,7 @@
     },
     {
       "id": "wire_corner_palette",
-      "type": "wire_corner",
+      "type": "Component.WireCorner",
       "position": { "r": 0, "c": 0 },
       "rotation": 0,
       "shapeOffsets": [ { "r": 0, "c": 0 } ],
@@ -97,7 +97,7 @@
     },
     {
       "id": "cross_wire_palette",
-      "type": "crossWire",
+      "type": "Component.CrossWire",
       "position": { "r": 0, "c": 0 },
       "rotation": 0,
       "shapeOffsets": [ { "r": 0, "c": 0 } ],
@@ -111,8 +111,8 @@
     }
   ],
   "goals": [
-    { "type": "power_bulb", "targetId": "bulb1" },
-    { "type": "power_bulb", "targetId": "bulb2" },
+    { "type": "Goal.PowerBulb", "targetId": "bulb1" },
+    { "type": "Goal.PowerBulb", "targetId": "bulb2" },
     { "type": "activate_component", "targetId": "buzzer1" }
   ],
   "hints": []

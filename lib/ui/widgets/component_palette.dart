@@ -2,6 +2,7 @@ import 'package:circuit_stem/common/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:circuit_stem/models/component.dart';
 import 'package:circuit_stem/ui/widgets/circuit_component_display.dart';
+import 'package:circuit_stem/core/component_registry.dart';
 
 class ComponentPalette extends StatelessWidget {
   final List<ComponentModel> availableComponents;
@@ -18,7 +19,7 @@ class ComponentPalette extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Logger.log('ComponentPalette: Building with ${availableComponents.length} available components: $availableComponents');
-    final componentCounts = <ComponentType, int>{};
+    final componentCounts = <String, int>{};
     for (final component in availableComponents) {
       componentCounts[component.type] = (componentCounts[component.type] ?? 0) + 1;
     }
@@ -153,7 +154,7 @@ class ComponentPaletteItem extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            _getComponentName(component.type),
+            ComponentRegistry.getDisplayName(component.type),
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               color: isSelected 
@@ -180,29 +181,5 @@ class ComponentPaletteItem extends StatelessWidget {
         ],
       ),
     );
-  }
-  
-  String _getComponentName(ComponentType type) {
-    switch (type) {
-      case ComponentType.wireStraight:
-      case ComponentType.wireCorner:
-      case ComponentType.wireT:
-      case ComponentType.wireLong:
-        return 'Wire';
-      case ComponentType.battery:
-        return 'Battery';
-      case ComponentType.bulb:
-        return 'Bulb';
-      case ComponentType.sw:
-        return 'Switch';
-      case ComponentType.resistor:
-        return 'Resistor';
-      case ComponentType.timer:
-        return 'Timer';
-      case ComponentType.blocked:
-        return 'Blocked';
-      default:
-        return 'Unknown';
-    }
   }
 }

@@ -39,7 +39,7 @@ class Level1TestHelper {
   }
   
   static bool getSwitchState(ComponentModel component) {
-    assert(component.type == ComponentType.sw, 'Component must be a switch');
+    assert(component.type == "Component.Switch", 'Component must be a switch');
     return component.state['closed'] as bool? ?? false;
   }
 

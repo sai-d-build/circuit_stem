@@ -9,6 +9,29 @@ import 'common/assets.dart';
 import 'dart:async';
 import 'services/svg_processor.dart';
 import 'services/svg_processor_base.dart';
+import 'components/bulb.dart';
+import 'components/wire.dart';
+import 'components/switch.dart';
+import 'components/battery.dart';
+import 'components/timer.dart';
+import 'components/crosswire.dart';
+import 'components/buzzer.dart';
+import 'goals/power_bulb_goal.dart';
+
+void registerAllGameEntities() {
+  registerBulb();
+  registerWireStraight();
+  registerWireCorner();
+  registerWireT();
+  registerSwitch();
+  registerBattery();
+  registerTimer();
+  registerCrossWire();
+  registerBuzzer();
+
+  // Goals
+  registerPowerBulbGoal();
+}
 
 void main() async {
   Logger.log('main() called');
@@ -19,6 +42,9 @@ void main() async {
 
   // Instantiate the SvgProcessor
   final SvgProcessorBase svgProcessor = SvgProcessor();
+
+  // Register all component and goal behaviors.
+  registerAllGameEntities();
 
   runApp(
     ProviderScope(
@@ -92,4 +118,3 @@ class InitializerState extends ConsumerState<Initializer> {
     return const App();
   }
 }
-

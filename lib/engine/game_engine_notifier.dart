@@ -4,7 +4,7 @@ import 'package:collection/collection.dart';
 import '../models/level_definition.dart';
 import '../models/grid.dart';
 import '../models/component.dart';
-import '../services/logic_engine.dart';
+
 import 'render_state.dart';
 import '../services/audio_service.dart';
 import 'animation_scheduler.dart';
@@ -96,7 +96,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
 
     final currentPoweredBuzzers = state.grid.componentsById.values
         .where((c) =>
-            c.type == ComponentType.buzzer &&
+            c.type == "Component.Buzzer" &&
             evalResult.poweredComponentIds.contains(c.id))
         .map((c) => c.id)
         .toSet();
@@ -117,13 +117,21 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     _checkWinCondition(evalResult);
   }
 
-  void _checkWinCondition(EvaluationResult eval) {
-    if (state.currentLevel == null || state.isWin || eval.isShortCircuit) return;
+  void _checkWinCondition() {
+    if (state.currentLevel == null || state.isWin || state.isShortCircuit) return;
 
     bool allGoalsMet = true;
     for (final goal in state.currentLevel!.goals) {
-      if (!_isGoalMet(goal, eval)) {
-        allGoalsMet = false;
+      final checker = goal.getBehavior<GoalCheckingBehavior>();
+      if (checker != null) {
+        if (!checker.isMet(state)) {
+          allGoalsMet = false;
+          break;
+        }
+      } else {
+        // Legacy goal checking for now
+        Logger.log('Warning: Goal type ${goal.type} does not have a behavior.');
+        allGoalsMet = false; // Or handle with old _isGoalMet
         break;
       }
     }
@@ -133,18 +141,6 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
       _audioService.play(AppAssets.audioSuccess);
       onWin?.call();
       Logger.log('GameEngine: Win condition met!');
-    }
-  }
-
-  bool _isGoalMet(Goal goal, EvaluationResult eval) {
-    switch (goal.type) {
-      case 'power_bulb':
-        final component = state.grid.componentsById.values
-            .firstWhereOrNull((c) => c.r == goal.r && c.c == goal.c);
-        return component != null && eval.poweredComponentIds.contains(component.id);
-      default:
-        Logger.log('Warning: Unknown goal type ${goal.type}');
-        return false;
     }
   }
 
@@ -250,6 +246,13 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     } else {
       _audioService.play(AppAssets.audioWarning);
     }
+    _evaluateAndUpdateRenderState();
+  }
+
+  void updateComponent(ComponentModel component) {
+    final newComponents = Map<String, ComponentModel>.from(state.grid.componentsById);
+    newComponents[component.id] = component;
+    state = state.copyWith(grid: state.grid.copyWith(componentsById: newComponents));
     _evaluateAndUpdateRenderState();
   }
 

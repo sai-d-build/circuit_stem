@@ -21,8 +21,12 @@ Goal _$GoalFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Goal {
   String get type => throw _privateConstructorUsedError;
+  String? get targetId => throw _privateConstructorUsedError;
   int? get r => throw _privateConstructorUsedError;
   int? get c => throw _privateConstructorUsedError;
+  String? get from => throw _privateConstructorUsedError;
+  String? get to => throw _privateConstructorUsedError;
+  List<dynamic> get behaviors => throw _privateConstructorUsedError;
 
   /// Serializes this Goal to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -38,7 +42,14 @@ abstract class $GoalCopyWith<$Res> {
   factory $GoalCopyWith(Goal value, $Res Function(Goal) then) =
       _$GoalCopyWithImpl<$Res, Goal>;
   @useResult
-  $Res call({String type, int? r, int? c});
+  $Res call(
+      {String type,
+      String? targetId,
+      int? r,
+      int? c,
+      String? from,
+      String? to,
+      List<dynamic> behaviors});
 }
 
 /// @nodoc
@@ -57,14 +68,22 @@ class _$GoalCopyWithImpl<$Res, $Val extends Goal>
   @override
   $Res call({
     Object? type = null,
+    Object? targetId = freezed,
     Object? r = freezed,
     Object? c = freezed,
+    Object? from = freezed,
+    Object? to = freezed,
+    Object? behaviors = null,
   }) {
     return _then(_value.copyWith(
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
               as String,
+      targetId: freezed == targetId
+          ? _value.targetId
+          : targetId // ignore: cast_nullable_to_non_nullable
+              as String?,
       r: freezed == r
           ? _value.r
           : r // ignore: cast_nullable_to_non_nullable
@@ -73,6 +92,18 @@ class _$GoalCopyWithImpl<$Res, $Val extends Goal>
           ? _value.c
           : c // ignore: cast_nullable_to_non_nullable
               as int?,
+      from: freezed == from
+          ? _value.from
+          : from // ignore: cast_nullable_to_non_nullable
+              as String?,
+      to: freezed == to
+          ? _value.to
+          : to // ignore: cast_nullable_to_non_nullable
+              as String?,
+      behaviors: null == behaviors
+          ? _value.behaviors
+          : behaviors // ignore: cast_nullable_to_non_nullable
+              as List<dynamic>,
     ) as $Val);
   }
 }
@@ -84,7 +115,14 @@ abstract class _$$GoalImplCopyWith<$Res> implements $GoalCopyWith<$Res> {
       __$$GoalImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String type, int? r, int? c});
+  $Res call(
+      {String type,
+      String? targetId,
+      int? r,
+      int? c,
+      String? from,
+      String? to,
+      List<dynamic> behaviors});
 }
 
 /// @nodoc
@@ -100,14 +138,22 @@ class __$$GoalImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? type = null,
+    Object? targetId = freezed,
     Object? r = freezed,
     Object? c = freezed,
+    Object? from = freezed,
+    Object? to = freezed,
+    Object? behaviors = null,
   }) {
     return _then(_$GoalImpl(
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
               as String,
+      targetId: freezed == targetId
+          ? _value.targetId
+          : targetId // ignore: cast_nullable_to_non_nullable
+              as String?,
       r: freezed == r
           ? _value.r
           : r // ignore: cast_nullable_to_non_nullable
@@ -116,14 +162,35 @@ class __$$GoalImplCopyWithImpl<$Res>
           ? _value.c
           : c // ignore: cast_nullable_to_non_nullable
               as int?,
+      from: freezed == from
+          ? _value.from
+          : from // ignore: cast_nullable_to_non_nullable
+              as String?,
+      to: freezed == to
+          ? _value.to
+          : to // ignore: cast_nullable_to_non_nullable
+              as String?,
+      behaviors: null == behaviors
+          ? _value._behaviors
+          : behaviors // ignore: cast_nullable_to_non_nullable
+              as List<dynamic>,
     ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$GoalImpl with DiagnosticableTreeMixin implements _Goal {
-  const _$GoalImpl({required this.type, this.r, this.c});
+class _$GoalImpl extends _Goal {
+  const _$GoalImpl(
+      {required this.type,
+      this.targetId,
+      this.r,
+      this.c,
+      this.from,
+      this.to,
+      final List<dynamic> behaviors = const []})
+      : _behaviors = behaviors,
+        super._();
 
   factory _$GoalImpl.fromJson(Map<String, dynamic> json) =>
       _$$GoalImplFromJson(json);
@@ -131,23 +198,27 @@ class _$GoalImpl with DiagnosticableTreeMixin implements _Goal {
   @override
   final String type;
   @override
+  final String? targetId;
+  @override
   final int? r;
   @override
   final int? c;
-
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Goal(type: $type, r: $r, c: $c)';
+  final String? from;
+  @override
+  final String? to;
+  final List<dynamic> _behaviors;
+  @override
+  @JsonKey()
+  List<dynamic> get behaviors {
+    if (_behaviors is EqualUnmodifiableListView) return _behaviors;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_behaviors);
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(DiagnosticsProperty('type', 'Goal'))
-      ..add(DiagnosticsProperty('type', type))
-      ..add(DiagnosticsProperty('r', r))
-      ..add(DiagnosticsProperty('c', c));
+  String toString() {
+    return 'Goal(type: $type, targetId: $targetId, r: $r, c: $c, from: $from, to: $to, behaviors: $behaviors)';
   }
 
   @override
@@ -156,13 +227,20 @@ class _$GoalImpl with DiagnosticableTreeMixin implements _Goal {
         (other.runtimeType == runtimeType &&
             other is _$GoalImpl &&
             (identical(other.type, type) || other.type == type) &&
+            (identical(other.targetId, targetId) ||
+                other.targetId == targetId) &&
             (identical(other.r, r) || other.r == r) &&
-            (identical(other.c, c) || other.c == c));
+            (identical(other.c, c) || other.c == c) &&
+            (identical(other.from, from) || other.from == from) &&
+            (identical(other.to, to) || other.to == to) &&
+            const DeepCollectionEquality()
+                .equals(other._behaviors, _behaviors));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, type, r, c);
+  int get hashCode => Object.hash(runtimeType, type, targetId, r, c, from, to,
+      const DeepCollectionEquality().hash(_behaviors));
 
   /// Create a copy of Goal
   /// with the given fields replaced by the non-null parameter values.
@@ -180,18 +258,33 @@ class _$GoalImpl with DiagnosticableTreeMixin implements _Goal {
   }
 }
 
-abstract class _Goal implements Goal {
+abstract class _Goal extends Goal {
   const factory _Goal(
-      {required final String type, final int? r, final int? c}) = _$GoalImpl;
+      {required final String type,
+      final String? targetId,
+      final int? r,
+      final int? c,
+      final String? from,
+      final String? to,
+      final List<dynamic> behaviors}) = _$GoalImpl;
+  const _Goal._() : super._();
 
   factory _Goal.fromJson(Map<String, dynamic> json) = _$GoalImpl.fromJson;
 
   @override
   String get type;
   @override
+  String? get targetId;
+  @override
   int? get r;
   @override
   int? get c;
+  @override
+  String? get from;
+  @override
+  String? get to;
+  @override
+  List<dynamic> get behaviors;
 
   /// Create a copy of Goal
   /// with the given fields replaced by the non-null parameter values.

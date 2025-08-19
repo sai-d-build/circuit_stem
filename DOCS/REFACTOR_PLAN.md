@@ -264,3 +264,5 @@ This tutorial shows how simple it is to add a new component once this refactor i
 *   **Event Bus:** For more complex interactions between components that don't involve direct power flow, we could implement a global event bus. A component's `InteractionBehavior` could fire an event (e.g., `ButtonPressedEvent`), and other components could have `ListeningBehavior`s that react to it.
 
 This refactoring will result in a highly professional, maintainable, and extensible architecture that will serve the project well into the future.
+
+Pending: lib/ui/widgets/component_palette.dart. This widget is heavily reliant on the old ComponentType enum for its logic. I will read the file to understand its implementation and then refactor it to work with our new string-based, behavior-driven component model.

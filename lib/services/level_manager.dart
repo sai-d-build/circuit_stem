@@ -91,8 +91,21 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
       final path = 'assets/levels/${levelMeta.id}.json';
       final jsonString = await _assetManager.loadString(path);
       Logger.log('LevelManager: Loaded level JSON for ${levelMeta.id}: $jsonString');
-      final decodedJson = json.decode(jsonString);
-      final levelDef = LevelDefinition.fromJson(decodedJson);
+      final decodedJson = json.decode(jsonString) as Map<String, dynamic>;
+
+      // Manually parse components to use our new factory logic
+      final initialComponents = (decodedJson['initialComponents'] as List)
+          .map((e) => _componentFromJson(e as Map<String, dynamic>))
+          .toList();
+
+      final paletteComponents = (decodedJson['paletteComponents'] as List)
+          .map((e) => _componentFromJson(e as Map<String, dynamic>))
+          .toList();
+
+      final levelDef = LevelDefinition.fromJson(decodedJson).copyWith(
+        initialComponents: initialComponents,
+        paletteComponents: paletteComponents,
+      );
       Logger.log('LevelManager: Parsed LevelDefinition: $levelDef');
       state = state.copyWith(currentLevelDefinition: levelDef, isLoading: false);
       Logger.log(

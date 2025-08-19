@@ -15,7 +15,7 @@ void main() {
       rows: 3,
       cols: 3,
       initialComponents: [
-        ComponentModel(id: 'c1', type: ComponentType.battery, r: 1, c: 1),
+        ComponentModel(id: 'c1', type: "Component.Battery", r: 1, c: 1),
       ],
       paletteComponents: [], // Add an empty list for palette components
       goals: [],
