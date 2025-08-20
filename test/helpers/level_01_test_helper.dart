@@ -1,5 +1,6 @@
 import 'package:circuit_stem/core/providers.dart';
 import 'package:circuit_stem/models/component.dart';
+import 'package:circuit_stem/models/level_definition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,8 +14,9 @@ class Level1TestHelper {
   static const double cellSize = 64.0;
   static const Size testCanvasSize = Size(384, 384); // 6x6 grid * 64px
 
-  static ComponentModel? findComponentById(ProviderContainer container, String id) {
-    final state = container.read(gameEngineProvider);
+  static ComponentModel? findComponentById(
+      ProviderContainer container, LevelDefinition level, String id) {
+    final state = container.read(gameEngineProvider(level));
     final grid = state.grid;
     try {
       return grid.components.firstWhere((c) => c.id == id);

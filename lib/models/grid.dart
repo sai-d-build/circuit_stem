@@ -21,7 +21,7 @@ class Grid with _$Grid {
   ComponentModel? componentAt(int r, int c) {
     for (final component in components) {
       for (final offset in component.shapeOffsets) {
-        if (component.r + offset.dr == r && component.c + offset.dc == c) {
+        if (component.r + offset.y == r && component.c + offset.x == c) {
           return component;
         }
       }

@@ -46,15 +46,18 @@ void main() {
       );
 
       await container.read(levelManagerProvider.notifier).init();
-      await container.read(levelManagerProvider.notifier).loadLevelByIndex(0);
-      final initialLevel = container.read(levelManagerProvider).currentLevelDefinition;
+      // It's better to load by a specific number in tests for clarity
+      final initialLevel = await container.read(levelManagerProvider.notifier).loadLevelByIndex(1);
+      
+      expect(initialLevel, isNotNull, reason: "Test setup failed: Level 1 could not be loaded.");
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
           child: ProviderScope(
             overrides: [
-              gameEngineProvider.overrideWith((ref) {
+              // Override the family provider with the specific level instance
+              gameEngineProvider(initialLevel!).overrideWith((ref) {
                 return GameEngineNotifier(
                   initialLevel: initialLevel,
                   animationScheduler: mockAnimationScheduler,
@@ -63,7 +66,7 @@ void main() {
               }),
             ],
             child: const MaterialApp(
-              home: GameScreen(),
+              home: GameScreen(levelNumber: 1),
             ),
           ),
         ),
@@ -99,9 +102,11 @@ void main() {
       'TC-L1-02: Move timer component',
       (WidgetTester tester) async {
         final container = await pumpGameScreenWithOverrides(tester);
-        final mockAnimationScheduler = container.read(gameEngineProvider.notifier).animationScheduler as MockAnimationScheduler;
+        final level = await container.read(levelDefinitionProvider(1).future);
+        final gameNotifier = container.read(gameEngineProvider(level!).notifier);
+        final mockAnimationScheduler = gameNotifier.animationScheduler as MockAnimationScheduler;
 
-        final timerComponent = Level1TestHelper.findComponentById(container, 'timer1');
+        final timerComponent = Level1TestHelper.findComponentById(container, level, 'timer1');
         expect(timerComponent, isNotNull);
         expect(timerComponent!.isDraggable, isTrue);
 
@@ -112,7 +117,7 @@ void main() {
         mockAnimationScheduler.triggerCallback(0.016);
         await tester.pump();
 
-        final movedComponent = Level1TestHelper.findComponentById(container, 'timer1')!;
+        final movedComponent = Level1TestHelper.findComponentById(container, level, 'timer1')!;
         expect(movedComponent.r, equals(2));
         expect(movedComponent.c, equals(3));
       },

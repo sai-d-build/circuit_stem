@@ -39,20 +39,17 @@ final levelManagerProvider = StateNotifierProvider<LevelManagerNotifier, LevelMa
   );
 });
 
-final gameEngineProvider = StateNotifierProvider<GameEngineNotifier, GameEngineState>((ref) {
-  final currentLevel = ref.watch(currentLevelDefinitionProvider);
+final levelDefinitionProvider = FutureProvider.autoDispose.family<LevelDefinition?, int>((ref, levelNumber) async {
+  final levelManager = ref.watch(levelManagerProvider.notifier);
+  return await levelManager.loadLevelByIndex(levelNumber);
+});
+
+final gameEngineProvider = StateNotifierProvider.autoDispose.family<GameEngineNotifier, GameEngineState, LevelDefinition>((ref, level) {
   final animationScheduler = ref.watch(animationSchedulerProvider);
   final audioService = ref.watch(audioServiceProvider);
 
-  if (currentLevel == null) {
-    return GameEngineNotifier.forNoLevel(
-      animationScheduler: animationScheduler,
-      audioService: audioService,
-    );
-  }
-
   return GameEngineNotifier(
-    initialLevel: currentLevel,
+    initialLevel: level,
     animationScheduler: animationScheduler,
     audioService: audioService,
   );
@@ -75,17 +72,14 @@ final levelIsLoadingProvider = Provider<bool>((ref) {
   return ref.watch(levelManagerProvider).isLoading;
 }, dependencies: [levelManagerProvider]);
 
-/// Provider for the currently loaded level definition.
-final currentLevelDefinitionProvider = Provider<LevelDefinition?>((ref) {
-  return ref.watch(levelManagerProvider).currentLevelDefinition;
-}, dependencies: [levelManagerProvider]);
+
 
 /// Provider for the game's render state.
-final renderStateProvider = Provider<RenderState?>((ref) {
-  return ref.watch(gameEngineProvider.select((state) => state.renderState));
-}, dependencies: [gameEngineProvider]);
+final renderStateProvider = Provider.autoDispose.family<RenderState?, LevelDefinition>((ref, level) {
+  return ref.watch(gameEngineProvider(level).select((state) => state.renderState));
+});
 
 /// Provider that returns true if the game has been won.
-final isWinProvider = Provider<bool>((ref) {
-  return ref.watch(gameEngineProvider.select((state) => state.isWin));
-}, dependencies: [gameEngineProvider]);
+final isWinProvider = Provider.autoDispose.family<bool, LevelDefinition>((ref, level) {
+  return ref.watch(gameEngineProvider(level).select((state) => state.isWin));
+});

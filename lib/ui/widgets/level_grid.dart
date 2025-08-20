@@ -52,11 +52,11 @@ class _LevelGridState extends ConsumerState<LevelGrid> {
   }
 
   void _startLevel(WidgetRef ref, int index) async {
-    final level = await ref.read(levelManagerProvider.notifier).loadLevelByIndex(index);
+    final levelNumber = index + 1;
+    final level = await ref.read(levelManagerProvider.notifier).loadLevelByIndex(levelNumber);
     if (level != null) {
       if (!mounted) return;
-      ref.read(gameEngineProvider.notifier).loadLevel(level);
-      Navigator.of(context).pushNamed(AppRoutes.gameScreen);
+      Navigator.of(context).pushNamed(AppRoutes.gameScreen, arguments: levelNumber);
     }
   }
 }

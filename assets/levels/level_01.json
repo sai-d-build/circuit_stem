@@ -111,7 +111,7 @@
     },
     {
       "id": "bulb_palette",
-      "type": "bulb",
+      "type": "Component.Bulb",
       "position": { "r": 0, "c": 0 },
       "rotation": 0,
       "shapeOffsets": [

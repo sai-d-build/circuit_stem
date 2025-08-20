@@ -7,7 +7,6 @@ import '../models/level_definition.dart';
 import '../models/level_metadata.dart';
 import 'level_manager_state.dart';
 import 'asset_manager.dart';
-import 'package:circuit_stem/models/component.dart'; // Added import
 
 /// Notifier for managing level state, including loading, progress, and persistence.
 class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
@@ -94,24 +93,25 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
       Logger.log('LevelManager: Loaded level JSON for ${levelMeta.id}: $jsonString');
       final decodedJson = json.decode(jsonString) as Map<String, dynamic>;
 
-      // Manually parse components to use our new factory logic
-      final initialComponents = (decodedJson['initialComponents'] as List)
-          .map((e) => ComponentModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-
-      final paletteComponents = (decodedJson['paletteComponents'] as List)
-          .map((e) => ComponentModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-
-      final levelDef = LevelDefinition.fromJson(decodedJson).copyWith(
-        initialComponents: initialComponents,
-        paletteComponents: paletteComponents,
-      );
-      Logger.log('LevelManager: Parsed LevelDefinition: $levelDef');
-      state = state.copyWith(currentLevelDefinition: levelDef, isLoading: false);
+      // Parse the level definition using our custom fromJson that handles behaviors
+      final level = LevelDefinition.fromJson(decodedJson);
+      
+      Logger.log('LevelManager: Loaded level ${level.id} with ${level.initialComponents.length} initial components and ${level.paletteComponents.length} palette components');
+      
+      // Verify behaviors are attached
+      final componentsWithBehaviors = level.initialComponents.where((c) => c.behaviors.isNotEmpty).length;
+      final paletteWithBehaviors = level.paletteComponents.where((c) => c.behaviors.isNotEmpty).length;
+      Logger.log('LevelManager: Initial components with behaviors: $componentsWithBehaviors/${level.initialComponents.length}');
+      Logger.log('LevelManager: Palette components with behaviors: $paletteWithBehaviors/${level.paletteComponents.length}');
+      
+      if (componentsWithBehaviors < level.initialComponents.length || paletteWithBehaviors < level.paletteComponents.length) {
+        Logger.log('LevelManager: WARNING: Some components are missing behaviors!');
+      }
+      
+      state = state.copyWith(currentLevelDefinition: level, isLoading: false);
       Logger.log(
           'LevelManagerNotifier: loadLevelByIndex END (Success) for level ${levelMeta.id}');
-      return levelDef;
+      return level;
     } catch (e, stackTrace) {
       Logger.log(
           'Failed to load level ${levelMeta.id}: $e\n$stackTrace');

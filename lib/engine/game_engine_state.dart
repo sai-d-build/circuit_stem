@@ -38,7 +38,15 @@ class GameEngineState with _$GameEngineState {
     draggedComponentId: null,
     selectedComponentId: null,
     dragPosition: null,
-    renderState: null,
+    renderState: RenderState(
+      grid: Grid(
+        rows: level?.rows ?? 0, 
+        cols: level?.cols ?? 0,
+      ),
+      poweredComponentIds: const {},
+      draggedComponentId: null,
+      dragPosition: null,
+    ),
   );
 
   /// Factory constructor for empty state (no level loaded)
@@ -51,7 +59,12 @@ class GameEngineState with _$GameEngineState {
     draggedComponentId: null,
     selectedComponentId: null,
     dragPosition: null,
-    renderState: null,
+    renderState: RenderState(
+      grid: Grid(rows: 0, cols: 0),
+      poweredComponentIds: {},
+      draggedComponentId: null,
+      dragPosition: null,
+    ),
   );
 }
 

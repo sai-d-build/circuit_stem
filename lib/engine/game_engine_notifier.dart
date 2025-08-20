@@ -12,6 +12,7 @@ import '../behaviors/goal_checking_behavior.dart';
 import '../behaviors/logic_behavior.dart';
 import '../common/assets.dart';
 import '../common/logger.dart';
+import 'render_state.dart';
 
 class _SimpleLogicSimulator {
   Set<String> evaluate(Grid grid) {
@@ -24,8 +25,8 @@ class _SimpleLogicSimulator {
     }
 
     final startNodes = battery.terminals
-        .where((t) => t.role == 'pos')
-        .map((t) => '${battery.id}_${t.label}');
+        .where((t) => t.type == TerminalType.power)
+        .map((t) => '${battery.id}_${t.offset.x}_${t.offset.y}_${t.direction.name}_${t.type.name}');
 
     if (startNodes.isEmpty) {
       Logger.log('_SimpleLogicSimulator: Battery has no positive terminals.');
@@ -47,12 +48,14 @@ class _SimpleLogicSimulator {
     final graph = <String, List<String>>{};
     for (final component in grid.components) {
       for (final terminal in component.terminals) {
-        final terminalId = '${component.id}_${terminal.label}';
+        final terminalId = '${component.id}_${terminal.offset.x}_${terminal.offset.y}_${terminal.direction.name}_${terminal.type.name}';
         graph[terminalId] = [];
       }
       for (final connection in component.internalConnections) {
-        final term1 = '${component.id}_${component.terminals[connection[0]].label}';
-        final term2 = '${component.id}_${component.terminals[connection[1]].label}';
+        final term1Spec = component.terminals[connection[0]];
+        final term2Spec = component.terminals[connection[1]];
+        final term1 = '${component.id}_${term1Spec.offset.x}_${term1Spec.offset.y}_${term1Spec.direction.name}_${term1Spec.type.name}';
+        final term2 = '${component.id}_${term2Spec.offset.x}_${term2Spec.offset.y}_${term2Spec.direction.name}_${term2Spec.type.name}';
         graph[term1]?.add(term2);
         graph[term2]?.add(term1);
       }
@@ -118,7 +121,19 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     Logger.log('GameEngineNotifier: Loading level: \${level.id}');
     final grid = Grid(rows: level.rows, cols: level.cols, components: level.initialComponents);
     Logger.log('GameEngineNotifier: Created grid with \${grid.components.length} initial components.');
-    state = GameEngineState.initial(level).copyWith(grid: grid);
+    
+    // Update both grid and render state
+    final updatedRenderState = RenderState(
+      grid: grid,
+      poweredComponentIds: const {},
+      draggedComponentId: null,
+      dragPosition: null,
+    );
+    
+    state = GameEngineState.initial(level).copyWith(
+      grid: grid,
+      renderState: updatedRenderState,
+    );
     _evaluateGrid();
   }
 
@@ -143,7 +158,22 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     }).toList();
 
     final updatedGrid = grid.copyWith(components: updatedComponents);
-    state = state.copyWith(grid: updatedGrid);
+    
+    // Update both grid and render state to keep them in sync
+    final updatedRenderState = state.renderState?.copyWith(
+      grid: updatedGrid,
+      poweredComponentIds: poweredIds,
+    ) ?? RenderState(
+      grid: updatedGrid,
+      poweredComponentIds: poweredIds,
+      draggedComponentId: state.draggedComponentId,
+      dragPosition: state.dragPosition,
+    );
+    
+    state = state.copyWith(
+      grid: updatedGrid,
+      renderState: updatedRenderState,
+    );
     Logger.log('GameEngineNotifier: Grid evaluation complete. Powered components: \$poweredIds');
     _checkWinCondition();
   }

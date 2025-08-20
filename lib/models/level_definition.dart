@@ -3,9 +3,10 @@ import 'component.dart';
 import 'goal.dart';
 import 'hint.dart';
 import 'position.dart';
+import '../core/component_registry.dart';
 
 part 'level_definition.freezed.dart';
-part 'level_definition.g.dart';
+ 
 
 @freezed
 class LevelDefinition with _$LevelDefinition {
@@ -25,5 +26,36 @@ class LevelDefinition with _$LevelDefinition {
     required List<Hint> hints,
   }) = _LevelDefinition;
 
-  factory LevelDefinition.fromJson(Map<String, dynamic> json) => _$LevelDefinitionFromJson(json);
+  factory LevelDefinition.fromJson(Map<String, dynamic> json) {
+    // Use ComponentRegistry.createFromJson to ensure behaviors are attached
+    final initialComponents = (json['initialComponents'] as List<dynamic>)
+        .map((e) => ComponentRegistry.createFromJson(e as Map<String, dynamic>))
+        .toList();
+    
+    final paletteComponents = (json['paletteComponents'] as List<dynamic>)
+        .map((e) => ComponentRegistry.createFromJson(e as Map<String, dynamic>))
+        .toList();
+
+    return _$LevelDefinitionImpl(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      levelNumber: (json['levelNumber'] as num).toInt(),
+      author: json['author'] as String,
+      version: (json['version'] as num).toInt(),
+      rows: (json['rows'] as num).toInt(),
+      cols: (json['cols'] as num).toInt(),
+      blockedCells: (json['blockedCells'] as List<dynamic>)
+          .map((e) => Position.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      initialComponents: initialComponents,
+      paletteComponents: paletteComponents,
+      goals: (json['goals'] as List<dynamic>)
+          .map((e) => Goal.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      hints: (json['hints'] as List<dynamic>)
+          .map((e) => Hint.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }

@@ -16,8 +16,8 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$CellOffset {
-  int get dr => throw _privateConstructorUsedError;
-  int get dc => throw _privateConstructorUsedError;
+  int get x => throw _privateConstructorUsedError;
+  int get y => throw _privateConstructorUsedError;
 
   /// Create a copy of CellOffset
   /// with the given fields replaced by the non-null parameter values.
@@ -32,7 +32,7 @@ abstract class $CellOffsetCopyWith<$Res> {
           CellOffset value, $Res Function(CellOffset) then) =
       _$CellOffsetCopyWithImpl<$Res, CellOffset>;
   @useResult
-  $Res call({int dr, int dc});
+  $Res call({int x, int y});
 }
 
 /// @nodoc
@@ -50,17 +50,17 @@ class _$CellOffsetCopyWithImpl<$Res, $Val extends CellOffset>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? dr = null,
-    Object? dc = null,
+    Object? x = null,
+    Object? y = null,
   }) {
     return _then(_value.copyWith(
-      dr: null == dr
-          ? _value.dr
-          : dr // ignore: cast_nullable_to_non_nullable
+      x: null == x
+          ? _value.x
+          : x // ignore: cast_nullable_to_non_nullable
               as int,
-      dc: null == dc
-          ? _value.dc
-          : dc // ignore: cast_nullable_to_non_nullable
+      y: null == y
+          ? _value.y
+          : y // ignore: cast_nullable_to_non_nullable
               as int,
     ) as $Val);
   }
@@ -74,7 +74,7 @@ abstract class _$$CellOffsetImplCopyWith<$Res>
       __$$CellOffsetImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int dr, int dc});
+  $Res call({int x, int y});
 }
 
 /// @nodoc
@@ -90,17 +90,17 @@ class __$$CellOffsetImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? dr = null,
-    Object? dc = null,
+    Object? x = null,
+    Object? y = null,
   }) {
     return _then(_$CellOffsetImpl(
-      null == dr
-          ? _value.dr
-          : dr // ignore: cast_nullable_to_non_nullable
+      null == x
+          ? _value.x
+          : x // ignore: cast_nullable_to_non_nullable
               as int,
-      null == dc
-          ? _value.dc
-          : dc // ignore: cast_nullable_to_non_nullable
+      null == y
+          ? _value.y
+          : y // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }
@@ -109,16 +109,16 @@ class __$$CellOffsetImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$CellOffsetImpl extends _CellOffset with DiagnosticableTreeMixin {
-  const _$CellOffsetImpl(this.dr, this.dc) : super._();
+  const _$CellOffsetImpl(this.x, this.y) : super._();
 
   @override
-  final int dr;
+  final int x;
   @override
-  final int dc;
+  final int y;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'CellOffset(dr: $dr, dc: $dc)';
+    return 'CellOffset(x: $x, y: $y)';
   }
 
   @override
@@ -126,8 +126,8 @@ class _$CellOffsetImpl extends _CellOffset with DiagnosticableTreeMixin {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'CellOffset'))
-      ..add(DiagnosticsProperty('dr', dr))
-      ..add(DiagnosticsProperty('dc', dc));
+      ..add(DiagnosticsProperty('x', x))
+      ..add(DiagnosticsProperty('y', y));
   }
 
   @override
@@ -135,12 +135,12 @@ class _$CellOffsetImpl extends _CellOffset with DiagnosticableTreeMixin {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$CellOffsetImpl &&
-            (identical(other.dr, dr) || other.dr == dr) &&
-            (identical(other.dc, dc) || other.dc == dc));
+            (identical(other.x, x) || other.x == x) &&
+            (identical(other.y, y) || other.y == y));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, dr, dc);
+  int get hashCode => Object.hash(runtimeType, x, y);
 
   /// Create a copy of CellOffset
   /// with the given fields replaced by the non-null parameter values.
@@ -152,13 +152,13 @@ class _$CellOffsetImpl extends _CellOffset with DiagnosticableTreeMixin {
 }
 
 abstract class _CellOffset extends CellOffset {
-  const factory _CellOffset(final int dr, final int dc) = _$CellOffsetImpl;
+  const factory _CellOffset(final int x, final int y) = _$CellOffsetImpl;
   const _CellOffset._() : super._();
 
   @override
-  int get dr;
+  int get x;
   @override
-  int get dc;
+  int get y;
 
   /// Create a copy of CellOffset
   /// with the given fields replaced by the non-null parameter values.
@@ -168,19 +168,11 @@ abstract class _CellOffset extends CellOffset {
       throw _privateConstructorUsedError;
 }
 
-TerminalSpec _$TerminalSpecFromJson(Map<String, dynamic> json) {
-  return _TerminalSpec.fromJson(json);
-}
-
 /// @nodoc
 mixin _$TerminalSpec {
-  int get cellIndex => throw _privateConstructorUsedError;
-  Dir get dir => throw _privateConstructorUsedError;
-  String? get label => throw _privateConstructorUsedError;
-  String? get role => throw _privateConstructorUsedError;
-
-  /// Serializes this TerminalSpec to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  CellOffset get offset => throw _privateConstructorUsedError;
+  Dir get direction => throw _privateConstructorUsedError;
+  TerminalType get type => throw _privateConstructorUsedError;
 
   /// Create a copy of TerminalSpec
   /// with the given fields replaced by the non-null parameter values.
@@ -195,7 +187,9 @@ abstract class $TerminalSpecCopyWith<$Res> {
           TerminalSpec value, $Res Function(TerminalSpec) then) =
       _$TerminalSpecCopyWithImpl<$Res, TerminalSpec>;
   @useResult
-  $Res call({int cellIndex, Dir dir, String? label, String? role});
+  $Res call({CellOffset offset, Dir direction, TerminalType type});
+
+  $CellOffsetCopyWith<$Res> get offset;
 }
 
 /// @nodoc
@@ -213,29 +207,34 @@ class _$TerminalSpecCopyWithImpl<$Res, $Val extends TerminalSpec>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? cellIndex = null,
-    Object? dir = null,
-    Object? label = freezed,
-    Object? role = freezed,
+    Object? offset = null,
+    Object? direction = null,
+    Object? type = null,
   }) {
     return _then(_value.copyWith(
-      cellIndex: null == cellIndex
-          ? _value.cellIndex
-          : cellIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      dir: null == dir
-          ? _value.dir
-          : dir // ignore: cast_nullable_to_non_nullable
+      offset: null == offset
+          ? _value.offset
+          : offset // ignore: cast_nullable_to_non_nullable
+              as CellOffset,
+      direction: null == direction
+          ? _value.direction
+          : direction // ignore: cast_nullable_to_non_nullable
               as Dir,
-      label: freezed == label
-          ? _value.label
-          : label // ignore: cast_nullable_to_non_nullable
-              as String?,
-      role: freezed == role
-          ? _value.role
-          : role // ignore: cast_nullable_to_non_nullable
-              as String?,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as TerminalType,
     ) as $Val);
+  }
+
+  /// Create a copy of TerminalSpec
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $CellOffsetCopyWith<$Res> get offset {
+    return $CellOffsetCopyWith<$Res>(_value.offset, (value) {
+      return _then(_value.copyWith(offset: value) as $Val);
+    });
   }
 }
 
@@ -247,7 +246,10 @@ abstract class _$$TerminalSpecImplCopyWith<$Res>
       __$$TerminalSpecImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int cellIndex, Dir dir, String? label, String? role});
+  $Res call({CellOffset offset, Dir direction, TerminalType type});
+
+  @override
+  $CellOffsetCopyWith<$Res> get offset;
 }
 
 /// @nodoc
@@ -263,53 +265,43 @@ class __$$TerminalSpecImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? cellIndex = null,
-    Object? dir = null,
-    Object? label = freezed,
-    Object? role = freezed,
+    Object? offset = null,
+    Object? direction = null,
+    Object? type = null,
   }) {
     return _then(_$TerminalSpecImpl(
-      cellIndex: null == cellIndex
-          ? _value.cellIndex
-          : cellIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      dir: null == dir
-          ? _value.dir
-          : dir // ignore: cast_nullable_to_non_nullable
+      offset: null == offset
+          ? _value.offset
+          : offset // ignore: cast_nullable_to_non_nullable
+              as CellOffset,
+      direction: null == direction
+          ? _value.direction
+          : direction // ignore: cast_nullable_to_non_nullable
               as Dir,
-      label: freezed == label
-          ? _value.label
-          : label // ignore: cast_nullable_to_non_nullable
-              as String?,
-      role: freezed == role
-          ? _value.role
-          : role // ignore: cast_nullable_to_non_nullable
-              as String?,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as TerminalType,
     ));
   }
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$TerminalSpecImpl with DiagnosticableTreeMixin implements _TerminalSpec {
   const _$TerminalSpecImpl(
-      {required this.cellIndex, required this.dir, this.label, this.role});
-
-  factory _$TerminalSpecImpl.fromJson(Map<String, dynamic> json) =>
-      _$$TerminalSpecImplFromJson(json);
+      {required this.offset, required this.direction, required this.type});
 
   @override
-  final int cellIndex;
+  final CellOffset offset;
   @override
-  final Dir dir;
+  final Dir direction;
   @override
-  final String? label;
-  @override
-  final String? role;
+  final TerminalType type;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'TerminalSpec(cellIndex: $cellIndex, dir: $dir, label: $label, role: $role)';
+    return 'TerminalSpec(offset: $offset, direction: $direction, type: $type)';
   }
 
   @override
@@ -317,10 +309,9 @@ class _$TerminalSpecImpl with DiagnosticableTreeMixin implements _TerminalSpec {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'TerminalSpec'))
-      ..add(DiagnosticsProperty('cellIndex', cellIndex))
-      ..add(DiagnosticsProperty('dir', dir))
-      ..add(DiagnosticsProperty('label', label))
-      ..add(DiagnosticsProperty('role', role));
+      ..add(DiagnosticsProperty('offset', offset))
+      ..add(DiagnosticsProperty('direction', direction))
+      ..add(DiagnosticsProperty('type', type));
   }
 
   @override
@@ -328,16 +319,14 @@ class _$TerminalSpecImpl with DiagnosticableTreeMixin implements _TerminalSpec {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TerminalSpecImpl &&
-            (identical(other.cellIndex, cellIndex) ||
-                other.cellIndex == cellIndex) &&
-            (identical(other.dir, dir) || other.dir == dir) &&
-            (identical(other.label, label) || other.label == label) &&
-            (identical(other.role, role) || other.role == role));
+            (identical(other.offset, offset) || other.offset == offset) &&
+            (identical(other.direction, direction) ||
+                other.direction == direction) &&
+            (identical(other.type, type) || other.type == type));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, cellIndex, dir, label, role);
+  int get hashCode => Object.hash(runtimeType, offset, direction, type);
 
   /// Create a copy of TerminalSpec
   /// with the given fields replaced by the non-null parameter values.
@@ -346,33 +335,20 @@ class _$TerminalSpecImpl with DiagnosticableTreeMixin implements _TerminalSpec {
   @pragma('vm:prefer-inline')
   _$$TerminalSpecImplCopyWith<_$TerminalSpecImpl> get copyWith =>
       __$$TerminalSpecImplCopyWithImpl<_$TerminalSpecImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$TerminalSpecImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _TerminalSpec implements TerminalSpec {
   const factory _TerminalSpec(
-      {required final int cellIndex,
-      required final Dir dir,
-      final String? label,
-      final String? role}) = _$TerminalSpecImpl;
-
-  factory _TerminalSpec.fromJson(Map<String, dynamic> json) =
-      _$TerminalSpecImpl.fromJson;
+      {required final CellOffset offset,
+      required final Dir direction,
+      required final TerminalType type}) = _$TerminalSpecImpl;
 
   @override
-  int get cellIndex;
+  CellOffset get offset;
   @override
-  Dir get dir;
+  Dir get direction;
   @override
-  String? get label;
-  @override
-  String? get role;
+  TerminalType get type;
 
   /// Create a copy of TerminalSpec
   /// with the given fields replaced by the non-null parameter values.
@@ -622,8 +598,14 @@ class _$ComponentModelImpl extends _ComponentModel
       final Map<String, dynamic> state = const {},
       final List<CellOffset> shapeOffsets = const [CellOffset(0, 0)],
       final List<TerminalSpec> terminals = const [
-        TerminalSpec(cellIndex: 0, dir: Dir.north),
-        TerminalSpec(cellIndex: 0, dir: Dir.south)
+        TerminalSpec(
+            offset: CellOffset(0, 0),
+            direction: Dir.north,
+            type: TerminalType.power),
+        TerminalSpec(
+            offset: CellOffset(0, 0),
+            direction: Dir.south,
+            type: TerminalType.power)
       ],
       final List<List<int>> internalConnections = const [],
       final List<dynamic> behaviors = const [],

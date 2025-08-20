@@ -14,10 +14,6 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-LevelDefinition _$LevelDefinitionFromJson(Map<String, dynamic> json) {
-  return _LevelDefinition.fromJson(json);
-}
-
 /// @nodoc
 mixin _$LevelDefinition {
   String get id => throw _privateConstructorUsedError;
@@ -35,9 +31,6 @@ mixin _$LevelDefinition {
       throw _privateConstructorUsedError;
   List<Goal> get goals => throw _privateConstructorUsedError;
   List<Hint> get hints => throw _privateConstructorUsedError;
-
-  /// Serializes this LevelDefinition to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of LevelDefinition
   /// with the given fields replaced by the non-null parameter values.
@@ -263,7 +256,7 @@ class __$$LevelDefinitionImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$LevelDefinitionImpl implements _LevelDefinition {
   const _$LevelDefinitionImpl(
       {required this.id,
@@ -284,9 +277,6 @@ class _$LevelDefinitionImpl implements _LevelDefinition {
         _paletteComponents = paletteComponents,
         _goals = goals,
         _hints = hints;
-
-  factory _$LevelDefinitionImpl.fromJson(Map<String, dynamic> json) =>
-      _$$LevelDefinitionImplFromJson(json);
 
   @override
   final String id;
@@ -376,7 +366,6 @@ class _$LevelDefinitionImpl implements _LevelDefinition {
             const DeepCollectionEquality().equals(other._hints, _hints));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -402,13 +391,6 @@ class _$LevelDefinitionImpl implements _LevelDefinition {
   _$$LevelDefinitionImplCopyWith<_$LevelDefinitionImpl> get copyWith =>
       __$$LevelDefinitionImplCopyWithImpl<_$LevelDefinitionImpl>(
           this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$LevelDefinitionImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _LevelDefinition implements LevelDefinition {
@@ -426,9 +408,6 @@ abstract class _LevelDefinition implements LevelDefinition {
       required final List<ComponentModel> paletteComponents,
       required final List<Goal> goals,
       required final List<Hint> hints}) = _$LevelDefinitionImpl;
-
-  factory _LevelDefinition.fromJson(Map<String, dynamic> json) =
-      _$LevelDefinitionImpl.fromJson;
 
   @override
   String get id;
