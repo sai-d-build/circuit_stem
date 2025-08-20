@@ -17,7 +17,7 @@ class GoalRegistry {
     final behaviorTypes = _behaviors[type];
     if (behaviorTypes == null) throw Exception('Unknown goal type: $type');
 
-    final behaviorInstances = behaviorTypes.map((t) => getBehavior<dynamic>()).toList();
+    final behaviorInstances = behaviorTypes.map((t) => getBehaviorByType(t)).toList();
 
     return Goal.fromJson(json).copyWith(behaviors: behaviorInstances);
   }

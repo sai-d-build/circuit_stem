@@ -1,3 +1,4 @@
+import '../models/grid.dart';
 
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -10,6 +11,7 @@ import '../services/asset_manager.dart';
 import '../common/theme.dart';
 import '../services/audio_service.dart';
 import '../common/assets.dart';
+import '../common/logger.dart';
 
 // --- Buzzer --- //
 
@@ -60,6 +62,7 @@ class BuzzerLogicBehavior implements LogicBehavior {
 
   @override
   void evaluate(Grid grid, ComponentModel component) {
+    Logger.log('BuzzerLogicBehavior: Evaluating buzzer \${component.id}');
     // This is a simplified logic. A more robust implementation would use the main game
     // engine to track state changes and avoid playing the sound on every evaluation.
     if (component.isPowered) {
@@ -69,13 +72,15 @@ class BuzzerLogicBehavior implements LogicBehavior {
 }
 
 void registerBuzzer() {
+  Logger.log('registerBuzzer() called.');
   registerBehavior<BuzzerDrawingBehavior>(() => BuzzerDrawingBehavior());
   registerBehavior<BuzzerLogicBehavior>(() => BuzzerLogicBehavior());
 
   ComponentRegistry.register(
-    type: "Component.Buzzer",
-    displayName: "Buzzer",
+    type: 'Component.Buzzer',
+    displayName: 'Buzzer',
     behaviors: [BuzzerDrawingBehavior, BuzzerLogicBehavior],
     isDraggable: true,
   );
+  Logger.log('registerBuzzer() completed.');
 }

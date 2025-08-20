@@ -1,15 +1,16 @@
 
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../common/constants.dart';
 import '../engine/render_state.dart';
-import '../models/component.dart';
-import '../services/asset_manager_state.dart';
+import '../services/asset_manager.dart';
 import '../behaviors/drawing_behavior.dart';
+import '../common/logger.dart';
 
 class CanvasPainter extends CustomPainter {
   final RenderState? renderState;
   final bool showDebugOverlay;
-  final AssetState assetState;
+  final AssetManagerNotifier assetManager;
   final bool isDark;
   final Color gridColor;
   final Color draggedComponentBackgroundColor;
@@ -17,7 +18,7 @@ class CanvasPainter extends CustomPainter {
   CanvasPainter({
     this.renderState,
     this.showDebugOverlay = false,
-    required this.assetState,
+    required this.assetManager,
     required this.isDark,
     required this.gridColor,
     required this.draggedComponentBackgroundColor,
@@ -25,48 +26,63 @@ class CanvasPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (renderState == null) return;
+    Logger.log('CanvasPainter: paint called.');
+    if (renderState == null) {
+      Logger.log('CanvasPainter: renderState is null. Skipping paint.');
+      return;
+    }
 
     final grid = renderState!.grid;
+    Logger.log('CanvasPainter: Grid dimensions: \${grid.rows}x\${grid.cols}');
+
     _drawGrid(canvas, size, grid.rows, grid.cols);
+    Logger.log('CanvasPainter: Grid drawn.');
 
     // Draw all components except dragged preview
-    for (final comp in renderState!.grid.componentsById.values) {
+    for (final comp in renderState!.grid.components) {
       if (comp.id != renderState!.draggedComponentId) {
         final drawingBehavior = comp.getBehavior<DrawingBehavior>();
-        drawingBehavior?.draw(canvas, const Size(cellSize, cellSize), comp, assetState.assetManager!);
+        if (drawingBehavior != null) {
+          Logger.log('CanvasPainter: Drawing component: \${comp.id} (type: \${comp.type})');
+          drawingBehavior.draw(canvas, const Size(cellSize, cellSize), comp, assetManager);
+        } else {
+          Logger.log('CanvasPainter: No DrawingBehavior for component: \${comp.id} (type: \${comp.type})');
+        }
       }
     }
+    Logger.log('CanvasPainter: Components drawn.');
 
     // Draw dragged preview
     if (renderState!.draggedComponentId != null && renderState!.dragPosition != null) {
-      final comp = renderState!.grid.componentsById[renderState!.draggedComponentId!];
-      if (comp != null) {
-        // This also needs to be behavior-driven
-        final drawingBehavior = comp.getBehavior<DrawingBehavior>();
-        drawingBehavior?.draw(canvas, const Size(cellSize, cellSize), comp, assetState.assetManager!);
+      final comp = renderState!.grid.components.firstWhere((c) => c.id == renderState!.draggedComponentId);
+      final drawingBehavior = comp.getBehavior<DrawingBehavior>();
+      if (drawingBehavior != null) {
+        Logger.log('CanvasPainter: Drawing dragged component: \${comp.id} (type: \${comp.type})');
+        drawingBehavior.draw(canvas, const Size(cellSize, cellSize), comp, assetManager);
+      } else {
+        Logger.log('CanvasPainter: No DrawingBehavior for dragged component: \${comp.id} (type: \${comp.type})');
       }
     }
+    Logger.log('CanvasPainter: Paint complete.');
   }
 
   void _drawGrid(Canvas canvas, Size size, int rows, int cols) {
-    final paint = Paint()
+    final Paint gridPaint = Paint()
       ..color = gridColor
-      ..style = PaintingStyle.stroke;
-    const double cw = cellSize, ch = cellSize;
+      ..strokeWidth = 1.0;
 
     for (int i = 0; i <= rows; i++) {
-      canvas.drawLine(Offset(0, i * ch), Offset(cols * cw, i * ch), paint);
+      canvas.drawLine(Offset(0, i * cellSize), Offset(size.width, i * cellSize), gridPaint);
     }
-    for (int j = 0; j <= cols; j++) {
-      canvas.drawLine(Offset(j * cw, 0), Offset(j * cw, rows * ch), paint);
+    for (int i = 0; i <= cols; i++) {
+      canvas.drawLine(Offset(i * cellSize, 0), Offset(i * cellSize, size.height), gridPaint);
     }
   }
 
   @override
   bool shouldRepaint(covariant CanvasPainter oldDelegate) =>
       oldDelegate.renderState != renderState ||
-      oldDelegate.assetState != assetState ||
+      oldDelegate.assetManager != assetManager ||
       oldDelegate.isDark != isDark ||
       oldDelegate.gridColor != gridColor ||
       oldDelegate.draggedComponentBackgroundColor != draggedComponentBackgroundColor;

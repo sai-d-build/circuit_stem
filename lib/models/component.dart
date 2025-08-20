@@ -150,3 +150,25 @@ class ComponentModel with _$ComponentModel {
 
 // Type alias for backward compatibility with tests
 typedef Component = ComponentModel;
+
+
+enum Dir { north, east, south, west }
+
+extension DirExtension on Dir {
+  Dir get opposite {
+    switch (this) {
+      case Dir.north:
+        return Dir.south;
+      case Dir.east:
+        return Dir.west;
+      case Dir.south:
+        return Dir.north;
+      case Dir.west:
+        return Dir.east;
+    }
+  }
+
+  Dir rotate(int steps) {
+    return Dir.values[(index + steps) % 4];
+  }
+}

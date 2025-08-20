@@ -18,8 +18,7 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$Grid {
   int get rows => throw _privateConstructorUsedError;
   int get cols => throw _privateConstructorUsedError;
-  Map<String, ComponentModel> get componentsById =>
-      throw _privateConstructorUsedError;
+  List<ComponentModel> get components => throw _privateConstructorUsedError;
 
   /// Create a copy of Grid
   /// with the given fields replaced by the non-null parameter values.
@@ -32,7 +31,7 @@ abstract class $GridCopyWith<$Res> {
   factory $GridCopyWith(Grid value, $Res Function(Grid) then) =
       _$GridCopyWithImpl<$Res, Grid>;
   @useResult
-  $Res call({int rows, int cols, Map<String, ComponentModel> componentsById});
+  $Res call({int rows, int cols, List<ComponentModel> components});
 }
 
 /// @nodoc
@@ -52,7 +51,7 @@ class _$GridCopyWithImpl<$Res, $Val extends Grid>
   $Res call({
     Object? rows = null,
     Object? cols = null,
-    Object? componentsById = null,
+    Object? components = null,
   }) {
     return _then(_value.copyWith(
       rows: null == rows
@@ -63,10 +62,10 @@ class _$GridCopyWithImpl<$Res, $Val extends Grid>
           ? _value.cols
           : cols // ignore: cast_nullable_to_non_nullable
               as int,
-      componentsById: null == componentsById
-          ? _value.componentsById
-          : componentsById // ignore: cast_nullable_to_non_nullable
-              as Map<String, ComponentModel>,
+      components: null == components
+          ? _value.components
+          : components // ignore: cast_nullable_to_non_nullable
+              as List<ComponentModel>,
     ) as $Val);
   }
 }
@@ -78,7 +77,7 @@ abstract class _$$GridImplCopyWith<$Res> implements $GridCopyWith<$Res> {
       __$$GridImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int rows, int cols, Map<String, ComponentModel> componentsById});
+  $Res call({int rows, int cols, List<ComponentModel> components});
 }
 
 /// @nodoc
@@ -95,7 +94,7 @@ class __$$GridImplCopyWithImpl<$Res>
   $Res call({
     Object? rows = null,
     Object? cols = null,
-    Object? componentsById = null,
+    Object? components = null,
   }) {
     return _then(_$GridImpl(
       rows: null == rows
@@ -106,10 +105,10 @@ class __$$GridImplCopyWithImpl<$Res>
           ? _value.cols
           : cols // ignore: cast_nullable_to_non_nullable
               as int,
-      componentsById: null == componentsById
-          ? _value._componentsById
-          : componentsById // ignore: cast_nullable_to_non_nullable
-              as Map<String, ComponentModel>,
+      components: null == components
+          ? _value._components
+          : components // ignore: cast_nullable_to_non_nullable
+              as List<ComponentModel>,
     ));
   }
 }
@@ -120,26 +119,26 @@ class _$GridImpl extends _Grid {
   const _$GridImpl(
       {required this.rows,
       required this.cols,
-      final Map<String, ComponentModel> componentsById = const {}})
-      : _componentsById = componentsById,
+      final List<ComponentModel> components = const []})
+      : _components = components,
         super._();
 
   @override
   final int rows;
   @override
   final int cols;
-  final Map<String, ComponentModel> _componentsById;
+  final List<ComponentModel> _components;
   @override
   @JsonKey()
-  Map<String, ComponentModel> get componentsById {
-    if (_componentsById is EqualUnmodifiableMapView) return _componentsById;
+  List<ComponentModel> get components {
+    if (_components is EqualUnmodifiableListView) return _components;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(_componentsById);
+    return EqualUnmodifiableListView(_components);
   }
 
   @override
   String toString() {
-    return 'Grid(rows: $rows, cols: $cols, componentsById: $componentsById)';
+    return 'Grid(rows: $rows, cols: $cols, components: $components)';
   }
 
   @override
@@ -150,12 +149,12 @@ class _$GridImpl extends _Grid {
             (identical(other.rows, rows) || other.rows == rows) &&
             (identical(other.cols, cols) || other.cols == cols) &&
             const DeepCollectionEquality()
-                .equals(other._componentsById, _componentsById));
+                .equals(other._components, _components));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, rows, cols,
-      const DeepCollectionEquality().hash(_componentsById));
+      const DeepCollectionEquality().hash(_components));
 
   /// Create a copy of Grid
   /// with the given fields replaced by the non-null parameter values.
@@ -170,7 +169,7 @@ abstract class _Grid extends Grid {
   const factory _Grid(
       {required final int rows,
       required final int cols,
-      final Map<String, ComponentModel> componentsById}) = _$GridImpl;
+      final List<ComponentModel> components}) = _$GridImpl;
   const _Grid._() : super._();
 
   @override
@@ -178,7 +177,7 @@ abstract class _Grid extends Grid {
   @override
   int get cols;
   @override
-  Map<String, ComponentModel> get componentsById;
+  List<ComponentModel> get components;
 
   /// Create a copy of Grid
   /// with the given fields replaced by the non-null parameter values.

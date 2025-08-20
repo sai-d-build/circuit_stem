@@ -9,6 +9,9 @@ import '../engine/game_engine_notifier.dart';
 import '../engine/game_engine_state.dart';
 import '../services/level_manager_state.dart';
 import '../services/asset_manager_state.dart';
+import '../engine/animation_scheduler.dart';
+import '../services/audio_service.dart';
+import '../ui/controllers/debug_overlay_controller.dart'; // Added import
 
 // This file is the single source of truth for all core providers.
 
@@ -22,6 +25,11 @@ final assetManagerProvider = StateNotifierProvider<AssetManagerNotifier, AssetSt
   return AssetManagerNotifier();
 });
 
+final audioServiceProvider = Provider((ref) => AudioService());
+final animationSchedulerProvider = Provider((ref) => AnimationScheduler());
+
+final debugOverlayControllerProvider = ChangeNotifierProvider((ref) => DebugOverlayController()); // Added provider
+
 // 2. Core Notifier Providers
 
 final levelManagerProvider = StateNotifierProvider<LevelManagerNotifier, LevelManagerState>((ref) {
@@ -33,20 +41,20 @@ final levelManagerProvider = StateNotifierProvider<LevelManagerNotifier, LevelMa
 
 final gameEngineProvider = StateNotifierProvider<GameEngineNotifier, GameEngineState>((ref) {
   final currentLevel = ref.watch(currentLevelDefinitionProvider);
+  final animationScheduler = ref.watch(animationSchedulerProvider);
+  final audioService = ref.watch(audioServiceProvider);
 
   if (currentLevel == null) {
     return GameEngineNotifier.forNoLevel(
-      onWin: () {
-        ref.read(levelManagerProvider.notifier).markCurrentLevelComplete();
-      },
+      animationScheduler: animationScheduler,
+      audioService: audioService,
     );
   }
 
   return GameEngineNotifier(
     initialLevel: currentLevel,
-    onWin: () {
-      ref.read(levelManagerProvider.notifier).markCurrentLevelComplete();
-    },
+    animationScheduler: animationScheduler,
+    audioService: audioService,
   );
 });
 

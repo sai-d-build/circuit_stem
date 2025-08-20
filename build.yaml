@@ -1,0 +1,6 @@
+targets:
+  $default:
+    builders:
+      freezed:
+        options:
+          import_for_relative_imports: "package:flutter/material.dart"

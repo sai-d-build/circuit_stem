@@ -8,6 +8,9 @@ import '../core/component_registry.dart';
 import '../models/component.dart';
 import '../services/asset_manager.dart';
 import '../common/theme.dart';
+import '../models/grid.dart';
+
+import '../common/logger.dart';
 
 class BulbDrawingBehavior implements DrawingBehavior {
   @override
@@ -69,19 +72,22 @@ class BulbDrawingBehavior implements DrawingBehavior {
 class BulbLogicBehavior implements LogicBehavior {
   @override
   void evaluate(Grid grid, ComponentModel component) {
+    Logger.log('BulbLogicBehavior: Evaluating bulb \${component.id}');
     // Bulbs are passive. Their powered state is determined by the main logic engine's evaluation.
     // No specific evaluation logic is needed here.
   }
 }
 
 void registerBulb() {
+  Logger.log('registerBulb() called.');
   registerBehavior<BulbDrawingBehavior>(() => BulbDrawingBehavior());
   registerBehavior<BulbLogicBehavior>(() => BulbLogicBehavior());
 
   ComponentRegistry.register(
-    type: "Component.Bulb",
-    displayName: "Bulb",
+    type: 'Component.Bulb',
+    displayName: 'Bulb',
     behaviors: [BulbDrawingBehavior, BulbLogicBehavior],
     isDraggable: true, // Bulbs are draggable in the palette
   );
+  Logger.log('registerBulb() completed.');
 }

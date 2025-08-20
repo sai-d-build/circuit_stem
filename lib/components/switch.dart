@@ -12,6 +12,8 @@ import '../common/theme.dart';
 import '../engine/game_engine_notifier.dart';
 import '../services/audio_service.dart';
 import '../common/assets.dart';
+import '../models/grid.dart';
+import '../common/logger.dart';
 
 // --- Switch --- //
 
@@ -63,6 +65,7 @@ class SwitchInteractionBehavior implements InteractionBehavior {
 
   @override
   void onTap(GameEngineNotifier notifier, ComponentModel component) {
+    Logger.log('SwitchInteractionBehavior: onTap called for switch \${component.id}');
     final currentState = component.state['closed'] as bool? ?? false;
     final newComponentState = Map<String, dynamic>.from(component.state);
     newComponentState['closed'] = !currentState;
@@ -86,19 +89,22 @@ class SwitchInteractionBehavior implements InteractionBehavior {
 class SwitchLogicBehavior implements LogicBehavior {
   @override
   void evaluate(Grid grid, ComponentModel component) {
+    Logger.log('SwitchLogicBehavior: Evaluating switch \${component.id}');
     // Logic is handled by the main engine based on the 'closed' state and terminals.
   }
 }
 
 void registerSwitch() {
+  Logger.log('registerSwitch() called.');
   registerBehavior<SwitchDrawingBehavior>(() => SwitchDrawingBehavior());
   registerBehavior<SwitchInteractionBehavior>(() => SwitchInteractionBehavior());
   registerBehavior<SwitchLogicBehavior>(() => SwitchLogicBehavior());
 
   ComponentRegistry.register(
-    type: "Component.Switch",
-    displayName: "Switch",
+    type: 'Component.Switch',
+    displayName: 'Switch',
     behaviors: [SwitchDrawingBehavior, SwitchInteractionBehavior, SwitchLogicBehavior],
     isDraggable: false, // Switches are not draggable
   );
+  Logger.log('registerSwitch() completed.');
 }

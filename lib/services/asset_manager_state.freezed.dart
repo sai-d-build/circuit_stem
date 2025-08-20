@@ -16,8 +16,8 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$AssetState {
-  Map<String, Image> get imageCache => throw _privateConstructorUsedError;
-  Map<String, Image> get svgImageCache => throw _privateConstructorUsedError;
+  Map<String, Image> get svgImages => throw _privateConstructorUsedError;
+  bool get isDark => throw _privateConstructorUsedError;
 
   /// Create a copy of AssetState
   /// with the given fields replaced by the non-null parameter values.
@@ -32,7 +32,7 @@ abstract class $AssetStateCopyWith<$Res> {
           AssetState value, $Res Function(AssetState) then) =
       _$AssetStateCopyWithImpl<$Res, AssetState>;
   @useResult
-  $Res call({Map<String, Image> imageCache, Map<String, Image> svgImageCache});
+  $Res call({Map<String, Image> svgImages, bool isDark});
 }
 
 /// @nodoc
@@ -50,18 +50,18 @@ class _$AssetStateCopyWithImpl<$Res, $Val extends AssetState>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? imageCache = null,
-    Object? svgImageCache = null,
+    Object? svgImages = null,
+    Object? isDark = null,
   }) {
     return _then(_value.copyWith(
-      imageCache: null == imageCache
-          ? _value.imageCache
-          : imageCache // ignore: cast_nullable_to_non_nullable
+      svgImages: null == svgImages
+          ? _value.svgImages
+          : svgImages // ignore: cast_nullable_to_non_nullable
               as Map<String, Image>,
-      svgImageCache: null == svgImageCache
-          ? _value.svgImageCache
-          : svgImageCache // ignore: cast_nullable_to_non_nullable
-              as Map<String, Image>,
+      isDark: null == isDark
+          ? _value.isDark
+          : isDark // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -74,7 +74,7 @@ abstract class _$$AssetStateImplCopyWith<$Res>
       __$$AssetStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({Map<String, Image> imageCache, Map<String, Image> svgImageCache});
+  $Res call({Map<String, Image> svgImages, bool isDark});
 }
 
 /// @nodoc
@@ -90,18 +90,18 @@ class __$$AssetStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? imageCache = null,
-    Object? svgImageCache = null,
+    Object? svgImages = null,
+    Object? isDark = null,
   }) {
     return _then(_$AssetStateImpl(
-      imageCache: null == imageCache
-          ? _value._imageCache
-          : imageCache // ignore: cast_nullable_to_non_nullable
+      svgImages: null == svgImages
+          ? _value._svgImages
+          : svgImages // ignore: cast_nullable_to_non_nullable
               as Map<String, Image>,
-      svgImageCache: null == svgImageCache
-          ? _value._svgImageCache
-          : svgImageCache // ignore: cast_nullable_to_non_nullable
-              as Map<String, Image>,
+      isDark: null == isDark
+          ? _value.isDark
+          : isDark // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -110,32 +110,25 @@ class __$$AssetStateImplCopyWithImpl<$Res>
 
 class _$AssetStateImpl implements _AssetState {
   const _$AssetStateImpl(
-      {final Map<String, Image> imageCache = const {},
-      final Map<String, Image> svgImageCache = const {}})
-      : _imageCache = imageCache,
-        _svgImageCache = svgImageCache;
+      {final Map<String, Image> svgImages = const {}, this.isDark = false})
+      : _svgImages = svgImages;
 
-  final Map<String, Image> _imageCache;
+  final Map<String, Image> _svgImages;
   @override
   @JsonKey()
-  Map<String, Image> get imageCache {
-    if (_imageCache is EqualUnmodifiableMapView) return _imageCache;
+  Map<String, Image> get svgImages {
+    if (_svgImages is EqualUnmodifiableMapView) return _svgImages;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(_imageCache);
+    return EqualUnmodifiableMapView(_svgImages);
   }
 
-  final Map<String, Image> _svgImageCache;
   @override
   @JsonKey()
-  Map<String, Image> get svgImageCache {
-    if (_svgImageCache is EqualUnmodifiableMapView) return _svgImageCache;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(_svgImageCache);
-  }
+  final bool isDark;
 
   @override
   String toString() {
-    return 'AssetState(imageCache: $imageCache, svgImageCache: $svgImageCache)';
+    return 'AssetState(svgImages: $svgImages, isDark: $isDark)';
   }
 
   @override
@@ -144,16 +137,13 @@ class _$AssetStateImpl implements _AssetState {
         (other.runtimeType == runtimeType &&
             other is _$AssetStateImpl &&
             const DeepCollectionEquality()
-                .equals(other._imageCache, _imageCache) &&
-            const DeepCollectionEquality()
-                .equals(other._svgImageCache, _svgImageCache));
+                .equals(other._svgImages, _svgImages) &&
+            (identical(other.isDark, isDark) || other.isDark == isDark));
   }
 
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(_imageCache),
-      const DeepCollectionEquality().hash(_svgImageCache));
+      runtimeType, const DeepCollectionEquality().hash(_svgImages), isDark);
 
   /// Create a copy of AssetState
   /// with the given fields replaced by the non-null parameter values.
@@ -166,13 +156,13 @@ class _$AssetStateImpl implements _AssetState {
 
 abstract class _AssetState implements AssetState {
   const factory _AssetState(
-      {final Map<String, Image> imageCache,
-      final Map<String, Image> svgImageCache}) = _$AssetStateImpl;
+      {final Map<String, Image> svgImages,
+      final bool isDark}) = _$AssetStateImpl;
 
   @override
-  Map<String, Image> get imageCache;
+  Map<String, Image> get svgImages;
   @override
-  Map<String, Image> get svgImageCache;
+  bool get isDark;
 
   /// Create a copy of AssetState
   /// with the given fields replaced by the non-null parameter values.

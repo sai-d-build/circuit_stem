@@ -6,8 +6,10 @@ import '../behaviors/drawing_behavior.dart';
 import '../behaviors/logic_behavior.dart';
 import '../core/component_registry.dart';
 import '../models/component.dart';
+import '../models/grid.dart';
 import '../services/asset_manager.dart';
 import '../common/theme.dart';
+import '../common/logger.dart';
 
 // --- Battery --- //
 
@@ -27,7 +29,6 @@ class BatteryDrawingBehavior implements DrawingBehavior {
 
     canvas.save();
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 3;
     final rotationAngle = (component.rotation % 360) * (math.pi / 180);
     canvas.translate(center.dx, center.dy);
     canvas.rotate(rotationAngle);
@@ -103,18 +104,21 @@ class BatteryDrawingBehavior implements DrawingBehavior {
 class BatteryLogicBehavior implements LogicBehavior {
   @override
   void evaluate(Grid grid, ComponentModel component) {
+    Logger.log('BatteryLogicBehavior: Evaluating battery \${component.id}');
     // The battery is the source of power, its logic is handled by the main engine.
   }
 }
 
 void registerBattery() {
+  Logger.log('registerBattery() called.');
   registerBehavior<BatteryDrawingBehavior>(() => BatteryDrawingBehavior());
   registerBehavior<BatteryLogicBehavior>(() => BatteryLogicBehavior());
 
   ComponentRegistry.register(
-    type: "Component.Battery",
-    displayName: "Battery",
+    type: 'Component.Battery',
+    displayName: 'Battery',
     behaviors: [BatteryDrawingBehavior, BatteryLogicBehavior],
     isDraggable: false,
   );
+  Logger.log('registerBattery() completed.');
 }

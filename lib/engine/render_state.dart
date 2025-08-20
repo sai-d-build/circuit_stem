@@ -1,52 +1,32 @@
-// lib/engine/render_state.dart
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import '../models/grid.dart';
-import '../models/component.dart';
 
-
-class DebugOverlayData {
-  final DebugInfo? debugInfo;
-  DebugOverlayData({this.debugInfo});
-}
-
+@immutable
 class RenderState {
   final Grid grid;
-  final List<ComponentModel> components;
-  final EvaluationResult evaluationResult;
+  final Set<String> poweredComponentIds;
   final String? draggedComponentId;
   final Offset? dragPosition;
-  final double bulbIntensity;
-  final double wireOffset;
-  final DebugOverlayData? debugOverlay;
 
-  RenderState({
+  const RenderState({
     required this.grid,
-    required this.components,
-    required this.evaluationResult,
+    this.poweredComponentIds = const {},
     this.draggedComponentId,
     this.dragPosition,
-    required this.bulbIntensity,
-    required this.wireOffset,
-    this.debugOverlay,
   });
 
-  factory RenderState.fromEvaluation({
-    required Grid grid,
-    required EvaluationResult eval,
-    required double bulbIntensity,
-    required double wireOffset,
+  RenderState copyWith({
+    Grid? grid,
+    Set<String>? poweredComponentIds,
     String? draggedComponentId,
     Offset? dragPosition,
   }) {
     return RenderState(
-      grid: grid,
-      components: grid.componentsById.values.toList(),
-      evaluationResult: eval,
-      draggedComponentId: draggedComponentId,
-      dragPosition: dragPosition,
-      bulbIntensity: bulbIntensity,
-      wireOffset: wireOffset,
-      debugOverlay: DebugOverlayData(debugInfo: eval.debugInfo),
+      grid: grid ?? this.grid,
+      poweredComponentIds: poweredComponentIds ?? this.poweredComponentIds,
+      draggedComponentId: draggedComponentId ?? this.draggedComponentId,
+      dragPosition: dragPosition ?? this.dragPosition,
     );
   }
 }

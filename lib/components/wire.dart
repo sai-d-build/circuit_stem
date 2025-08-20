@@ -8,6 +8,8 @@ import '../core/component_registry.dart';
 import '../models/component.dart';
 import '../services/asset_manager.dart';
 import '../common/theme.dart';
+import '../models/grid.dart';
+import '../common/logger.dart';
 
 // --- Straight Wire --- //
 
@@ -46,19 +48,23 @@ class WireStraightDrawingBehavior implements DrawingBehavior {
 class WireLogicBehavior implements LogicBehavior {
   @override
   void evaluate(Grid grid, ComponentModel component) {
+    Logger.log('WireLogicBehavior: Evaluating wire \${component.id}');
     // Wires are passive conductors. No specific logic needed.
   }
 }
 
 void registerWireStraight() {
+  Logger.log('registerWireStraight() called.');
   registerBehavior<WireStraightDrawingBehavior>(() => WireStraightDrawingBehavior());
   registerBehavior<WireLogicBehavior>(() => WireLogicBehavior()); // Can be shared
 
   ComponentRegistry.register(
-    type: "Component.WireStraight",
+    type: 'Component.WireStraight',
+    displayName: 'Wire',
     behaviors: [WireStraightDrawingBehavior, WireLogicBehavior],
     isDraggable: true,
   );
+  Logger.log('registerWireStraight() completed.');
 }
 
 
@@ -95,13 +101,16 @@ class WireCornerDrawingBehavior implements DrawingBehavior {
 }
 
 void registerWireCorner() {
+  Logger.log('registerWireCorner() called.');
   registerBehavior<WireCornerDrawingBehavior>(() => WireCornerDrawingBehavior());
 
   ComponentRegistry.register(
-    type: "Component.WireCorner",
+    type: 'Component.WireCorner',
+    displayName: 'Corner Wire',
     behaviors: [WireCornerDrawingBehavior, WireLogicBehavior], // Re-use same logic behavior
     isDraggable: true,
   );
+  Logger.log('registerWireCorner() completed.');
 }
 
 
@@ -127,7 +136,7 @@ class WireTDrawingBehavior implements DrawingBehavior {
     final rotationAngle = (component.rotation % 360) * (math.pi / 180);
     canvas.translate(center.dx, center.dy);
     canvas.rotate(rotationAngle);
-    canvas.translate(-center.dx, -center.dy);
+    canvas.translate(-center.dx, -center.dx);
 
     // Draw T-junction
     canvas.drawLine(Offset(center.dx, 0), Offset(center.dx, size.height), paint);
@@ -138,13 +147,16 @@ class WireTDrawingBehavior implements DrawingBehavior {
 }
 
 void registerWireT() {
+  Logger.log('registerWireT() called.');
   registerBehavior<WireTDrawingBehavior>(() => WireTDrawingBehavior());
 
   ComponentRegistry.register(
-    type: "Component.WireT",
+    type: 'Component.WireT',
+    displayName: 'T-Wire',
     behaviors: [WireTDrawingBehavior, WireLogicBehavior], // Re-use same logic behavior
     isDraggable: true,
   );
+  Logger.log('registerWireT() completed.');
 }
 
 
@@ -186,12 +198,15 @@ class CrossWireDrawingBehavior implements DrawingBehavior {
 }
 
 void registerCrossWire() {
+  Logger.log('registerCrossWire() called.');
   registerBehavior<CrossWireDrawingBehavior>(() => CrossWireDrawingBehavior());
 
   ComponentRegistry.register(
-    type: "Component.CrossWire",
-    displayName: "Wire",
+    type: 'Component.CrossWire',
+    displayName: 'Cross Wire',
     behaviors: [CrossWireDrawingBehavior, WireLogicBehavior], // Re-use same logic behavior
     isDraggable: true,
   );
+  Logger.log('registerCrossWire() completed.');
 }
+

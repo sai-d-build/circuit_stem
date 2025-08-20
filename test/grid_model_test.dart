@@ -1,49 +1,42 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:circuit_stem/models/grid.dart';
 import 'package:circuit_stem/models/component.dart';
-import 'package:circuit_stem/models/level_definition.dart';
-import 'package:circuit_stem/engine/game_engine_notifier.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  group('GameEngineNotifier Grid Logic Tests', () {
-    late GameEngineNotifier notifier;
-    const initialLevel = LevelDefinition(
-      id: 'test_level',
-      title: 'Test Level',
-      description: '',
-      levelNumber: 1,
-      rows: 3,
-      cols: 3,
-      initialComponents: [
-        ComponentModel(id: 'c1', type: "Component.Battery", r: 1, c: 1),
-      ],
-      paletteComponents: [], // Add an empty list for palette components
-      goals: [],
-      author: 'test',
-      version: 1,
-      hints: [],
-      blockedCells: [],
-    );
-
-    setUp(() {
-      notifier = GameEngineNotifier(initialLevel: initialLevel);
+  group('Grid Model Tests', () {
+    test('componentAt returns the correct component', () {
+      const grid = Grid(rows: 3, cols: 3, components: [ComponentModel(id: 'c1', type: 'test', r: 1, c: 1)]);
+      expect(grid.componentAt(1, 1)?.id, equals('c1'));
+      expect(grid.componentAt(0, 0), isNull);
     });
 
-    test('loadLevel places initial components on the grid', () {
-      final grid = notifier.state.grid;
-      expect(grid.componentsById.length, 1);
-      expect(grid.componentsAt(1, 1).first.id, 'c1');
+    test('isCellOccupied works correctly', () {
+      const grid = Grid(rows: 3, cols: 3, components: [ComponentModel(id: 'c1', type: 'test', r: 1, c: 1)]);
+      expect(grid.isCellOccupied(1, 1), isTrue);
+      expect(grid.isCellOccupied(0, 0), isFalse);
+      expect(grid.isCellOccupied(1, 1, excludeComponentId: 'c1'), isFalse);
     });
 
-    test('endDrag moves a component to a new valid position', () {
-      notifier.startDrag('c1', const Offset(1 * 64.0 + 32.0, 1 * 64.0 + 32.0));
-      notifier.updateDrag('c1', const Offset(2 * 64.0 + 32.0, 2 * 64.0 + 32.0));
-      notifier.endDrag('c1');
+    test('copyWithUpdatedComponent updates the correct component', () {
+      const component1 = ComponentModel(id: 'c1', type: 'test', r: 1, c: 1);
+      const component2 = ComponentModel(id: 'c2', type: 'test', r: 2, c: 2);
+      const grid = Grid(rows: 3, cols: 3, components: [component1, component2]);
 
-      final grid = notifier.state.grid;
-      expect(grid.componentsAt(1, 1), isEmpty, reason: 'Original position should be empty');
-      expect(grid.componentsAt(2, 2), isNotEmpty, reason: 'New position should be occupied');
-      expect(grid.componentsAt(2, 2).first.id, 'c1');
+      final updatedComponent1 = component1.copyWith(isPowered: true);
+      final newGrid = grid.copyWithUpdatedComponent(updatedComponent1);
+
+      expect(newGrid.componentAt(1, 1)?.isPowered, isTrue);
+      expect(newGrid.componentAt(2, 2)?.isPowered, isFalse);
+    });
+
+    test('componentsById returns a correct map', () {
+      const component1 = ComponentModel(id: 'c1', type: 'test', r: 1, c: 1);
+      const component2 = ComponentModel(id: 'c2', type: 'test', r: 2, c: 2);
+      const grid = Grid(rows: 3, cols: 3, components: [component1, component2]);
+
+      expect(grid.componentsById.length, 2);
+      expect(grid.componentsById['c1'], component1);
+      expect(grid.componentsById['c2'], component2);
     });
   });
 }

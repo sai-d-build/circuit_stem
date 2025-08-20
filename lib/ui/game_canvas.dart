@@ -1,52 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../common/constants.dart';
 import '../core/providers.dart';
-import '../ui/canvas_painter.dart';
-import '../common/logger.dart';
+import 'canvas_painter.dart';
 import '../models/component.dart';
+import '../common/constants.dart';
+import '../common/logger.dart';
 
-class GameCanvas extends ConsumerStatefulWidget {
+class GameCanvas extends ConsumerWidget {
   const GameCanvas({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<GameCanvas> createState() => _GameCanvasState();
-}
-
-class _GameCanvasState extends ConsumerState<GameCanvas> with TickerProviderStateMixin {
-  late final Ticker _ticker;
-
-  @override
-  void initState() {
-    super.initState();
-    _ticker = Ticker(_onTick)..start();
-  }
-
-  void _onTick(Duration elapsed) {
-    // This ticker can be used to drive animations if needed.
-    // The `elapsed` duration can be used to calculate animation frames.
-    // For example: ref.read(gameEngineProvider.notifier).update(elapsed);
-  }
-
-  @override
-  void dispose() {
-    _ticker.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    Logger.log('GameCanvas: Building GameCanvas.');
     final gameNotifier = ref.read(gameEngineProvider.notifier);
-    final renderState = ref.watch(renderStateProvider);
-    final assetState = ref.watch(assetManagerProvider);
+    final renderState = ref.watch(gameEngineProvider.select((s) => s.renderState));
+    final assetManager = ref.watch(assetManagerProvider.notifier);
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final gridColor = theme.dividerColor;
-    final draggedComponentBackgroundColor = theme.scaffoldBackgroundColor.withAlpha(179);
-    final selectedComponentId = ref.watch(gameEngineProvider.select((state) => state.selectedComponentId));
-    final selectedComponent = selectedComponentId != null ? ref.watch(gameEngineProvider.select((state) => state.grid.componentsById[selectedComponentId])) : null;
-    Logger.log('GameCanvas: Building with ${renderState?.grid.componentsById.length ?? "null renderState"} components in renderState');
+    final selectedComponentId = ref.watch(gameEngineProvider.select((s) => s.selectedComponentId));
+    final selectedComponent = selectedComponentId != null ? ref.watch(gameEngineProvider.select((s) => s.grid.componentsById[selectedComponentId])) : null;
+
+    Logger.log('GameCanvas: renderState is ${renderState != null ? 'not null' : 'null'}');
+    if (renderState != null) {
+      Logger.log('GameCanvas: renderState grid has \${renderState.grid.components.length} components.');
+    }
 
     return DragTarget<ComponentModel>(
       onAcceptWithDetails: (details) {
@@ -54,68 +30,59 @@ class _GameCanvasState extends ConsumerState<GameCanvas> with TickerProviderStat
         final offset = details.offset;
         final col = (offset.dx / cellSize).floor();
         final row = (offset.dy / cellSize).floor();
-        Logger.log('GameCanvas: Dropped component ${component.id} of type ${component.type} at ($row, $col)');
-        final newComponent = component.copyWith(id: 'comp_${DateTime.now().millisecondsSinceEpoch}');
-        gameNotifier.addComponent(newComponent, row, col);
+        Logger.log('GameCanvas: Dropped component \${component.id} of type \${component.type} at (\$row, \$col)');
+        gameNotifier.addComponent(component, row, col);
       },
       builder: (context, candidateData, rejectedData) {
         return GestureDetector(
-          behavior: HitTestBehavior.opaque,
           onTapDown: (details) {
-            final tapPos = details.localPosition;
-            final col = (tapPos.dx / cellSize).floor();
-            final row = (tapPos.dy / cellSize).floor();
-            Logger.log('GameCanvas: Tap down at ($row, $col)');
-            gameNotifier.handleTap(row, col);
+            Logger.log('GameCanvas: TapDown at \${details.localPosition}');
+            gameNotifier.handleTap(details.localPosition);
           },
           onPanStart: (details) {
-            final startPos = details.localPosition;
-            final col = (startPos.dx / cellSize).floor();
-            final row = (startPos.dy / cellSize).floor();
-            Logger.log('GameCanvas: Pan start at ($row, $col)');
-
-            final component = ref.read(gameEngineProvider).grid.componentsAt(row, col).firstOrNull;
-            if (component != null) {
-              Logger.log('GameCanvas: Tapped on component ${component.id} of type ${component.type}, isDraggable: ${component.isDraggable}');
-              if (component.isDraggable) {
-                Logger.log('GameCanvas: Starting drag for component ${component.id}');
-                gameNotifier.startDrag(component.id, startPos);
+            Logger.log('GameCanvas: PanStart at \${details.localPosition}');
+            final cell = renderState?.grid.cellAt(details.localPosition.dx, details.localPosition.dy);
+            if (cell != null) {
+              final component = renderState?.grid.componentAt(cell.r, cell.c);
+              if (component != null && component.isDraggable) {
+                Logger.log('GameCanvas: Starting drag for component \${component.id}');
+                gameNotifier.startDrag(component, details.localPosition);
+              } else {
+                Logger.log('GameCanvas: No draggable component at (\${cell.r}, \${cell.c})');
               }
+            } else {
+              Logger.log('GameCanvas: PanStart outside grid.');
             }
           },
           onPanUpdate: (details) {
-            final draggedId = ref.read(gameEngineProvider).draggedComponentId;
-            if (draggedId != null) {
-              gameNotifier.updateDrag(draggedId, details.localPosition);
-            }
+            Logger.log('GameCanvas: PanUpdate to \${details.localPosition}');
+            gameNotifier.updateDrag(details.localPosition);
           },
           onPanEnd: (details) {
-            final draggedId = ref.read(gameEngineProvider).draggedComponentId;
-            if (draggedId != null) {
-              Logger.log('GameCanvas: Pan end for component $draggedId');
-              gameNotifier.endDrag(draggedId);
-            }
+            Logger.log('GameCanvas: PanEnd.');
+            gameNotifier.endDrag();
           },
           child: Stack(
             children: [
               CustomPaint(
                 painter: CanvasPainter(
                   renderState: renderState,
-                  assetState: assetState,
-                  isDark: isDark,
-                  gridColor: gridColor,
-                  draggedComponentBackgroundColor: draggedComponentBackgroundColor,
+                  assetManager: assetManager,
+                  isDark: theme.brightness == Brightness.dark,
+                  gridColor: theme.dividerColor,
+                  draggedComponentBackgroundColor: theme.scaffoldBackgroundColor.withAlpha(179),
                 ),
                 size: Size.infinite,
               ),
-              if (selectedComponent != null && selectedComponent.isDraggable)
+              if (selectedComponent != null) // Show rotate button if a component is selected
                 Positioned(
-                  left: (selectedComponent.c + 1) * cellSize,
+                  left: selectedComponent.c * cellSize,
                   top: selectedComponent.r * cellSize,
                   child: IconButton(
                     icon: const Icon(Icons.rotate_right),
                     onPressed: () {
-                      gameNotifier.rotateComponent(selectedComponent.id);
+                      Logger.log('GameCanvas: Rotate button pressed for component \${selectedComponent.id}');
+                      gameNotifier.rotateComponent();
                     },
                   ),
                 ),

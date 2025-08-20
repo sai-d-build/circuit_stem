@@ -7,6 +7,7 @@ import '../models/level_definition.dart';
 import '../models/level_metadata.dart';
 import 'level_manager_state.dart';
 import 'asset_manager.dart';
+import 'package:circuit_stem/models/component.dart'; // Added import
 
 /// Notifier for managing level state, including loading, progress, and persistence.
 class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
@@ -95,11 +96,11 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
 
       // Manually parse components to use our new factory logic
       final initialComponents = (decodedJson['initialComponents'] as List)
-          .map((e) => _componentFromJson(e as Map<String, dynamic>))
+          .map((e) => ComponentModel.fromJson(e as Map<String, dynamic>))
           .toList();
 
       final paletteComponents = (decodedJson['paletteComponents'] as List)
-          .map((e) => _componentFromJson(e as Map<String, dynamic>))
+          .map((e) => ComponentModel.fromJson(e as Map<String, dynamic>))
           .toList();
 
       final levelDef = LevelDefinition.fromJson(decodedJson).copyWith(

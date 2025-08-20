@@ -14,7 +14,7 @@ import 'components/wire.dart';
 import 'components/switch.dart';
 import 'components/battery.dart';
 import 'components/timer.dart';
-import 'components/crosswire.dart';
+
 import 'components/buzzer.dart';
 import 'goals/power_bulb_goal.dart';
 
@@ -45,6 +45,7 @@ void main() async {
 
   // Register all component and goal behaviors.
   registerAllGameEntities();
+  Logger.log('main.dart: All game entities registered.');
 
   runApp(
     ProviderScope(
@@ -54,6 +55,7 @@ void main() async {
       child: Initializer(svgProcessor: svgProcessor), // Pass processor to Initializer
     ),
   );
+  Logger.log('runApp() called');
   Logger.log('runApp() called');
 }
 

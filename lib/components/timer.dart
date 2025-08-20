@@ -1,3 +1,4 @@
+import 'package:circuit_stem/models/grid.dart';
 
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -8,6 +9,7 @@ import '../core/component_registry.dart';
 import '../models/component.dart';
 import '../services/asset_manager.dart';
 import '../common/theme.dart';
+import '../common/logger.dart';
 
 // --- Timer --- //
 
@@ -54,18 +56,21 @@ class TimerDrawingBehavior implements DrawingBehavior {
 class TimerLogicBehavior implements LogicBehavior {
   @override
   void evaluate(Grid grid, ComponentModel component) {
+    Logger.log('TimerLogicBehavior: Evaluating timer \${component.id}');
     // Timer logic is handled by the main engine.
   }
 }
 
 void registerTimer() {
+  Logger.log('registerTimer() called.');
   registerBehavior<TimerDrawingBehavior>(() => TimerDrawingBehavior());
   registerBehavior<TimerLogicBehavior>(() => TimerLogicBehavior());
 
   ComponentRegistry.register(
-    type: "Component.Timer",
-    displayName: "Timer",
+    type: 'Component.Timer',
+    displayName: 'Timer',
     behaviors: [TimerDrawingBehavior, TimerLogicBehavior],
     isDraggable: true,
   );
+  Logger.log('registerTimer() completed.');
 }

@@ -1,4 +1,3 @@
-
 ## [v2.0.0] - 2025-08-19 - Architectural Refactor: Component-Behavior Model
 
 This is a major architectural overhaul to improve extensibility and align with modern best practices.
@@ -60,3 +59,21 @@ This is a major architectural overhaul to improve extensibility and align with m
     - Modified the `handleTap` method in `GameEngineNotifier` to select components.
     - Updated the UI in `lib/ui/game_canvas.dart` to show a rotate button when a draggable component is selected.
     - Added a rotatable `wire_straight` component to `level_02.json` to demonstrate the new feature.
+
+## [Unreleased] - 2025-08-19 - Debugging Session & Compiler Error Fixes
+
+### Added
+- **Extensive Logging**: Added `Logger.log` statements across critical files (`main.dart`, `component_registry.dart`, `game_engine_notifier.dart`, `asset_manager.dart`, `canvas_painter.dart`, `game_canvas.dart`, `circuit_component_display.dart`, and individual component/goal registration files) to trace execution flow and pinpoint issues related to missing grid and component images.
+
+### Fixed
+- **Compilation Errors**:
+    - `Method not found: 'MyApp'` in `main.dart`: Corrected `runApp` call to use `Initializer`.
+    - Syntax errors in `lib/ui/game_canvas.dart`: Fixed incorrect string interpolation in logger statements.
+    - `Undefined class/name` errors in `lib/ui/widgets/circuit_component_display.dart`: Added missing imports for `ComponentModel`, `assetManagerProvider`, `AssetManagerNotifier`, and `DrawingBehavior`.
+    - `Duplicate import` and `unnecessary_import` warnings: Cleaned up imports in `lib/services/asset_manager.dart` and `lib/ui/canvas_painter.dart`.
+    - `Error: Type 'Grid' not found.` in component files (`wire.dart`, `switch.dart`, `battery.dart`, `timer.dart`, `buzzer.dart`): Added missing `import '../models/grid.dart';` statements.
+    - `Error: The value 'null' can't be returned from a function with return type 'T' because 'T' is not nullable.` in `lib/core/component_registry.dart`: Reverted `getBehavior<T>()` to throw an exception for unregistered behaviors, as this is the correct behavior for non-nullable types.
+
+### Current Status
+- All known compilation errors have been addressed. The application should now compile and run.
+- The next step is to run the application and analyze the new runtime logs to understand why behaviors are not being found and why the grid is not rendering.
