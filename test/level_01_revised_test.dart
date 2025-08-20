@@ -66,7 +66,7 @@ void main() {
               }),
             ],
             child: const MaterialApp(
-              home: GameScreen(levelNumber: 1),
+              home: GameScreen(levelIndex: 1),
             ),
           ),
         ),
@@ -79,9 +79,10 @@ void main() {
       'TC-L1-01: Toggle switch interaction',
       (WidgetTester tester) => fakeAsync((async) async {
         final container = await pumpGameScreenWithOverrides(tester);
-        final mockAnimationScheduler = container.read(gameEngineProvider.notifier).animationScheduler as MockAnimationScheduler;
+        final level = await container.read(levelDefinitionProvider(1).future);
+        final mockAnimationScheduler = container.read(gameEngineProvider(level!).notifier).animationScheduler as MockAnimationScheduler;
 
-        final switchComponent = Level1TestHelper.findComponentById(container, 'switch1');
+        final switchComponent = Level1TestHelper.findComponentById(container, level!, 'switch1');
         expect(switchComponent, isNotNull);
         final initialSwitchClosed = Level1TestHelper.getSwitchState(switchComponent!);
 
@@ -90,7 +91,7 @@ void main() {
         mockAnimationScheduler.triggerCallback(0.016);
         await tester.pump();
 
-        final newSwitchComponent = Level1TestHelper.findComponentById(container, 'switch1')!;
+        final newSwitchComponent = Level1TestHelper.findComponentById(container, level!, 'switch1')!;
         final finalSwitchClosed = Level1TestHelper.getSwitchState(newSwitchComponent);
 
         expect(finalSwitchClosed, !initialSwitchClosed);

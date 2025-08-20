@@ -136,34 +136,41 @@ class ComponentRegistry {
     final shapeOffsets = shapeOffsetsJson != null
         ? shapeOffsetsJson.map((e) {
             final offsetJson = e as Map<String, dynamic>;
+            Logger.log('Parsing shapeOffset: $offsetJson'); // Add logger
             return CellOffset(
-              offsetJson['x'] as int,
-              offsetJson['y'] as int,
+              offsetJson['r'] as int, // Change from 'x' to 'r'
+              offsetJson['c'] as int, // Change from 'y' to 'c'
             );
           }).toList()
         : [CellOffset(0, 0)];
 
     // Parse terminals manually - NEVER call TerminalSpec.fromJson
     final terminalsJson = json['terminals'] as List<dynamic>?;
+    Logger.log('Parsing terminals: $terminalsJson'); // Add logger
     final terminals = terminalsJson != null
         ? terminalsJson.map((e) {
             final termJson = e as Map<String, dynamic>;
             
             // Parse offset
             final offsetJson = termJson['offset'] as Map<String, dynamic>;
+            Logger.log('Parsing terminal offset: $offsetJson'); // Add logger
             final offset = CellOffset(
-              offsetJson['x'] as int,
-              offsetJson['y'] as int,
+              offsetJson['r'] as int, // Change from 'x' to 'r'
+              offsetJson['c'] as int, // Change from 'y' to 'c'
             );
             
             // Parse direction string
-            final dirString = termJson['direction'] as String;
+            final dirString = termJson['dir'] as String;
             final dir = _dirFromString(dirString);
             
-            return TerminalSpec(
+            // Parse type string with null-check and default
+            final typeString = termJson['type'] as String? ?? 'power';
+            final type = typeString.toTerminalType();
+            
+            return TerminalSpec( // Use named arguments for TerminalSpec constructor
               offset: offset,
               direction: dir,
-              type: (termJson['type'] as String).toTerminalType(),
+              type: type,
             );
           }).toList()
         : const [
@@ -173,6 +180,7 @@ class ComponentRegistry {
 
     // Parse internalConnections manually
     final internalConnectionsJson = json['internalConnections'] as List<dynamic>?;
+    Logger.log('Parsing internalConnections: $internalConnectionsJson'); // Add logger
     final internalConnections = internalConnectionsJson?.map<List<int>>((e) {
             final connectionJson = e as List<dynamic>;
             return connectionJson.map<int>((i) => i as int).toList();

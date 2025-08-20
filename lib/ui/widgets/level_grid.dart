@@ -2,18 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers.dart';
 import '../../models/level_metadata.dart';
-import '../../routes.dart';
 
-class LevelGrid extends ConsumerStatefulWidget {
-  const LevelGrid({super.key});
+class LevelGrid extends ConsumerWidget {
+  final Function(int) onLevelSelected;
+
+  const LevelGrid({required this.onLevelSelected, super.key});
 
   @override
-  ConsumerState<LevelGrid> createState() => _LevelGridState();
-}
-
-class _LevelGridState extends ConsumerState<LevelGrid> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final levels = ref.watch(levelsProvider);
     final completedLevelIds = ref.watch(completedLevelIdsProvider);
 
@@ -42,22 +38,13 @@ class _LevelGridState extends ConsumerState<LevelGrid> {
               return _LevelCard(
                 level: level,
                 isCompleted: isCompleted,
-                onTap: level.unlocked ? () => _startLevel(ref, index) : null,
+                onTap: level.unlocked ? () => onLevelSelected(index) : null,
               );
             },
           ),
         ),
       ],
     );
-  }
-
-  void _startLevel(WidgetRef ref, int index) async {
-    final levelNumber = index + 1;
-    final level = await ref.read(levelManagerProvider.notifier).loadLevelByIndex(levelNumber);
-    if (level != null) {
-      if (!mounted) return;
-      Navigator.of(context).pushNamed(AppRoutes.gameScreen, arguments: levelNumber);
-    }
   }
 }
 
@@ -75,10 +62,10 @@ class _LevelCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLocked = !level.unlocked;
-    final color = isLocked 
-        ? Colors.grey 
-        : isCompleted 
-            ? Colors.green 
+    final color = isLocked
+        ? Colors.grey
+        : isCompleted
+            ? Colors.green
             : Theme.of(context).colorScheme.primary;
 
     return Card(
@@ -90,7 +77,9 @@ class _LevelCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                isLocked ? Icons.lock : (isCompleted ? Icons.check_circle : Icons.lightbulb_outline),
+                isLocked
+                    ? Icons.lock
+                    : (isCompleted ? Icons.check_circle : Icons.lightbulb_outline),
                 size: 32,
                 color: color,
               ),
@@ -98,8 +87,8 @@ class _LevelCard extends StatelessWidget {
               Text(
                 'Level ${level.levelNumber}',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: isLocked ? Colors.grey : null,
-                ),
+                      color: isLocked ? Colors.grey : null,
+                    ),
               ),
               if (!isLocked) ...[
                 const SizedBox(height: 4),

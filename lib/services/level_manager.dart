@@ -18,6 +18,7 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
   LevelManagerNotifier(this._sharedPrefs, this._assetManager)
       : super(const LevelManagerState());
 
+  /// Initializes the manager by loading the manifest and user progress.
   Future<void> init() async {
     Logger.log('LevelManagerNotifier: init');
     await _loadManifest();
@@ -32,6 +33,7 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
   Future<void> _loadManifest() async {
     Logger.log('LevelManagerNotifier: _loadManifest START');
     state = state.copyWith(isLoading: true, errorMessage: null);
+
     try {
       final manifestString =
           await _assetManager.loadString('assets/levels/level_manifest.json');
@@ -44,12 +46,12 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
       final completedIds =
           _sharedPrefs.getStringList(_prefsKeyCompletedLevels)?.toSet() ?? {};
 
-      // The first level is always unlocked.
+      // Unlock first level
       if (allLevels.isNotEmpty) {
         allLevels[0] = allLevels[0].copyWith(unlocked: true);
       }
 
-      // A level is unlocked if it's the first one, or if the previous one is complete.
+      // Unlock levels based on progress
       for (int i = 1; i < allLevels.length; i++) {
         if (completedIds.contains(allLevels[i - 1].id)) {
           allLevels[i] = allLevels[i].copyWith(unlocked: true);
@@ -62,8 +64,7 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
         isLoading: false,
       );
     } catch (e, stackTrace) {
-      Logger.log(
-          'Failed to load level manifest: $e\n$stackTrace');
+      Logger.log('Failed to load level manifest: $e\n$stackTrace');
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Failed to load levels. Please restart the app.',
@@ -71,82 +72,69 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
     }
   }
 
-  /// Loads the full definition for a specific level by its index.
+  /// PURELY loads a level JSON by index. Does NOT modify state.
   Future<LevelDefinition?> loadLevelByIndex(int index) async {
-    Logger.log('LevelManagerNotifier: loadLevelByIndex for index $index');
+    Logger.log('LevelManagerNotifier: loadLevelByIndex index $index');
+
     if (index < 0 || index >= state.levels.length) {
-      Logger.log(
-          'LevelManagerNotifier: loadLevelByIndex - Invalid index $index or state.levels is empty. Length: ${state.levels.length}');
+      Logger.log('Invalid index $index for levels length ${state.levels.length}');
       return null;
     }
 
     final levelMeta = state.levels[index];
     if (!levelMeta.unlocked) {
-      Logger.log('Attempted to load a locked level: ${levelMeta.id}');
+      Logger.log('Attempted to load locked level ${levelMeta.id}');
       return null;
     }
 
-    state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final path = 'assets/levels/${levelMeta.id}.json';
-      final jsonString = await _assetManager.loadString(path);
-      Logger.log('LevelManager: Loaded level JSON for ${levelMeta.id}: $jsonString');
+      final jsonString =
+          await _assetManager.loadString('assets/levels/${levelMeta.id}.json');
+      Logger.log('LevelManagerNotifier: Loaded JSON string for ${levelMeta.id}: $jsonString'); // Add logger
       final decodedJson = json.decode(jsonString) as Map<String, dynamic>;
-
-      // Parse the level definition using our custom fromJson that handles behaviors
-      final level = LevelDefinition.fromJson(decodedJson);
-      
-      Logger.log('LevelManager: Loaded level ${level.id} with ${level.initialComponents.length} initial components and ${level.paletteComponents.length} palette components');
-      
-      // Verify behaviors are attached
-      final componentsWithBehaviors = level.initialComponents.where((c) => c.behaviors.isNotEmpty).length;
-      final paletteWithBehaviors = level.paletteComponents.where((c) => c.behaviors.isNotEmpty).length;
-      Logger.log('LevelManager: Initial components with behaviors: $componentsWithBehaviors/${level.initialComponents.length}');
-      Logger.log('LevelManager: Palette components with behaviors: $paletteWithBehaviors/${level.paletteComponents.length}');
-      
-      if (componentsWithBehaviors < level.initialComponents.length || paletteWithBehaviors < level.paletteComponents.length) {
-        Logger.log('LevelManager: WARNING: Some components are missing behaviors!');
-      }
-      
-      state = state.copyWith(currentLevelDefinition: level, isLoading: false);
-      Logger.log(
-          'LevelManagerNotifier: loadLevelByIndex END (Success) for level ${levelMeta.id}');
-      return level;
+      final levelDefinition = LevelDefinition.fromJson(decodedJson); // Store in a variable
+      Logger.log('LevelManagerNotifier: Parsed LevelDefinition for ${levelMeta.id}: $levelDefinition'); // Add logger
+      return levelDefinition; // Return the variable
     } catch (e, stackTrace) {
-      Logger.log(
-          'Failed to load level ${levelMeta.id}: $e\n$stackTrace');
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Failed to load level. Please try again.',
-      );
+      Logger.log('Failed to load level ${levelMeta.id}: $e\n$stackTrace');
       return null;
     }
+  }
+
+  /// Sets the current level in state without fetching JSON.
+  void setCurrentLevel(LevelDefinition level) {
+    state = state.copyWith(currentLevelDefinition: level);
+    Logger.log('Current level set: ${level.id}');
   }
 
   /// Marks the current level as complete and unlocks the next one.
   Future<void> markCurrentLevelComplete() async {
     final currentLevelId = state.currentLevelDefinition?.id;
-    if (currentLevelId == null ||
-        state.completedLevelIds.contains(currentLevelId)) {
+    if (currentLevelId == null || state.completedLevelIds.contains(currentLevelId)) {
       return;
     }
 
-    final newCompletedIds = Set<String>.from(state.completedLevelIds)
-      ..add(currentLevelId);
+    // Update completed levels
+    final newCompletedIds = {...state.completedLevelIds, currentLevelId};
     await _sharedPrefs.setStringList(
-        _prefsKeyCompletedLevels, newCompletedIds.toList());
+      _prefsKeyCompletedLevels,
+      newCompletedIds.toList(),
+    );
 
-    // Recalculate unlocked status for all levels
-    final newLevels = state.levels.map((level) => level).toList();
-    for (int i = 1; i < newLevels.length; i++) {
-      if (newCompletedIds.contains(newLevels[i - 1].id)) {
-        newLevels[i] = newLevels[i].copyWith(unlocked: true);
-      }
-    }
+    // Unlock next level(s)
+    final newLevels = state.levels.asMap().entries.map((entry) {
+      final i = entry.key;
+      final level = entry.value;
+      final unlocked =
+          level.unlocked || (i > 0 && newCompletedIds.contains(state.levels[i - 1].id));
+      return level.copyWith(unlocked: unlocked);
+    }).toList();
 
     state = state.copyWith(
       completedLevelIds: newCompletedIds,
       levels: newLevels,
     );
+
+    Logger.log('Marked level $currentLevelId as complete');
   }
 }

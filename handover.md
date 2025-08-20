@@ -3,7 +3,7 @@ session was focused on diagnosing and fixing a series of complex issues in the c
 1. Initial Problem: Blank UI
 
 Symptom: You reported that the main game grid and the component palette were not rendering, leaving the user with a blank screen.
-Analysis: I determined that the root cause was a race condition. The recent refactoring had made the level loading process asynchronous, but the UI was not set up to handle this. It was building instantly, before any level data was available, resulting in a blank state.
+Analysis: I determined that the root cause was a race condition. The recent refactoring had made the level loading process asynchronous, but the UI was not set up to handle this. It was building instantly, before any level data is available, resulting in a blank state.
 2. Architectural Solution
 
 My Proposal: I initially proposed a standard fix using a FutureProvider to manage the asynchronous loading and update the UI accordingly.
@@ -231,3 +231,52 @@ A key decision was how to manage the asynchronous data loading. Two approaches w
 
 *   **The Fix**: The router's fallback was removed, and the `levelNumber` argument was made mandatory. This will force a crash at the precise location of the incorrect, argument-less navigation call.
 *   **Current Status**: The application is ready to be run. The expected outcome is no longer an infinite loop but a clear error message that will pinpoint the origin of the rogue navigation, enabling a final fix.
+
+## Recent Debugging Session: Level Loading Errors (2025-08-20)
+
+This session focused on resolving critical `TypeError` issues that prevented `level_01.json` from loading correctly, despite previous compilation fixes.
+
+### Problem Statement
+
+After addressing compilation errors, the application would launch but crash with `TypeError` messages when attempting to load `level_01.json`. The errors indicated that `null` values were being encountered where `int` or `String` types were expected during the parsing of level data.
+
+### Diagnosis and Root Cause Analysis
+
+Through systematic debugging and the strategic addition of `Logger.log` statements, the root causes were identified as mismatches between the JSON structure in `level_01.json` and the parsing logic in `lib/core/component_registry.dart`:
+
+1.  **`shapeOffsets` Parsing Error (`TypeError: null: type 'Null' is not a subtype of type 'int'`):**
+    *   **Symptom**: The application crashed when parsing the `shapeOffsets` for components.
+    *   **Root Cause**: `level_01.json` uses `"r"` (row) and `"c"` (column) keys within `shapeOffsets` objects (e.g., `{"r": 0, "c": 0}`), but the `ComponentRegistry.createFromJson` method was incorrectly attempting to read `"x"` and `"y"` keys.
+
+2.  **`terminals` Parsing Errors (`TypeError: null: type 'Null' is not a subtype of type 'String'`):**
+    *   **Symptom**: The application crashed when parsing the `terminals` for components.
+    *   **Root Cause 1 (Direction)**: `level_01.json` uses `"dir"` (direction) key (e.g., `"dir": "up"`), but the `ComponentRegistry.createFromJson` method was incorrectly attempting to read `"direction"`.
+    *   **Root Cause 2 (Type)**: The `"type"` field within `terminals` objects was often missing in `level_01.json`. The parsing logic expected a non-nullable `String` for this field, leading to a crash when `null` was encountered.
+
+### Actions Taken and Fixes Implemented
+
+To resolve these issues, the following modifications were made to `lib/core/component_registry.dart`:
+
+1.  **Corrected `shapeOffsets` Parsing:**
+    *   The code responsible for parsing `shapeOffsets` was updated to read `offsetJson['r']` and `offsetJson['c']` instead of `offsetJson['x']` and `offsetJson['y']`.
+
+2.  **Corrected `terminals` Parsing:**
+    *   The code was updated to read `termJson['dir']` for the terminal direction.
+    *   A null-aware operator (`??`) was added to the `"type"` field parsing (`termJson['type'] as String? ?? 'power'`). This ensures that if the `"type"` field is missing or `null` in the JSON, it defaults to `'power'`, preventing a crash.
+    *   The `TerminalSpec` constructor call was updated to use named arguments for clarity and correctness.
+
+3.  **Enhanced Logging:**
+    *   Extensive `Logger.log` statements were added to `lib/core/component_registry.dart`, `lib/models/level_definition.dart`, and `lib/services/level_manager.dart`. These loggers provide visibility into the raw JSON data being parsed and the intermediate results, which was invaluable for diagnosing the subtle data mismatches.
+
+### Current Status
+
+The application now successfully launches, loads `level_01.json`, and displays the game grid and components correctly. All previously identified `TypeError` issues related to level data parsing have been resolved. The added loggers provide a robust mechanism for future debugging of data-related issues.
+
+### Key Files Involved
+
+*   `lib/core/component_registry.dart`: Contains the core parsing logic for components from JSON.
+*   `lib/models/level_definition.dart`: Responsible for deserializing the overall level structure.
+*   `lib/services/level_manager.dart`: Manages the loading and state of levels.
+*   `assets/levels/level_01.json`: The level data file that was causing the parsing issues.
+
+This concludes the debugging session for the level loading errors. The application is now in a stable state regarding level data parsing.

@@ -38,20 +38,9 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
     super.dispose();
   }
 
-  void _navigateToLevel(int index) async {
-    final levelNumber = index + 1;
-    // Wait for the level to load before navigating
-    final level = await ref.read(levelManagerProvider.notifier).loadLevelByIndex(levelNumber);
-    if (!mounted) return; // Check if the widget is still in the tree.
-    if (level != null) {
-      // Now navigate to the game screen
-      Navigator.of(context).pushNamed(AppRoutes.gameScreen, arguments: levelNumber);
-    } else {
-      // Handle level loading failure
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to load level')),
-      );
-    }
+  void _navigateToLevel(int index) {
+    Logger.log('_navigateToLevel called for level index: $index');
+    Navigator.of(context).pushNamed(AppRoutes.gameScreen, arguments: index);
   }
 
   @override
