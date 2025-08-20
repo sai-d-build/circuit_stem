@@ -103,3 +103,26 @@ This section lists the known issues that still need to be addressed and the next
     *   **Next Step**: Implement the comprehensive testing strategy outlined in `DOCS/TESTING.md` to achieve full test coverage for the application.
 *   **New Feature Development**:
     *   **Next Step**: Continue to add new components, levels, and features to the game.
+
+## Debugging Session & Compiler Error Fixes (2025-08-19)
+
+This section summarizes the debugging session and the compiler error fixes implemented.
+
+### Problem Statement
+- The game grid was not appearing for Level 01.
+- Component palette images/icons were not displaying.
+
+### Actions Taken
+1.  **Initial Analysis & Logging**: Reviewed project architecture and recent git changes (Component-Behavior model refactoring). Added extensive `Logger.log` statements across critical files (`main.dart`, `component_registry.dart`, `game_engine_notifier.dart`, `asset_manager.dart`, `canvas_painter.dart`, `game_canvas.dart`, `circuit_component_display.dart`, and individual component/goal registration files) to trace execution flow.
+2.  **Compilation Error Resolution (Round 1)**:
+    -   **`Method not found: 'MyApp'` in `main.dart`**: Fixed by correcting the `runApp` call to use `Initializer`.
+    -   **Syntax errors in `lib/ui/game_canvas.dart`**: Fixed incorrect string interpolation in logger statements.
+    -   **`Undefined class/name` errors in `lib/ui/widgets/circuit_component_display.dart`**: Added missing imports for `ComponentModel`, `assetManagerProvider`, `AssetManagerNotifier`, and `DrawingBehavior`.
+    -   **Warnings (`Duplicate import`, `unnecessary_import`)**: Cleaned up imports in `lib/services/asset_manager.dart` and `lib/ui/canvas_painter.dart`.
+3.  **Compilation Error Resolution (Round 2)**:
+    -   **`Error: Type 'Grid' not found.` in component files (`wire.dart`, `switch.dart`, `battery.dart`, `timer.dart`, `buzzer.dart`)**: Added missing `import '../models/grid.dart';` statements to these files.
+    -   **`Error: The value 'null' can't be returned from a function with return type 'T' because 'T' is not nullable.` in `lib/core/component_registry.dart`**: Reverted `getBehavior<T>()` to throw an `Exception` for unregistered behaviors, as this is the correct behavior for non-nullable types.
+
+### Current Status
+- All known compilation errors have been addressed. The application should now compile and run.
+- The next step is to run the application and analyze the new runtime logs to understand why behaviors are not being found and why the grid is not rendering.
