@@ -1,12 +1,28 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:circuit_stem/services/asset_manager.dart';
 import 'package:circuit_stem/services/asset_manager_state.dart';
 
-class MockAssetManager extends StateNotifier<AssetState> implements AssetManagerNotifier {
+class MockAssetManager extends StateNotifier<AssetState>
+    implements AssetManagerNotifier {
   final Map<String, String> _files = {};
+  ui.Image? _testImage;
 
-  MockAssetManager() : super(const AssetState());
+  MockAssetManager() : super(const AssetState()) {
+    _testImage = _createMinimalTestImage();
+  }
+
+  // Helper to create a minimal 1x1 test image to avoid nulls
+  ui.Image _createMinimalTestImage() {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 1, 1), Paint()..color = Colors.blue);
+    final picture = recorder.endRecording();
+    // Use toImageSync for test environments
+    return picture.toImageSync(1, 1);
+  }
 
   @override
   bool get isDark => state.isDark;
@@ -30,11 +46,15 @@ class MockAssetManager extends StateNotifier<AssetState> implements AssetManager
 
   @override
   Future<void> loadAllAssets() {
+    // In tests, we assume assets are primed manually.
     return Future.value();
   }
 
   @override
-  ui.Image? getSvgAsImage(String path) => null;
+  ui.Image? getSvgAsImage(String path) {
+    // Return the minimal test image instead of null
+    return _testImage;
+  }
 
   @override
   void setSvgImages(Map<String, ui.Image> images) {

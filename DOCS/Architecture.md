@@ -1,7 +1,7 @@
 # Architecture & UI Design
 
 **Project:** Circuit STEM
-**Last Updated:** 2025-08-14 EST
+**Last Updated:** 2025-08-20
 
 ---
 
@@ -104,12 +104,30 @@ The application features three primary screens, each designed for intuitive inte
 *   **Wires:** Have distinct visual states for `powered` and `unpowered`. The `powered` state includes an animated "flow" effect, also driven by the `AnimationScheduler`.
 *   **Switch:** Has two distinct visuals for its `open` and `closed` states.
 
+---
+
 ## 4. Architectural Evolution: The Component-Behavior Model
 
-To enhance extensibility and align with modern game development best practices, the project is undergoing a significant architectural refactoring. The original architecture is being evolved into a **Component-Behavior model**, inspired by Entity-Component-System (ECS) patterns.
+To enhance extensibility and align with modern game development best practices, the project has been refactored to a **Component-Behavior model**. This architecture is inspired by the **Entity-Component-System (ECS)** pattern and is the new standard for all game logic.
 
-This new architecture decouples data from behavior, allowing new component types and game rules to be added as "plug-ins" without modifying the core engine.
+### Core Concepts
 
-For a complete breakdown of the new architecture, the motivation behind it, and the detailed, phased implementation plan, please see the full refactoring document:
+*   **Data-Driven Components:** Instead of hard-coded `enum` types, components are now defined by a simple `String` identifier in the level JSON files (e.g., `"type": "Component.Bulb"`).
 
-- **[Architectural Refactor Plan: The Component-Behavior Model](./REFACTOR_PLAN.md)**
+*   **Behaviors:** All logic and rendering for a component is encapsulated in small, interchangeable classes called **Behaviors**. A `ComponentModel` is now just a simple container for a list of these behaviors.
+    *   `DrawingBehavior`: Defines how a component is rendered.
+    *   `LogicBehavior`: Defines how a component interacts with the power simulation.
+    *   `InteractionBehavior`: Defines how a component responds to user input.
+
+*   **Central Registry:** On app startup, each component type registers itself and its associated behaviors with the central `ComponentRegistry`. When a level is loaded, the engine uses this registry to look up the component's string `type` and attach the correct behaviors automatically.
+
+*   **Behavior-Driven Engine:** The core engine (`GameEngineNotifier`, `CanvasPainter`) is now much simpler. It no longer contains large `switch` statements. Instead, it iterates through a component's behaviors and executes them. For example, the painter asks the component for its `DrawingBehavior` and tells it to `draw()`.
+
+### Benefits
+
+This architecture makes the project significantly more extensible and maintainable. Adding a new component no longer requires modifying any core engine files; you simply create a new set of behavior classes and register them. This follows the **Open/Closed Principle**, allowing the system to be extended without being modified.
+
+For a complete breakdown of the new architecture and a tutorial on how to add new components, please see the following documents:
+
+*   **[Architectural Refactor Plan](./REFACTOR_PLAN_CompBeh_Model.md)**
+*   **[Tutorial: Adding a New Component](./AddingNewComponents.md)**

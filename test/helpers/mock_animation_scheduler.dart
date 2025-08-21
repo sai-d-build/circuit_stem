@@ -2,47 +2,105 @@ import 'package:circuit_stem/engine/animation_scheduler.dart';
 
 class MockAnimationScheduler implements AnimationScheduler {
   final List<AnimationCallback> _callbacks = [];
+  bool _isRunning = false;
+  int _frameCount = 0;
+  static const int _maxFrames = 60; // Auto-stop after 60 frames (~1 second at 60fps)
 
   @override
-  double get bulbIntensity => 1.0; // Fixed value for testing
+  double get bulbIntensity => _isRunning ? 0.5 + 0.5 * (_frameCount / _maxFrames) : 1.0;
 
   @override
-  double get wireOffset => 0.0; // Fixed value for testing
+  double get wireOffset => _isRunning ? (_frameCount % 10) / 10.0 : 0.0;
 
   @override
   void addCallback(AnimationCallback callback) {
+    print('[MockAnimationScheduler] Adding callback');
     _callbacks.add(callback);
   }
 
   @override
   void dispose() {
+    print('[MockAnimationScheduler] Disposing');
     _callbacks.clear();
+    _isRunning = false;
+    _frameCount = 0;
   }
 
   @override
-  void pause() {}
+  void pause() {
+    print('[MockAnimationScheduler] Pausing');
+    _isRunning = false;
+  }
 
   @override
   void removeCallback(AnimationCallback callback) {
+    print('[MockAnimationScheduler] Removing callback');
     _callbacks.remove(callback);
   }
 
   @override
-  void reset() {}
+  void reset() {
+    print('[MockAnimationScheduler] Resetting');
+    _isRunning = false;
+    _frameCount = 0;
+  }
 
   @override
-  void resume() {}
+  void resume() {
+    print('[MockAnimationScheduler] Resuming');
+    _isRunning = true;
+  }
 
   @override
-  void start() {}
+  void start() {
+    print('[MockAnimationScheduler] Starting');
+    _isRunning = true;
+    _frameCount = 0;
+  }
 
   @override
-  void stop() {}
+  void stop() {
+    print('[MockAnimationScheduler] Stopping');
+    _isRunning = false;
+    _frameCount = 0;
+  }
 
-  // New method to manually trigger callbacks in tests
-  void triggerCallback(double dt) {
-    for (final callback in _callbacks) {
+  bool get isRunning => _isRunning;
+  int get frameCount => _frameCount;
+
+  void triggerManualFrame(double dt) {
+    if (!_isRunning) return;
+    
+    _frameCount++;
+    print('[MockAnimationScheduler] Triggering frame: $_frameCount');
+    
+    // Create a copy to avoid concurrent modification issues
+    final List<AnimationCallback> currentCallbacks = List.from(_callbacks);
+    for (final callback in currentCallbacks) {
       callback(dt);
     }
+    
+    // Auto-stop after enough frames to simulate animation completion
+    if (_frameCount >= _maxFrames) {
+      print('[MockAnimationScheduler] Max frames reached, stopping animation');
+      _isRunning = false;
+      _frameCount = 0;
+    }
+  }
+
+  /// Force the animation to complete immediately
+  void completeAnimation() {
+    print('[MockAnimationScheduler] Forcing animation completion');
+    if (_isRunning) {
+      _frameCount = _maxFrames;
+      triggerManualFrame(0.016); // This will auto-stop the animation
+    }
+  }
+
+  /// Reset and ensure the animation is stopped (for test cleanup)
+  void forceStop() {
+    print('[MockAnimationScheduler] Forcing stop');
+    _isRunning = false;
+    _frameCount = 0;
   }
 }

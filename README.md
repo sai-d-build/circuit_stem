@@ -31,6 +31,16 @@ An engaging and educational puzzle game built with Flutter, designed to teach th
     flutter run
     ```
 
+### macOS Development Setup
+
+If you are developing on macOS, you may need to install the Xcode command-line tools for the Flutter build process to work correctly. If you encounter build errors related to Xcode, run the following command in your terminal:
+
+```sh
+xcode-select --install
+```
+
+This will install the necessary tools. After the installation is complete, try running the app again.
+
 ## 🏛️ Architecture
 
 The project follows a clean, modular architecture that separates logic, state management, and UI.

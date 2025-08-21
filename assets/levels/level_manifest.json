@@ -1,4 +1,3 @@
-
 {
   "levels": [
     { "id": "level_01", "title": "First Spark", "description": "A simple circuit to get you started.", "levelNumber": 1 },
