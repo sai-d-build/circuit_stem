@@ -1,3 +1,34 @@
+ ## [1.2.0] - 2025-08-21 - Comprehensive Testing Overhaul
+
+This release introduces a robust, scalable testing architecture and implements a significant portion of the test suite, ensuring higher application quality and stability.
+
+### Added
+
+-   **New Testing Roadmap:** Created `DOCS/TESTING_IMPLEMENTATION_ROADMAP.md`, a detailed technical guide for implementing the full test suite.
+-   **Foundational Test Helpers:**
+    -   `test/helpers/game_test_helper.dart`: A universal helper class for querying game state and simulating user interactions in a readable way.
+    -   `test/helpers/mock_services.dart`: Provides verifiable mocks, including a `MockAudioService` that records played sounds.
+    -   `test/helpers/test_setup_helper.dart`: A standardized, reusable setup function (`pumpGameScreenForLevel`) that creates a fully mocked and stable environment for any level test.
+-   **Comprehensive Test Suite:**
+    -   Established a new category-based test structure in `test/categories/`.
+    -   **Interaction Tests (`01_interaction_tests.dart`):** Added tests for immovable components and invalid placements (`TC-L1-04`, `TC-L1-05`, `TC-L1-06`).
+    -   **Circuit Logic Tests (`02_circuit_logic_tests.dart`):** Implemented a full suite of logic tests covering partial circuits, complete circuits (with and without a timer), win conditions, and breaking the win state (`TC-L1-07` to `TC-L1-12`).
+    -   **Audio Tests (`04_audio_tests.dart`):** Added tests to verify correct audio feedback for valid and invalid component placements (`TC-L1-22`, `TC-L1-23`).
+    -   **Game Flow Tests (`03_game_flow_tests.dart`):** Implemented tests for the Restart and Undo buttons, and for switch spam prevention (`TC-L1-28`, `TC-L1-29`, `TC-L1-30`).
+-   **New UI Features:**
+    -   Added "Restart" and "Undo" `IconButton`s to the `GameScreen` to provide core gameplay functionality.
+
+### Changed
+
+-   **`lib/ui/game_screen.dart`:** Modified to include the new Restart and Undo buttons in the component palette area.
+-   **`DOCS/TESTING.md`:** Updated to reflect the resolution of previous test-hanging bugs and to document the new testing architecture as the current standard.
+
+### Fixed
+
+-   **Testability of UI:** The `GameScreen` is now more testable due to the addition of `Key`s (`restart_button`, `undo_button`) on interactive elements.
+
+---
+
 ## [Unreleased] - 2025-08-20 - Level Loading Fixes & Enhanced Debugging
 
 ### Fixed

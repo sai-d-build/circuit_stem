@@ -93,6 +93,10 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   final AudioService audioService;
   final _logicSimulator = _SimpleLogicSimulator();
 
+  /// History stack for undo functionality
+  final List<GameEngineState> _stateHistory = [];
+  static const int _maxHistorySize = 50;
+
   GameEngineNotifier({
     this.initialLevel,
     required this.animationScheduler,
@@ -115,6 +119,13 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
       animationScheduler: animationScheduler,
       audioService: audioService,
     );
+  }
+
+  void _pushToHistory() {
+    _stateHistory.add(state);
+    if (_stateHistory.length > _maxHistorySize) {
+      _stateHistory.removeAt(0);
+    }
   }
 
   void loadLevel(LevelDefinition level) {
@@ -215,11 +226,15 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
       Logger.log('GameEngineNotifier: Tap outside grid.');
       return;
     }
+    
     final component = state.grid.componentAt(cell.r, cell.c);
     if (component != null) {
       Logger.log('GameEngineNotifier: Tapped on component: \${component.id}');
       final behavior = component.getBehavior<InteractionBehavior>();
       if (behavior != null) {
+        // Push to history before interactive behavior (like switch toggle)
+        _pushToHistory();
+        
         Logger.log('GameEngineNotifier: Invoking InteractionBehavior for component: \${component.id}');
         behavior.onTap(this, component);
       } else {
@@ -233,6 +248,10 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
 
   void updateComponent(ComponentModel component) {
     Logger.log('GameEngineNotifier: Updating component: \${component.id}');
+    
+    // Push current state to history before making changes
+    _pushToHistory();
+    
     final newGrid = state.grid.copyWithUpdatedComponent(component);
     state = state.copyWith(grid: newGrid);
     _evaluateGrid();
@@ -264,8 +283,16 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
             audioService.play(AppAssets.audioWarning);
           } else {
             Logger.log('GameEngineNotifier: Valid drop, updating component position.');
+            
+            // Push to history before making the move
+            _pushToHistory();
+            
             final newComponent = oldComponent.copyWith(r: cell.r, c: cell.c);
-            updateComponent(newComponent);
+            final newGrid = state.grid.copyWithUpdatedComponent(newComponent);
+            state = state.copyWith(grid: newGrid);
+            
+            // Play placement sound for successful moves
+            audioService.play(AppAssets.audioPlacement);
           }
         }
       } else {
@@ -274,17 +301,26 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     } else {
       Logger.log('GameEngineNotifier: No component being dragged.');
     }
+    
     state = state.copyWith(draggedComponentId: null, dragPosition: null);
     _evaluateGrid();
   }
 
   void addComponent(ComponentModel paletteComponent, int r, int c) {
     Logger.log('GameEngineNotifier: Adding component \${paletteComponent.type} at (\$r, \$c)');
+    
+    // Push current state to history before adding component
+    _pushToHistory();
+    
     final grid = state.grid;
     final newId = '${paletteComponent.type}_${DateTime.now().millisecondsSinceEpoch}';
     final newComponent = paletteComponent.copyWith(id: newId, r: r, c: c);
     final newGrid = grid.copyWith(components: [...grid.components, newComponent]);
     state = state.copyWith(grid: newGrid);
+    
+    // Play placement sound
+    audioService.play(AppAssets.audioPlacement);
+    
     _evaluateGrid();
   }
 
@@ -294,9 +330,15 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     if (selectedComponentId != null) {
       final component = state.grid.componentsById[selectedComponentId];
       if (component != null && component.isDraggable) {
+        // Push to history before rotating
+        _pushToHistory();
+        
         final newRotation = (component.rotation + 90) % 360;
         final updatedComponent = component.copyWith(rotation: newRotation);
-        updateComponent(updatedComponent);
+        final newGrid = state.grid.copyWithUpdatedComponent(updatedComponent);
+        state = state.copyWith(grid: newGrid);
+        
+        _evaluateGrid();
         Logger.log('GameEngineNotifier: Rotated component \${component.id} to \$newRotation degrees.');
       } else {
         Logger.log('GameEngineNotifier: Selected component is null or not draggable.');
@@ -318,5 +360,65 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   void togglePause() {
     Logger.log('GameEngineNotifier: Toggling pause. Current state: \${state.isPaused}');
     state = state.copyWith(isPaused: !state.isPaused);
+  }
+
+  /// Restart the current level to its initial state
+  void restartLevel() {
+    Logger.log('GameEngineNotifier: Restarting level.');
+    
+    final currentLevel = state.currentLevel;
+    if (currentLevel == null) {
+      Logger.log('GameEngineNotifier: No current level to restart.');
+      return;
+    }
+
+    // Clear state history when restarting
+    _stateHistory.clear();
+    
+    // Recreate the initial grid from level definition
+    final initialGrid = Grid(
+      rows: currentLevel.rows, 
+      cols: currentLevel.cols, 
+      components: currentLevel.initialComponents.map((c) => c.copyWith()).toList()
+    );
+    
+    // Reset to initial state
+    final initialRenderState = RenderState(
+      grid: initialGrid,
+      poweredComponentIds: const {},
+      draggedComponentId: null,
+      dragPosition: null,
+    );
+    
+    state = GameEngineState.initial(currentLevel).copyWith(
+      grid: initialGrid,
+      renderState: initialRenderState,
+      isWin: false,
+      isPaused: false,
+      selectedComponentId: null,
+      draggedComponentId: null,
+      dragPosition: null,
+    );
+    
+    _evaluateGrid();
+    Logger.log('GameEngineNotifier: Level restarted successfully.');
+  }
+
+  /// Undo the last action that changed game state
+  void undo() {
+    Logger.log('GameEngineNotifier: Attempting to undo last action.');
+    
+    if (_stateHistory.isEmpty) {
+      Logger.log('GameEngineNotifier: No actions to undo.');
+      return;
+    }
+
+    final previousState = _stateHistory.removeLast();
+    state = previousState;
+    
+    // Re-evaluate grid to ensure consistency
+    _evaluateGrid();
+    
+    Logger.log('GameEngineNotifier: Undo successful. History size: ${_stateHistory.length}');
   }
 }

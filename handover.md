@@ -376,4 +376,25 @@ worked on testing suite, Hanging seems to be resolved dbut other issue persistis
 - **Components should be created with the correct behaviors**.
 - **Test assertions should pass** (switch toggles, timer is draggable).
 
-Would you like me to proceed with implementing the remaining fixes for component/behavior matching and test assertions?
+---
+
+## **7. Current Test Issue: Premature `GameEngineNotifier` Disposal**
+
+**Date:** 2025-08-21
+
+### Problem Description
+
+The tests "TC-L1-01: Toggle switch interaction" and "TC-L1-02: Move timer component" in `test/level_01_revised_test.dart` are failing with a `StateError: Bad state: Tried to use GameEngineNotifier after `dispose` was called.` This error occurs when the test attempts to access `gameEngineNotifier.state` within the test body.
+
+### Root Cause Analysis
+
+`GameEngineNotifier` is managed by an `autoDispose` Riverpod provider (`gameEngineProvider`). When a `ProviderContainer` is disposed, all `autoDispose` providers within it are also disposed. While `addTearDown(() => container.dispose())` is used to ensure the `ProviderContainer` is disposed at the end of the test, the error occurs *within* the test body, implying that `gameEngineNotifier` is being disposed prematurely.
+
+This suggests a subtle lifecycle management issue. It's highly unusual for `addTearDown` to execute before the test body completes. Possible, though less common, scenarios for this premature disposal include:
+
+1.  **Asynchronous Cleanup Conflict**: An asynchronous operation or microtask might be completing after `pumpAndSettle()` but before the test's final assertions, implicitly triggering the disposal of the `ProviderContainer` or the `GameEngineNotifier`.
+2.  **Implicit Framework Disposal**: The Flutter test framework might have an internal cleanup mechanism that disposes of certain resources (including `StateNotifier` instances managed by `autoDispose` providers) at an unexpected point in the test lifecycle, conflicting with the explicit `addTearDown` setup.
+
+### Summary
+
+The tests are failing because `GameEngineNotifier` is being disposed prematurely, leading to a `StateError` when its state is accessed. This points to a complex lifecycle management issue within the Flutter test environment, where the `GameEngineNotifier` is becoming unmounted earlier than anticipated during the test's execution, despite explicit disposal handling via `addTearDown`."

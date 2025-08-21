@@ -73,7 +73,7 @@ class SwitchInteractionBehavior implements InteractionBehavior {
     final updatedComponent = component.copyWith(state: newComponentState);
     
     notifier.updateComponent(updatedComponent);
-    _audioService.play(AppAssets.audioToggle);
+    _audioService.play(AppAssets.audioSwitch);
   }
 
   @override
@@ -97,8 +97,11 @@ class SwitchLogicBehavior implements LogicBehavior {
 void registerSwitch() {
   Logger.log('registerSwitch() called.');
   registerBehavior<SwitchDrawingBehavior>(() => SwitchDrawingBehavior());
+  Logger.log('registerBehavior<SwitchDrawingBehavior> called.');
   registerBehavior<SwitchInteractionBehavior>(() => SwitchInteractionBehavior());
+  Logger.log('registerBehavior<SwitchInteractionBehavior> called.');
   registerBehavior<SwitchLogicBehavior>(() => SwitchLogicBehavior());
+  Logger.log('registerBehavior<SwitchLogicBehavior> called.');
 
   ComponentRegistry.register(
     type: 'Component.Switch',

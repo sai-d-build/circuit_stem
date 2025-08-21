@@ -66,7 +66,7 @@ class BuzzerLogicBehavior implements LogicBehavior {
     // This is a simplified logic. A more robust implementation would use the main game
     // engine to track state changes and avoid playing the sound on every evaluation.
     if (component.isPowered) {
-      _audioService.play(AppAssets.audioToggle);
+      _audioService.play(AppAssets.audioSwitch);
     }
   }
 }

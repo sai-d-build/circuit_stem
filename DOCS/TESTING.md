@@ -56,13 +56,15 @@ This table provides a comprehensive list of test cases for Level 1. It covers th
 
 ## 3. Next Steps to Achieve Full Test Coverage
 
-To achieve full test coverage for Level 1 and beyond, we will follow these steps:
+To achieve full test coverage for Level 1 and beyond, we will follow these steps.
+
+**Note:** Implementation of this strategy is underway. The file `test/level_01_revised_test.dart` serves as the reference implementation for the new, stable test architecture.
 
 1.  **Create a Test Plan:** For each level, we will create a test plan that is based on the master list of test cases in this document. The test plan will be a markdown file in the `test/plans` directory.
 
 2.  **Simulate Gestures by Coordinate:** The game grid is rendered by a `CustomPainter`, not by individual widgets. Therefore, tests must simulate user interactions by calculating the pixel coordinates of a grid cell and using the `WidgetTester`'s gesture methods (e.g., `tester.tapAt(position)`). Other interactive UI elements outside the canvas (like buttons) should have `Key`s added to them for easy discovery.
 
-3.  **Implement the Test Suite:** We will create a new test file for each level (e.g., `test/ui/level_01_interaction_test.dart`) and implement the test cases in the test plan.
+3.  **Implement the Test Suite:** We will create a new test file for each level (e.g., `test/ui/level_01_interaction_test.dart`) and implement the test cases in the test plan, following the architecture established in `test/level_01_revised_test.dart`.
 
 4.  **Prioritize Bug Fixes:** We will prioritize the implementation of test cases that are most likely to help us find and fix bugs.
 
@@ -70,13 +72,21 @@ To achieve full test coverage for Level 1 and beyond, we will follow these steps
 
 By following this plan, we can build a comprehensive and robust suite of automated tests that will help us to improve the quality of the Circuit STEM project and to ensure that it provides a great user experience.
 
-## Known Testing Issues (as of 2025-08-14 9PM EST)
+## Testing Status (as of 2025-08-21)
 
-During recent debugging efforts, several critical issues impacting test compilation and execution were identified:
+This section tracks the status of major testing-related issues.
 
-*   **Persistent Test Compilation Error:** Tests consistently fail to compile with `Error: Type 'Component' not found` in `test/helpers/level_01_test_helper.dart`. This issue remains unresolved despite extensive debugging, project cleaning (`flutter clean`), and repeated verification of import statements. This indicates a deeper problem with how the test environment resolves package imports.
-*   **macOS Build Environment Issue:** The macOS application build and test execution are blocked by a missing `xcodebuild` utility. This is a system-level configuration issue (missing Xcode command-line tools) that needs to be addressed by running `xcode-select --install`.
-*   **Outdated Package Dependencies:** The project has 26 packages with newer versions incompatible with current dependency constraints. While not directly causing the compilation error, this can lead to instability and should be addressed by running `flutter pub outdated` and updating `pubspec.yaml`.
+### Resolved Issues
+
+*   **Persistent Test Compilation Errors & Hangs:** Previously, tests would consistently fail to compile or would hang during execution. This was tracked to two root causes:
+    1.  **Missing Component Behaviors:** The test environment did not register component behaviors, causing the engine to fail.
+    2.  **File I/O in `testWidgets`:** Reading files inside the test body caused hangs.
+    *   **Solution:** A new test architecture has been implemented in `test/level_01_revised_test.dart`. The solution involves calling `registerAllGameEntities()` and pre-reading all necessary files in a `setUpAll` block. This ensures the test environment is stable and mirrors the live application before any test is run.
+
+### Remaining Issues & Prerequisites
+
+*   **macOS Build Environment:** Test execution on macOS requires the Xcode command-line tools. This can be resolved by running `xcode-select --install`.
+*   **Outdated Package Dependencies:** The project has several packages with newer versions available. While not currently blocking, these should be updated to ensure long-term stability by running `flutter pub outdated` and updating `pubspec.yaml`.
 
 ---
 

@@ -16,11 +16,15 @@ import 'helpers/mock_asset_manager.dart';
 import 'helpers/mock_animation_scheduler.dart';
 import 'helpers/mock_audio_service.dart';
 
-// A record to hold the results of the test setup
-typedef TestSetup = ({ProviderContainer container, MockAnimationScheduler scheduler});
+import 'helpers/test_setup.dart'; // NEW: Import the TestSetup utility
 
-// TC-L1-01: Toggle switch interaction
-// TC-L1-02: Move timer component
+// This typedef will be replaced by the TestSetup class
+// typedef TestSetup = ({
+//   ProviderContainer container, 
+//   MockAnimationScheduler scheduler,
+//   GameEngineNotifier gameEngineNotifier,
+//   LevelDefinition level
+// });
 
 void main() {
   group('Level 01 Revised Tests - Foundation', () {
@@ -41,7 +45,7 @@ void main() {
       // This MUST be called before any getInstance() calls
       SharedPreferences.setMockInitialValues({});
       
-      // Read files here in setUpAll to avoid the testWidgets() File.readAsString() hang bug
+      // Read files here in setUpAll to avoid the testWidgets() + File.readAsString() hang bug
       print('[SetupAll] Reading level manifest file...');
       manifestContent = await File('assets/levels/level_manifest.json').readAsString();
       print('[SetupAll] Reading level_01.json file...');
@@ -55,92 +59,77 @@ void main() {
       print('[SetupAll] Game entities registered successfully');
     });
 
-    // This setup function implements the "Pre-Initialize Providers" strategy
-    // with files pre-read to avoid the Flutter testWidgets() + File.readAsString() hang bug
+    // Refactored setup function to correctly manage ProviderContainer lifecycle
+    // and ensure all overrides are present at container creation.
+    // NEW: Return TestSetup instead of the anonymous record
     Future<TestSetup> pumpGameScreenWithOverrides(WidgetTester tester) async {
       print('[Test Setup] Starting pumpGameScreenWithOverrides...');
-      
-      // 1. Create all mock services (EXCEPT SharedPreferences)
-      print('[Test Setup] Creating MockAssetManager...');
-      mockAssetManager = MockAssetManager();
-      
-      print('[Test Setup] Creating MockAnimationScheduler...');
-      mockAnimationScheduler = MockAnimationScheduler();
-      
-      print('[Test Setup] Creating MockAudioService...');
-      mockAudioService = MockAudioService();
-      
-      // 2. Get SharedPreferences instance (should work since we called setMockInitialValues)
-      print('[Test Setup] Getting SharedPreferences instance...');
-      mockPrefs = await SharedPreferences.getInstance();
-      print('[Test Setup] SharedPreferences instance obtained successfully');
 
-      // 3. Prime the mock asset manager with the pre-read level files
+      // 1. Create all mock services
+      final mockAssetManager = MockAssetManager();
+      final mockAnimationScheduler = MockAnimationScheduler();
+      final mockAudioService = MockAudioService();
+      final mockPrefs = await SharedPreferences.getInstance();
+
+      // 2. Prime the mock asset manager with the pre-read level files
       print('[Test Setup] Priming MockAssetManager with pre-read files...');
       mockAssetManager.primeFile('assets/levels/level_manifest.json', manifestContent);
       mockAssetManager.primeFile('assets/levels/level_01.json', level1Content);
 
-      // 4. Create a temporary container to initialize services BEFORE the UI is built
-      print('[Test Setup] Creating temporary ProviderContainer...');
-      final tempContainer = ProviderContainer(
-        overrides: [
-          assetManagerProvider.overrideWith((_) => mockAssetManager),
-          sharedPreferencesProvider.overrideWithValue(mockPrefs),
-        ],
-      );
-
-      // 5. Initialize the level manager and load the level data
-      print('[Test Setup] Initializing level manager...');
-      await tempContainer.read(levelManagerProvider.notifier).init();
-      print('[Test Setup] Loading level by index...');
-      final loadedLevel = await tempContainer.read(levelManagerProvider.notifier).loadLevelByIndex(0);
+      // 3. Create LevelManagerNotifier directly and load level data
+      print('[Test Setup] Creating LevelManagerNotifier and loading level...');
+      final levelManager = LevelManagerNotifier(mockPrefs, mockAssetManager);
+      await levelManager.init();
+      final loadedLevel = await levelManager.loadLevelByIndex(0);
       expect(loadedLevel, isNotNull, reason: "Test setup failed: Level 1 could not be loaded.");
       level1 = loadedLevel!;
       print('[Test Setup] Level loaded successfully: ${level1.id}');
 
-      // 6. Dispose the temporary container
-      print('[Test Setup] Disposing temporary container...');
-      tempContainer.dispose();
+      // 4. Create GameEngineNotifier instance (will be overridden)
+      final gameEngineNotifierInstance = GameEngineNotifier(
+        initialLevel: level1,
+        animationScheduler: mockAnimationScheduler,
+        audioService: mockAudioService,
+      );
 
-      // 7. Now, build the actual widget tree for the test
-      print('[Test Setup] Creating test ProviderContainer...');
-      final testContainer = ProviderContainer(
+      // 5. Create the main ProviderContainer with ALL overrides
+      print('[Test Setup] Creating main ProviderContainer with all overrides...');
+      final container = ProviderContainer(
         overrides: [
           assetManagerProvider.overrideWith((_) => mockAssetManager),
           sharedPreferencesProvider.overrideWithValue(mockPrefs),
-          // Provide the already-initialized level manager
-          levelManagerProvider.overrideWith((ref) {
-            final manager = LevelManagerNotifier(mockPrefs, mockAssetManager);
-            manager.state = tempContainer.read(levelManagerProvider);
-            manager.setCurrentLevel(level1);
-            return manager;
-          }),
-          // Provide the game engine with the pre-loaded level
-          gameEngineProvider(level1).overrideWith((ref) {
-            return GameEngineNotifier(
-              initialLevel: level1,
-              animationScheduler: mockAnimationScheduler,
-              audioService: mockAudioService,
-            );
-          }),
+          levelManagerProvider.overrideWith((ref) => levelManager), // Use the directly created instance
+          // Override with the specific instance created for the test
+          gameEngineProvider(level1).overrideWith((ref) => gameEngineNotifierInstance),
         ],
       );
 
+      // NEW: Create TestSetup instance and keep gameEngineProvider alive
+      final testSetup = TestSetup(container);
+      // Prevent autoDispose from cleaning up gameEngineProvider
+      // when widget tree temporarily stops listening.
+      testSetup.keepAlive(gameEngineProvider(level1));
+
+      // Ensure the container and its listeners are disposed at the end of the test
+      addTearDown(() => testSetup.dispose());
+      print('[Test Setup] ProviderContainer created and addTearDown registered.');
+
+      // 6. Build the widget tree
       print('[Test Setup] Building widget tree...');
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: testContainer,
+          container: container,
           child: const MaterialApp(
             home: GameScreen(levelIndex: 0),
           ),
         ),
       );
-      
+
       print('[Test Setup] Pumping and settling...');
       await tester.pumpAndSettle();
       print('[Test Setup] Setup complete!');
-      
-      return (container: testContainer, scheduler: mockAnimationScheduler);
+
+      return testSetup; // Return the TestSetup instance
     }
 
     testWidgets(
@@ -149,10 +138,14 @@ void main() {
         print('[Test] Starting TC-L1-01...');
         final setup = await pumpGameScreenWithOverrides(tester);
         final container = setup.container;
-        final scheduler = setup.scheduler;
+        // NEW: Read notifier from container
+        final gameEngineNotifier = container.read(gameEngineProvider(level1).notifier);
+        final scheduler = gameEngineNotifier.animationScheduler as MockAnimationScheduler; // Access scheduler via notifier
+        final level = level1; // Use the level1 variable from the group scope
 
         print('[Test] Finding switch component...');
-        final switchComponent = Level1TestHelper.findComponentById(container, level1, 'switch1');
+        // FIXED: Get switch component from the actual GameEngineNotifier state
+        final switchComponent = Level1TestHelper.findComponentById(container, level, 'switch1');
         expect(switchComponent, isNotNull);
         final initialSwitchClosed = Level1TestHelper.getSwitchState(switchComponent!);
         print('[Test] Initial switch state: $initialSwitchClosed');
@@ -160,10 +153,10 @@ void main() {
         final tapOffset = Offset(switchComponent.c * cellSize + cellSize / 2, switchComponent.r * cellSize + cellSize / 2);
         print('[Test] Tapping switch at offset: $tapOffset');
         await Level1TestHelper.tapComponent(tester, tapOffset);
-        
+
         // Give the animation a chance to start
         await tester.pump();
-        
+
         // If animation is running, let it complete automatically
         if (scheduler.isRunning) {
           print('[Test] Animation running, waiting for completion...');
@@ -172,7 +165,7 @@ void main() {
             await tester.pump(const Duration(milliseconds: 16)); // 16ms = 60fps
             attempts++;
           }
-          
+
           // If still running after reasonable time, force complete it
           if (scheduler.isRunning) {
             print('[Test] Forcing animation completion...');
@@ -185,11 +178,15 @@ void main() {
         await tester.pumpAndSettle();
 
         print('[Test] Checking final switch state...');
-        final newSwitchComponent = Level1TestHelper.findComponentById(container, level1, 'switch1')!;
-        final finalSwitchClosed = Level1TestHelper.getSwitchState(newSwitchComponent);
+        // FIXED: Get the updated switch component from the GameEngineNotifier's current state
+        final currentState = gameEngineNotifier.state;
+        final updatedSwitchComponent = currentState.grid.componentsById['switch1'];
+        expect(updatedSwitchComponent, isNotNull, reason: 'Switch component should exist after tap');
+
+        final finalSwitchClosed = Level1TestHelper.getSwitchState(updatedSwitchComponent!);
         print('[Test] Final switch state: $finalSwitchClosed');
 
-        expect(finalSwitchClosed, !initialSwitchClosed);
+        expect(finalSwitchClosed, !initialSwitchClosed, reason: 'Switch state should toggle after tap');
         print('[Test] TC-L1-01 completed successfully!');
       },
       timeout: const Timeout(Duration(seconds: 30)),
@@ -201,10 +198,13 @@ void main() {
         print('[Test] Starting TC-L1-02...');
         final setup = await pumpGameScreenWithOverrides(tester);
         final container = setup.container;
-        final scheduler = setup.scheduler;
+        // NEW: Read notifier from container
+        final gameEngineNotifier = container.read(gameEngineProvider(level1).notifier);
+        final scheduler = gameEngineNotifier.animationScheduler as MockAnimationScheduler; // Access scheduler via notifier
+        final level = level1; // Use the level1 variable from the group scope
 
         print('[Test] Finding timer component...');
-        final timerComponent = Level1TestHelper.findComponentById(container, level1, 'timer1');
+        final timerComponent = Level1TestHelper.findComponentById(container, level, 'timer1');
         expect(timerComponent, isNotNull);
         expect(timerComponent!.isDraggable, isTrue);
         print('[Test] Timer component found at (${timerComponent.r}, ${timerComponent.c})');
@@ -214,7 +214,7 @@ void main() {
         print('[Test] Dragging from $fromOffset to $toOffset');
 
         await Level1TestHelper.dragComponent(tester, fromOffset, toOffset);
-        
+
         // Handle any animation from the drag operation
         await tester.pump();
         if (scheduler.isRunning) {
@@ -222,16 +222,20 @@ void main() {
           scheduler.completeAnimation();
           await tester.pump();
         }
-        
+
         print('[Test] Final pump and settle...');
         await tester.pumpAndSettle();
 
         print('[Test] Checking moved component position...');
-        final movedComponent = Level1TestHelper.findComponentById(container, level1, 'timer1')!;
-        print('[Test] Component moved to (${movedComponent.r}, ${movedComponent.c})');
-        
-        expect(movedComponent.r, equals(2));
-        expect(movedComponent.c, equals(3));
+        // FIXED: Get the moved component from the GameEngineNotifier's current state
+        final currentState = gameEngineNotifier.state;
+        final movedComponent = currentState.grid.componentsById['timer1'];
+        expect(movedComponent, isNotNull, reason: 'Timer component should exist after drag');
+
+        print('[Test] Component moved to (${movedComponent!.r}, ${movedComponent.c})');
+
+        expect(movedComponent.r, equals(2), reason: 'Timer should be at row 2 after drag');
+        expect(movedComponent.c, equals(3), reason: 'Timer should be at column 3 after drag');
         print('[Test] TC-L1-02 completed successfully!');
       },
       timeout: const Timeout(Duration(seconds: 30)),

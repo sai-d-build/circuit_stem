@@ -91,10 +91,34 @@ class GameScreen extends ConsumerWidget {
                     ),
                     SizedBox(
                       width: 200,
-                      child: ComponentPalette(
-                        availableComponents: paletteComponents,
-                        onComponentSelected: gameNotifier.selectComponent,
-                        selectedComponent: selectedComponent,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: ComponentPalette(
+                              availableComponents: paletteComponents,
+                              onComponentSelected: gameNotifier.selectComponent,
+                              selectedComponent: selectedComponent,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                IconButton(
+                                  key: const Key('restart_button'),
+                                  icon: const Icon(Icons.refresh),
+                                  onPressed: gameNotifier.restartLevel,
+                                ),
+                                IconButton(
+                                  key: const Key('undo_button'),
+                                  icon: const Icon(Icons.undo),
+                                  onPressed: gameNotifier.undo,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
