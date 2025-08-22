@@ -72,8 +72,8 @@ class SwitchInteractionBehavior implements InteractionBehavior {
     final updatedComponent = component.copyWith(state: newComponentState);
 
     // ✅ Update game state first
-    notifier.updateComponent(component);
-      notifier.audio.playToggle();
+    notifier.updateComponent(updatedComponent);
+    notifier.audio.playToggle();
   }
 
   void onDragStart(GameEngineNotifierV2 notifier, ComponentModel component) {}

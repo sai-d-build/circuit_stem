@@ -11,6 +11,6 @@ class MovableBehavior extends Behavior {
 
   void moveToCell(String componentId, GridCell cell) {
     // In the future, boundary checks, snapping, or collision rules could be added here.
-    gameEngineNotifier.moveComponent(componentId, cell.row, cell.col);
+    gameEngineNotifier.inputManager.handleMove(componentId, cell.row, cell.col);
   }
 }

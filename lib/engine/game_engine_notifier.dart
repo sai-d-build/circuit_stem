@@ -2,106 +2,91 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:circuit_stem/models/level_definition.dart';
 import 'package:circuit_stem/models/grid.dart';
 import 'package:circuit_stem/models/component.dart';
-import 'game_engine_state.dart'; // Corrected import
+import 'game_engine_state.dart';
 import '../services/audio_service.dart';
 import '../common/logger.dart';
 import 'simulation_manager.dart';
-import 'game_engine_core.dart';
 import 'audio_manager.dart';
 import 'input_manager.dart';
 
-/// Orchestrator: Owns state and glues Core, Simulation, Input, and Audio.
 class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
-  final GameEngineCore core;
   final InputManager input;
   final AudioManager audio;
-  late final SimulationManager _simulationManager; // Added
+  final SimulationManager simulation;
 
   GameEngineNotifierV2({
     required AudioService audioService,
-    LevelDefinition? initialLevel,
-  })  : _simulationManager = SimulationManager(this), // Instantiate here
-        core = GameEngineCore(_simulationManager), // Pass to GameEngineCore
+  })  : input = InputManager(),
         audio = AudioManager(audioService),
-        input = InputManager(
-          onComponentTapped: (comp) {},
-          onComponentMoved: (id, r, c) {},
-        ),
+        simulation = SimulationManager(),
         super(GameEngineState.empty()) {
-    _init(initialLevel);
+    _init();
   }
 
-  void _init(LevelDefinition? initialLevel) {
+  void _init() {
     input.onComponentTapped = _handleTap;
     input.onComponentMoved = _moveComponent;
-
-    if (initialLevel != null) {
-      loadLevel(initialLevel);
-    }
   }
 
+  // Public getters to encapsulate state
+  Grid get grid => state.grid;
+  LevelDefinition? get currentLevel => state.currentLevel;
+
   void loadLevel(LevelDefinition level) {
-    final grid = Grid(
+    var grid = Grid(
       rows: level.rows,
       cols: level.cols,
       components: level.initialComponents,
     );
-    state = GameEngineState.initial(level);
-    state = core.commit(state, grid, isWin: false, isPaused: false);
+    // Run an initial simulation
+    grid = simulation.simulatePowerFlow(grid);
+    state = GameEngineState.initial(level).copyWith(grid: grid);
   }
 
   void _handleTap(ComponentModel comp) {
     audio.playSelection();
-    state = core.commit(state, state.grid,
-        selectedComponentId: comp.id, isPaused: state.isPaused);
+    // Tapping does not change the grid logic, only selection state
+    state = state.copyWith(selectedComponentId: comp.id);
   }
 
   void _moveComponent(String id, int r, int c) {
     final comp = state.grid.componentsById[id];
     if (comp == null) return;
+
     final moved = comp.copyWith(r: r, c: c);
-    final newGrid = state.grid.copyWithUpdatedComponent(moved);
+    var newGrid = state.grid.copyWithUpdatedComponent(moved);
+    newGrid = simulation.simulatePowerFlow(newGrid);
+
     audio.playPlacement();
-    state = core.commit(state, newGrid);
-  }
-
-  // Public method to move components
-  void moveComponent(String id, int r, int c) => _moveComponent(id, r, c);
-
-  // Public method to update components
-  void updateComponent(ComponentModel component) {
-    final updatedGrid = state.grid.copyWithUpdatedComponent(component);
-    state = core.commit(state, updatedGrid);
-  }
-
-  // Public method to update the grid
-  void updateGrid(Grid newGrid) {
     state = state.copyWith(grid: newGrid);
   }
 
-  InputManager get inputManager => input;
-
-  void reset() {
-    if (state.currentLevel == null) return; // Changed state.level to state.currentLevel
-    loadLevel(state.currentLevel!); // Changed state.level to state.currentLevel
+  void updateComponent(ComponentModel component) {
+    var newGrid = state.grid.copyWithUpdatedComponent(component);
+    newGrid = simulation.simulatePowerFlow(newGrid);
+    audio.playToggle(); // Assuming this is for switches
+    state = state.copyWith(grid: newGrid);
   }
 
-  void selectPaletteComponent(ComponentModel comp) {
+  void selectPaletteComponent(ComponentModel component) {
     audio.playSelection();
-    state = core.commit(state, state.grid,
-        selectedComponentId: comp.id, isPaused: state.isPaused);
-  }
-
-  void restartLevel() {
-    reset();
-  }
-
-  void undo() {
-    // Placeholder for undo logic, will interact with GameEngineCore
-    Logger.log('Undo not yet implemented.');
+    state = state.copyWith(selectedComponentId: component.id);
   }
 
   void togglePause() {
-    state = core.commit(state, state.grid, isPaused: !state.isPaused);
+    state = state.copyWith(isPaused: !state.isPaused);
+  }
+
+  // Methods that remain largely the same
+  InputManager get inputManager => input;
+
+  void restartLevel() {
+    if (state.currentLevel != null) {
+      loadLevel(state.currentLevel!);
+    }
+  }
+
+  void undo() {
+    Logger.log('Undo not yet implemented.');
   }
 }

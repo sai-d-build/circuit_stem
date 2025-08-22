@@ -1,32 +1,30 @@
 
 // lib/behaviors/drag_behavior.dart
-import 'package:flutter/widgets.dart';
-import '../engine/game_engine_notifier.dart';
-import '../models/grid_cell.dart';
-import '../widgets/grid_widget.dart'; // Added import for GridWidgetState
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/providers.dart';
+import '../models/component.dart';
+import '../ui/utils/coordinate_translator.dart';
 import 'behavior.dart';
-import 'movable_behavior.dart';
 
 class DragBehavior extends Behavior {
-  final GameEngineNotifierV2 gameEngineNotifier;
-  final GlobalKey<GridWidgetState> gridKey;
+  final WidgetRef ref;
+  final GlobalKey gridKey;
 
-  DragBehavior({
-    required this.gameEngineNotifier,
-    required this.gridKey,
-  });
+  DragBehavior({required this.ref, required this.gridKey});
 
-  void onDragEnd(DraggableDetails details, String componentId) {
+  void onDragEnd(DragTargetDetails<ComponentModel> details) {
     final renderBox = gridKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
 
-    final grid = gameEngineNotifier.state.grid;
+    final grid = ref.read(gridProvider);
+    final notifier = ref.read(gameEngineProvider.notifier);
     final translator = CoordinateTranslator(renderBox);
     final cell = translator.globalToCell(details.offset, grid.rows, grid.cols);
 
     if (cell != null) {
-      final movable = getBehavior<MovableBehavior>();
-      movable?.moveToCell(componentId, cell);
+      notifier.inputManager.handleMove(details.data.id, cell.row, cell.col);
     }
   }
 }
+

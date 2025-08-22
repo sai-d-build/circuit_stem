@@ -12,6 +12,7 @@ import '../services/asset_manager_state.dart';
 import '../engine/animation_scheduler.dart';
 import '../services/audio_service.dart';
 import '../ui/controllers/debug_overlay_controller.dart';
+import '../models/grid.dart'; // Added import
 
 // This file is the single source of truth for all core providers.
 
@@ -50,20 +51,23 @@ final levelDefinitionProvider =
   },
 );
 
-final gameEngineProvider = StateNotifierProvider.autoDispose
-    .family<GameEngineNotifierV2, GameEngineState, LevelDefinition>(
-  (ref, level) {
-    final animationScheduler = ref.watch(animationSchedulerProvider);
-    final audioService = ref.watch(audioServiceProvider);
-
-    return GameEngineNotifierV2(
-      initialLevel: level,
-      audioService: audioService,
-    );
-  },
-);
+final gameEngineProvider =
+    StateNotifierProvider<GameEngineNotifierV2, GameEngineState>((ref) {
+  final audioService = ref.watch(audioServiceProvider);
+  // The notifier is now created without a level.
+  // Levels will be loaded by calling a method on the notifier.
+  return GameEngineNotifierV2(
+    audioService: audioService,
+  );
+});
 
 // 3. Granular State Providers
+
+/// Provides the current grid from the game engine.
+/// UI widgets should watch this to rebuild only when the grid changes.
+final gridProvider = Provider<Grid>((ref) {
+  return ref.watch(gameEngineProvider.select((state) => state.grid));
+});
 
 /// List of all levels
 final levelsProvider = Provider<List<LevelMetadata>>((ref) {
@@ -81,15 +85,11 @@ final levelIsLoadingProvider = Provider<bool>((ref) {
 });
 
 /// Current render state of a level
-final renderStateProvider =
-    Provider.autoDispose.family<RenderState?, LevelDefinition>((ref, level) {
-  return ref
-      .watch(gameEngineProvider(level).select((state) => state.renderState));
+final renderStateProvider = Provider<RenderState?>((ref) {
+  return ref.watch(gameEngineProvider.select((state) => state.renderState));
 });
 
 /// Whether the level has been won
-final isWinProvider =
-    Provider.autoDispose.family<bool, LevelDefinition>((ref, level) {
-  return ref
-      .watch(gameEngineProvider(level).select((state) => state.isWin));
+final isWinProvider = Provider<bool>((ref) {
+  return ref.watch(gameEngineProvider.select((state) => state.isWin));
 });

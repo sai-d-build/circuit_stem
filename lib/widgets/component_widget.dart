@@ -21,7 +21,13 @@ class ComponentWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final componentSize = Size(component.shape.first.c * 100.0, component.shape.first.r * 100.0);
+        int maxR = 0;
+    int maxC = 0;
+    for (final offset in component.shapeOffsets) {
+      if (offset.r > maxR) maxR = offset.r;
+      if (offset.c > maxC) maxC = offset.c;
+    }
+    final componentSize = Size((maxC + 1) * 100.0, (maxR + 1) * 100.0);
 
     final child = GestureDetector(
       onTap: onTap,
@@ -57,9 +63,6 @@ class ComponentWidget extends StatelessWidget {
         ),
       ),
       childWhenDragging: Container(),
-      onDragEnd: (details) {
-        dragBehavior.onDragEnd(details, component.id);
-      },
       child: child,
     );
   }

@@ -14,7 +14,7 @@ class GameTestHelper {
   // --- State Querying Methods ---
   static ComponentModel findComponentById(ProviderContainer container, String id) {
     final level = container.read(levelManagerProvider).currentLevelDefinition!;
-    final state = container.read(gameEngineProvider(level)).state; // Corrected access
+    final state = container.read(gameEngineProvider);
     return state.grid.components.firstWhere((c) => c.id == id, orElse: () {
       throw StateError('Component with id "$id" not found.');
     });
@@ -41,7 +41,7 @@ class GameTestHelper {
 
   static bool isGameInWinState(ProviderContainer container) {
     final level = container.read(levelManagerProvider).currentLevelDefinition!;
-    final state = container.read(gameEngineProvider(level)).state; // Corrected access
+    final state = container.read(gameEngineProvider);
     return state.isWin;
   }
 

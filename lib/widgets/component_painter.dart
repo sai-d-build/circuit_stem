@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/component.dart';
 import '../services/asset_manager.dart';
+import '../behaviors/drawing_behavior.dart';
 
 class ComponentPainter extends CustomPainter {
   final ComponentModel component;
@@ -15,7 +16,7 @@ class ComponentPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final drawingBehavior = getDrawingBehavior(component.type);
+    final drawingBehavior = component.getBehavior<DrawingBehavior>();
     if (drawingBehavior != null) {
       drawingBehavior.draw(canvas, size, component, assetManager);
     }

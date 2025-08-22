@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/component.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/providers.dart';
 
@@ -30,7 +31,8 @@ class GameScreen extends ConsumerWidget {
           );
         }
 
-        ref.listen<bool>(isWinProvider(levelDefinition), (previous, isWin) {
+        // Listen to the new, non-family isWinProvider
+        ref.listen<bool>(isWinProvider, (previous, isWin) {
           if (isWin) {
             final manager = ref.read(levelManagerProvider.notifier);
 
@@ -56,22 +58,27 @@ class GameScreen extends ConsumerWidget {
           }
         });
 
-        final gameEngineProviderWithLevel = gameEngineProvider(levelDefinition);
-        final gameEngineState = ref.watch(gameEngineProviderWithLevel);
-        final gameNotifier = ref.read(gameEngineProviderWithLevel.notifier);
-        final isPaused = gameEngineState.isPaused;
+        // Use the new providers
+        final gameNotifier = ref.read(gameEngineProvider.notifier);
+        final grid = ref.watch(gridProvider);
+        final isPaused = ref.watch(gameEngineProvider.select((s) => s.isPaused));
+        final selectedComponentId = ref.watch(gameEngineProvider.select((s) => s.selectedComponentId));
         final isDark = Theme.of(context).brightness == Brightness.dark;
 
         final gridComponentIds =
-            gameEngineState.grid.components.map((c) => c.id).toSet();
+            grid.components.map((c) => c.id).toSet();
         final paletteComponents = levelDefinition.paletteComponents
             .where((c) => !gridComponentIds.contains(c.id))
             .toList();
-        final selectedComponent = gameEngineState.selectedComponentId == null
-            ? null
-            : levelDefinition.paletteComponents.firstWhere(
-                (c) => c.id == gameEngineState.selectedComponentId,
-              );
+        ComponentModel? selectedComponent;
+        if (selectedComponentId != null) {
+          for (final component in levelDefinition.paletteComponents) {
+            if (component.id == selectedComponentId) {
+              selectedComponent = component;
+              break;
+            }
+          }
+        }
 
         return Scaffold(
           body: Stack(

@@ -8,7 +8,6 @@ import '../models/level_definition.dart';
 import '../widgets/grid_widget.dart';
 import '../widgets/component_widget.dart';
 import '../behaviors/drag_behavior.dart';
-import '../behaviors/movable_behavior.dart';
 
 class GameCanvas extends ConsumerStatefulWidget {
   final LevelDefinition levelDefinition;
@@ -22,56 +21,62 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
   final GlobalKey _gridKey = GlobalKey();
 
   @override
-  Widget build(BuildContext context) {
-    Logger.log('GameCanvas: Building GameCanvas.');
-    final gameNotifier = ref.read(gameEngineProvider(widget.levelDefinition).notifier);
-    final gameEngineState = ref.watch(gameEngineProvider(widget.levelDefinition));
-    final assetManager = ref.watch(assetManagerProvider.notifier);
+  void initState() {
+    super.initState();
+    // Load the level into the notifier when the widget is first created.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(gameEngineProvider.notifier).loadLevel(widget.levelDefinition);
+    });
+  }
 
-    final movableBehavior = MovableBehavior(gameEngineNotifier: gameNotifier);
-    final dragBehavior = DragBehavior(gameEngineNotifier: gameNotifier, gridKey: _gridKey);
-    dragBehavior.attachBehavior(movableBehavior);
+  @override
+  Widget build(BuildContext context) {
+    final grid = ref.watch(gridProvider);
+    final notifier = ref.read(gameEngineProvider.notifier);
+    final assetManager = ref.watch(assetManagerProvider.notifier);
+    final dragBehavior = DragBehavior(ref: ref, gridKey: _gridKey);
 
     return DragTarget<ComponentModel>(
-        onAcceptWithDetails: (details) {
-          final component = details.data;
-          final renderBox = _gridKey.currentContext?.findRenderObject() as RenderBox?;
-          if (renderBox == null) return;
+      onAcceptWithDetails: (details) {
+        dragBehavior.onDragEnd(details);
+      },
+      builder: (context, candidateData, rejectedData) {
+        return Stack(
+          key: _gridKey,
+          children: [
+            GridWidget(
+              rows: grid.rows,
+              cols: grid.cols,
+              cellSize: cellSize,
+            ),
+            ...grid.components.map((component) {
+              int maxR = 0;
+              int maxC = 0;
+              for (final offset in component.shapeOffsets) {
+                if (offset.r > maxR) maxR = offset.r;
+                if (offset.c > maxC) maxC = offset.c;
+              }
+              final componentWidth = (maxC + 1) * cellSize;
+              final componentHeight = (maxR + 1) * cellSize;
 
-          final localOffset = renderBox.globalToLocal(details.offset);
-          final col = (localOffset.dx / cellSize).floor();
-          final row = (localOffset.dy / cellSize).floor();
-
-          Logger.log('GameCanvas: Dropped component ${component.id} of type ${component.type} at ($row, $col)');
-          gameNotifier.inputManager.handleMove(component.id, row, col);
-        },
-        builder: (context, candidateData, rejectedData) {
-          return Stack(
-            key: _gridKey,
-            children: [
-              GridWidget(
-                rows: gameEngineState.grid.rows,
-                cols: gameEngineState.grid.cols,
-                cellSize: cellSize,
-              ),
-              ...gameEngineState.grid.components.map((component) {
-                return Positioned(
-                  left: component.c * cellSize,
-                  top: component.r * cellSize,
-                  width: component.shape.first.c * cellSize,
-                  height: component.shape.first.r * cellSize,
-                  child: ComponentWidget(
-                    component: component,
-                    assetManager: assetManager,
-                    dragBehavior: dragBehavior,
-                    onTap: () {
-                    gameNotifier.inputManager.handleTap(component);
+              return Positioned(
+                left: component.c * cellSize,
+                top: component.r * cellSize,
+                width: componentWidth,
+                height: componentHeight,
+                child: ComponentWidget(
+                  component: component,
+                  assetManager: assetManager,
+                  dragBehavior: dragBehavior,
+                  onTap: () {
+                    notifier.inputManager.handleTap(component);
                   },
-                  ),
-                );
-              }).toList(),
-            ],
-          );
-        });
+                ),
+              );
+            }).toList(),
+          ],
+        );
+      },
+    );
   }
 }

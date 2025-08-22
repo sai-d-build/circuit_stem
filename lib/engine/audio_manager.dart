@@ -6,13 +6,9 @@ class AudioManager {
 
   AudioManager(this._audio);
 
-  void playSelection() => _audio.playSelection();
-
-  void playPlacement() => _audio.playPlacement();
-
-  void playWin() => _audio.playWin();
-
-  void playLose() => _audio.playLose();
-
-  void stopAll() => _audio.stopAll();
+  void playSelection() => _audio.play('toggle.wav');
+  void playPlacement() => _audio.play('place.wav');
+  void playToggle() => _audio.play('toggle.wav');
+  void playWin() => _audio.play('success.wav');
+  void playLose() => _audio.play('warning.wav');
 }
