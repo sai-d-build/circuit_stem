@@ -61,27 +61,27 @@ class SwitchDrawingBehavior implements DrawingBehavior {
 }
 
 class SwitchInteractionBehavior implements InteractionBehavior {
-  final AudioService _audioService = AudioService(); // In a real app, inject this
-
   @override
   void onTap(GameEngineNotifier notifier, ComponentModel component) {
-    Logger.log('SwitchInteractionBehavior: onTap called for switch \${component.id}');
+    Logger.log('SwitchInteractionBehavior: onTap called for switch ${component.id}');
+
     final currentState = component.state['closed'] as bool? ?? false;
-    final newComponentState = Map<String, dynamic>.from(component.state);
-    newComponentState['closed'] = !currentState;
+    final newComponentState = Map<String, dynamic>.from(component.state)
+      ..['closed'] = !currentState;
 
     final updatedComponent = component.copyWith(state: newComponentState);
-    
+
+    // ✅ Update game state first
     notifier.updateComponent(updatedComponent);
-    _audioService.play(AppAssets.audioSwitch);
+
+    // ✅ Use notifier's audio service (mockable in tests)
+    notifier.audioService.play(AppAssets.audioSwitch);
   }
 
   @override
   void onDragStart(GameEngineNotifier notifier, ComponentModel component) {}
-
   @override
   void onDragUpdate(GameEngineNotifier notifier, ComponentModel component) {}
-
   @override
   void onDragEnd(GameEngineNotifier notifier, ComponentModel component) {}
 }
@@ -89,7 +89,7 @@ class SwitchInteractionBehavior implements InteractionBehavior {
 class SwitchLogicBehavior implements LogicBehavior {
   @override
   void evaluate(Grid grid, ComponentModel component) {
-    Logger.log('SwitchLogicBehavior: Evaluating switch \${component.id}');
+        Logger.log('SwitchLogicBehavior: Evaluating switch ${component.id}');
     // Logic is handled by the main engine based on the 'closed' state and terminals.
   }
 }

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'component.dart';
 import '../common/constants.dart';
+import '../common/logger.dart';
 
 part 'grid.freezed.dart';
 
@@ -40,6 +41,7 @@ class Grid with _$Grid {
     final newComponents = components.map((c) {
       return c.id == component.id ? component : c;
     }).toList();
+    Logger.log('Grid.copyWithUpdatedComponent: Component \'${component.id}\' updated. New state: ${component.state}');
     return copyWith(components: newComponents);
   }
 

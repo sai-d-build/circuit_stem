@@ -19,21 +19,22 @@ void main() {
       final movableId = 'bulb1';
 
       // Get the component's starting position.
-      final initialPosition = GameTestHelper.findComponentById(container, movableId).position;
+      final initialComponent = GameTestHelper.findComponentById(container, movableId);
 
       // ACT 1: Move the component to a new, valid position.
       await GameTestHelper.dragComponentToGrid(tester, container, movableId, 4, 4);
 
       // ASSERT 1: Verify the component has moved.
-      final movedPosition = GameTestHelper.findComponentById(container, movableId).position;
-      expect(movedPosition, isNot(equals(initialPosition)), reason: "Component should have moved before restart.");
+      final movedComponent = GameTestHelper.findComponentById(container, movableId);
+      expect(movedComponent.r, isNot(equals(initialComponent.r)));
 
       // ACT 2: Tap the restart button.
       await GameTestHelper.tapButton(tester, const Key('restart_button'));
 
       // ASSERT 2: Verify the component is back in its original position.
-      final finalPosition = GameTestHelper.findComponentById(container, movableId).position;
-      expect(finalPosition, equals(initialPosition), reason: "Component should reset to initial position after restart.");
+      final finalComponent = GameTestHelper.findComponentById(container, movableId);
+      expect(finalComponent.r, equals(initialComponent.r));
+      expect(finalComponent.c, equals(initialComponent.c));
     });
 
     testWidgets('TC-L1-29: Undo button reverts the last move', (tester) async {
@@ -43,21 +44,22 @@ void main() {
       final movableId = 'bulb1';
 
       // Get the component's starting position.
-      final initialPosition = GameTestHelper.findComponentById(container, movableId).position;
+      final initialComponent = GameTestHelper.findComponentById(container, movableId);
 
       // ACT 1: Move the component to a new, valid position.
       await GameTestHelper.dragComponentToGrid(tester, container, movableId, 4, 4);
 
       // ASSERT 1: Verify the component has moved.
-      final movedPosition = GameTestHelper.findComponentById(container, movableId).position;
-      expect(movedPosition, isNot(equals(initialPosition)), reason: "Component should have moved before undo.");
+      final movedComponent = GameTestHelper.findComponentById(container, movableId);
+      expect(movedComponent.r, isNot(equals(initialComponent.r)));
 
       // ACT 2: Tap the undo button.
       await GameTestHelper.tapButton(tester, const Key('undo_button'));
 
       // ASSERT 2: Verify the component is back in its original position.
-      final finalPosition = GameTestHelper.findComponentById(container, movableId).position;
-      expect(finalPosition, equals(initialPosition), reason: "Component should revert to previous position after undo.");
+      final finalComponent = GameTestHelper.findComponentById(container, movableId);
+      expect(finalComponent.r, equals(initialComponent.r));
+      expect(finalComponent.c, equals(initialComponent.c));
     });
 
     testWidgets('TC-L1-30: Rapidly tapping a switch does not queue multiple animations', (tester) async {
@@ -76,9 +78,9 @@ void main() {
       await tester.pump();
 
       // ASSERT
-      // Verify that the schedule method was called only once.
+      // Verify that the start method was called only once.
       // The game engine should prevent new animations while one is running.
-      verify(() => scheduler.schedule(any(), any())).called(1);
+      verify(() => scheduler.start()).called(1);
     });
   });
 }

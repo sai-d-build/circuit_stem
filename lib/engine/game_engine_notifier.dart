@@ -145,44 +145,42 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
       grid: grid,
       renderState: updatedRenderState,
     );
-    _evaluateGrid();
+    _updateStateWithNewGrid(state.grid);
   }
 
-  void _evaluateGrid() {
+  void _updateStateWithNewGrid(Grid newGrid) {
     Logger.log('GameEngineNotifier: Evaluating grid.');
-    final grid = state.grid;
 
-    for (var component in grid.components) {
+    for (var component in newGrid.components) {
       final behavior = component.getBehavior<LogicBehavior>();
       if (behavior != null) {
         Logger.log('GameEngineNotifier: Evaluating logic for component: \${component.id}');
-        behavior.evaluate(grid, component);
+        behavior.evaluate(newGrid, component);
       } else {
         Logger.log('GameEngineNotifier: No LogicBehavior found for component: \${component.id}');
       }
     }
 
-    final poweredIds = _logicSimulator.evaluate(grid);
+    final poweredIds = _logicSimulator.evaluate(newGrid);
 
-    final updatedComponents = grid.components.map((c) {
+    final updatedComponents = newGrid.components.map((c) {
       return c.copyWith(isPowered: poweredIds.contains(c.id));
     }).toList();
 
-    final updatedGrid = grid.copyWith(components: updatedComponents);
+    final finalGrid = newGrid.copyWith(components: updatedComponents);
     
-    // Update both grid and render state to keep them in sync
     final updatedRenderState = state.renderState?.copyWith(
-      grid: updatedGrid,
+      grid: finalGrid,
       poweredComponentIds: poweredIds,
     ) ?? RenderState(
-      grid: updatedGrid,
+      grid: finalGrid,
       poweredComponentIds: poweredIds,
       draggedComponentId: state.draggedComponentId,
       dragPosition: state.dragPosition,
     );
     
     state = state.copyWith(
-      grid: updatedGrid,
+      grid: finalGrid,
       renderState: updatedRenderState,
     );
     Logger.log('GameEngineNotifier: Grid evaluation complete. Powered components: \$poweredIds');
@@ -247,14 +245,19 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   }
 
   void updateComponent(ComponentModel component) {
-    Logger.log('GameEngineNotifier: Updating component: \${component.id}');
-    
+    Logger.log('GameEngineNotifier: Updating component: \${component.id} with new state: \${component.state}');
+    final oldComponent = state.grid.componentsById[component.id];
+    Logger.log('GameEngineNotifier: Old component state: \${oldComponent?.state}');
+
     // Push current state to history before making changes
     _pushToHistory();
     
     final newGrid = state.grid.copyWithUpdatedComponent(component);
     state = state.copyWith(grid: newGrid);
-    _evaluateGrid();
+
+    final verifyComponent = state.grid.componentsById[component.id];
+    Logger.log('GameEngineNotifier: State AFTER update. Verified component state: \${verifyComponent?.state}');
+    _updateStateWithNewGrid(state.grid);
   }
 
   void startDrag(ComponentModel component, Offset position) {
@@ -289,7 +292,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
             
             final newComponent = oldComponent.copyWith(r: cell.r, c: cell.c);
             final newGrid = state.grid.copyWithUpdatedComponent(newComponent);
-            state = state.copyWith(grid: newGrid);
+            _updateStateWithNewGrid(newGrid);
             
             // Play placement sound for successful moves
             audioService.play(AppAssets.audioPlacement);
@@ -303,7 +306,8 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     }
     
     state = state.copyWith(draggedComponentId: null, dragPosition: null);
-    _evaluateGrid();
+    // No-op evaluation to clean up state after drag, e.g. if drop was invalid
+    _updateStateWithNewGrid(state.grid);
   }
 
   void addComponent(ComponentModel paletteComponent, int r, int c) {
@@ -321,7 +325,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     // Play placement sound
     audioService.play(AppAssets.audioPlacement);
     
-    _evaluateGrid();
+    _updateStateWithNewGrid(state.grid);
   }
 
   void rotateComponent() {
@@ -338,7 +342,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
         final newGrid = state.grid.copyWithUpdatedComponent(updatedComponent);
         state = state.copyWith(grid: newGrid);
         
-        _evaluateGrid();
+        _updateStateWithNewGrid(state.grid);
         Logger.log('GameEngineNotifier: Rotated component \${component.id} to \$newRotation degrees.');
       } else {
         Logger.log('GameEngineNotifier: Selected component is null or not draggable.');
@@ -400,7 +404,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
       dragPosition: null,
     );
     
-    _evaluateGrid();
+    _updateStateWithNewGrid(state.grid);
     Logger.log('GameEngineNotifier: Level restarted successfully.');
   }
 
@@ -417,7 +421,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     state = previousState;
     
     // Re-evaluate grid to ensure consistency
-    _evaluateGrid();
+    _updateStateWithNewGrid(state.grid);
     
     Logger.log('GameEngineNotifier: Undo successful. History size: ${_stateHistory.length}');
   }

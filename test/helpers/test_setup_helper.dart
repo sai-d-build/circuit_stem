@@ -72,7 +72,9 @@ class TestSetupHelper {
     final mockPrefs = await SharedPreferences.getInstance();
 
     // 2. Prime the mock asset manager with the pre-read file cache.
-    mockAssetManager.primeWithFiles(_fileCache);
+    _fileCache.forEach((path, content) {
+      mockAssetManager.primeFile(path, content);
+    });
 
     // 3. Create a temporary container to initialize services BEFORE the UI is built.
     // This avoids race conditions and ensures data is ready.

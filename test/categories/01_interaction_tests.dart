@@ -18,42 +18,42 @@ void main() {
       // ARRANGE
       final setup = await TestSetupHelper.pumpGameScreenForLevel(tester, 0);
       final batteryId = 'bat1';
-      final initialPosition = GameTestHelper.findComponentById(setup.container, batteryId).position;
+      final initialComponent = GameTestHelper.findComponentById(setup.container, batteryId);
 
       // ACT
       await GameTestHelper.dragComponentToGrid(
         tester,
         setup.container,
         batteryId,
-        initialPosition.r + 1,
-        initialPosition.c + 1,
+        initialComponent.r + 1,
+        initialComponent.c + 1,
       );
 
       // ASSERT
-      final finalPosition = GameTestHelper.findComponentById(setup.container, batteryId).position;
-      expect(finalPosition, equals(initialPosition),
-          reason: "Immovable component should not change position after being dragged.");
+      final finalComponent = GameTestHelper.findComponentById(setup.container, batteryId);
+      expect(finalComponent.r, equals(initialComponent.r));
+      expect(finalComponent.c, equals(initialComponent.c));
     });
 
     testWidgets('TC-L1-05: Attempting to drag an immovable component (Switch) fails', (tester) async {
       // ARRANGE
       final setup = await TestSetupHelper.pumpGameScreenForLevel(tester, 0);
       final switchId = 'switch1';
-      final initialPosition = GameTestHelper.findComponentById(setup.container, switchId).position;
+      final initialComponent = GameTestHelper.findComponentById(setup.container, switchId);
 
       // ACT
       await GameTestHelper.dragComponentToGrid(
         tester,
         setup.container,
         switchId,
-        initialPosition.r + 1,
-        initialPosition.c + 1,
+        initialComponent.r + 1,
+        initialComponent.c + 1,
       );
 
       // ASSERT
-      final finalPosition = GameTestHelper.findComponentById(setup.container, switchId).position;
-      expect(finalPosition, equals(initialPosition),
-          reason: "Immovable component should not change position after being dragged.");
+      final finalComponent = GameTestHelper.findComponentById(setup.container, switchId);
+      expect(finalComponent.r, equals(initialComponent.r));
+      expect(finalComponent.c, equals(initialComponent.c));
     });
 
     testWidgets('TC-L1-06: Dragging a component onto an occupied tile fails and gives feedback',
@@ -65,8 +65,8 @@ void main() {
       final movableId = 'bulb1'; // The bulb is movable
       final stationaryId = 'bat1'; // The battery is not
 
-      final movableInitialPos = GameTestHelper.findComponentById(setup.container, movableId).position;
-      final stationaryPos = GameTestHelper.findComponentById(setup.container, stationaryId).position;
+      final movableInitial = GameTestHelper.findComponentById(setup.container, movableId);
+      final stationary = GameTestHelper.findComponentById(setup.container, stationaryId);
 
       // ACT
       // Attempt to drag the bulb onto the battery's position
@@ -74,15 +74,15 @@ void main() {
         tester,
         setup.container,
         movableId,
-        stationaryPos.r,
-        stationaryPos.c,
+        stationary.r,
+        stationary.c,
       );
 
       // ASSERT
       // 1. The component should have returned to its original position.
-      final movableFinalPos = GameTestHelper.findComponentById(setup.container, movableId).position;
-      expect(movableFinalPos, equals(movableInitialPos),
-          reason: "Component should return to original position after invalid drag.");
+      final movableFinal = GameTestHelper.findComponentById(setup.container, movableId);
+      expect(movableFinal.r, equals(movableInitial.r));
+      expect(movableFinal.c, equals(movableInitial.c));
 
       // 2. A warning sound should have been played.
       GameTestHelper.expectSoundPlayed(audioService, AppAssets.audioWarning);

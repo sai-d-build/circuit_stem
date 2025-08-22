@@ -23,7 +23,7 @@ void main() {
 
       // ASSERT
       // Verify that the placement sound was played.
-      GameTestHelper.expectSoundPlayed(audioService, AppAssets.audioPlace);
+      GameTestHelper.expectSoundPlayed(audioService, AppAssets.audioPlacement);
     });
 
     testWidgets('TC-L1-23: Placing a component in an invalid position plays warning sound', (tester) async {
@@ -31,7 +31,7 @@ void main() {
       final setup = await TestSetupHelper.pumpGameScreenForLevel(tester, 0);
       final audioService = setup.audioService;
       final movableId = 'bulb1';
-      final stationaryPos = GameTestHelper.findComponentById(setup.container, 'bat1').position;
+      final stationaryComponent = GameTestHelper.findComponentById(setup.container, 'bat1');
 
       // ACT
       // Attempt to drag the bulb onto the battery's occupied position.
@@ -39,8 +39,8 @@ void main() {
         tester,
         setup.container,
         movableId,
-        stationaryPos.r,
-        stationaryPos.c,
+        stationaryComponent.r,
+        stationaryComponent.c,
       );
 
       // ASSERT

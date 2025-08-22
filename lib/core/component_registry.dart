@@ -113,7 +113,7 @@ class ComponentRegistry {
         isDraggable: false,
         rotation: json['rotation'] as int? ?? 0,
         isPowered: json['isPowered'] as bool? ?? false,
-        shapeOffsets: const [const CellOffset(0, 0)],
+        shapeOffsets: const [CellOffset(0, 0)],
         terminals: const [],
         internalConnections: const [],
         state: const {},

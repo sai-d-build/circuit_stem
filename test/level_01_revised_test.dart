@@ -59,10 +59,7 @@ void main() {
       print('[SetupAll] Game entities registered successfully');
     });
 
-    // Refactored setup function to correctly manage ProviderContainer lifecycle
-    // and ensure all overrides are present at container creation.
-    // NEW: Return TestSetup instead of the anonymous record
-    Future<TestSetup> pumpGameScreenWithOverrides(WidgetTester tester) async {
+    Future<ProviderContainer> pumpGameScreenWithOverrides(WidgetTester tester) async {
       print('[Test Setup] Starting pumpGameScreenWithOverrides...');
 
       // 1. Create all mock services
@@ -85,36 +82,35 @@ void main() {
       level1 = loadedLevel!;
       print('[Test Setup] Level loaded successfully: ${level1.id}');
 
-      // 4. Create GameEngineNotifier instance (will be overridden)
-      final gameEngineNotifierInstance = GameEngineNotifier(
-        initialLevel: level1,
-        animationScheduler: mockAnimationScheduler,
-        audioService: mockAudioService,
-      );
-
-      // 5. Create the main ProviderContainer with ALL overrides
+      // 4. Create the main ProviderContainer with ALL overrides
       print('[Test Setup] Creating main ProviderContainer with all overrides...');
       final container = ProviderContainer(
         overrides: [
           assetManagerProvider.overrideWith((_) => mockAssetManager),
           sharedPreferencesProvider.overrideWithValue(mockPrefs),
-          levelManagerProvider.overrideWith((ref) => levelManager), // Use the directly created instance
-          // Override with the specific instance created for the test
-          gameEngineProvider(level1).overrideWith((ref) => gameEngineNotifierInstance),
+          levelManagerProvider.overrideWith((ref) => levelManager),
+          // This override replaces the autoDispose provider with a regular provider,
+          // preventing premature disposal during tests.
+          gameEngineProvider(level1).overrideWith(
+            (ref) => GameEngineNotifier(
+              initialLevel: level1,
+              animationScheduler: mockAnimationScheduler,
+              audioService: mockAudioService,
+            ),
+          ),
         ],
       );
 
-      // NEW: Create TestSetup instance and keep gameEngineProvider alive
-      final testSetup = TestSetup(container);
-      // Prevent autoDispose from cleaning up gameEngineProvider
-      // when widget tree temporarily stops listening.
-      testSetup.keepAlive(gameEngineProvider(level1));
+      // ROBUSTNESS FIX: Manually create a listener to keep the provider alive
+      // for the duration of the test. This prevents autoDispose from firing prematurely.
+      final subscription = container.listen(gameEngineProvider(level1), (_, __) {});
 
-      // Ensure the container and its listeners are disposed at the end of the test
-      addTearDown(() => testSetup.dispose());
+      // Ensure both the listener and the container are disposed at the end of the test.
+      addTearDown(subscription.close);
+      addTearDown(container.dispose);
       print('[Test Setup] ProviderContainer created and addTearDown registered.');
 
-      // 6. Build the widget tree
+      // 5. Build the widget tree
       print('[Test Setup] Building widget tree...');
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -129,15 +125,14 @@ void main() {
       await tester.pumpAndSettle();
       print('[Test Setup] Setup complete!');
 
-      return testSetup; // Return the TestSetup instance
+      return container; // Return the container for the test to use
     }
 
     testWidgets(
       'TC-L1-01: Toggle switch interaction',
       (WidgetTester tester) async {
         print('[Test] Starting TC-L1-01...');
-        final setup = await pumpGameScreenWithOverrides(tester);
-        final container = setup.container;
+        final container = await pumpGameScreenWithOverrides(tester);
         // NEW: Read notifier from container
         final gameEngineNotifier = container.read(gameEngineProvider(level1).notifier);
         final scheduler = gameEngineNotifier.animationScheduler as MockAnimationScheduler; // Access scheduler via notifier
@@ -196,8 +191,7 @@ void main() {
       'TC-L1-02: Move timer component',
       (WidgetTester tester) async {
         print('[Test] Starting TC-L1-02...');
-        final setup = await pumpGameScreenWithOverrides(tester);
-        final container = setup.container;
+        final container = await pumpGameScreenWithOverrides(tester);
         // NEW: Read notifier from container
         final gameEngineNotifier = container.read(gameEngineProvider(level1).notifier);
         final scheduler = gameEngineNotifier.animationScheduler as MockAnimationScheduler; // Access scheduler via notifier
