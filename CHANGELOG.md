@@ -1,3 +1,26 @@
+## [1.2.1] - 2025-08-21 - State Management and Data Consistency Fixes
+
+This release addresses critical bugs related to state management, component registration, and data consistency, leading to a more stable and robust application.
+
+### Fixed
+
+-   **State Management Race Conditions:** Refactored the `GameEngineNotifier` to use a "single commit pipeline" architecture. This eliminates race conditions that were causing unpredictable behavior and failing tests. All state updates now go through a single, centralized `_commitGrid` method, ensuring that state changes are atomic and predictable.
+-   **Component Behavior Registration:** Fixed a bug in the `ComponentRegistry` that was preventing behaviors from being attached to components created from JSON. This was a primary cause of the switch interaction test failure.
+-   **Data Inconsistencies in `level_01.json`:**
+    *   Corrected the switch component's state to use `closed` instead of `switchOpen`.
+    *   Un-nested the `position` field to be top-level `r` and `c` properties.
+-   **Coordinate Naming Convention:** Standardized on `r` and `c` for rows and columns throughout the codebase, including in the `CellOffset` class, the `GameEngineNotifier`, and the `Grid` model.
+
+### Changed
+
+-   **`lib/engine/game_engine_notifier.dart`:** Completely refactored to use a "single commit pipeline" architecture.
+-   **`lib/core/component_registry.dart`:** Updated the `createFromJson` method to correctly attach behaviors to components.
+-   **`lib/models/component.dart`:** Refactored the `CellOffset` class to use `r` and `c` instead of `x` and `y`.
+-   **`lib/models/grid.dart`:** Updated the `componentAt` method to use `r` and `c`.
+-   **`assets/levels/level_01.json`:** Updated to be consistent with the new data model.
+
+---
+
  ## [1.2.0] - 2025-08-21 - Comprehensive Testing Overhaul
 
 This release introduces a robust, scalable testing architecture and implements a significant portion of the test suite, ensuring higher application quality and stability.

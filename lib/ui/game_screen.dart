@@ -96,7 +96,7 @@ class GameScreen extends ConsumerWidget {
                           Expanded(
                             child: ComponentPalette(
                               availableComponents: paletteComponents,
-                              onComponentSelected: gameNotifier.selectComponent,
+                              onComponentSelected: gameNotifier.selectPaletteComponent,
                               selectedComponent: selectedComponent,
                             ),
                           ),

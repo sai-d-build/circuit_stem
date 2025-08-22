@@ -8,18 +8,18 @@ part 'component.freezed.dart';
 class CellOffset with _$CellOffset {
   const CellOffset._();
   const factory CellOffset(
-    int x,
-    int y,
+    int r,
+    int c,
   ) = _CellOffset;
 
   factory CellOffset.fromJson(Map<String, dynamic> json) {
     return CellOffset(
-      (json['x'] ?? json['r']) as int,
-      (json['y'] ?? json['c']) as int,
+      json['r'] as int,
+      json['c'] as int,
     );
   }
 
-  Map<String, dynamic> toJson() => {'x': x, 'y': y};
+  Map<String, dynamic> toJson() => {'r': r, 'c': c};
 }
 
 enum TerminalType { power, signal }

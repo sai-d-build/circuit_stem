@@ -1,0 +1,137 @@
+Dart SDK 3.8.1
+Flutter SDK 3.32.8
+circuit_stem 1.0.0+1
+
+dependencies:
+- collection 1.19.1
+- cupertino_icons 1.0.8
+- flame 1.30.1 [collection flutter meta ordered_set vector_math]
+- flame_audio 2.11.8 [audioplayers flame flutter synchronized]
+- flutter 0.0.0 [characters collection material_color_utilities meta vector_math sky_engine]
+- flutter_hooks 0.21.3+1 [flutter]
+- flutter_riverpod 2.6.1 [collection flutter meta riverpod state_notifier]
+- flutter_svg 2.2.0 [flutter http vector_graphics vector_graphics_codec vector_graphics_compiler]
+- flutter_web_plugins 0.0.0 [flutter characters collection material_color_utilities meta vector_math]
+- freezed_annotation 2.4.4 [collection json_annotation meta]
+- google_fonts 6.3.0 [flutter http path_provider crypto]
+- hooks_riverpod 2.6.1 [collection flutter flutter_hooks flutter_riverpod riverpod state_notifier]
+- json_annotation 4.9.0 [meta]
+- meta 1.16.0
+- provider 6.1.5+1 [collection flutter nested]
+- riverpod 2.6.1 [collection meta stack_trace state_notifier]
+- rxdart 0.28.0
+- shared_preferences 2.5.3 [flutter shared_preferences_android shared_preferences_foundation shared_preferences_linux shared_preferences_platform_interface shared_preferences_web shared_preferences_windows]
+- vector_graphics 1.1.19 [flutter http vector_graphics_codec]
+- widgets_to_image 2.0.1 [flutter]
+
+dev dependencies:
+- build_runner 2.5.4 [analyzer args async build build_config build_daemon build_resolvers build_runner_core code_builder collection crypto dart_style frontend_server_client glob graphs http http_multi_server io js logging meta mime package_config path pool pub_semver pubspec_parse shelf shelf_web_socket stack_trace stream_transform timing watcher web web_socket_channel yaml]
+- fake_async 1.3.3 [clock collection]
+- flutter_lints 6.0.0 [lints]
+- flutter_test 0.0.0 [flutter test_api matcher path fake_async clock stack_trace vector_math leak_tracker_flutter_testing async boolean_selector characters collection leak_tracker leak_tracker_testing material_color_utilities meta source_span stream_channel string_scanner term_glyph vm_service]
+- freezed 2.5.8 [analyzer build build_config collection meta source_gen freezed_annotation json_annotation dart_style]
+- json_serializable 6.9.5 [analyzer async build build_config collection dart_style json_annotation meta path pub_semver pubspec_parse source_gen source_helper]
+- mocktail 1.0.4 [collection matcher test_api]
+- source_gen 2.0.0 [analyzer async build dart_style glob path pub_semver source_span yaml]
+
+dependency overrides:
+- _fe_analyzer_shared 64.0.0 [meta]
+- analyzer 6.10.0 [_fe_analyzer_shared collection convert crypto glob macros meta package_config path pub_semver source_span watcher yaml]
+
+transitive dependencies:
+- _macros 0.3.3
+- args 2.7.0
+- async 2.13.0 [collection meta]
+- audioplayers 6.5.0 [audioplayers_android audioplayers_darwin audioplayers_linux audioplayers_platform_interface audioplayers_web audioplayers_windows file flutter http meta path_provider synchronized uuid]
+- audioplayers_android 5.2.1 [audioplayers_platform_interface flutter]
+- audioplayers_darwin 6.3.0 [audioplayers_platform_interface flutter]
+- audioplayers_linux 4.2.1 [audioplayers_platform_interface flutter]
+- audioplayers_platform_interface 7.1.1 [collection flutter meta plugin_platform_interface]
+- audioplayers_web 5.1.1 [audioplayers_platform_interface flutter flutter_web_plugins web]
+- audioplayers_windows 4.2.1 [audioplayers_platform_interface flutter]
+- boolean_selector 2.1.2 [source_span string_scanner]
+- build 2.5.4 [analyzer async build_runner_core built_collection built_value convert crypto glob graphs logging meta package_config path pool]
+- build_config 1.1.2 [checked_yaml json_annotation path pubspec_parse yaml]
+- build_daemon 4.0.4 [built_collection built_value crypto http_multi_server logging path pool shelf shelf_web_socket stream_transform watcher web_socket_channel]
+- build_resolvers 2.5.4 [analyzer async build build_runner_core collection convert crypto graphs logging package_config path pool pub_semver stream_transform]
+- build_runner_core 9.1.2 [analyzer async build build_config build_resolvers build_runner built_collection built_value collection convert crypto glob graphs json_annotation logging meta package_config path pool timing watcher yaml]
+- built_collection 5.1.1
+- built_value 8.11.1 [built_collection collection fixnum meta]
+- characters 1.4.0
+- checked_yaml 2.0.4 [json_annotation source_span yaml]
+- clock 1.1.2
+- code_builder 4.10.1 [built_collection built_value collection matcher meta]
+- convert 3.1.2 [typed_data]
+- crypto 3.0.6 [typed_data]
+- dart_style 3.1.2 [analyzer args collection package_config path pub_semver source_span yaml]
+- ffi 2.1.4
+- file 7.0.1 [meta path]
+- fixnum 1.1.1
+- frontend_server_client 4.0.0 [async path]
+- glob 2.1.3 [async collection file path string_scanner]
+- graphs 2.3.2 [collection]
+- http 1.5.0 [async http_parser meta web]
+- http_multi_server 3.2.2 [async]
+- http_parser 4.1.2 [collection source_span string_scanner typed_data]
+- io 1.0.5 [meta path string_scanner]
+- js 0.7.2
+- leak_tracker 10.0.9 [clock collection meta path vm_service]
+- leak_tracker_flutter_testing 3.0.9 [flutter leak_tracker leak_tracker_testing matcher meta]
+- leak_tracker_testing 3.0.1 [leak_tracker matcher meta]
+- lints 6.0.0
+- logging 1.3.0
+- macros 0.1.3-main.0 [_macros]
+- matcher 0.12.17 [async meta stack_trace term_glyph test_api]
+- material_color_utilities 0.11.1 [collection]
+- mime 2.0.0
+- nested 1.0.0 [flutter]
+- ordered_set 8.0.0
+- package_config 2.2.0 [path]
+- path 1.9.1
+- path_parsing 1.1.0 [meta vector_math]
+- path_provider 2.1.5 [flutter path_provider_android path_provider_foundation path_provider_linux path_provider_platform_interface path_provider_windows]
+- path_provider_android 2.2.17 [flutter path_provider_platform_interface]
+- path_provider_foundation 2.4.2 [flutter path_provider_platform_interface]
+- path_provider_linux 2.2.1 [ffi flutter path path_provider_platform_interface xdg_directories]
+- path_provider_platform_interface 2.1.2 [flutter platform plugin_platform_interface]
+- path_provider_windows 2.3.0 [ffi flutter path path_provider_platform_interface]
+- petitparser 6.1.0 [meta collection]
+- platform 3.1.6
+- plugin_platform_interface 2.1.8 [meta]
+- pool 1.5.1 [async stack_trace]
+- pub_semver 2.2.0 [collection]
+- pubspec_parse 1.5.0 [checked_yaml collection json_annotation pub_semver yaml]
+- shared_preferences_android 2.4.11 [flutter shared_preferences_platform_interface]
+- shared_preferences_foundation 2.5.4 [flutter shared_preferences_platform_interface]
+- shared_preferences_linux 2.4.1 [file flutter path path_provider_linux path_provider_platform_interface shared_preferences_platform_interface]
+- shared_preferences_platform_interface 2.4.1 [flutter plugin_platform_interface]
+- shared_preferences_web 2.4.3 [flutter flutter_web_plugins shared_preferences_platform_interface web]
+- shared_preferences_windows 2.4.1 [file flutter path path_provider_platform_interface path_provider_windows shared_preferences_platform_interface]
+- shelf 1.4.2 [async collection http_parser path stack_trace stream_channel]
+- shelf_web_socket 3.0.0 [shelf stream_channel web_socket_channel]
+- sky_engine 0.0.0
+- source_helper 1.3.5 [analyzer collection source_gen]
+- source_span 1.10.1 [collection path term_glyph]
+- sprintf 7.0.0
+- stack_trace 1.12.1 [path]
+- state_notifier 1.0.0 [meta]
+- stream_channel 2.1.4 [async]
+- stream_transform 2.1.1
+- string_scanner 1.4.1 [source_span]
+- synchronized 3.4.0
+- term_glyph 1.2.2
+- test_api 0.7.4 [async boolean_selector collection meta source_span stack_trace stream_channel string_scanner term_glyph]
+- timing 1.0.2 [json_annotation]
+- typed_data 1.4.0 [collection]
+- uuid 4.5.1 [crypto sprintf meta fixnum]
+- vector_graphics_codec 1.1.13
+- vector_graphics_compiler 1.1.18 [args meta path path_parsing vector_graphics_codec xml]
+- vector_math 2.1.4
+- vm_service 15.0.0
+- watcher 1.1.2 [async path]
+- web 1.1.1
+- web_socket 1.0.1 [web]
+- web_socket_channel 3.0.3 [async crypto stream_channel web web_socket]
+- xdg_directories 1.1.0 [meta path]
+- xml 6.5.0 [collection meta petitparser]
+- yaml 3.1.3 [collection source_span string_scanner]

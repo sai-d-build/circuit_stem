@@ -40,7 +40,7 @@ class _SimpleLogicSimulator {
       final componentId = terminalId.split('_').first;
       poweredComponentIds.add(componentId);
     }
-    Logger.log('_SimpleLogicSimulator: Powered component IDs: \$poweredComponentIds');
+    Logger.log('_SimpleLogicSimulator: Powered component IDs: $poweredComponentIds');
     return poweredComponentIds;
   }
 
@@ -102,10 +102,10 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     required this.animationScheduler,
     required this.audioService,
   }) : super(GameEngineState.empty()) {
-    Logger.log('GameEngineNotifier: Initializing with initialLevel: \$initialLevel');
+    Logger.log('GameEngineNotifier: Initializing with initialLevel: $initialLevel');
     final level = initialLevel;
     if (level != null) {
-      loadLevel(level);
+      _loadLevel(level);
     }
   }
 
@@ -128,97 +128,80 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     }
   }
 
-  void loadLevel(LevelDefinition level) {
-    Logger.log('GameEngineNotifier: Loading level: \${level.id}');
-    final grid = Grid(rows: level.rows, cols: level.cols, components: level.initialComponents);
-    Logger.log('GameEngineNotifier: Created grid with \${grid.components.length} initial components.');
+  // ============================================================================
+  // SINGLE COMMIT PIPELINE - The ONLY method that modifies state
+  // ============================================================================
+  
+  /// The single, canonical pipeline for ALL state updates.
+  /// This method ensures atomic, race-condition-free state management.
+  void _commitGrid(Grid newGrid, {
+    String? selectedComponentId,
+    String? draggedComponentId,
+    Offset? dragPosition,
+    bool? isPaused,
+    bool? isWin,
+  }) {
+    Logger.log('GameEngineNotifier: _commitGrid called - SINGLE COMMIT PIPELINE');
     
-    // Update both grid and render state
-    final updatedRenderState = RenderState(
-      grid: grid,
-      poweredComponentIds: const {},
-      draggedComponentId: null,
-      dragPosition: null,
-    );
-    
-    state = GameEngineState.initial(level).copyWith(
-      grid: grid,
-      renderState: updatedRenderState,
-    );
-    _updateStateWithNewGrid(state.grid);
-  }
-
-  void _updateStateWithNewGrid(Grid newGrid) {
-    Logger.log('GameEngineNotifier: Evaluating grid.');
-
+    // Step 1: Evaluate all LogicBehavior components
     for (var component in newGrid.components) {
       final behavior = component.getBehavior<LogicBehavior>();
       if (behavior != null) {
-        Logger.log('GameEngineNotifier: Evaluating logic for component: \${component.id}');
+        Logger.log('GameEngineNotifier: Evaluating logic for component: ${component.id}');
         behavior.evaluate(newGrid, component);
-      } else {
-        Logger.log('GameEngineNotifier: No LogicBehavior found for component: \${component.id}');
       }
     }
 
+    // Step 2: Calculate powered components
     final poweredIds = _logicSimulator.evaluate(newGrid);
 
+    // Step 3: Update component power states
     final updatedComponents = newGrid.components.map((c) {
       return c.copyWith(isPowered: poweredIds.contains(c.id));
     }).toList();
 
     final finalGrid = newGrid.copyWith(components: updatedComponents);
     
-    final updatedRenderState = state.renderState?.copyWith(
+    // Step 4: Create updated render state
+    final updatedRenderState = RenderState(
       grid: finalGrid,
       poweredComponentIds: poweredIds,
-    ) ?? RenderState(
-      grid: finalGrid,
-      poweredComponentIds: poweredIds,
-      draggedComponentId: state.draggedComponentId,
-      dragPosition: state.dragPosition,
+      draggedComponentId: draggedComponentId ?? state.draggedComponentId,
+      dragPosition: dragPosition ?? state.dragPosition,
     );
     
+    // Step 5: Update state EXACTLY ONCE
     state = state.copyWith(
       grid: finalGrid,
       renderState: updatedRenderState,
+      selectedComponentId: selectedComponentId ?? state.selectedComponentId,
+      draggedComponentId: draggedComponentId ?? state.draggedComponentId,
+      dragPosition: dragPosition ?? state.dragPosition,
+      isPaused: isPaused ?? state.isPaused,
+      isWin: isWin ?? state.isWin,
     );
-    Logger.log('GameEngineNotifier: Grid evaluation complete. Powered components: \$poweredIds');
+    
+    Logger.log('GameEngineNotifier: State committed. Powered components: $poweredIds');
+    
+    // Step 6: Check win condition
     _checkWinCondition();
   }
 
-  void _checkWinCondition() {
-    Logger.log('GameEngineNotifier: Checking win condition.');
-    final currentLevel = state.currentLevel;
-    if (currentLevel == null) {
-      Logger.log('GameEngineNotifier: No current level to check win condition.');
-      return;
-    }
+  // ============================================================================
+  // PUBLIC API - All public methods delegate to _commitGrid
+  // ============================================================================
 
-    bool allGoalsMet = true;
-    for (final goal in currentLevel.goals) {
-      final behavior = goal.getBehavior<GoalCheckingBehavior>();
-      if (behavior == null) {
-        Logger.log('GameEngineNotifier: No GoalCheckingBehavior found for goal: \${goal.type}');
-        allGoalsMet = false;
-        break;
-      }
-      if (!behavior.isMet(state.grid, goal)) {
-        Logger.log('GameEngineNotifier: Goal \${goal.type} not met.');
-        allGoalsMet = false;
-        break;
-      }
-    }
-
-    if (allGoalsMet) {
-      state = state.copyWith(isWin: true);
-      audioService.play(AppAssets.audioSuccess);
-      Logger.log('GameEngineNotifier: Win condition met!');
-    }
+  void _loadLevel(LevelDefinition level) {
+    Logger.log('GameEngineNotifier: Loading level: ${level.id}');
+    final grid = Grid(rows: level.rows, cols: level.cols, components: level.initialComponents);
+    Logger.log('GameEngineNotifier: Created grid with ${grid.components.length} initial components.');
+    
+    state = GameEngineState.initial(level);
+    _commitGrid(grid, isWin: false, isPaused: false);
   }
 
   void handleTap(Offset tapPosition) {
-    Logger.log('GameEngineNotifier: Handling tap at: \$tapPosition');
+    Logger.log('GameEngineNotifier: Handling tap at: $tapPosition');
     final cell = state.grid.cellAt(tapPosition.dx, tapPosition.dy);
     if (cell == null) {
       Logger.log('GameEngineNotifier: Tap outside grid.');
@@ -227,47 +210,44 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     
     final component = state.grid.componentAt(cell.r, cell.c);
     if (component != null) {
-      Logger.log('GameEngineNotifier: Tapped on component: \${component.id}');
+      Logger.log('GameEngineNotifier: Tapped on component: ${component.id}');
       final behavior = component.getBehavior<InteractionBehavior>();
       if (behavior != null) {
         // Push to history before interactive behavior (like switch toggle)
         _pushToHistory();
         
-        Logger.log('GameEngineNotifier: Invoking InteractionBehavior for component: \${component.id}');
+        Logger.log('GameEngineNotifier: Invoking InteractionBehavior for component: ${component.id}');
         behavior.onTap(this, component);
       } else {
-        Logger.log('GameEngineNotifier: No InteractionBehavior found for component: \${component.id}. Selecting component.');
-        selectComponent(component);
+        Logger.log('GameEngineNotifier: No InteractionBehavior found for component: ${component.id}. Selecting component.');
+        _commitGrid(state.grid, selectedComponentId: component.isDraggable ? component.id : null);
       }
     } else {
-      Logger.log('GameEngineNotifier: No component at tapped cell: (\${cell.r}, \${cell.c})');
+      Logger.log('GameEngineNotifier: No component at tapped cell: (${cell.r}, ${cell.c})');
     }
   }
 
-  void updateComponent(ComponentModel component) {
-    Logger.log('GameEngineNotifier: Updating component: \${component.id} with new state: \${component.state}');
-    final oldComponent = state.grid.componentsById[component.id];
-    Logger.log('GameEngineNotifier: Old component state: \${oldComponent?.state}');
+  void selectPaletteComponent(ComponentModel component) {
+    Logger.log('GameEngineNotifier: Selecting palette component: ${component.id}');
+    _commitGrid(state.grid, selectedComponentId: component.id);
+  }
 
-    // Push current state to history before making changes
-    _pushToHistory();
+  /// Called by InteractionBehavior implementations to update component state
+  void updateComponent(ComponentModel component) {
+    Logger.log('GameEngineNotifier: Updating component: ${component.id} with new state: ${component.state}');
     
     final newGrid = state.grid.copyWithUpdatedComponent(component);
-    state = state.copyWith(grid: newGrid);
-
-    final verifyComponent = state.grid.componentsById[component.id];
-    Logger.log('GameEngineNotifier: State AFTER update. Verified component state: \${verifyComponent?.state}');
-    _updateStateWithNewGrid(state.grid);
+    _commitGrid(newGrid);
   }
 
   void startDrag(ComponentModel component, Offset position) {
-    Logger.log('GameEngineNotifier: Starting drag for component: \${component.id} at \$position');
-    state = state.copyWith(draggedComponentId: component.id, dragPosition: position);
+    Logger.log('GameEngineNotifier: Starting drag for component: ${component.id} at $position');
+    _commitGrid(state.grid, draggedComponentId: component.id, dragPosition: position);
   }
 
   void updateDrag(Offset position) {
-    Logger.log('GameEngineNotifier: Updating drag position to: \$position');
-    state = state.copyWith(dragPosition: position);
+    Logger.log('GameEngineNotifier: Updating drag position to: $position');
+    _commitGrid(state.grid, dragPosition: position);
   }
 
   void endDrag() {
@@ -278,12 +258,14 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     if (draggedComponentId != null && dragPosition != null) {
       final cell = state.grid.cellAt(dragPosition.dx, dragPosition.dy);
       if (cell != null) {
-        Logger.log('GameEngineNotifier: Dropped at cell: (\${cell.r}, \${cell.c})');
+        Logger.log('GameEngineNotifier: Dropped at cell: (${cell.r}, ${cell.c})');
         final oldComponent = state.grid.componentsById[draggedComponentId];
         if (oldComponent != null) {
           if (state.grid.isCellOccupied(cell.r, cell.c, excludeComponentId: oldComponent.id)) {
             Logger.log('GameEngineNotifier: Cell occupied, playing warning sound.');
             audioService.play(AppAssets.audioWarning);
+            // Clear drag state but don't move component
+            _commitGrid(state.grid, draggedComponentId: null, dragPosition: null);
           } else {
             Logger.log('GameEngineNotifier: Valid drop, updating component position.');
             
@@ -292,26 +274,26 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
             
             final newComponent = oldComponent.copyWith(r: cell.r, c: cell.c);
             final newGrid = state.grid.copyWithUpdatedComponent(newComponent);
-            _updateStateWithNewGrid(newGrid);
             
             // Play placement sound for successful moves
             audioService.play(AppAssets.audioPlacement);
+            
+            // Clear drag state and commit new position
+            _commitGrid(newGrid, draggedComponentId: null, dragPosition: null);
           }
         }
       } else {
         Logger.log('GameEngineNotifier: Dropped outside grid.');
+        _commitGrid(state.grid, draggedComponentId: null, dragPosition: null);
       }
     } else {
       Logger.log('GameEngineNotifier: No component being dragged.');
+      _commitGrid(state.grid, draggedComponentId: null, dragPosition: null);
     }
-    
-    state = state.copyWith(draggedComponentId: null, dragPosition: null);
-    // No-op evaluation to clean up state after drag, e.g. if drop was invalid
-    _updateStateWithNewGrid(state.grid);
   }
 
   void addComponent(ComponentModel paletteComponent, int r, int c) {
-    Logger.log('GameEngineNotifier: Adding component \${paletteComponent.type} at (\$r, \$c)');
+    Logger.log('GameEngineNotifier: Adding component ${paletteComponent.type} at ($r, $c)');
     
     // Push current state to history before adding component
     _pushToHistory();
@@ -320,12 +302,11 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     final newId = '${paletteComponent.type}_${DateTime.now().millisecondsSinceEpoch}';
     final newComponent = paletteComponent.copyWith(id: newId, r: r, c: c);
     final newGrid = grid.copyWith(components: [...grid.components, newComponent]);
-    state = state.copyWith(grid: newGrid);
     
     // Play placement sound
     audioService.play(AppAssets.audioPlacement);
     
-    _updateStateWithNewGrid(state.grid);
+    _commitGrid(newGrid);
   }
 
   void rotateComponent() {
@@ -340,10 +321,9 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
         final newRotation = (component.rotation + 90) % 360;
         final updatedComponent = component.copyWith(rotation: newRotation);
         final newGrid = state.grid.copyWithUpdatedComponent(updatedComponent);
-        state = state.copyWith(grid: newGrid);
         
-        _updateStateWithNewGrid(state.grid);
-        Logger.log('GameEngineNotifier: Rotated component \${component.id} to \$newRotation degrees.');
+        _commitGrid(newGrid);
+        Logger.log('GameEngineNotifier: Rotated component ${component.id} to $newRotation degrees.');
       } else {
         Logger.log('GameEngineNotifier: Selected component is null or not draggable.');
       }
@@ -352,18 +332,9 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     }
   }
 
-  void selectComponent(ComponentModel component) {
-    Logger.log('GameEngineNotifier: Selecting component: \${component.id}');
-    if (component.isDraggable) {
-      state = state.copyWith(selectedComponentId: component.id);
-    } else {
-      Logger.log('GameEngineNotifier: Component \${component.id} is not draggable, cannot be selected.');
-    }
-  }
-
   void togglePause() {
-    Logger.log('GameEngineNotifier: Toggling pause. Current state: \${state.isPaused}');
-    state = state.copyWith(isPaused: !state.isPaused);
+    Logger.log('GameEngineNotifier: Toggling pause. Current state: ${state.isPaused}');
+    _commitGrid(state.grid, isPaused: !state.isPaused);
   }
 
   /// Restart the current level to its initial state
@@ -387,24 +358,17 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     );
     
     // Reset to initial state
-    final initialRenderState = RenderState(
-      grid: initialGrid,
-      poweredComponentIds: const {},
-      draggedComponentId: null,
-      dragPosition: null,
-    );
+    state = GameEngineState.initial(currentLevel);
     
-    state = GameEngineState.initial(currentLevel).copyWith(
-      grid: initialGrid,
-      renderState: initialRenderState,
-      isWin: false,
-      isPaused: false,
+    _commitGrid(
+      initialGrid, 
+      isWin: false, 
+      isPaused: false, 
       selectedComponentId: null,
       draggedComponentId: null,
       dragPosition: null,
     );
     
-    _updateStateWithNewGrid(state.grid);
     Logger.log('GameEngineNotifier: Level restarted successfully.');
   }
 
@@ -421,8 +385,42 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     state = previousState;
     
     // Re-evaluate grid to ensure consistency
-    _updateStateWithNewGrid(state.grid);
+    _commitGrid(state.grid);
     
     Logger.log('GameEngineNotifier: Undo successful. History size: ${_stateHistory.length}');
+  }
+
+  // ============================================================================
+  // PRIVATE HELPER METHODS
+  // ============================================================================
+
+  void _checkWinCondition() {
+    Logger.log('GameEngineNotifier: Checking win condition.');
+    final currentLevel = state.currentLevel;
+    if (currentLevel == null) {
+      Logger.log('GameEngineNotifier: No current level to check win condition.');
+      return;
+    }
+
+    bool allGoalsMet = true;
+    for (final goal in currentLevel.goals) {
+      final behavior = goal.getBehavior<GoalCheckingBehavior>();
+      if (behavior == null) {
+        Logger.log('GameEngineNotifier: No GoalCheckingBehavior found for goal: ${goal.type}');
+        allGoalsMet = false;
+        break;
+      }
+      if (!behavior.isMet(state.grid, goal)) {
+        Logger.log('GameEngineNotifier: Goal ${goal.type} not met.');
+        allGoalsMet = false;
+        break;
+      }
+    }
+
+    if (allGoalsMet && !state.isWin) {
+      state = state.copyWith(isWin: true);
+      audioService.play(AppAssets.audioSuccess);
+      Logger.log('GameEngineNotifier: Win condition met!');
+    }
   }
 }

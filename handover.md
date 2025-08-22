@@ -397,4 +397,45 @@ This suggests a subtle lifecycle management issue. It's highly unusual for `addT
 
 ### Summary
 
-The tests are failing because `GameEngineNotifier` is being disposed prematurely, leading to a `StateError` when its state is accessed. This points to a complex lifecycle management issue within the Flutter test environment, where the `GameEngineNotifier` is becoming unmounted earlier than anticipated during the test's execution, despite explicit disposal handling via `addTearDown`."
+The tests are failing because `GameEngineNotifier` is being disposed prematurely, leading to a `StateError` when its state is accessed. This points to a complex lifecycle management issue within the Flutter test environment, where the `GameEngineNotifier` is becoming unmounted earlier than anticipated during the test's execution, despite explicit disposal handling via `addTearDown`.
+
+
+---
+
+## Recent Debugging Session: State Management and Data Consistency (2025-08-21)
+
+This section summarizes the recent debugging session that resolved critical issues related to state management and data consistency.
+
+### Problem Statement
+
+The test suite was failing with two critical errors: one for toggling a switch and another for moving a timer component. These errors were caused by a combination of issues, including race conditions in the state management pipeline, incorrect component registration, and data inconsistencies in the level files.
+
+### The "Single Commit Pipeline" Architecture
+
+The `GameEngineNotifier` has been refactored to use a "single commit pipeline" architecture. This is a critical concept for new developers to understand.
+
+*   **The Problem:** The old `GameEngineNotifier` had multiple methods that could independently modify the game state, leading to race conditions and unpredictable behavior.
+*   **The Solution:** All state updates now go through a single, centralized `_commitGrid` method. This ensures that state changes are atomic and predictable. Any method that needs to update the game state must now call `_commitGrid`.
+
+### The `ComponentRegistry`
+
+The `ComponentRegistry` is responsible for creating components and attaching behaviors to them.
+
+*   **The Problem:** The `createFromJson` method was not correctly attaching behaviors to components created from the level's JSON data.
+*   **The Solution:** The `createFromJson` method has been fixed to ensure that all components have the correct behaviors at runtime.
+
+### The `r` and `c` Naming Convention
+
+The codebase has been standardized to use `r` for rows and `c` for columns. This convention is used in the `Grid` model, the `ComponentModel`, the `CellOffset` class, and the level files.
+
+### How to Add a New Component
+
+To add a new component, you need to:
+
+1.  **Create a new component file** in `lib/components/`.
+2.  **Implement the necessary behaviors** for the component.
+3.  **Create a registration function** that registers the component and its behaviors with the `ComponentRegistry`.
+4.  **Call the registration function** in `lib/main.dart`.
+5.  **Use the new component** in your level files.
+
+This new architecture makes the project significantly easier to extend and maintain.

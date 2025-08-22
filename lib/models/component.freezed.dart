@@ -16,8 +16,8 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$CellOffset {
-  int get x => throw _privateConstructorUsedError;
-  int get y => throw _privateConstructorUsedError;
+  int get r => throw _privateConstructorUsedError;
+  int get c => throw _privateConstructorUsedError;
 
   /// Create a copy of CellOffset
   /// with the given fields replaced by the non-null parameter values.
@@ -32,7 +32,7 @@ abstract class $CellOffsetCopyWith<$Res> {
           CellOffset value, $Res Function(CellOffset) then) =
       _$CellOffsetCopyWithImpl<$Res, CellOffset>;
   @useResult
-  $Res call({int x, int y});
+  $Res call({int r, int c});
 }
 
 /// @nodoc
@@ -50,17 +50,17 @@ class _$CellOffsetCopyWithImpl<$Res, $Val extends CellOffset>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? x = null,
-    Object? y = null,
+    Object? r = null,
+    Object? c = null,
   }) {
     return _then(_value.copyWith(
-      x: null == x
-          ? _value.x
-          : x // ignore: cast_nullable_to_non_nullable
+      r: null == r
+          ? _value.r
+          : r // ignore: cast_nullable_to_non_nullable
               as int,
-      y: null == y
-          ? _value.y
-          : y // ignore: cast_nullable_to_non_nullable
+      c: null == c
+          ? _value.c
+          : c // ignore: cast_nullable_to_non_nullable
               as int,
     ) as $Val);
   }
@@ -74,7 +74,7 @@ abstract class _$$CellOffsetImplCopyWith<$Res>
       __$$CellOffsetImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int x, int y});
+  $Res call({int r, int c});
 }
 
 /// @nodoc
@@ -90,17 +90,17 @@ class __$$CellOffsetImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? x = null,
-    Object? y = null,
+    Object? r = null,
+    Object? c = null,
   }) {
     return _then(_$CellOffsetImpl(
-      null == x
-          ? _value.x
-          : x // ignore: cast_nullable_to_non_nullable
+      null == r
+          ? _value.r
+          : r // ignore: cast_nullable_to_non_nullable
               as int,
-      null == y
-          ? _value.y
-          : y // ignore: cast_nullable_to_non_nullable
+      null == c
+          ? _value.c
+          : c // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }
@@ -109,16 +109,16 @@ class __$$CellOffsetImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$CellOffsetImpl extends _CellOffset with DiagnosticableTreeMixin {
-  const _$CellOffsetImpl(this.x, this.y) : super._();
+  const _$CellOffsetImpl(this.r, this.c) : super._();
 
   @override
-  final int x;
+  final int r;
   @override
-  final int y;
+  final int c;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'CellOffset(x: $x, y: $y)';
+    return 'CellOffset(r: $r, c: $c)';
   }
 
   @override
@@ -126,8 +126,8 @@ class _$CellOffsetImpl extends _CellOffset with DiagnosticableTreeMixin {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'CellOffset'))
-      ..add(DiagnosticsProperty('x', x))
-      ..add(DiagnosticsProperty('y', y));
+      ..add(DiagnosticsProperty('r', r))
+      ..add(DiagnosticsProperty('c', c));
   }
 
   @override
@@ -135,12 +135,12 @@ class _$CellOffsetImpl extends _CellOffset with DiagnosticableTreeMixin {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$CellOffsetImpl &&
-            (identical(other.x, x) || other.x == x) &&
-            (identical(other.y, y) || other.y == y));
+            (identical(other.r, r) || other.r == r) &&
+            (identical(other.c, c) || other.c == c));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, x, y);
+  int get hashCode => Object.hash(runtimeType, r, c);
 
   /// Create a copy of CellOffset
   /// with the given fields replaced by the non-null parameter values.
@@ -152,13 +152,13 @@ class _$CellOffsetImpl extends _CellOffset with DiagnosticableTreeMixin {
 }
 
 abstract class _CellOffset extends CellOffset {
-  const factory _CellOffset(final int x, final int y) = _$CellOffsetImpl;
+  const factory _CellOffset(final int r, final int c) = _$CellOffsetImpl;
   const _CellOffset._() : super._();
 
   @override
-  int get x;
+  int get r;
   @override
-  int get y;
+  int get c;
 
   /// Create a copy of CellOffset
   /// with the given fields replaced by the non-null parameter values.
@@ -596,7 +596,7 @@ class _$ComponentModelImpl extends _ComponentModel
       this.rotation = 0,
       this.isPowered = false,
       final Map<String, dynamic> state = const {},
-      final List<CellOffset> shapeOffsets = const [CellOffset(0, 0)],
+      final List<CellOffset> shapeOffsets = const [const CellOffset(0, 0)],
       final List<TerminalSpec> terminals = const [
         TerminalSpec(
             offset: CellOffset(0, 0),

@@ -39,7 +39,7 @@
         { "id": "sw1_in", "label": "in", "offset": { "r": 0, "c": 0 }, "dir": "left" },
         { "id": "sw1_out", "label": "out", "offset": { "r": 0, "c": 0 }, "dir": "right" }
       ],
-      "state": { "switchOpen": false }
+      "state": { "closed": false }
     },
     {
       "id": "bulb1",
