@@ -50,8 +50,12 @@ class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
   }
 
   void _moveComponent(String id, int r, int c) {
+    Logger.log('[_moveComponent] id: \$id, targetR: \$r, targetC: \$c');
     final comp = state.grid.componentsById[id];
-    if (comp == null) return;
+    if (comp == null) {
+      Logger.log('[_moveComponent] Component with id \$id not found.');
+      return;
+    }
 
     final moved = comp.copyWith(r: r, c: c);
     var newGrid = state.grid.copyWithUpdatedComponent(moved);
@@ -59,6 +63,7 @@ class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
 
     audio.playPlacement();
     state = state.copyWith(grid: newGrid);
+    Logger.log('[_moveComponent] Component \$id moved to (\$r, \$c). Current state grid: \${state.grid.componentsById[id]?.r}, \${state.grid.componentsById[id]?.c}');
   }
 
   void updateComponent(ComponentModel component) {
