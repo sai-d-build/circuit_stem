@@ -11,6 +11,12 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 | `BUG-001` | Resolved | Build & Compilation                          | `flutter test` command fails due to compilation errors in `GameEngineNotifier`. | 2025-08-21    | 2025-08-21    | High     |
 | `BUG-002` | Resolved | State Management (`GameEngineNotifier`)      | Component state is not updated correctly after user interactions (tap, drag). | 2025-08-21    | 2025-08-21    | High     |
 | `BUG-003` | Resolved | Component Behaviors (`SwitchInteractionBehavior`) | Behaviors creating their own services bypasses test mocks, causing failures.  | 2025-08-21    | 2025-08-21    | Medium   |
+| `BUG-004` | Open     | Core Models, Simulation Engine               | Missing `lib/models/port.dart` file.                                        | 2025-08-22    |               | High     |
+| `BUG-005` | Open     | Behaviors, UI                                | `GridWidgetState` type not found.                                           | 2025-08-22    |               | High     |
+| `BUG-006` | Open     | Game Engine, Test Setup                      | `GameEngineNotifierV2` Constructor and API Mismatches.                      | 2025-08-22    |               | High     |
+| `BUG-007` | Open     | Various (Audio, Grid, Components, UI)        | Undefined Methods/Getters Across Refactored Components.                     | 2025-08-22    |               | High     |
+| `BUG-008` | Open     | Game Engine                                  | Invalid `this` Reference in `GameEngineNotifierV2` Initializer.             | 2025-08-22    |               | High     |
+| `BUG-009` | Open     | Code Quality, Riverpod Usage                 | Unused Code and Improper State Access Warnings.                             | 2025-08-22    |               | Low      |
 
 ---
 
@@ -53,38 +59,73 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 *   **Fix:** The `SwitchInteractionBehavior` was already correctly implemented to use the `notifier.audioService`. The issue was resolved by the refactoring of the `GameEngineNotifier` and `ComponentRegistry`, which ensured that the `onTap` method was called correctly.
 *   **Reference Docs:** `lib/components/switch.dart`
 
+---
 
- failed with compilation errors. Here is a summary of the issues:
+### ID: `BUG-004`
+*   **Date:** 2025-08-22
+*   **Status:** Open
+*   **Module/Feature:** Core Models, Simulation Engine
+*   **Description:** The file `lib/models/port.dart` is missing, causing compilation errors in `lib/engine/simulation_manager.dart` and preventing tests from running. This file is a critical dependency for the new `SimulationManager`.
+*   **Root Cause:** File either deleted, renamed, or moved without updating its references or being recreated.
+*   **Impact:** Blocks compilation of `SimulationManager` and thus the entire test suite and application.
+*   **Reference Docs:** `lib/engine/simulation_manager.dart`
 
-Root Cause: Incomplete Refactoring of CellOffset
-The core of the problem is that when I refactored the CellOffset class in lib/models/component.dart to use r and c instead of x and y, I only changed the factory constructor and the fromJson method. I did not change the primary constructor or the class properties themselves.
+---
 
-This means that the CellOffset class still has x and y properties, but the rest of the code is now trying to access r and c properties that don't exist.
+### ID: `BUG-005`
+*   **Date:** 2025-08-22
+*   **Status:** Open
+*   **Module/Feature:** Behaviors, UI
+*   **Description:** The type `GridWidgetState` is not found in `lib/behaviors/drag_behavior.dart`, leading to compilation errors. This suggests `GridWidgetState` is either not defined or not correctly imported/exposed.
+*   **Root Cause:** Likely a missing definition, incorrect import, or a change in the class's visibility/location.
+*   **Impact:** Prevents compilation of `DragBehavior` and related UI components.
+*   **Reference Docs:** `lib/behaviors/drag_behavior.dart`
 
-Summary of Compilation Errors
-This single issue in CellOffset has caused a cascade of compilation errors in all the files that use it:
+---
 
-lib/models/component.dart:
-The toJson method is trying to access the non-existent r and c properties.
-lib/engine/game_engine_notifier.dart:
-The _SimpleLogicSimulator is trying to access the non-existent r and c properties on t.offset.
-lib/models/grid.dart:
-The componentAt method is trying to access the non-existent r and c properties on offset.
-Next Steps
-To fix these issues, I need to complete the refactoring of the CellOffset class. This will involve:
+### ID: `BUG-006`
+*   **Date:** 2025-08-22
+*   **Status:** Open
+*   **Module/Feature:** Game Engine, Test Setup
+*   **Description:** The `GameEngineNotifierV2` constructor has argument mismatches (e.g., `animationScheduler` parameter not found, `audioManager` parameter not defined, too many positional arguments). Additionally, getters like `animationScheduler` are being accessed on `GameEngineNotifierV2` but are not defined.
+*   **Root Cause:** Incomplete update of all call sites and test setups to match the new `GameEngineNotifierV2` constructor signature and API. Responsibilities for `animationScheduler` have likely moved.
+*   **Impact:** Prevents correct instantiation of the game engine in tests and potentially in the application, leading to compilation errors.
+*   **Reference Docs:** `lib/engine/game_engine_notifier.dart`, `test/level_01_revised_test.dart`, `test/helpers/test_setup_helper.dart`
 
-Changing the primary constructor of CellOffset to use r and c.
-Changing the properties of CellOffset from x and y to r and c.
-Running the build_runner to regenerate the freezed files.
-Once these changes are made, the compilation errors should be resolved, and the tests should be able to run.I have completed all the requested tasks, including summarizing the test results. There are no further steps to take based on your previous requests.
+---
 
-e errors are still related to:
+### ID: `BUG-007`
+*   **Date:** 2025-08-22
+*   **Status:** Open
+*   **Module/Feature:** Various (Audio, Grid, Components, UI)
+*   **Description:** Numerous methods and getters are reported as undefined across various parts of the codebase, indicating that APIs have changed due to refactoring, and calling code has not been updated.
+    *   `playToggle`, `playSelection`, `playPlacement`, `playWin`, `playLose`, `stopAll` not defined for `AudioManager`/`AudioService`.
+    *   `getComponentAt` not defined for `Grid`.
+    *   `shape` getter not defined for `ComponentModel`.
+    *   `getDrawingBehavior` not defined for `ComponentPainter`.
+    *   `state` getter not defined for `GameEngineState` (in test helpers).
+*   **Root Cause:** Incomplete propagation of API changes from the refactoring of `GameEngineNotifier` and related components.
+*   **Impact:** Widespread compilation errors, preventing the application and tests from running.
+*   **Reference Docs:** `lib/components/switch.dart`, `lib/engine/audio_manager.dart`, `lib/engine/simulation_manager.dart`, `lib/ui/game_canvas.dart`, `lib/widgets/component_painter.dart`, `lib/widgets/component_widget.dart`, `test/helpers/game_test_helper.dart`
 
-Missing implementations for freezed classes: This is the main issue. The freezed classes are not being correctly generated or linked.
-StateNotifier and ProviderListenable not found: This indicates a problem with the riverpod imports or linking.
-Missing state getter/setter: This is a consequence of StateNotifier not being found.
-Possible causes:
+---
 
-freezed generation issue: Even though build_runner succeeded, it might not have generated the files correctly, or the generated files are not being picked up.
-riverpod version mismatch: Although I updated the riverpod dependencies, there might still be a subtle version conflict that is causing these types to not be found.
-Incorrect imports: The import statements for riverpod and state_notifier might be incorrect.
+### ID: `BUG-008`
+*   **Date:** 2025-08-22
+*   **Status:** Open
+*   **Module/Feature:** Game Engine
+*   **Description:** Invalid `this` reference and implicit `this` reference in initializer for `_simulationManager` in `lib/engine/game_engine_notifier.dart`.
+*   **Root Cause:** Incorrect way of initializing `_simulationManager` within the constructor's initializer list, potentially trying to use `this` before the object is fully constructed.
+*   **Impact:** Compilation error in `GameEngineNotifierV2`.
+*   **Reference Docs:** `lib/engine/game_engine_notifier.dart`
+
+---
+
+### ID: `BUG-009`
+*   **Date:** 2025-08-22
+*   **Status:** Open
+*   **Module/Feature:** Code Quality, Riverpod Usage
+*   **Description:** Warnings about unused imports, unused local variables, and invalid use of the `state` member outside of `StateNotifier` or test context.
+*   **Root Cause:** Remnants of old code, incomplete cleanup after refactoring, or violations of Riverpod's best practices for state access.
+*   **Impact:** Does not block compilation but indicates code smells, potential for bugs, and reduced maintainability.
+*   **Reference Docs:** Various files, including `lib/behaviors/drag_behavior.dart`, `lib/components/switch.dart`, `lib/core/providers.dart`, `lib/engine/game_engine_core.dart`, `lib/engine/simulation_manager.dart`, `lib/widgets/component_painter.dart`

@@ -127,20 +127,20 @@ This new architecture makes the project significantly easier to extend and maint
 
 This section details the new features and enhancements implemented during the latest development cycle.
 
-*   **Drawing Logic Refinement**:
+*   **Drawing Logic Refinement**
     *   Refined `lib/ui/canvas_painter.dart` to make grid and dragged component colors theme-aware, improving dark mode support.
     *   Updated `lib/ui/game_canvas.dart` to pass these theme-aware colors to the painter.
     *   Fixed analyzer warnings by removing unused imports and replacing a deprecated `withOpacity` call.
-*   **New Component Implementation (Cross Wire & Buzzer)**:
+*   **New Component Implementation (Cross Wire & Buzzer)**
     *   Added `crossWire` and `buzzer` to the `ComponentType` enum in `lib/models/component.dart`.
     *   Updated the `isDraggable` property for the new components.
     *   Regenerated the `freezed` and `g` files using `build_runner`.
     *   Implemented the drawing logic for `crossWire` and `buzzer` in `lib/ui/painters/circuit_component_painter.dart`.
     *   Integrated a sound effect for the buzzer, playing it when the buzzer becomes powered, by modifying `lib/engine/game_engine_notifier.dart` and `lib/engine/game_engine_state.dart`.
-*   **Component Placement in Levels**:
+*   **Component Placement in Levels**
     *   Reverted the `level_01.json` palette to its original state.
     *   Created a new `level_02.json` file, incorporating the new `crossWire` and `buzzer` components into its initial setup and palette.
-*   **Rotatable Wire Feature**:
+*   **Rotatable Wire Feature**
     *   Implemented a `rotateComponent` method in `lib/engine/game_engine_notifier.dart` to allow rotation of draggable components.
     *   Modified the `handleTap` method in `GameEngineNotifier` to select components.
     *   Updated the UI in `lib/ui/game_canvas.dart` to show a rotate button when a draggable component is selected.
@@ -356,7 +356,7 @@ worked on testing suite, Hanging seems to be resolved dbut other issue persistis
 - After fixing the above, re-run the tests to confirm:
   - No more hangs.
   - Components are created with the correct behaviors.
-  - Test assertions pass.
+  - Test assertions should pass.
 
 ---
 
@@ -439,3 +439,49 @@ To add a new component, you need to:
 5.  **Use the new component** in your level files.
 
 This new architecture makes the project significantly easier to extend and maintain.
+## Recent Architectural Refactoring: Game Engine Orchestration (2025-08-22)
+
+This section details a significant architectural refactoring of the game engine, moving towards a more modular and orchestrated design.
+
+### Overview of Changes
+
+The core game engine has undergone a substantial overhaul, transitioning from a monolithic `GameEngineNotifier` to a system where `GameEngineNotifierV2` acts as a central orchestrator, delegating responsibilities to specialized managers. This refactoring aims to improve modularity, testability, and maintainability.
+
+### Key Components and Their Roles
+
+*   **`GameEngineNotifierV2` (Orchestrator):**
+    *   Replaces the original `GameEngineNotifier`.
+    *   Delegates core responsibilities to dedicated managers.
+    *   Coordinates interactions between different parts of the game engine.
+
+*   **`GameEngineCore` (New File: `lib/engine/game_engine_core.dart`):**
+    *   Responsible for applying state updates and producing new `GameEngineState` objects.
+    *   Assumes the `newGrid` (with pre-calculated power states) is provided, indicating a delegation of power simulation logic.
+
+*   **`SimulationManager` (New File: `lib/engine/simulation_manager.dart`):**
+    *   Centralizes and manages the power flow simulation logic through the circuit.
+    *   Explicitly handles power propagation, improving clarity and testability of this complex logic.
+
+*   **`InputManager`:**
+    *   Handles user interactions and translates them into game actions.
+
+*   **`AudioManager`:**
+    *   Centralizes and manages audio feedback within the game.
+
+### Impact on Existing Codebase
+
+*   **Behavior System Adaptation:**
+    *   `lib/behaviors/drag_behavior.dart`, `lib/behaviors/interaction_behavior.dart`, `lib/behaviors/movable_behavior.dart`: All behavior classes have been updated to interact with `GameEngineNotifierV2`.
+    *   `drag_behavior.dart` now directly interacts with `GridWidgetState` for UI operations, enhancing type safety and encapsulation.
+
+*   **Component-Level Updates:**
+    *   `lib/components/switch.dart`: Updated to use `GameEngineNotifierV2`. The `onTap` method's `updateComponent` call changed from `updatedComponent` to `component`, which requires careful verification in `GameEngineNotifierV2` to ensure correct state updates. Audio handling shifted to `notifier.audio.playToggle()`.
+
+*   **Test Suite Adaptation:**
+    *   `test/helpers/game_test_helper.dart`: Test utilities updated to correctly access `gameEngineProvider`'s state, use string literals for component types, and reflect new state property names (e.g., `isClosed`, `isActive`).
+    *   `test/helpers/test_setup_helper.dart`: Test setup now instantiates `GameEngineNotifierV2` and removes the `animationScheduler` dependency, aligning the test environment.
+    *   `test/level_01_revised_test.dart`: Updated to use `GameEngineNotifierV2` and the renamed `audioManager` parameter.
+
+### Rationale and Benefits
+
+This refactoring promotes a clearer separation of concerns, making the codebase more modular, easier to understand, and more maintainable. Each new component has a well-defined responsibility, which significantly improves testability and scalability for future feature development. While this introduces significant changes across the codebase, it lays a robust foundation for the game's long-term architectural health.

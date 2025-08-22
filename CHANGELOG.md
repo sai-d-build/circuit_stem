@@ -1,3 +1,36 @@
+## [Unreleased] - 2025-08-22
+
+### Changed
+- **Major Game Engine Refactoring (Orchestrator Pattern)**
+  - The core game engine has undergone a significant architectural overhaul, transitioning from a monolithic `GameEngineNotifier` to a modular system.
+  - `GameEngineNotifierV2` now acts as an orchestrator, delegating responsibilities to specialized managers:
+    - `GameEngineCore`: Responsible for applying state updates and producing new `GameEngineState` objects. It assumes the `newGrid` (with pre-calculated power states) is provided, indicating a delegation of power simulation.
+    - `SimulationManager`: A new dedicated component for centralizing and managing power flow simulation logic through the circuit.
+    - `InputManager`: Handles user interactions and translates them into game actions.
+    - `AudioManager`: Centralizes and manages audio feedback.
+  - This refactoring promotes a clearer separation of concerns, improved testability, and better maintainability.
+
+- **Behavior System Adaptation**
+  - `lib/behaviors/drag_behavior.dart`, `lib/behaviors/interaction_behavior.dart`, `lib/behaviors/movable_behavior.dart`: All behavior classes have been updated to use `GameEngineNotifierV2`, ensuring interaction with the new engine API.
+  - `drag_behavior.dart` now directly interacts with `GridWidgetState` for UI operations, improving type safety and encapsulation.
+
+- **Component-Level Updates**
+  - `lib/components/switch.dart`: Updated to use `GameEngineNotifierV2`. The `onTap` method's `updateComponent` call changed from `updatedComponent` to `component`, requiring verification. Audio handling shifted to `notifier.audio.playToggle()`.
+
+- **Test Suite Adaptation**
+  - `test/helpers/game_test_helper.dart`: Test utilities updated to correctly access `gameEngineProvider`'s state, use string literals for component types, and reflect new state property names (e.g., `isClosed`, `isActive`).
+  - `test/helpers/test_setup_helper.dart`: Test setup now instantiates `GameEngineNotifierV2` and removes the `animationScheduler` dependency, aligning the test environment.
+  - `test/level_01_revised_test.dart`: Updated to use `GameEngineNotifierV2` and the renamed `audioManager` parameter.
+- **Refactored GameEngineNotifier into a modular architecture.**
+  - The monolithic `GameEngineNotifier` has been broken down into specialized managers to improve separation of concerns, testability, and extensibility.
+  - Introduced `GameEngineCore` for core state management and logic application.
+  - Introduced `SimulationManager` for handling power propagation and circuit simulation.
+  - Introduced `InputManager` for translating UI gestures into game actions.
+  - Introduced `AudioManager` for centralizing audio feedback.
+  - `GameEngineNotifier` now acts as a thin orchestrator, wiring up these new managers.
+  - Updated `lib/core/providers.dart` to use the new `GameEngineNotifier` (formerly `GameEngineNotifierV2`).
+  - Updated UI consumers (`lib/ui/game_canvas.dart`, `lib/ui/game_screen.dart`) to interact with the new `InputManager` and the refined `GameEngineNotifier` API.
+
 ## [1.2.1] - 2025-08-21 - State Management and Data Consistency Fixes
 
 This release addresses critical bugs related to state management, component registration, and data consistency, leading to a more stable and robust application.

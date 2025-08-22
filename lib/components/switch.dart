@@ -10,7 +10,7 @@ import '../models/component.dart';
 import '../services/asset_manager.dart';
 import '../common/theme.dart';
 import '../engine/game_engine_notifier.dart';
-import '../services/audio_service.dart';
+
 import '../common/assets.dart';
 import '../models/grid.dart';
 import '../common/logger.dart';
@@ -62,7 +62,7 @@ class SwitchDrawingBehavior implements DrawingBehavior {
 
 class SwitchInteractionBehavior implements InteractionBehavior {
   @override
-  void onTap(GameEngineNotifier notifier, ComponentModel component) {
+  void onTap(GameEngineNotifierV2 notifier, ComponentModel component) {
     Logger.log('SwitchInteractionBehavior: onTap called for switch ${component.id}');
 
     final currentState = component.state['closed'] as bool? ?? false;
@@ -72,18 +72,17 @@ class SwitchInteractionBehavior implements InteractionBehavior {
     final updatedComponent = component.copyWith(state: newComponentState);
 
     // ✅ Update game state first
-    notifier.updateComponent(updatedComponent);
-
-    // ✅ Use notifier's audio service (mockable in tests)
-    notifier.audioService.play(AppAssets.audioSwitch);
+    notifier.updateComponent(component);
+      notifier.audio.playToggle();
   }
 
+  void onDragStart(GameEngineNotifierV2 notifier, ComponentModel component) {}
+
   @override
-  void onDragStart(GameEngineNotifier notifier, ComponentModel component) {}
+  void onDragUpdate(GameEngineNotifierV2 notifier, ComponentModel component) {}
+
   @override
-  void onDragUpdate(GameEngineNotifier notifier, ComponentModel component) {}
-  @override
-  void onDragEnd(GameEngineNotifier notifier, ComponentModel component) {}
+  void onDragEnd(GameEngineNotifierV2 notifier, ComponentModel component) {}
 }
 
 class SwitchLogicBehavior implements LogicBehavior {

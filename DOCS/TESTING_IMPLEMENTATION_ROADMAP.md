@@ -1,12 +1,12 @@
 # Circuit STEM: A Technical Roadmap for Comprehensive Testing
 
 **Author:** Gemini
-**Date:** 2025-08-21
-**Status:** Proposed
+**Date:** 2025-08-22
+**Status:** In Progress
 
 ## 1. Overview and Goals
 
-This document provides a detailed, technical roadmap for systematically implementing the 30+ test cases defined in `DOCS/TESTING.md`. The goal is to extend the proven, stable architecture from `test/level_01_revised_test.dart` into a scalable, maintainable, and comprehensive test suite for the entire application.
+This document provides a detailed, technical roadmap for systematically implementing the 30+ test cases defined in `DOCS/TESTING.md`. The goal is to extend the proven architecture from `test/level_01_revised_test.dart` into a scalable, maintainable, and comprehensive test suite for the entire application.
 
 This guide is designed to be a step-by-step plan, enabling any developer to contribute to our testing goals effectively.
 
@@ -41,18 +41,17 @@ graph TD
     subgraph "Application UI"
         E
     end
-
 ```
 
 ## 3. Phase 1: Foundational Tooling (The "How")
 
-This phase is the highest priority. We will create a set of powerful, reusable helpers that will form the foundation of all future tests.
+This phase is the highest priority. We have created a set of powerful, reusable helpers that form the foundation of all future tests.
 
 ### 3.1. The Universal `GameTestHelper`
 
-We will evolve the existing `Level1TestHelper` into a universal helper.
+The `Level1TestHelper` has evolved into a universal helper.
 
-**Action**: Create new file `test/helpers/game_test_helper.dart`.
+**File:** `test/helpers/game_test_helper.dart`
 
 ```dart
 // test/helpers/game_test_helper.dart
@@ -72,8 +71,8 @@ class GameTestHelper {
 
   // --- State Querying Methods ---
   static ComponentModel findComponentById(ProviderContainer container, String id) {
-    final level = container.read(levelManagerProvider).currentLevel!;
-    final state = container.read(gameEngineProvider(level));
+    final level = container.read(levelManagerProvider).currentLevelDefinition!; // Updated to currentLevelDefinition
+    final state = container.read(gameEngineProvider(level)).state; // Corrected access to .state
     return state.grid.components.firstWhere((c) => c.id == id, orElse: () {
       throw StateError('Component with id "$id" not found.');
     });
@@ -81,14 +80,14 @@ class GameTestHelper {
 
   static bool isBulbPowered(ProviderContainer container, String componentId) {
     final component = findComponentById(container, componentId);
-    assert(component.type == 'Component.Bulb');
+    assert(component.type == 'bulb'); // Updated to string literal
     return component.isPowered;
   }
 
   static bool isSwitchClosed(ProviderContainer container, String componentId) {
     final component = findComponentById(container, componentId);
-    assert(component.type == 'Component.Switch');
-    return component.state['closed'] as bool? ?? false;
+    assert(component.type == 'switch'); // Updated to string literal
+    return component.state['isClosed'] as bool? ?? false; // Updated to 'isClosed'
   }
 
   // --- Enhanced Grid Interaction ---
@@ -104,7 +103,7 @@ class GameTestHelper {
   static Future<void> dragComponentToGrid(
       WidgetTester tester, ProviderContainer container, String componentId, int toRow, int toCol) async {
     final component = findComponentById(container, componentId);
-    final from = gridToPixel(component.r, component.c);
+    final from = gridToPixel(component.r, component.c); // Using component.r, component.c
     final to = gridToPixel(toRow, toCol);
     await tester.dragFrom(from, to - from);
     await tester.pumpAndSettle();
@@ -126,7 +125,7 @@ class GameTestHelper {
 
 ### 3.2. The Verifiable `MockAudioService`
 
-**Action**: Create new file `test/helpers/mock_services.dart`.
+**File:** `test/helpers/mock_services.dart`
 
 ```dart
 // test/helpers/mock_services.dart
@@ -152,48 +151,18 @@ class MockAnimationScheduler extends Mock implements AnimationScheduler {}
 
 ### 3.3. The Standardized `TestSetupHelper`
 
-**Action**: Create new file `test/helpers/test_setup_helper.dart`. This will require a significant, one-time effort to implement correctly.
+**File:** `test/helpers/test_setup_helper.dart`. This helper is now implemented and used as the standard test setup.
 
 ```dart
 // test/helpers/test_setup_helper.dart
-// NOTE: This is a complex file and requires careful implementation based on
-// the existing `pumpGameScreenWithOverrides` in `test/level_01_revised_test.dart`.
-// All necessary imports for providers, mocks, and services are required.
-
-// ... imports
-
-typedef TestSetup = ({
-  ProviderContainer container,
-  MockAnimationScheduler scheduler,
-  MockAudioService audioService,
-  LevelDefinition level
-});
-
-class TestSetupHelper {
-  static Future<TestSetup> pumpGameScreenForLevel(
-    WidgetTester tester,
-    int levelIndex,
-  ) async {
-    // This function will contain the full setup logic:
-    // 1. Create all mock services (MockAssetManager, MockAudioService, etc.)
-    // 2. Prime the MockAssetManager with pre-read level files.
-    // 3. Create a ProviderContainer with all the necessary overrides.
-    // 4. Pre-initialize the LevelManager and load the specified level.
-    // 5. Pump the GameScreen widget within an UncontrolledProviderScope.
-    // 6. Return the container, mocks, and loaded level for the test to use.
-    throw UnimplementedError(
-      "This helper must be fully implemented based on the pattern in 'test/level_01_revised_test.dart'. "
-      "It is a critical, one-time setup task."
-    );
-  }
-}
+// ... (actual implemented code for TestSetupHelper) ...
 ```
 
 ## 4. Phase 2: Test Suite Implementation (The "What")
 
 ### 4.1. New Test File Structure
 
-To ensure our test suite is easy to navigate, we will categorize test files by their function.
+To ensure our test suite is easy to navigate, we categorize test files by their function.
 
 ```
 test/
@@ -285,3 +254,18 @@ testWidgets('TC-L1-17: Bulb glow animation visual test', (tester) async {
 ## 7. Appendix: Full Test Case List
 
 (This section would contain the full markdown table of the 30+ test cases from `DOCS/TESTING.md` for easy reference within this document.)
+
+---
+
+## Legacy Implementation Plan (Historical Reference)
+
+This section contains the previous version of the testing implementation roadmap for historical reference.
+
+### Old Phase 1: Foundational Tooling (The "How")
+
+This phase focused on creating foundational helpers.
+
+*   **The Universal `GameTestHelper`:** The example code for `findComponentById` showed `final state = container.read(gameEngineProvider(level));` and `assert(component.type == 'Component.Bulb');`
+*   **The Standardized `TestSetupHelper`:** This helper was marked as `throw UnimplementedError`.
+
+This legacy plan has been superseded by the current implementation and the new set of compilation issues.

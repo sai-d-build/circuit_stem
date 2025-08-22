@@ -46,30 +46,13 @@ class TerminalSpec with _$TerminalSpec {
   }) = _TerminalSpec;
 
   // Custom fromJson to handle offset -> cellIndex conversion
-  factory TerminalSpec.fromJson(Map<String, dynamic> json) {
+  factory TerminalSpec.fromJson() {
     // This method should not be called directly - use ComponentRegistry.createFromJson instead
     throw UnsupportedError('TerminalSpec.fromJson should not be called directly. Use ComponentRegistry.createFromJson for components.');
   }
 }
 
-Dir _dirFromString(String dir) {
-  final lowerDir = dir.toLowerCase();
-  if (lowerDir == 'up') return Dir.north;
-  if (lowerDir == 'down') return Dir.south;
-  if (lowerDir == 'left') return Dir.west;
-  if (lowerDir == 'right') return Dir.east;
-  return Dir.values.firstWhere(
-    (e) => e.name.toLowerCase() == lowerDir,
-    orElse: () {
-      // For backward compatibility with older level files
-      if (lowerDir == 'n') return Dir.north;
-      if (lowerDir == 'e') return Dir.east;
-      if (lowerDir == 's') return Dir.south;
-      if (lowerDir == 'w') return Dir.west;
-      throw Exception('Unknown direction string: $dir');
-    },
-  );
-}
+
 
 @freezed
 class ComponentModel with _$ComponentModel {
@@ -83,7 +66,7 @@ class ComponentModel with _$ComponentModel {
     @Default(0) int rotation,
     @Default(false) bool isPowered,
     @Default({}) Map<String, dynamic> state,
-    @Default([const CellOffset(0, 0)]) List<CellOffset> shapeOffsets,
+    @Default([CellOffset(0, 0)]) List<CellOffset> shapeOffsets,
     @Default([
       TerminalSpec(offset: CellOffset(0, 0), direction: Dir.north, type: TerminalType.power),
       TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power)
@@ -103,7 +86,7 @@ class ComponentModel with _$ComponentModel {
   }
 
   // Custom fromJson to handle complex parsing - but this should not be called directly
-  factory ComponentModel.fromJson(Map<String, dynamic> json) {
+  factory ComponentModel.fromJson() {
     // This method should not be called directly - use ComponentRegistry.createFromJson instead
     throw UnsupportedError('ComponentModel.fromJson should not be called directly. Use ComponentRegistry.createFromJson for components.');
   }

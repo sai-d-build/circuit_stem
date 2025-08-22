@@ -1,7 +1,7 @@
 # Comprehensive Testing Strategy
 
 **Project:** Circuit STEM
-**Last Updated:** 2025-08-14 9PM EST
+**Last Updated:** 2025-08-22
 
 ---
 
@@ -15,6 +15,8 @@ Our testing strategy is based on the following principles:
 *   **Automation:** We will automate as much of the testing process as possible using Flutter's testing framework.
 *   **Modularity:** We will write modular tests that are easy to read, understand, and maintain.
 *   **Consistency:** We will use a consistent testing strategy across all levels of the application.
+*   **Stability & Isolation**: Tests must be hermetic (self-contained). We achieve this by mocking all external services (file system, audio, preferences) and pre-initializing the game state. This ensures tests are fast, reliable, and fail only for valid reasons.
+*   **Readability & Maintainability**: Tests must be easy to understand. We achieve this by abstracting all complex interactions and state-checking into a universal `GameTestHelper` class.
 
 ## 2. Level 1 – Comprehensive Circuit Test Cases
 
@@ -58,7 +60,7 @@ This table provides a comprehensive list of test cases for Level 1. It covers th
 
 To achieve full test coverage for Level 1 and beyond, we will follow these steps.
 
-**Note:** Implementation of this strategy is underway. The file `test/level_01_revised_test.dart` serves as the reference implementation for the new, stable test architecture.
+**Note:** Implementation of this strategy is underway. The file `test/level_01_revised_test.dart` serves as the reference implementation for the new, stable test architecture, though it currently has compilation issues that need to be resolved.
 
 1.  **Create a Test Plan:** For each level, we will create a test plan that is based on the master list of test cases in this document. The test plan will be a markdown file in the `test/plans` directory.
 
@@ -72,7 +74,7 @@ To achieve full test coverage for Level 1 and beyond, we will follow these steps
 
 By following this plan, we can build a comprehensive and robust suite of automated tests that will help us to improve the quality of the Circuit STEM project and to ensure that it provides a great user experience.
 
-## Testing Status (as of 2025-08-21)
+## Testing Status (as of 2025-08-22)
 
 This section tracks the status of major testing-related issues.
 
@@ -83,37 +85,36 @@ This section tracks the status of major testing-related issues.
     2.  **File I/O in `testWidgets`:** Reading files inside the test body caused hangs.
     *   **Solution:** A new test architecture has been implemented in `test/level_01_revised_test.dart`. The solution involves calling `registerAllGameEntities()` and pre-reading all necessary files in a `setUpAll` block. This ensures the test environment is stable and mirrors the live application before any test is run.
 
-### Remaining Issues & Prerequisites
+### Current Blockers & Known Issues
 
+*   **Compilation Errors due to Game Engine Refactoring:** The recent refactoring of `GameEngineNotifier` to `GameEngineNotifierV2` and the introduction of new modular components (`GameEngineCore`, `SimulationManager`, `InputManager`, `AudioManager`) have introduced a new set of compilation errors in the test suite. These include:
+    *   Missing `lib/models/port.dart` file.
+    *   `GridWidgetState` type not found.
+    *   `GameEngineNotifierV2` constructor and API mismatches (e.g., `animationScheduler` parameter not found, `audioManager` parameter not defined, too many positional arguments).
+    *   Undefined methods/getters across refactored components (e.g., `playToggle` on `AudioManager`, `getComponentAt` on `Grid`, `shape` on `ComponentModel`).
+    *   Invalid `this` reference in `GameEngineNotifierV2` initializer.
+    *   (Refer to `BUGS_TRACKING.md` for detailed bug reports: `BUG-004` to `BUG-008`).
+*   **Unused Code and Improper State Access Warnings:** Warnings about unused imports, unused local variables, and invalid use of the `state` member outside of `StateNotifier` or test context. (Refer to `BUGS_TRACKING.md` for `BUG-009`).
 *   **macOS Build Environment:** Test execution on macOS requires the Xcode command-line tools. This can be resolved by running `xcode-select --install`.
 *   **Outdated Package Dependencies:** The project has several packages with newer versions available. While not currently blocking, these should be updated to ensure long-term stability by running `flutter pub outdated` and updating `pubspec.yaml`.
 
 ---
 
-## Legacy Testing Notes
+## Legacy Testing Notes (Historical Reference)
 
 This section contains the previous version of the testing documentation for historical reference.
 
-# Testing Strategy
+### Old Testing Philosophy
 
-**Project:** Circuit STEM
-**Last Updated:** 2025-08-12 EST
+Our testing strategy was based on the principle of the "Testing Pyramid," prioritizing fast, isolated tests.
 
----
+*   **Unit Tests (High Priority):** Core logic, especially the `LogicEngine`, was covered extensively by unit tests.
+*   **Widget Tests (Medium Priority):** Core UI components and user interactions were covered by widget tests.
+*   **Integration Tests (Low Priority):** A few key user flows were covered by integration tests.
 
-This document outlines the testing philosophy, strategy, and procedures for the Circuit STEM project.
+### Old How to Run Tests
 
-## 1. Testing Philosophy
-
-Our testing strategy is based on the principle of the "Testing Pyramid." We prioritize fast, isolated tests and use slower, more integrated tests more sparingly.
-
--   **Unit Tests (High Priority):** Core logic, especially the `LogicEngine`, should be covered extensively by unit tests. These tests are fast, stable, and ensure the fundamental rules of the game are correct.
--   **Widget Tests (Medium Priority):** Core UI components and user interactions should be covered by widget tests. This ensures that tapping, dragging, and other gestures correctly trigger state changes in the `GameEngineNotifier`.
--   **Integration Tests (Low Priority):** A few key user flows should be covered by integration tests. These are the slowest and most brittle tests but are valuable for ensuring that all the different parts of the application work together correctly.
-
-## 2. How to Run Tests
-
-All automated tests can be run from the root of the project directory.
+All automated tests could be run from the root of the project directory.
 
 ```sh
 # Run all unit and widget tests
@@ -123,17 +124,15 @@ flutter test
 flutter test test/services/logic_engine_test.dart
 ```
 
-## 3. Where to Add New Tests
+### Old Where to Add New Tests
 
--   **New Logic Engine Feature:** If you add a new rule, component behavior, or edge case to the `LogicEngine`, a corresponding unit test **must** be added in `test/services/logic_engine_test.dart`.
--   **New UI Widget/Interaction:** If you create a new interactive widget, a widget test should be added in the `test/ui/widgets/` directory to verify its behavior.
--   **New Service/Controller:** Any new service or `StateNotifier` controller should have its own unit test file in the appropriate `test/` subdirectory.
+*   **New Logic Engine Feature:** If a new rule, component behavior, or edge case was added to the `LogicEngine`, a corresponding unit test was added in `test/services/logic_engine_test.dart`.
+*   **New UI Widget/Interaction:** If a new interactive widget was created, a widget test was added in the `test/ui/widgets/` directory.
+*   **New Service/Controller:** Any new service or `StateNotifier` controller had its own unit test file in the appropriate `test/` subdirectory.
 
-## 4. Testing with Riverpod
+### Old Testing with Riverpod Example
 
-To test a widget that depends on a Riverpod provider, you should wrap the widget in a `ProviderScope` and override the necessary providers with mock instances for the test.
-
-**Example: Testing a widget that uses `gameEngineProvider`**
+To test a widget that depended on a Riverpod provider, the widget was wrapped in a `ProviderScope` and the necessary providers were overridden with mock instances.
 
 ```dart
 import 'package:flutter_test/flutter_test.dart';
@@ -170,8 +169,10 @@ void main() {
 }
 ```
 
-## 5. Current Test Coverage
+### Old Current Test Coverage
 
--   **`LogicEngine`**: This is the most critical component for testing. The goal is to maintain near 100% test coverage for its evaluation logic.
--   **Models & Grid**: The data models and `Grid` class are tested to ensure component placement, collision detection, and validation work as expected.
--   **UI/Widgets**: Key widgets are tested to ensure they respond correctly to state changes from their providers. Note: The recent UI/UX overhaul has introduced several new widgets and significantly modified existing ones. Comprehensive widget tests for these new and updated UI components are crucial and should be prioritized.
+*   **`LogicEngine`**: This was the most critical component for testing. The goal was to maintain near 100% test coverage for its evaluation logic.
+*   **Models & Grid**: The data models and `Grid` class were tested to ensure component placement, collision detection, and validation work as expected.
+*   **UI/Widgets**: Key widgets were tested to ensure they respond correctly to state changes from their providers.
+
+This legacy testing approach has been superseded by the new modular architecture and updated testing helpers for improved reliability and maintainability.

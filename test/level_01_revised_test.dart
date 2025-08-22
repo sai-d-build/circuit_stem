@@ -16,7 +16,7 @@ import 'helpers/mock_asset_manager.dart';
 import 'helpers/mock_animation_scheduler.dart';
 import 'helpers/mock_audio_service.dart';
 
-import 'helpers/test_setup.dart'; // NEW: Import the TestSetup utility
+
 
 // This typedef will be replaced by the TestSetup class
 // typedef TestSetup = ({
@@ -28,10 +28,7 @@ import 'helpers/test_setup.dart'; // NEW: Import the TestSetup utility
 
 void main() {
   group('Level 01 Revised Tests - Foundation', () {
-    late MockAssetManager mockAssetManager;
-    late MockAnimationScheduler mockAnimationScheduler;
-    late MockAudioService mockAudioService;
-    late SharedPreferences mockPrefs;
+    
     late LevelDefinition level1;
     
     // Pre-read file contents outside of testWidgets to avoid Flutter bug
@@ -92,10 +89,10 @@ void main() {
           // This override replaces the autoDispose provider with a regular provider,
           // preventing premature disposal during tests.
           gameEngineProvider(level1).overrideWith(
-            (ref) => GameEngineNotifier(
+            (ref) => GameEngineNotifierV2(
               initialLevel: level1,
               animationScheduler: mockAnimationScheduler,
-              audioService: mockAudioService,
+              audioManager: mockAudioService,
             ),
           ),
         ],

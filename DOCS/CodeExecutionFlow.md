@@ -1,7 +1,7 @@
 # Code Execution Flow
 
 **Project:** Circuit STEM
-**Last Updated:** 2025-08-12 EST
+**Last Updated:** 2025-08-22
 
 ---
 
@@ -49,46 +49,69 @@ This flow is now much simpler and more robust due to the centralized Riverpod ar
     -   Its `build` method uses a `WidgetRef` (`ref`) to access the application's providers.
     -   It **watches** the providers it needs. This single line both retrieves the state and subscribes to future updates.
         ```dart
-        final gameEngineState = ref.watch(gameEngineProvider);
+        final gameEngineState = ref.watch(gameEngineProvider(level)).state; // Accessing state property
         final levelManager = ref.watch(levelManagerProvider);
         ```
     -   There is no need to manually create providers here. Riverpod handles the entire lifecycle automatically. If `gameEngineProvider` needs the `levelManager`, it will read it internally, as defined in `lib/core/providers.dart`.
     -   The UI is built directly based on the state received from the providers (e.g., `gameEngineState.isPaused`).
 
-## 4. The Gameplay Loop (StateNotifier Pattern)
+## 4. The Gameplay Loop (Orchestrator Pattern)
 
 Once the `GameScreen` is built, the gameplay loop is driven by state changes.
 
 1.  **User Input (`ui/game_canvas.dart`)**:
     -   The user interacts with the `GameCanvas` (e.g., taps a component, drags a component, taps a rotate button).
-    -   The UI widget calls a method on the **notifier** of the game engine provider.
+    -   The UI widget calls a method on the `InputManager` via the `GameEngineNotifierV2`.
         ```dart
-        ref.read(gameEngineProvider.notifier).handleTap(x, y);
+        ref.read(gameEngineProvider(level).notifier).input.handleTap(component); // Delegated to InputManager
         ```
-    -   If a component is tapped, the `handleTap` method in `GameEngineNotifier` is called. This method now also handles selecting components.
-    -   If a rotate button is tapped, the `rotateComponent` method in `GameEngineNotifier` is called.
+    -   If a component is tapped, the `handleTap` method in `InputManager` is called. This manager then translates the raw input into a game action and calls the appropriate method on `GameEngineNotifierV2`.
+    -   If a rotate button is tapped, the `rotateComponent` method in `GameEngineNotifierV2` is called.
 
 2.  **State Update (`engine/game_engine_notifier.dart`)**:
-    -   The `handleTap` method inside `GameEngineNotifier` contains the business logic.
-    -   It uses the current state (`state`) and the `LogicEngine` to compute a **new, immutable `GameEngineState` object**.
-    -   Crucially, it **does not call `notifyListeners()`**. Instead, it updates its state by assigning the new state object to its internal `state` property:
+    -   `GameEngineNotifierV2` receives the action (e.g., from `InputManager` or a direct call).
+    -   It delegates the core logic to `GameEngineCore`.
+    -   `GameEngineCore` processes the action, potentially interacting with `SimulationManager` for logic evaluation (e.g., power flow), and creates a **new, immutable `GameEngineState` object**.
+    -   `GameEngineCore` updates the `GameEngineState`. `GameEngineNotifierV2` then updates its internal state by assigning the new state object to its internal `state` property:
         ```dart
-        state = state.copyWith(grid: newGrid, ...);
+        state = core.commit(state, newGrid, ...); // Delegation to GameEngineCore
         ```
 
 3.  **Re-render (Riverpod -> UI)**:
     -   Riverpod automatically detects that the `gameEngineProvider` has emitted a new state.
     -   It efficiently rebuilds **only the widgets that were watching the provider**.
-    -   In `GameScreen`, the `build` method runs again. The `ref.watch(gameEngineProvider)` call now returns the *new* `GameEngineState`.
+    -   In `GameScreen`, the `build` method runs again. The `ref.watch(gameEngineProvider(level)).state` call now returns the *new* `GameEngineState`.
     -   The new state is passed down to the `CanvasPainter`, which redraws the screen to reflect the changes.
 
 This entire loop is a declarative, unidirectional data flow, which is more robust and easier to reason about than the previous imperative `notifyListeners()` approach.
 
 ## 5. Winning a Level
 
-1.  In the `GameEngineNotifier`, after a state update, a `_checkWinCondition` method is called.
-2.  If the win condition is met, the `onWin` callback (which was injected into the notifier by its provider) is executed.
-3.  This callback calls `levelManager.markCurrentLevelComplete()`.
+1.  In the `GameEngineNotifierV2`, after a state update (delegated to `GameEngineCore`), the win condition is checked.
+2.  If the win condition is met, the `isWin` flag in the `GameEngineState` is set to `true`.
+3.  The `onWin` callback (which was injected into the notifier by its provider) is executed, which calls `levelManager.markCurrentLevelComplete()`.
 4.  The `LevelManager` updates its own state (e.g., the list of completed levels).
-5.  Simultaneously, the `GameEngineNotifier` includes `isWin: true` in the new state it emits.
-6.  Back in `game_screen.dart`, the UI rebuilds in response to the new state, and because `gameEngineState.isWin` is true, it can now show a `WinScreen` overlay.
+5.  Back in `game_screen.dart`, the UI rebuilds in response to the new state, and because `gameEngineState.isWin` is true, it can now show a `WinScreen` overlay.
+
+## Legacy Code Execution Flow (Historical Reference)
+
+The previous architecture featured a monolithic `GameEngineNotifier` that directly handled state management, UI input, and logic evaluation using a `LogicEngine` service. This section is retained for historical context.
+
+### Old Gameplay Loop (StateNotifier Pattern)
+
+1.  **User Input (`ui/game_canvas.dart`)**:
+    -   The UI widget called a method directly on the `GameEngineNotifier` (e.g., `ref.read(gameEngineProvider.notifier).handleTap(x, y);`).
+    -   The `handleTap` method in `GameEngineNotifier` contained the business logic and used the `LogicEngine` to compute a new `GameEngineState`.
+
+2.  **State Update (`engine/game_engine_notifier.dart`)**:
+    -   The `GameEngineNotifier` directly updated its `state` property (e.g., `state = state.copyWith(grid: newGrid, ...);`).
+
+3.  **Re-render (Riverpod -> UI)**:
+    -   Riverpod detected the new state and rebuilt watching widgets.
+
+### Old Winning a Level
+
+1.  In the `GameEngineNotifier`, after a state update, a `_checkWinCondition` method was called.
+2.  If the win condition was met, the `onWin` callback was executed, calling `levelManager.markCurrentLevelComplete()`.
+
+This legacy approach has been superseded by the modular `GameEngineNotifierV2` orchestrator pattern for improved maintainability, testability, and scalability.

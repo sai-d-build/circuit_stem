@@ -1,6 +1,6 @@
 
 import 'package:circuit_stem/common/assets.dart';
-import 'package:circuit_stem/models/component.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/game_test_helper.dart';

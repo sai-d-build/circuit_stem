@@ -45,8 +45,8 @@ This will install the necessary tools. After the installation is complete, try r
 
 The project follows a clean, modular architecture that separates logic, state management, and UI.
 
-*   **Services (`/lib/services`):** Stateless, reusable services like the `LogicEngine` and `LevelManager`.
-*   **Engine (`/lib/engine`):** The `GameEngine` orchestrates the state and rules for an active game session.
+*   **Services (`/lib/services`):** Stateless, reusable services like the `LevelManager`.
+*   **Engine (`/lib/engine`):** The `GameEngine` now features a highly modular design, with `GameEngineNotifier` orchestrating specialized managers for core state, simulation, input, and audio, ensuring clear separation of concerns and enhanced testability.
 *   **Models (`/lib/models`):** Plain Dart objects representing the game's data, such as `Grid`, `Component`, and `LevelDefinition`.
 *   **UI (`/lib/ui`):** Flutter widgets, screens, and `CustomPainter`s responsible for rendering the game state.
 *   **Key Dependencies:** The project leverages powerful community packages, including `flutter_riverpod` for state management, `freezed` for immutable models, and `widgets_to_image` for rendering widgets to images on the canvas.

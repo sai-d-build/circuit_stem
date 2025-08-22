@@ -51,14 +51,13 @@ final levelDefinitionProvider =
 );
 
 final gameEngineProvider = StateNotifierProvider.autoDispose
-    .family<GameEngineNotifier, GameEngineState, LevelDefinition>(
+    .family<GameEngineNotifierV2, GameEngineState, LevelDefinition>(
   (ref, level) {
     final animationScheduler = ref.watch(animationSchedulerProvider);
     final audioService = ref.watch(audioServiceProvider);
 
-    return GameEngineNotifier(
+    return GameEngineNotifierV2(
       initialLevel: level,
-      animationScheduler: animationScheduler,
       audioService: audioService,
     );
   },
