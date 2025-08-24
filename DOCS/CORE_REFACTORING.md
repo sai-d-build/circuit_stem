@@ -1,7 +1,7 @@
 # **Circuit STEM: Core Logic Refactoring Guide**
 
 **Version:** 1.0
-**Author:** Gemini
+**Author:** ME
 **Status:** Proposed
 
 ---
@@ -515,7 +515,7 @@ This section documents previous architectural proposals that were considered but
 
 **🎯 Goal:** To connect a single piece of the old engine to our new, tested domain logic. This proves the integration works while keeping the risk contained to one small feature.
 
-**🤔 Why this phase is important:** This was our first step in "strangling" the old system. We were building a "bridge" from the old world to the new. By doing this for one small feature (toggling a switch), we aimed to prove the pattern works before applying it to more complex logic like the power simulation.
+**🤔 Why this phase is important:** This is our first step in "strangling" the old system. We're building a "bridge" from the old world to the new. By doing this for one small feature (toggling a switch), we can prove the pattern works before applying it to more complex logic like the power simulation.
 
 ---
 
@@ -523,7 +523,7 @@ This section documents previous architectural proposals that were considered but
 
 #### **Step 1: Create the "Adapter" File**
 
-This file would contain helper functions to translate between the old models and our new, pure entities.
+This file will contain helper functions to translate between the old models and our new, pure entities.
 
 Create a new file: `lib/application/domain_adapter.dart`.
 
@@ -577,11 +577,11 @@ ComponentModel toComponentModel(ComponentEntity entity) {
 
 #### **Step 2: Modify the Old Engine to Use the Adapter**
 
-Now we would modify the original `GameEngineNotifierV2` to use our new logic for just one specific case.
+Now we will modify the original `GameEngineNotifierV2` to use our new logic for just one specific case.
 
 **File to Modify:** `lib/application/game_engine_notifier.dart`
 
-Find the method responsible for handling taps (it might be named `_handleTap` or be inside the `InteractionBehavior`). We were going to change it.
+Find the method responsible for handling taps (it might be named `_handleTap` or be inside the `InteractionBehavior`). We are going to change it.
 
 **FROM (The Old Way):**
 ```dart
@@ -639,10 +639,6 @@ Run the application. Play Level 1. When you tap the switch, you should see the m
 Run the test suite again with `flutter test`. All tests should still pass.
 
 **You have successfully replaced a piece of the engine's core logic with your new, pure domain code, without breaking the application!**
-
----
-
-**Reason for Discarding:** This approach was deemed overly complex and introduced significant technical debt due to bidirectional translation, state synchronization issues, and over-engineering for the current application scale. It violated the KISS principle and created unnecessary layers of abstraction.
 
 ---
 
@@ -757,3 +753,198 @@ Now that you have a clean, testable, and extensible architecture, you can easily
 *   **Command Pattern for Undo/Redo:** Implement the `CommandService` and `Command` classes.
 *   **Event-Driven Audio:** Implement the `EventBus` and decouple the audio system.
 *   **Advanced Testing:** Begin implementing the Golden, Performance, and Accessibility tests on your new, highly testable codebase.
+
+Design Plan PHASE 2: Option A - In-Place Behavior Standardization
+Goal: To refactor component behaviors to be functional and testable, centralizing state updates within GameEngineNotifierV2, while leveraging the existing ComponentModel and comp.behaviors structure.
+
+Phase 0: Preparation & Foundation
+Step 0.1: Resolve File Conflict (Critical Blocker)
+
+Issue: Duplicate SimulationManager (lib/application/simulation_manager.dart) and SimulationService (lib/application/services/simulation_service.dart) files. This will cause build errors and ambiguity.
+Action: Delete the old lib/application/simulation_manager.dart file.
+Impact:
+Files: lib/application/simulation_manager.dart (deleted). lib/application/services/simulation_service.dart (remains as the sole simulation service).
+Classes: GameEngineNotifierV2's simulation field and constructor initialization will need to be updated to use SimulationService.
+Justification: This is a non-negotiable first step to ensure a clean build environment and prevent runtime errors. It establishes a single source of truth for simulation logic.
+Step 0.2: Define GameContext
+
+Purpose: To provide behaviors with necessary read-only context (like the current grid state) without giving them direct access to the GameEngineNotifierV2 instance. This improves decoupling and testability.
+File: lib/application/game_context.dart
+Class: GameContext
+Code Change:
+// lib/application/game_context.dart
+import 'package:circuit_stem/domain/entities/grid.dart';
+import 'package:circuit_stem/application/game_engine_state.dart'; // To create from state
+
+class GameContext {
+  final Grid grid;
+  // Add other read-only services/data behaviors might need, e.g., Logger
+  // final Logger logger; 
+
+  GameContext({required this.grid /*, required this.logger */});
+
+  // Factory constructor to create from GameEngineState
+  factory GameContext.from(GameEngineState state) {
+    return GameContext(
+      grid: state.grid,
+      // logger: Logger(), // Example: if Logger is needed
+    );
+  }
+}
+Impact:
+Files: New lib/application/game_context.dart.
+Classes: GameEngineNotifierV2 will instantiate GameContext and pass it to behaviors. Behaviors will receive GameContext in their handle method.
+Core Logic: Behaviors gain access to global game state (like the grid) in a controlled, read-only manner.
+UI/Testing: No direct UI impact. Improves testability of behaviors as GameContext can be easily mocked.
+Phase 1: Standardize Behavior Interface
+Step 1.1: Modify lib/domain/behaviors/behavior.dart (New Interface Definition)
+
+Current Role: Abstract base for the new pure domain behaviors (ToggleBehavior was previously defined to extend this).
+Changes: Adapt this file to define the ComponentBehavior interface proposed by you. This will temporarily break ComponentEntity and ToggleBehavior (which will be fixed in subsequent steps).
+Code Change:
+// lib/domain/behaviors/behavior.dart
+import 'package:circuit_stem/domain/entities/component.dart'; // Import ComponentModel
+import 'package:circuit_stem/application/game_context.dart'; // Import new GameContext
+
+abstract class ComponentBehavior {
+  String get behaviorType; // e.g., 'interaction', 'power_conduction', 'movement'
+
+  // handle method returns a new ComponentModel if state changes, null otherwise
+  // This makes behaviors functional: input (component, action, context) -> output (new component or null)
+  ComponentModel? handle(ComponentModel component, String action, GameContext context);
+}
+Impact:
+Files: lib/domain/behaviors/behavior.dart (modified).
+Classes: ComponentEntity (will have compile errors because its executeAction method signature no longer matches the Behavior interface it expects). ToggleBehavior (will have compile errors because it no longer correctly implements Behavior).
+Justification: This is the foundational change for the "In-Place Behavior Standardization." It defines the new contract for all behaviors, making them functional and decoupled from the notifier's direct mutation methods.
+Step 1.2: Refactor lib/domain/behaviors/interaction_behavior.dart (ToggleBehavior)
+
+Current Role: Concrete implementation of the new Behavior interface (from Phase 1 of the original refactoring plan).
+Changes: Make ToggleBehavior implement the new ComponentBehavior interface. It will now operate directly on ComponentModel and return a new ComponentModel if the state changes.
+Code Change:
+// lib/domain/behaviors/interaction_behavior.dart
+import 'package:circuit_stem/domain/entities/component.dart'; // Import ComponentModel
+import 'package:circuit_stem/application/game_context.dart'; // Import GameContext
+import 'package:circuit_stem/domain/behaviors/behavior.dart'; // Import ComponentBehavior (the new interface)
+
+class ToggleBehavior implements ComponentBehavior { // Implement ComponentBehavior
+    String get behaviorType => 'interaction'; // Consistent with user's example
+
+  
+  ComponentModel? handle(ComponentModel component, String action, GameContext context) {
+    // Only handle 'tap' action for 'switch' type components
+    if (action == 'tap' && component.type == 'switch') { 
+      final currentState = component.state['closed'] as bool? ?? false;
+      final newState = Map<String, dynamic>.from(component.state);
+      newState['closed'] = !currentState;
+      return component.copyWith(state: newState); // Return new ComponentModel
+    }
+    return null; // Return null if this behavior doesn't handle the action
+  }
+}
+Impact:
+Files: lib/domain/behaviors/interaction_behavior.dart (modified).
+Classes: ToggleBehavior now conforms to the new ComponentBehavior interface.
+Testing: test/unit/domain/behaviors/interaction_behavior_test.dart will need to be updated to reflect the new handle method signature and ComponentModel usage.
+Justification: This makes ToggleBehavior a pure function. It receives a component and context, processes the action, and returns a new component if its state changes, or null otherwise. This is highly testable and avoids direct state mutation.
+Step 1.3: Revert/Adjust lib/domain/entities/component_entity.dart (Temporary Adjustment)
+
+Current Role: The new pure domain ComponentEntity (from the previous, now discarded, "Forward-Only Orchestrator" plan).
+Changes: Since we are no longer pursuing the full "pure domain" separation in this phase, ComponentEntity and its related files (component_type.dart, action_context.dart) are not directly part of "In-Place Behavior Standardization." For now, we will either:
+Option A (Simpler): Delete component_entity.dart, component_type.dart, action_context.dart and their related freezed files. This removes the unused code.
+Option B (Preserve for Future): Keep them, but they will not be used in this phase. The behavior.dart file will be the one used by ComponentModel.
+Decision: Given the "in-place" nature and focus on immediate benefits, Option A (deletion) is cleaner to avoid confusion and unused code.
+Action: Delete lib/domain/entities/component_entity.dart, lib/domain/value_objects/component_type.dart, lib/domain/value_objects/action_context.dart, and lib/domain/value_objects/position.freezed.dart (as position.dart was created for ComponentEntity).
+Impact:
+Files: Deletion of several files.
+Classes: Removes the ComponentEntity and related pure domain concepts from the active codebase for this phase.
+Justification: Reduces complexity and removes code that is not part of the current refactoring strategy. The Position value object can be re-introduced if needed by other parts of the system later.
+Phase 2: Integrate Standardized Behaviors into GameEngineNotifierV2
+Step 2.1: Modify lib/application/game_engine_notifier.dart (_handleTap and simulation)
+
+Current Role: Orchestrates tap handling, directly calling onTap on InteractionBehavior.
+Changes:
+Update the simulation field and constructor to use SimulationService.
+Refactor _handleTap to iterate through comp.behaviors and use the new ComponentBehavior.handle method.
+Code Change:
+// lib/application/game_engine_notifier.dart
+// ... existing imports ...
+import 'package:circuit_stem/application/services/simulation_service.dart'; // New import for SimulationService
+import 'package:circuit_stem/application/game_context.dart'; // New import for GameContext
+import 'package:circuit_stem/domain/behaviors/behavior.dart'; // Import ComponentBehavior (the new interface)
+// Remove: import '../../domain/behaviors/interaction_behavior.dart'; // Old import
+
+class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
+  final InputManager input;
+  final AudioManager audio;
+  // Change type from SimulationManager to SimulationService
+  final SimulationService simulation; 
+
+  GameEngineNotifierV2({
+    required AudioService audioService,
+  })  : input = InputManager(),
+        audio = AudioManager(audioService),
+        simulation = SimulationService(), // Use new SimulationService
+        super(GameEngineState.empty()) {
+    _init();
+  }
+
+  // ... _init, loadLevel, _moveComponent ...
+
+  void _handleTap(ComponentModel comp) {
+    Logger.log('GameEngineNotifierV2: _handleTap called for component ${comp.id}');
+    audio.playSelection(); // Keep initial audio for selection
+
+    ComponentModel? updatedComponent;
+    final gameContext = GameContext.from(state); // Create GameContext
+
+    // Iterate through behaviors associated with the component
+    // Assuming comp.behaviors now contains instances of ComponentBehavior
+    for (final behavior in comp.behaviors.whereType<ComponentBehavior>()) {
+      final result = behavior.handle(comp, 'tap', gameContext);
+      if (result != null) {
+        updatedComponent = result;
+        // Trigger specific audio based on behavior type or component type
+        if (behavior.behaviorType == 'interaction' && comp.type == 'switch') { 
+            audio.playToggle(); 
+        }
+        break; // Assuming only one behavior handles a 'tap' action
+      }
+    }
+
+    if (updatedComponent != null) {
+      var newGrid = state.grid.copyWithUpdatedComponent(updatedComponent);
+      newGrid = simulation.simulatePowerFlow(newGrid); // Use SimulationService
+      state = state.copyWith(grid: newGrid);
+    }
+
+    // Tapping does not change the grid logic, only selection state
+    // This line should probably be moved or removed if the interaction behavior handles selection
+    state = state.copyWith(selectedComponentId: comp.id);
+  }
+
+  // ... updateComponent, selectPaletteComponent, togglePause, restartLevel, undo ...
+}
+Impact:
+Files: lib/application/game_engine_notifier.dart (modified).
+Core Logic: _handleTap becomes more functional and delegates behavior execution. It centralizes the state update (state = state.copyWith(...)) after a behavior has processed an action.
+UI: No direct UI impact, as GameEngineNotifierV2's public interface remains largely the same.
+Testing: Existing tests for GameEngineNotifierV2 will need to be updated to reflect the new _handleTap logic and the change in simulation type.
+Justification: This is the core integration step. It makes the Notifier responsible for state management, while behaviors become pure functions that inform the Notifier of changes.
+Phase 3: Verification & Cleanup
+Step 3.1: Update Unit Tests
+
+Files: test/unit/domain/behaviors/interaction_behavior_test.dart (and any other behavior tests that will be refactored later).
+Changes: Update tests to use the new ComponentBehavior interface and handle method signature, passing GameContext.
+Justification: Ensure the new behavior implementations are correctly tested in isolation.
+Step 3.2: Run All Tests & Analysis
+
+Action: flutter test && flutter analyze.
+Justification: Verify that all changes are correct, no regressions are introduced, and the codebase remains clean. This is a critical step after any code modification.
+Step 3.3: Clean Up Old InteractionBehavior (Later)
+
+Action: Once all components are migrated to the new ComponentBehavior interface, the old lib/domain/behaviors/interaction_behavior.dart (the one with onTap(this, comp)) and its usages can be safely removed. This will be a gradual process as more behaviors are refactored.
+Justification: Remove dead code and simplify the codebase.
+This detailed plan for "Option A: In-Place Behavior Standardization" provides a clear, step-by-step guide for implementation, focusing on a low-risk, incremental approach that aligns with your recommendations.
+
+Context Sources (1)
