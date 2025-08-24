@@ -1,4 +1,4 @@
-import 'package:circuit_stem/engine/animation_scheduler.dart';
+import 'package:circuit_stem/application/animation_scheduler.dart';
 import 'mock_logger.dart';
 
 class MockAnimationScheduler implements AnimationScheduler {

@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:circuit_stem/models/component.dart'; // Added import for ComponentModel
-import 'package:circuit_stem/core/providers.dart'; // Added import for providers
+import 'package:circuit_stem/domain/entities/component.dart'; // Added import for ComponentModel
+import 'package:circuit_stem/application/services/providers.dart'; // Added import for providers
 import 'mock_services.dart';
 
 /// A universal helper class for all game-related tests.

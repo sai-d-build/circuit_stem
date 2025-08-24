@@ -3,12 +3,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:circuit_stem/core/providers.dart';
-import 'package:circuit_stem/engine/game_engine_notifier.dart';
+import 'package:circuit_stem/application/services/providers.dart';
+import 'package:circuit_stem/application/game_engine_notifier.dart';
 import 'package:circuit_stem/main.dart';
-import 'package:circuit_stem/models/level_definition.dart';
-import 'package:circuit_stem/services/level_manager.dart';
-import 'package:circuit_stem/ui/game_screen.dart';
+import 'package:circuit_stem/domain/entities/level_definition.dart';
+import 'package:circuit_stem/infrastructure/persistence/level_manager.dart';
+import 'package:circuit_stem/presentation/screens/game_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

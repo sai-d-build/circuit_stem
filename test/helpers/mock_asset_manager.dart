@@ -2,8 +2,8 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:circuit_stem/services/asset_manager.dart';
-import 'package:circuit_stem/services/asset_manager_state.dart';
+import 'package:circuit_stem/infrastructure/rendering/asset_manager.dart';
+import 'package:circuit_stem/infrastructure/rendering/asset_manager_state.dart';
 
 class MockAssetManager extends StateNotifier<AssetState>
     implements AssetManagerNotifier {

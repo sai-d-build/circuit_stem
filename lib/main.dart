@@ -3,20 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
-import 'core/providers.dart';
+import 'application/services/providers.dart';
 import 'common/logger.dart';
 import 'common/assets.dart';
 import 'dart:async';
-import 'services/svg_processor.dart';
-import 'services/svg_processor_base.dart';
+import 'infrastructure/rendering/svg_processor.dart';
+import 'infrastructure/rendering/svg_processor_base.dart';
 import 'components/bulb.dart';
 import 'components/wire.dart';
 import 'components/switch.dart';
 import 'components/battery.dart';
 import 'components/timer.dart';
-
 import 'components/buzzer.dart';
-import 'goals/power_bulb_goal.dart';
+import 'domain/goals/power_bulb_goal.dart';
 
 void registerAllGameEntities() {
   registerBulb();
@@ -61,7 +60,7 @@ void main() async {
 
 class Initializer extends ConsumerStatefulWidget {
   final SvgProcessorBase svgProcessor;
-  const Initializer({Key? key, required this.svgProcessor}) : super(key: key);
+  const Initializer({super.key, required this.svgProcessor});
 
   @override
   InitializerState createState() => InitializerState();

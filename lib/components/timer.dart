@@ -1,13 +1,13 @@
-import 'package:circuit_stem/models/grid.dart';
+import 'package:circuit_stem/domain/entities/grid.dart';
 
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-import '../behaviors/drawing_behavior.dart';
-import '../behaviors/logic_behavior.dart';
-import '../core/component_registry.dart';
-import '../models/component.dart';
-import '../services/asset_manager.dart';
+import 'package:circuit_stem/domain/behaviors/drawing_behavior.dart';
+import 'package:circuit_stem/domain/behaviors/logic_behavior.dart';
+import 'package:circuit_stem/application/services/component_registry.dart';
+import 'package:circuit_stem/domain/entities/component.dart';
+import 'package:circuit_stem/infrastructure/rendering/asset_manager.dart';
 import '../common/theme.dart';
 import '../common/logger.dart';
 

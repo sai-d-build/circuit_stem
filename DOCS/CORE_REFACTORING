@@ -1,0 +1,721 @@
+Based on my analysis of the codebase structure and current implementation, the core logic has several critical architectural issues that will significantly impede testing, maintainability, and future enhancements. **Yes, the core logic needs substantial refactoring** to create a robust, testable, and extensible application.
+
+## Critical Architectural Problems
+
+### 1. **Single Responsibility Violation**
+Your `GameEngineNotifierV2` is a god class handling:
+- State management
+- Input coordination  
+- Audio management
+- Simulation orchestration
+- Component behavior execution
+
+This makes unit testing nearly impossible since you cannot test component behavior without involving audio, state management, and simulation simultaneously.
+
+### 2. **Flawed Behavior System**
+The current behavior architecture has fundamental issues:
+- Behaviors stored as `List<dynamic>` instead of typed interfaces
+- No common base class with standard methods
+- Runtime type checking instead of compile-time safety
+- Inconsistent patterns across different behavior types
+
+### 3. **Tight UI-Logic Coupling**
+Your `DragBehavior` directly manipulates UI concerns (RenderBox, GlobalKey) mixed with game logic, making testing extremely difficult.
+
+### 4. **Missing Command Pattern**
+The stubbed `undo()` method reveals that the architecture cannot support reversible operations without major refactoring.
+
+### 5. **Unvalidated State Mutations**
+Components can be updated without validation, potentially creating invalid game states.
+
+## Recommended Refactored Architecture
+
+### Domain-Driven Design Structure
+```
+lib/
+├── domain/              # Pure business logic (no Flutter dependencies)
+│   ├── entities/        # Core models 
+│   ├── behaviors/       # Proper behavior interfaces
+│   ├── commands/        # Command pattern for undo/redo
+│   └── services/        # Domain services
+├── application/         # Use cases and orchestration
+├── infrastructure/      # External concerns (audio, persistence)
+└── presentation/        # UI layer
+```
+
+### Key Improvements
+
+1. **Proper Behavior System**: Type-safe behaviors with common interfaces and standardized execution patterns.
+
+2. **Command Pattern**: Built-in undo/redo support through reversible commands.
+
+3. **Event-Driven Audio**: Decouple audio from game logic using domain events.
+
+4. **Clean Separation**: Domain logic testable without UI dependencies.
+
+5. **Validation Layer**: Prevent invalid state transitions.
+
+## Testing Benefits
+
+The refactored architecture enables:
+- **Pure Domain Unit Tests**: Test behaviors in complete isolation
+- **Use Case Integration Tests**: Test application logic without UI
+- **Mocked Widget Tests**: UI tests with controllable dependencies
+- **Property-Based Testing**: Generate random valid game states
+- **Performance Benchmarks**: Test simulation performance independently
+
+## Implementation Impact
+
+**Effort Required**: 5-6 weeks for complete refactoring
+**Risk**: Medium (well-established patterns)
+**Payoff**: High (exponentially easier feature development and testing)
+
+## Recommendation
+
+The current architecture will become increasingly problematic as the application grows. The tight coupling and god classes will make adding features like:
+- Multiplayer support
+- Level editor
+- Complex component types
+- Advanced undo/redo
+- Save/load functionality
+
+Extremely difficult and error-prone. **I strongly recommend proceeding with the refactoring** as it will provide a solid foundation for robust testing and future enhancements.
+
+The refactored architecture follows proven software engineering principles and will make your application significantly more maintainable, testable, and extensible in the long term.
+
+# Core Logic Refactoring Analysis for Circuit STEM
+
+## Executive Summary
+
+After analyzing the codebase structure and current implementation, the core logic has several architectural issues that will impede testing, maintainability, and future enhancements. The current design violates several SOLID principles and creates tight coupling between concerns. A strategic refactoring is necessary to create a truly robust, testable, and extensible application.
+
+## Critical Architectural Issues
+
+### 1. **Violation of Single Responsibility Principle**
+
+**Problem**: `GameEngineNotifierV2` is doing too much:
+- State management (StateNotifier)
+- Input handling coordination 
+- Audio management coordination
+- Simulation orchestration
+- Component behavior execution
+
+**Current Code Issues**:
+```dart
+class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
+  final InputManager input;
+  final AudioManager audio;
+  final SimulationManager simulation;
+  
+  void _handleTap(ComponentModel comp) {
+    audio.playSelection(); // Audio concern
+    
+    // Component behavior execution
+    final interactionBehavior = comp.behaviors.firstWhere(...);
+    if (interactionBehavior != null) {
+      (interactionBehavior as InteractionBehavior).onTap(this, comp);
+    }
+    
+    // State management
+    state = state.copyWith(selectedComponentId: comp.id);
+  }
+}
+```
+
+**Impact**: This makes unit testing nearly impossible since you cannot test component behavior without involving audio, state management, and simulation.
+
+### 2. **Inconsistent Behavior Architecture**
+
+**Problem**: The behavior system lacks a common interface and has inconsistent patterns.
+
+**Current Issues**:
+- No common `Behavior` base class with standard methods
+- `InteractionBehavior` is abstract but other behaviors aren't consistently structured
+- Behaviors are stored as `List<dynamic>` instead of typed interfaces
+- No clear separation between stateless behaviors and stateful components
+
+**Example of the Problem**:
+```dart
+// In ComponentModel
+@Default([]) List<dynamic> behaviors, // Untyped!
+
+// In GameEngineNotifierV2
+final interactionBehavior = comp.behaviors.firstWhere(
+  (b) => b is InteractionBehavior, // Runtime type checking
+  orElse: () => null,
+);
+```
+
+### 3. **Tight Coupling Between UI and Game Logic**
+
+**Problem**: UI components directly manipulate game state, making testing difficult.
+
+**Example**:
+```dart
+// In DragBehavior
+void onDragEnd(DragTargetDetails<ComponentModel> details) {
+  // Direct dependency on UI concerns (RenderBox, GlobalKey)
+  final renderBox = gridKey.currentContext?.findRenderObject() as RenderBox?;
+  final notifier = ref.read(gameEngineProvider.notifier);
+  
+  // UI logic mixed with game logic
+  final cell = translator.globalToCell(details.offset, grid.rows, grid.cols);
+  notifier.inputManager.handleMove(details.data.id, cell.row, cell.col);
+}
+```
+
+### 4. **Missing Command Pattern for Undo/Redo**
+
+**Problem**: The current undo implementation is stubbed out, but the architecture doesn't support it.
+
+```dart
+void undo() {
+  Logger.log('Undo not yet implemented.');
+}
+```
+
+**Impact**: Adding undo/redo later will require significant refactoring since there's no command history or reversible operations.
+
+### 5. **State Mutation Without Validation**
+
+**Problem**: Components can be updated without validation, leading to invalid game states.
+
+```dart
+void updateComponent(ComponentModel component) {
+  var newGrid = state.grid.copyWithUpdatedComponent(component);
+  newGrid = simulation.simulatePowerFlow(newGrid);
+  // No validation that this update is legal!
+  state = state.copyWith(grid: newGrid);
+}
+```
+
+## Proposed Refactored Architecture
+
+### 1. **Domain-Driven Design Structure**
+
+```
+lib/
+├── domain/              # Core business logic (pure Dart, no Flutter dependencies)
+│   ├── entities/        # Core models (Component, Grid, etc.)
+│   ├── value_objects/   # Immutable values (Position, Terminal, etc.)
+│   ├── behaviors/       # Behavior interfaces and implementations
+│   ├── services/        # Domain services (SimulationService, ValidationService)
+│   ├── commands/        # Command pattern for undo/redo
+│   └── events/          # Domain events for loose coupling
+│
+├── application/         # Application layer (use cases and orchestration)
+│   ├── use_cases/       # Specific game operations
+│   ├── services/        # Application services
+│   └── dto/             # Data transfer objects
+│
+├── infrastructure/      # External concerns (persistence, audio, etc.)
+│   ├── persistence/
+│   ├── audio/
+│   └── rendering/
+│
+└── presentation/        # UI layer (Flutter-specific)
+    ├── screens/
+    ├── widgets/
+    └── state/           # Riverpod providers and notifiers
+```
+
+### 2. **Proper Behavior System**
+
+```dart
+// domain/behaviors/behavior.dart
+abstract class Behavior {
+  String get type;
+  bool canExecute(ComponentEntity component, String action);
+  ComponentEntity execute(ComponentEntity component, String action, Map<String, dynamic> context);
+}
+
+// domain/behaviors/interaction_behavior.dart
+class InteractionBehavior extends Behavior {
+  @override
+  String get type => 'interaction';
+  
+  @override
+  bool canExecute(ComponentEntity component, String action) {
+    return ['tap', 'drag_start', 'drag_end'].contains(action);
+  }
+  
+  @override
+  ComponentEntity execute(ComponentEntity component, String action, Map<String, dynamic> context) {
+    switch (action) {
+      case 'tap':
+        return _handleTap(component, context);
+      case 'drag_start':
+        return _handleDragStart(component, context);
+      default:
+        return component;
+    }
+  }
+}
+
+// domain/entities/component_entity.dart
+class ComponentEntity {
+  final String id;
+  final String type;
+  final Position position;
+  final Map<String, dynamic> state;
+  final List<Behavior> behaviors;
+  
+  T? getBehavior<T extends Behavior>() {
+    return behaviors.whereType<T>().firstOrNull;
+  }
+  
+  ComponentEntity executeAction(String action, Map<String, dynamic> context) {
+    ComponentEntity result = this;
+    
+    for (final behavior in behaviors) {
+      if (behavior.canExecute(this, action)) {
+        result = behavior.execute(result, action, context);
+      }
+    }
+    
+    return result;
+  }
+}
+```
+
+### 3. **Command Pattern for Undo/Redo**
+
+```dart
+// domain/commands/command.dart
+abstract class Command {
+  String get id;
+  CommandResult execute(GameState state);
+  CommandResult undo(GameState state);
+}
+
+// domain/commands/move_component_command.dart
+class MoveComponentCommand extends Command {
+  final String componentId;
+  final Position targetPosition;
+  final Position originalPosition;
+  
+  @override
+  CommandResult execute(GameState state) {
+    final component = state.grid.getComponent(componentId);
+    if (component == null) {
+      return CommandResult.failure('Component not found');
+    }
+    
+    final validation = ValidationService.validateMove(component, targetPosition, state.grid);
+    if (!validation.isValid) {
+      return CommandResult.failure(validation.error);
+    }
+    
+    final updatedComponent = component.copyWith(position: targetPosition);
+    final newGrid = state.grid.updateComponent(updatedComponent);
+    final simulatedGrid = SimulationService.simulate(newGrid);
+    
+    return CommandResult.success(state.copyWith(grid: simulatedGrid));
+  }
+  
+  @override
+  CommandResult undo(GameState state) {
+    final component = state.grid.getComponent(componentId);
+    final revertedComponent = component.copyWith(position: originalPosition);
+    final newGrid = state.grid.updateComponent(revertedComponent);
+    final simulatedGrid = SimulationService.simulate(newGrid);
+    
+    return CommandResult.success(state.copyWith(grid: simulatedGrid));
+  }
+}
+
+// application/services/command_service.dart
+class CommandService {
+  final List<Command> _history = [];
+  final List<Command> _undoStack = [];
+  
+  CommandResult execute(Command command, GameState state) {
+    final result = command.execute(state);
+    
+    if (result.isSuccess) {
+      _history.add(command);
+      _undoStack.clear(); // Clear redo stack
+    }
+    
+    return result;
+  }
+  
+  CommandResult undo(GameState state) {
+    if (_history.isEmpty) {
+      return CommandResult.failure('Nothing to undo');
+    }
+    
+    final command = _history.removeLast();
+    final result = command.undo(state);
+    
+    if (result.isSuccess) {
+      _undoStack.add(command);
+    }
+    
+    return result;
+  }
+}
+```
+
+### 4. **Decoupled Game Engine**
+
+```dart
+// application/use_cases/game_use_cases.dart
+class GameUseCases {
+  final CommandService _commandService;
+  final ValidationService _validationService;
+  final SimulationService _simulationService;
+  final EventBus _eventBus;
+  
+  GameUseCases({
+    required CommandService commandService,
+    required ValidationService validationService,
+    required SimulationService simulationService,
+    required EventBus eventBus,
+  }) : _commandService = commandService,
+       _validationService = validationService,
+       _simulationService = simulationService,
+       _eventBus = eventBus;
+  
+  Future<UseCaseResult<GameState>> moveComponent(
+    GameState currentState,
+    String componentId,
+    Position targetPosition,
+  ) async {
+    final component = currentState.grid.getComponent(componentId);
+    if (component == null) {
+      return UseCaseResult.failure('Component not found');
+    }
+    
+    final command = MoveComponentCommand(
+      componentId: componentId,
+      targetPosition: targetPosition,
+      originalPosition: component.position,
+    );
+    
+    final result = _commandService.execute(command, currentState);
+    
+    if (result.isSuccess) {
+      _eventBus.emit(ComponentMovedEvent(componentId, targetPosition));
+      return UseCaseResult.success(result.data);
+    }
+    
+    return UseCaseResult.failure(result.error);
+  }
+  
+  Future<UseCaseResult<GameState>> interactWithComponent(
+    GameState currentState,
+    String componentId,
+    String interaction,
+  ) async {
+    final component = currentState.grid.getComponent(componentId);
+    if (component == null) {
+      return UseCaseResult.failure('Component not found');
+    }
+    
+    final context = {'currentState': currentState};
+    final updatedComponent = component.executeAction(interaction, context);
+    
+    if (updatedComponent != component) {
+      final newGrid = currentState.grid.updateComponent(updatedComponent);
+      final simulatedGrid = await _simulationService.simulate(newGrid);
+      final newState = currentState.copyWith(grid: simulatedGrid);
+      
+      _eventBus.emit(ComponentInteractionEvent(componentId, interaction));
+      return UseCaseResult.success(newState);
+    }
+    
+    return UseCaseResult.success(currentState);
+  }
+}
+
+// presentation/state/game_state_notifier.dart
+class GameStateNotifier extends StateNotifier<GameState> {
+  final GameUseCases _gameUseCases;
+  
+  GameStateNotifier(this._gameUseCases) : super(GameState.empty());
+  
+  Future<void> moveComponent(String componentId, Position position) async {
+    final result = await _gameUseCases.moveComponent(state, componentId, position);
+    
+    if (result.isSuccess) {
+      state = result.data;
+    } else {
+      // Handle error (show snackbar, etc.)
+    }
+  }
+  
+  Future<void> interactWithComponent(String componentId, String interaction) async {
+    final result = await _gameUseCases.interactWithComponent(state, componentId, interaction);
+    
+    if (result.isSuccess) {
+      state = result.data;
+    }
+  }
+}
+```
+
+### 5. **Event-Driven Audio System**
+
+```dart
+// application/services/event_bus.dart
+class EventBus {
+  final Map<Type, List<Function>> _subscribers = {};
+  
+  void subscribe<T>(void Function(T) handler) {
+    _subscribers.putIfAbsent(T, () => []).add(handler);
+  }
+  
+  void emit<T>(T event) {
+    _subscribers[T]?.forEach((handler) => handler(event));
+  }
+}
+
+// infrastructure/audio/audio_event_handler.dart
+class AudioEventHandler {
+  final AudioService _audioService;
+  
+  AudioEventHandler(this._audioService, EventBus eventBus) {
+    eventBus.subscribe<ComponentMovedEvent>(_onComponentMoved);
+    eventBus.subscribe<ComponentInteractionEvent>(_onComponentInteraction);
+    eventBus.subscribe<LevelCompleteEvent>(_onLevelComplete);
+  }
+  
+  void _onComponentMoved(ComponentMovedEvent event) {
+    _audioService.playPlacementSound();
+  }
+  
+  void _onComponentInteraction(ComponentInteractionEvent event) {
+    if (event.interaction == 'tap') {
+      _audioService.playSelectionSound();
+    }
+  }
+}
+```
+
+## Testing Strategy for Refactored Architecture
+
+### 1. **Pure Domain Unit Tests**
+```dart
+// test/domain/behaviors/interaction_behavior_test.dart
+void main() {
+  group('InteractionBehavior', () {
+    test('tap toggles switch state', () {
+      final behavior = InteractionBehavior();
+      final component = ComponentEntity.switch(state: {'closed': false});
+      
+      final result = behavior.execute(component, 'tap', {});
+      
+      expect(result.state['closed'], isTrue);
+    });
+  });
+}
+```
+
+### 2. **Use Case Integration Tests**
+```dart
+// test/application/use_cases/game_use_cases_test.dart
+void main() {
+  group('GameUseCases', () {
+    test('moveComponent validates and updates state', () async {
+      final useCases = GameUseCases(/* dependencies */);
+      final initialState = GameState.withComponents([...]);
+      
+      final result = await useCases.moveComponent(
+        initialState, 
+        'bulb1', 
+        Position(2, 2)
+      );
+      
+      expect(result.isSuccess, isTrue);
+      expect(result.data.grid.getComponent('bulb1').position, equals(Position(2, 2)));
+    });
+  });
+}
+```
+
+### 3. **Widget Tests with Mocked Dependencies**
+```dart
+// test/presentation/screens/game_screen_test.dart
+void main() {
+  testWidgets('tapping component triggers interaction', (tester) async {
+    final mockUseCases = MockGameUseCases();
+    
+    await tester.pumpWidget(GameScreen(useCases: mockUseCases));
+    await tester.tap(find.byKey(const Key('component_switch1')));
+    
+    verify(mockUseCases.interactWithComponent(any, 'switch1', 'tap')).called(1);
+  });
+}
+```
+
+## Implementation Roadmap
+
+### Phase 1: Domain Layer Foundation (2 weeks)
+1. Create domain entities and value objects
+2. Implement proper behavior system
+3. Create command pattern infrastructure
+4. Add validation services
+
+### Phase 2: Application Layer (1 week)
+1. Implement use cases
+2. Create application services
+3. Add event bus system
+
+### Phase 3: Infrastructure Decoupling (1 week)
+1. Move audio to event-driven system
+2. Create rendering services
+3. Implement persistence layer
+
+### Phase 4: Presentation Layer Updates (1 week)
+1. Update Riverpod providers to use new architecture
+2. Modify UI components to use use cases
+3. Add proper error handling
+
+### Phase 5: Testing Implementation (1 week)
+1. Write comprehensive domain unit tests
+2. Add use case integration tests
+3. Update widget tests with mocked dependencies
+
+## Benefits of Refactored Architecture
+
+1. **Testability**: Each layer can be tested in isolation
+2. **Maintainability**: Clear separation of concerns
+3. **Extensibility**: Easy to add new behaviors and features
+4. **Undo/Redo**: Built-in support through command pattern
+5. **Performance**: Event-driven systems reduce coupling
+6. **Debugging**: Clear data flow and error handling
+7. **Future-Proof**: Architecture can handle complex features like multiplayer, level editor, etc.
+
+## Conclusion
+
+The current architecture has significant issues that will impede long-term maintainability and testing. The proposed refactoring creates a robust, testable, and extensible foundation that follows established software architecture patterns. While it requires significant upfront investment, it will pay dividends in development velocity and application quality.
+
+omprehensive analysis of the impact this refactoring would have on the existing codebase, detailing which files would be affected and how.
+
+Executive Summary of Impact
+Implementing this proposed architecture would be a transformative, project-wide refactoring. Nearly every file in the lib directory would be touched, and many would be either deleted or completely rewritten.
+
+The Bad News: This is a significant undertaking (5-6 weeks is a realistic estimate). It cannot be done piecemeal without introducing major inconsistencies.
+The Good News: The result would be a vastly superior application. The current "god class" GameEngineNotifierV2 would be eliminated, concerns would be cleanly separated, and the core game logic would become 100% testable in isolation, which is impossible right now. This refactoring directly enables the advanced testing strategies (property-based, performance, etc.) that are currently blocked.
+Architectural Shift: Before and After
+Concern	Current Architecture	Proposed (Refactored) Architecture
+Core Logic	Mixed in GameEngineNotifierV2 and behaviors	Pure Dart logic in lib/domain/
+State Management	A single, large StateNotifier (GameEngineNotifierV2)	A thin GameStateNotifier in lib/presentation/ driving the UI
+User Actions	UI calls methods directly on the Notifier	UI calls GameUseCases in lib/application/, which execute Commands
+Behaviors	Untyped List<dynamic>, inconsistent methods	Type-safe List<Behavior> with a common execute pattern
+Undo/Redo	Not possible	Natively supported via the Command Pattern
+Audio	Called directly from the Notifier (audio.play...)	Decoupled via an Event Bus in lib/infrastructure/
+UI Responsibility	Widgets have some logic (e.g., DragBehavior)	Widgets become "dumb," only dispatching actions and rendering state
+Detailed File-by-File Impact Analysis
+lib/domain/ (Foundation Layer - Mostly New Files)
+This new directory would contain the heart of your application, with zero dependencies on Flutter.
+
+entities/ & value_objects/:
+IMPACTED: lib/models/*. All files from the current models directory would move here. They would be stripped of any logic that isn't core to the data itself (e.g., copyWithUpdatedComponent might move to a service).
+behaviors/:
+DELETED: All files in lib/behaviors/.
+CREATED: A new, proper behavior system as you designed, with a base Behavior class and specific, testable implementations.
+services/:
+IMPACTED: lib/engine/simulation_manager.dart. Its logic would move into a new domain/services/simulation_service.dart.
+CREATED: validation_service.dart to handle rules like "can this component be placed here?".
+commands/:
+CREATED: This entire directory is new. It will contain all the Command classes (MoveComponentCommand, ToggleSwitchCommand, etc.) that make undo/redo possible.
+events/:
+CREATED: This directory is new and will contain event definitions (ComponentMovedEvent, etc.) for decoupling services like audio.
+lib/application/ (Orchestration Layer - Mostly New Files)
+This new directory replaces the bloated GameEngineNotifierV2.
+
+use_cases/:
+CREATED: This is the core of the new orchestration layer. Files like move_component_use_case.dart will contain the high-level logic for a single user action.
+services/:
+CREATED: command_service.dart to manage the command history for undo/redo.
+dto/:
+CREATED: Data Transfer Objects, if needed, to pass data between the domain and presentation layers.
+lib/infrastructure/ (External Concerns - New & Moved Files)
+This new directory isolates external dependencies.
+
+audio/:
+IMPACTED: lib/services/audio_service.dart. It would move here and be refactored to listen to the new EventBus instead of being called directly.
+rendering/:
+IMPACTED: lib/ui/canvas_painter.dart. This file would likely move here and would be driven by data from the presentation layer, with no direct knowledge of the game engine.
+persistence/:
+IMPACTED: lib/services/level_manager.dart. Its logic for loading levels from assets and handling SharedPreferences would move here.
+lib/presentation/ (UI Layer - Heavy Refactoring)
+This becomes the "dumb" UI layer.
+
+state/:
+DELETED: lib/engine/game_engine_notifier.dart, game_engine_core.dart, input_manager.dart, etc.
+IMPACTED: lib/core/providers.dart. This file would be completely rewritten to provide the new, smaller GameStateNotifier and the application/domain services.
+CREATED: A new, thin game_state_notifier.dart that simply calls the GameUseCases and updates its state with the result.
+screens/ & widgets/:
+IMPACTED: lib/ui/game_screen.dart, lib/ui/game_canvas.dart, lib/ui/widgets/component_palette.dart. All these files would be significantly simplified. Instead of reading complex state from a massive notifier, they would just call methods on the GameStateNotifier (e.g., ref.read(gameStateProvider.notifier).moveComponent(...)). Their only job is to render the current state and dispatch user intents.
+Summary of Benefits
+Implementing this architecture will directly solve your current testing problems:
+
+Testability: You will be able to write pure Dart unit tests for every single behavior, command, and service in your domain layer, achieving 100% test coverage on your core logic without ever needing to import Flutter.
+Maintainability: With concerns cleanly separated, a bug in the audio system can no longer break the simulation engine. Adding a new component becomes a predictable process of creating its entity, behaviors, and commands.
+Extensibility: Features like a level editor or multiplayer support, which are nearly impossible now, become feasible. A level editor would simply be another UI that generates and executes the same Commands as the main game.
+
+Core Logic Refactoring: A Phased and Incremental Plan
+Phase 0: Preparation & Restructuring (Time: ~2-3 days)
+Goal: Reorganize the codebase to match the target architecture's directory structure without changing any logic. This prepares the project for the refactor and has the lowest risk.
+Issues Addressed: Code organization.
+Solution & File Changes:
+Create New Directories: Create the proposed top-level directories in lib/: domain, application, infrastructure, and presentation.
+Move Existing Files:
+Move lib/models/* -> lib/domain/entities/
+Move lib/behaviors/* -> lib/domain/behaviors/ (These will be replaced later, but we move them for now).
+Move lib/services/audio_service.dart -> lib/infrastructure/audio/
+Move lib/services/level_manager.dart -> lib/infrastructure/persistence/
+Move lib/ui/* and lib/widgets/* -> lib/presentation/
+Move lib/engine/* -> lib/application/ (The engine is currently the "application layer").
+Update All Imports: This is the most tedious step. Go through every file that was moved and fix all import statements to point to the new locations. The Dart analyzer will be essential here.
+Verify: Run the entire existing test suite (flutter test). All tests must still pass. This confirms that the reorganization did not break any existing functionality.
+Outcome: The project structure is clean and ready for the logical changes. The application is 100% functional.
+Phase 1: Introduce the Pure Domain (Coexistence) (Time: ~1 week)
+Goal: Build the new, pure, and fully tested domain models and services in parallel with the old system.
+Issues Addressed: Creates the testable, core logic foundation.
+Solution & File Changes:
+Create New Domain Entities: In lib/domain/entities/, create new files for component_entity.dart, grid_entity.dart, etc. These will be pure Dart classes, distinct from the old models.
+Create New Behavior System: In lib/domain/behaviors/, create the new, type-safe Behavior base class and concrete implementations as you designed them.
+Create New Domain Services: In a new lib/domain/services/ directory, create simulation_service.dart and validation_service.dart. Port the logic from the old SimulationManager into the new SimulationService.
+Write Pure Unit Tests: Create a new test/domain/ directory. Write comprehensive unit tests for every new entity, behavior, and service. This is the key benefit: this entire layer can be validated in isolation before it's ever used by the app.
+Outcome: The new domain layer is complete and has 100% unit test coverage. The running application is completely unaffected and still uses the old logic.
+Phase 2: The Adapter & Bridge (First Integration) (Time: ~1 week)
+Goal: Connect a single piece of the old engine to the new domain logic, proving the integration works while minimizing risk.
+Issues Addressed: Begins the "strangling" process safely.
+Solution & File Changes:
+Focus on One Action: Choose a simple interaction, like toggling a switch.
+Create an Adapter: Create a new file, e.g., lib/application/domain_adapter.dart. This file will contain functions to convert old models to new entities and back (e.g., ComponentEntity toComponentModel(ComponentModel oldModel)).
+Modify the Old Engine:
+IMPACTED: lib/application/game_engine_notifier.dart (previously lib/engine/...).
+In the _handleTap method (or equivalent), when a switch is tapped: a. Instead of using the old behavior logic, call the new adapter: final newEntity = toComponentEntity(oldSwitchModel); b. Execute the new, pure domain behavior: final resultEntity = newEntity.executeAction('tap', {}); c. Convert the result back: final newModel = toComponentModel(resultEntity); d. Update the state with the new model: state = state.copyWithUpdatedComponent(newModel);
+Outcome: The app still functions as before, but the logic for toggling a switch is now powered by your new, fully tested domain layer. The risk was isolated to a single, small feature.
+Phase 3: Gradual Strangulation (Feature by Feature) (Time: ~2 weeks)
+Goal: Systematically replace all remaining old logic with calls to the new, adapted domain layer.
+Issues Addressed: Completes the hollowing-out of the old engine.
+Solution & File Changes:
+Refactor Component Movement:
+IMPACTED: lib/application/game_engine_notifier.dart.
+Create a MoveComponentUseCase in lib/application/use_cases/.
+Change the drag-and-drop handling in the old notifier to call this new use case (via the adapter).
+Refactor Simulation:
+IMPACTED: lib/application/game_engine_notifier.dart.
+Change the simulatePowerFlow call to instead use the adapter to convert the whole grid, run the new SimulationService, and convert the result back.
+Continue for all features: Repeat this process for every piece of logic (checking win conditions, rotations, etc.) until the GameEngineNotifierV2 is mostly an empty shell that delegates everything to the new application and domain layers.
+Outcome: The application is still fully functional, but its internal logic is now almost entirely powered by the new architecture. The old code is still present but is no longer being executed.
+Phase 4: The Final Cutover (Time: ~1 week)
+Goal: Remove the old system and have the UI communicate directly with the new, clean application layer.
+Issues Addressed: Finalizes the refactoring and removes all technical debt.
+Solution & File Changes:
+Create New Notifier: Create the new, thin GameStateNotifier in lib/presentation/state/ as you designed. It will take the GameUseCases as a dependency.
+Update Providers:
+IMPACTED: lib/core/providers.dart.
+Change the gameEngineProvider to provide the new GameStateNotifier.
+Update UI:
+IMPACTED: lib/presentation/screens/game_screen.dart, game_canvas.dart, etc.
+Change all UI code that was calling the old GameEngineNotifierV2 to now call the clean methods on the new GameStateNotifier (e.g., ref.read(gameEngineProvider.notifier).moveComponent(...)).
+Delete Old Code:
+DELETED: The old GameEngineNotifierV2, the old ComponentModel files in lib/domain/entities, the old lib/domain/behaviors, and the adapter code.
+Outcome: The refactoring is complete. The application now fully uses the new, robust, and highly testable architecture.

@@ -1,6 +1,6 @@
 // test/helpers/mock_services.dart
-import 'package:circuit_stem/services/audio_service.dart';
-import 'package:circuit_stem/engine/animation_scheduler.dart';
+import 'package:circuit_stem/infrastructure/audio/audio_service.dart';
+import 'package:circuit_stem/application/animation_scheduler.dart';
 import 'package:mocktail/mocktail.dart';
 
 /// A mock AudioService that records played sounds for verification in tests.

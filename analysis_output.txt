@@ -1,0 +1,9 @@
+Analyzing circuit_stem...                                       
+
+   info • Parameter 'key' could be a super parameter • lib/presentation/widgets/circuit_component_display.dart:14:9 • use_super_parameters
+  error • The argument for the named parameter 'key' was already specified • lib/presentation/widgets/circuit_component_display.dart:19:14 • duplicate_named_argument
+   info • Use 'const' with the constructor to improve performance • test/helpers/pump_game_screen.dart:29:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • test/helpers/pump_game_screen.dart:30:15 • prefer_const_constructors
+   info • Unnecessary use of double quotes • test/helpers/test_setup_helper.dart:91:44 • prefer_single_quotes
+   info • Parameter 'key' could be a super parameter • test/timeout_repro_test.dart:10:9 • use_super_parameters
+

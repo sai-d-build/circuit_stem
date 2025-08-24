@@ -1,8 +1,8 @@
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:circuit_stem/engine/game_engine_notifier.dart';
-import 'package:circuit_stem/models/component.dart';
-import 'package:circuit_stem/engine/game_engine_state.dart';
+import 'package:circuit_stem/application/game_engine_notifier.dart';
+import 'package:circuit_stem/domain/entities/component.dart';
+import 'package:circuit_stem/application/game_engine_state.dart';
 
 class LevelTestHelper {
   static const double cellSize = 64.0;

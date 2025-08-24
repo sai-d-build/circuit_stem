@@ -2,13 +2,13 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-import '../behaviors/drawing_behavior.dart';
-import '../behaviors/logic_behavior.dart';
-import '../core/component_registry.dart';
-import '../models/component.dart';
-import '../services/asset_manager.dart';
+import '../domain/behaviors/drawing_behavior.dart';
+import '../domain/behaviors/logic_behavior.dart';
+import '../application/services/component_registry.dart';
+import '../domain/entities/component.dart';
+import '../infrastructure/rendering/asset_manager.dart';
 import '../common/theme.dart';
-import '../models/grid.dart';
+import '../domain/entities/grid.dart';
 import '../common/logger.dart';
 
 // --- Straight Wire --- //
