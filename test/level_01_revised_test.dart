@@ -1,10 +1,8 @@
 import 'dart:io';
-import 'package:circuit_stem/core/providers.dart';
 import 'package:circuit_stem/engine/game_engine_notifier.dart';
 import 'package:circuit_stem/models/level_definition.dart';
 import 'package:circuit_stem/services/level_manager.dart';
 import 'package:circuit_stem/main.dart'; // Import for registerAllGameEntities
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -49,7 +47,7 @@ void main() {
       await levelManager.init();
       final loadedLevel = await levelManager.loadLevelByIndex(0);
       expect(loadedLevel, isNotNull,
-          reason: "Test setup failed: Level 1 could not be loaded.");
+          reason: 'Test setup failed: Level 1 could not be loaded.');
       level1 = loadedLevel!;
 
       // Create a fresh notifier for each test
@@ -57,8 +55,7 @@ void main() {
     });
 
     testWidgets('TC-L1-01: Toggle switch interaction', (tester) async {
-      final container =
-          await pumpGameScreenWithOverrides(tester, level1, notifier: notifier);
+      await pumpGameScreenWithOverrides(tester, level1, notifier: notifier);
 
       final switchComponent =
           LevelTestHelper.findComponentById(notifier.state, 'switch1');
@@ -84,8 +81,7 @@ void main() {
     });
 
     testWidgets('TC-L1-02: Move timer component', (tester) async {
-      final container =
-          await pumpGameScreenWithOverrides(tester, level1, notifier: notifier);
+      await pumpGameScreenWithOverrides(tester, level1, notifier: notifier);
 
       final timer = LevelTestHelper.findComponentById(notifier.state, 'timer1');
       expect(timer, isNotNull);

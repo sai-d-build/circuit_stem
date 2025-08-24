@@ -27,7 +27,7 @@ void main() {
       // ASSERT
       // Verify that the bulb is not powered.
       final isPowered = GameTestHelper.isBulbPowered(setup.container, bulbId);
-      expect(isPowered, isFalse, reason: "Bulb should not be powered in a partial circuit.");
+      expect(isPowered, isFalse, reason: 'Bulb should not be powered in a partial circuit.');
     });
 
     testWidgets('TC-L1-08: A complete circuit powers the bulb', (tester) async {
@@ -56,7 +56,7 @@ void main() {
       // ASSERT
       // Verify that the bulb is now powered.
       final isPowered = GameTestHelper.isBulbPowered(container, bulbId);
-      expect(isPowered, isTrue, reason: "Bulb should be powered in a complete circuit.");
+      expect(isPowered, isTrue, reason: 'Bulb should be powered in a complete circuit.');
     });
 
     testWidgets('TC-L1-09: A complete circuit with a timer powers the bulb and activates the timer',
@@ -89,8 +89,8 @@ void main() {
 
       // ASSERT
       // Verify that both the bulb is powered and the timer is active.
-      expect(GameTestHelper.isBulbPowered(container, bulbId), isTrue, reason: "Bulb should be powered.");
-      expect(GameTestHelper.isTimerActive(container, timerId), isTrue, reason: "Timer should be active.");
+      expect(GameTestHelper.isBulbPowered(container, bulbId), isTrue, reason: 'Bulb should be powered.');
+      expect(GameTestHelper.isTimerActive(container, timerId), isTrue, reason: 'Timer should be active.');
     });
 
     testWidgets('TC-L1-10: Meeting all goals triggers the win condition', (tester) async {
@@ -112,7 +112,7 @@ void main() {
 
       // ASSERT
       // Verify that the game engine reports a win state.
-      expect(GameTestHelper.isGameInWinState(container), isTrue, reason: "Win condition should be met when all goals are achieved.");
+      expect(GameTestHelper.isGameInWinState(container), isTrue, reason: 'Win condition should be met when all goals are achieved.');
     });
 
     testWidgets('TC-L1-12: Breaking a winning circuit revokes the win state', (tester) async {
@@ -134,16 +134,16 @@ void main() {
       await GameTestHelper.tapGridCell(tester, sw.r, sw.c);
 
       // ASSERT 1: Verify everything is active and the game is won.
-      expect(GameTestHelper.isGameInWinState(container), isTrue, reason: "Setup failed: Win condition not met.");
-      expect(GameTestHelper.isBulbPowered(container, bulbId), isTrue, reason: "Setup failed: Bulb not powered.");
+      expect(GameTestHelper.isGameInWinState(container), isTrue, reason: 'Setup failed: Win condition not met.');
+      expect(GameTestHelper.isBulbPowered(container, bulbId), isTrue, reason: 'Setup failed: Bulb not powered.');
 
       // ACT 2: Tap the switch again to open it, breaking the circuit.
       await GameTestHelper.tapGridCell(tester, sw.r, sw.c);
 
       // ASSERT 2: Verify the win state is revoked and components are off.
-      expect(GameTestHelper.isGameInWinState(container), isFalse, reason: "Win condition should be revoked after breaking circuit.");
-      expect(GameTestHelper.isBulbPowered(container, bulbId), isFalse, reason: "Bulb should turn off after breaking circuit.");
-      expect(GameTestHelper.isTimerActive(container, timerId), isFalse, reason: "Timer should stop after breaking circuit.");
+      expect(GameTestHelper.isGameInWinState(container), isFalse, reason: 'Win condition should be revoked after breaking circuit.');
+      expect(GameTestHelper.isBulbPowered(container, bulbId), isFalse, reason: 'Bulb should turn off after breaking circuit.');
+      expect(GameTestHelper.isTimerActive(container, timerId), isFalse, reason: 'Timer should stop after breaking circuit.');
     });
 
   });

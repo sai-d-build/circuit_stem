@@ -11,7 +11,6 @@ import '../services/asset_manager.dart';
 import '../common/theme.dart';
 import '../engine/game_engine_notifier.dart';
 
-import '../common/assets.dart';
 import '../models/grid.dart';
 import '../common/logger.dart';
 
@@ -76,6 +75,7 @@ class SwitchInteractionBehavior implements InteractionBehavior {
     notifier.audio.playToggle();
   }
 
+  @override
   void onDragStart(GameEngineNotifierV2 notifier, ComponentModel component) {}
 
   @override

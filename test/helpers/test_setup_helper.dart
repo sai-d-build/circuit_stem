@@ -111,11 +111,12 @@ class TestSetupHelper {
         }),
         
         // Provide the game engine with the pre-loaded level and mocks.
-        gameEngineProvider(level).overrideWith((ref) {
-          return GameEngineNotifierV2(
-            initialLevel: level,
+        gameEngineProvider.overrideWith((ref) {
+          final notifier = GameEngineNotifierV2(
             audioService: mockAudioService,
           );
+          notifier.loadLevel(level); // Load the level after creating the notifier
+          return notifier;
         }),
       ],
     );

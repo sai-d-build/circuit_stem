@@ -25,7 +25,7 @@ class _GridPainter extends CustomPainter {
   final int rows;
   final int cols;
   final double cellSize;
-  final Paint _paint = Paint()..color = Colors.grey.withOpacity(0.5);
+  final Paint _paint = Paint()..color = Colors.grey.withAlpha((255 * 0.5).round());
 
   _GridPainter({
     required this.rows,

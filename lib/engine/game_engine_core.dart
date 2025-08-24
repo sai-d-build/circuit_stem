@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/grid.dart';
-import '../models/component.dart';
 import 'game_engine_state.dart'; // Corrected import
 import 'render_state.dart'; // Corrected import
 import '../behaviors/logic_behavior.dart';

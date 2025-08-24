@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/providers.dart';
 import '../models/component.dart';
 import '../common/constants.dart';
-import '../common/logger.dart';
 import '../models/level_definition.dart';
 import '../widgets/grid_widget.dart';
 import '../widgets/component_widget.dart';
@@ -73,7 +72,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
                   },
                 ),
               );
-            }).toList(),
+            }),
           ],
         );
       },

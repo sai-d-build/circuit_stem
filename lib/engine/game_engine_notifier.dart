@@ -8,6 +8,7 @@ import '../common/logger.dart';
 import 'simulation_manager.dart';
 import 'audio_manager.dart';
 import 'input_manager.dart';
+import '../behaviors/interaction_behavior.dart';
 
 class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
   final InputManager input;
@@ -44,8 +45,23 @@ class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
   }
 
   void _handleTap(ComponentModel comp) {
+    Logger.log('GameEngineNotifierV2: _handleTap called for component ${comp.id}');
     audio.playSelection();
+
+    // Find the interaction behavior for the component and call its onTap
+    final interactionBehavior = comp.behaviors.firstWhere(
+      (b) => b is InteractionBehavior,
+      orElse: () => null,
+    );
+
+    if (interactionBehavior != null) {
+      (interactionBehavior as InteractionBehavior).onTap(this, comp);
+    } else {
+      Logger.log('No InteractionBehavior found for component: ${comp.id} of type ${comp.type}');
+    }
+
     // Tapping does not change the grid logic, only selection state
+    // This line should probably be moved or removed if the interaction behavior handles selection
     state = state.copyWith(selectedComponentId: comp.id);
   }
 

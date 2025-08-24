@@ -1,3 +1,4 @@
+import '../common/logger.dart';
 import '../models/component.dart';
 
 /// Translates raw UI input into specific game actions.
@@ -10,6 +11,7 @@ class InputManager {
 
   // This now calls a function on the Notifier
   void handleTap(ComponentModel comp) {
+    Logger.log('InputManager: handleTap called for component ${comp.id}');
     onComponentTapped?.call(comp);
   }
 

@@ -1,3 +1,38 @@
+## [2.0.0] - 2025-08-23 5:00 PM EST - Testing Strategy Overhaul
+
+### Added
+- **`DOCS/TESTING_BIBLE.md`**: A new, comprehensive guide to the project's testing strategy, architecture, and best practices.
+- A new, layered test suite architecture (`unit/`, `widgets/`, `levels/`, `integration/`).
+
+### Changed
+- The project's testing strategy has been completely refactored to follow a multi-layered approach (unit, widget, integration tests).
+- The focus is now on true widget tests that simulate user interactions to prevent UI-related bugs from going undetected.
+
+### Deprecated
+- `DOCS/TESTING.md`: The old testing strategy document.
+- `DOCS/TESTING_IMPLEMENTATION_ROADMAP.md`: The old testing roadmap.
+- The `test/categories/` directory structure is now deprecated in favor of a more organized, level-based approach.
+
+
+## [Unreleased] - 2025-08-23
+
+### Fixed
+- **Toggle Switch Interaction**: Resolved the issue where the toggle switch in the UI was not responding to taps. The `_handleTap` method in `lib/engine/game_engine_notifier.dart` was updated to correctly delegate tap events to the component's `InteractionBehavior.onTap` method. Loggers were added to `lib/engine/input_manager.dart` and `lib/engine/game_engine_notifier.dart` to trace the tap event flow.
+
+### Changed
+
+- **Codebase Clean-up and Refinements**:
+  - **Logger Import Paths**: Corrected import paths for `logger.dart` across the `lib/` directory to reflect its consistent location in `lib/common/logger.dart`. This involved updating imports in various component files, core registries, engine files, goal files, and UI files.
+  - **Test Helper `Logger` Mocking**: Introduced a local `mock_logger.dart` in `test/helpers/` to provide a decoupled `Logger` implementation for test environments, resolving persistent import resolution issues in `test/helpers/mock_animation_scheduler.dart`.
+  - **Test Setup Refinements**: Adjusted `test/helpers/test_setup_helper.dart` to correctly instantiate `MockAnimationScheduler` without an undefined `logger` parameter.
+  - **Unused Code Removal**: Eliminated unused imports and local variables from various files, including `lib/components/switch.dart`, `lib/engine/game_engine_core.dart`, `lib/engine/game_engine_notifier.dart`, `lib/ui/game_canvas.dart`, `test/helpers/level_test_helper.dart`, `test/level_01_revised_test.dart`, and `test/helpers/pump_game_screen.dart`.
+  - **Style and Best Practices**: Applied several stylistic improvements:
+    - Added missing `@override` annotations (e.g., in `lib/components/switch.dart`).
+    - Removed unnecessary `.toList()` calls in spread operators (e.g., in `lib/ui/game_canvas.dart`).
+    - Replaced deprecated `withOpacity` usage (e.g., in `lib/widgets/grid_widget.dart`).
+    - Standardized string literals to single quotes in test files (e.g., `test/categories/02_circuit_logic_tests.dart`, `test/categories/04_audio_tests.dart`, `test/level_01_revised_test.dart`).
+    - Replaced `print` statements with `Logger.log` in `test/helpers/mock_animation_scheduler.dart` for consistent logging.
+
 ## [Unreleased] - 2025-08-22
 
 ### Changed
