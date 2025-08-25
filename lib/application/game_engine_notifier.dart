@@ -89,7 +89,10 @@ class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
 
     if (id.endsWith('_palette')) {
       // This is a component from the palette
+      Logger.log('[_moveComponent] Attempting to find palette component with ID: $id');
+      Logger.log('[_moveComponent] Current palette components IDs: ${state.paletteComponents.map((comp) => comp.id).join(', ')}');
       final paletteComponent = state.paletteComponents.firstWhere((c) => c.id == id);
+      Logger.log('[_moveComponent] Found palette component: ${paletteComponent.id}');
       final newId = Uuid().v4();
       final newComponent = paletteComponent.copyWith(id: newId, r: r, c: c);
 

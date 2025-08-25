@@ -11,11 +11,11 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 | `BUG-001` | Resolved | Build & Compilation                          | `flutter test` command fails due to compilation errors in `GameEngineNotifier`. | 2025-08-21    | 2025-08-21    | High     |
 | `BUG-002` | Resolved | State Management (`GameEngineNotifier`)      | Component state is not updated correctly after user interactions (tap, drag). | 2025-08-21    | 2025-08-21    | High     |
 | `BUG-003` | Resolved | Component Behaviors (`SwitchInteractionBehavior`) | Behaviors creating their own services bypasses test mocks, causing failures.  | 2025-08-21    | 2025-08-21    | Medium   |
-| `BUG-004` | Open     | Core Models, Simulation Engine               | Missing `lib/models/port.dart` file.                                        | 2025-08-22    |               | High     |
-| `BUG-005` | Open     | Behaviors, UI                                | `GridWidgetState` type not found.                                           | 2025-08-22    |               | High     |
-| `BUG-006` | Open     | Game Engine, Test Setup                      | `GameEngineNotifierV2` Constructor and API Mismatches.                      | 2025-08-22    |               | High     |
+| `BUG-004` | Resolved | Core Models, Simulation Engine               | Missing `lib/models/port.dart` file.                                        | 2025-08-22    | 2025-08-25    | High     |
+| `BUG-005` | Resolved | Behaviors, UI                                | `GridWidgetState` type not found.                                           | 2025-08-22    | 2025-08-25    | High     |
+| `BUG-006` | Resolved | Game Engine, Test Setup                      | `GameEngineNotifierV2` Constructor and API Mismatches.                      | 2025-08-22    | 2025-08-25    | High     |
 | `BUG-007` | Open     | Various (Audio, Grid, Components, UI)        | Undefined Methods/Getters Across Refactored Components.                     | 2025-08-22    |               | High     |
-| `BUG-008` | Open     | Game Engine                                  | Invalid `this` Reference in `GameEngineNotifierV2` Initializer.             | 2025-08-22    |               | High     |
+| `BUG-008` | Resolved | Game Engine                                  | Invalid `this` Reference in `GameEngineNotifierV2` Initializer.             | 2025-08-22    | 2025-08-25    | High     |
 | `BUG-009` | Open     | Code Quality, Riverpod Usage                 | Unused Code and Improper State Access Warnings.                             | 2025-08-22    |               | Low      |
 
 ---
@@ -63,9 +63,9 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 
 ### ID: `BUG-004`
 *   **Date:** 2025-08-22
-*   **Status:** Open
-*   **Module/Feature:** Core Models, Simulation Engine
-*   **Description:** The file `lib/models/port.dart` is missing, causing compilation errors in `lib/engine/simulation_manager.dart` and preventing tests from running. This file is a critical dependency for the new `SimulationManager`.
+*   **Status:** Resolved
+*   **Date Resolved:** 2025-08-25
+*   **Detailed Information:** The file `lib/models/port.dart` was reported as missing, causing compilation errors in `lib/engine/simulation_manager.dart`. This bug is resolved because `lib/application/simulation_manager.dart` (the primary consumer of `port.dart`) has been deleted in the current refactoring, removing the problematic dependency.
 *   **Root Cause:** File either deleted, renamed, or moved without updating its references or being recreated.
 *   **Impact:** Blocks compilation of `SimulationManager` and thus the entire test suite and application.
 *   **Reference Docs:** `lib/engine/simulation_manager.dart`
@@ -74,9 +74,9 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 
 ### ID: `BUG-005`
 *   **Date:** 2025-08-22
-*   **Status:** Open
-*   **Module/Feature:** Behaviors, UI
-*   **Description:** The type `GridWidgetState` is not found in `lib/behaviors/drag_behavior.dart`, leading to compilation errors. This suggests `GridWidgetState` is either not defined or not correctly imported/exposed.
+*   **Status:** Resolved
+*   **Date Resolved:** 2025-08-25
+*   **Detailed Information:** The type `GridWidgetState` was reported as not found in `lib/behaviors/drag_behavior.dart`. This bug is resolved because `lib/domain/behaviors/drag_behavior.dart` has been refactored and no longer references `GridWidgetState`. The drag behavior now uses `GlobalKey` and `CoordinateTranslator` for handling drag events.
 *   **Root Cause:** Likely a missing definition, incorrect import, or a change in the class's visibility/location.
 *   **Impact:** Prevents compilation of `DragBehavior` and related UI components.
 *   **Reference Docs:** `lib/behaviors/drag_behavior.dart`
@@ -85,9 +85,9 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 
 ### ID: `BUG-006`
 *   **Date:** 2025-08-22
-*   **Status:** Open
-*   **Module/Feature:** Game Engine, Test Setup
-*   **Description:** The `GameEngineNotifierV2` constructor has argument mismatches (e.g., `animationScheduler` parameter not found, `audioManager` parameter not defined, too many positional arguments). Additionally, getters like `animationScheduler` are being accessed on `GameEngineNotifierV2` but are not defined.
+*   **Status:** Resolved
+*   **Date Resolved:** 2025-08-25
+*   **Detailed Information:** The `GameEngineNotifierV2` constructor and API were reported to have mismatches. This bug is resolved as `lib/application/game_engine_notifier.dart` has been refactored. The constructor now correctly defines and requires `AudioService` and `AnimationScheduler`, and internal initializations for `InputManager`, `AudioManager`, and `SimulationService` are handled, addressing the reported mismatches.
 *   **Root Cause:** Incomplete update of all call sites and test setups to match the new `GameEngineNotifierV2` constructor signature and API. Responsibilities for `animationScheduler` have likely moved.
 *   **Impact:** Prevents correct instantiation of the game engine in tests and potentially in the application, leading to compilation errors.
 *   **Reference Docs:** `lib/engine/game_engine_notifier.dart`, `test/level_01_revised_test.dart`, `test/helpers/test_setup_helper.dart`
@@ -99,11 +99,12 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 *   **Status:** Open
 *   **Module/Feature:** Various (Audio, Grid, Components, UI)
 *   **Description:** Numerous methods and getters are reported as undefined across various parts of the codebase, indicating that APIs have changed due to refactoring, and calling code has not been updated.
-    *   `playToggle`, `playSelection`, `playPlacement`, `playWin`, `playLose`, `stopAll` not defined for `AudioManager`/`AudioService`.
-    *   `getComponentAt` not defined for `Grid`.
-    *   `shape` getter not defined for `ComponentModel`.
-    *   `getDrawingBehavior` not defined for `ComponentPainter`.
-    *   `state` getter not defined for `GameEngineState` (in test helpers).
+    *   `playToggle`, `playSelection`, `playPlacement`, `playWin`, `playLose`: **Resolved** (defined in `AudioManager`).
+    *   `stopAll`: **Still Open** (not found in `AudioManager` or `AudioService`).
+    *   `getComponentAt` not defined for `Grid`: **Resolved** (renamed to `componentAt`).
+    *   `shape` getter not defined for `ComponentModel`: **Resolved** (replaced by `shapeOffsets`).
+    *   `getDrawingBehavior` not defined for `ComponentPainter`: **Resolved** (refactored to retrieve `DrawingBehavior` from `ComponentModel`).
+    *   `state` getter not defined for `GameEngineState` (in test helpers): **Resolved** (due to architectural changes in `GameEngineState` and `GameEngineNotifierV2`).
 *   **Root Cause:** Incomplete propagation of API changes from the refactoring of `GameEngineNotifier` and related components.
 *   **Impact:** Widespread compilation errors, preventing the application and tests from running.
 *   **Reference Docs:** `lib/components/switch.dart`, `lib/engine/audio_manager.dart`, `lib/engine/simulation_manager.dart`, `lib/ui/game_canvas.dart`, `lib/widgets/component_painter.dart`, `lib/widgets/component_widget.dart`, `test/helpers/game_test_helper.dart`
@@ -112,9 +113,9 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 
 ### ID: `BUG-008`
 *   **Date:** 2025-08-22
-*   **Status:** Open
-*   **Module/Feature:** Game Engine
-*   **Description:** Invalid `this` reference and implicit `this` reference in initializer for `_simulationManager` in `lib/engine/game_engine_notifier.dart`.
+*   **Status:** Resolved
+*   **Date Resolved:** 2025-08-25
+*   **Detailed Information:** Invalid `this` reference and implicit `this` reference in initializer for `_simulationManager` in `lib/engine/game_engine_notifier.dart` was reported. This bug is resolved as the `GameEngineNotifierV2` constructor in `lib/application/game_engine_notifier.dart` now correctly initializes `simulation = SimulationService()` directly, resolving the `this` reference issue.
 *   **Root Cause:** Incorrect way of initializing `_simulationManager` within the constructor's initializer list, potentially trying to use `this` before the object is fully constructed.
 *   **Impact:** Compilation error in `GameEngineNotifierV2`.
 *   **Reference Docs:** `lib/engine/game_engine_notifier.dart`
@@ -140,3 +141,23 @@ Investigation: I identified that other draggable components (Bulb, Buzzer, and a
 Compilation Errors: Repeated attempts to add the MoveBehavior import to bulb.dart, buzzer.dart, and wire.dart have resulted in recurring compilation errors related to misplaced import statements and MoveBehavior not being recognized as a type.
 Debugging: To diagnose why MoveBehavior instances are not being correctly attached to components, I added enhanced logging to lib/application/services/component_registry.dart to trace the behavior instantiation process.
 The application is currently stuck in a state where it cannot compile due to these unresolved import and type resolution issues, preventing further runtime debugging.
+The application successfully launched and initialized, registering all game components and behaviors as expected. This confirms that the initial setup and ComponentRegistry are functioning correctly.
+
+However, the logs reveal a critical runtime error: StateError: Bad state: No element. This exception occurs within GameEngineNotifierV2._moveComponent at line 92, specifically when attempting to find a palette component using state.paletteComponents.firstWhere((c) => c.id == id).
+
+Detailed Issue Analysis:
+
+StateError: Bad state: No element in GameEngineNotifierV2._moveComponent (line 92):
+Cause: This error indicates that when a user attempts to drag a component from the palette (identified by its ID ending with _palette), the GameEngineNotifierV2 cannot find a matching component within its state.paletteComponents list. The firstWhere method fails because no element satisfies the condition.
+Impact: This directly prevents users from dragging and placing new components from the palette onto the game grid, effectively blocking core gameplay functionality.
+Root Cause (Hypothesis): The id of the component being dragged from the palette does not precisely match any of the IDs currently present in state.paletteComponents. This could be due to:
+ID Mismatch: The ID generated or used by the UI for the dragged palette component might differ from the actual IDs stored in state.paletteComponents.
+Incorrect Palette Population/Maintenance: state.paletteComponents might not be correctly populated during level loading, or components might be inadvertently removed from it before a drag operation completes.
+Comparison to Previous Analysis:
+
+My previous analysis of the "Component Movement Issue" focused on the scenario where components already on the grid fail to move due to MoveBehavior not being found. The current logs highlight a different, earlier problem: the inability to even start moving components from the palette. This suggests the "Component Movement Issue" is multi-faceted. The StateError is a more immediate, blocking issue than the MoveBehavior attachment problem for existing grid components.
+
+To further diagnose this StateError, I need more specific information:
+
+What is the exact id of the component being dragged from the palette when this error occurs?
+What are the contents (IDs) of state.paletteComponents at the moment the error is thrown?
