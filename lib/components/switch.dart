@@ -9,7 +9,7 @@ import '../application/services/component_registry.dart';
 import '../domain/entities/component.dart';
 import '../infrastructure/rendering/asset_manager.dart';
 import '../common/theme.dart';
-import '../application/game_engine_notifier.dart';
+
 import '../domain/entities/grid.dart';
 import '../common/logger.dart';
 
@@ -58,31 +58,7 @@ class SwitchDrawingBehavior implements DrawingBehavior {
   }
 }
 
-class SwitchInteractionBehavior implements InteractionBehavior {
-  @override
-  void onTap(GameEngineNotifierV2 notifier, ComponentModel component) {
-    Logger.log('SwitchInteractionBehavior: onTap called for switch ${component.id}');
 
-    final currentState = component.state['closed'] as bool? ?? false;
-    final newComponentState = Map<String, dynamic>.from(component.state)
-      ..['closed'] = !currentState;
-
-    final updatedComponent = component.copyWith(state: newComponentState);
-
-    // ✅ Update game state first
-    notifier.updateComponent(updatedComponent);
-    notifier.audio.playToggle();
-  }
-
-  @override
-  void onDragStart(GameEngineNotifierV2 notifier, ComponentModel component) {}
-
-  @override
-  void onDragUpdate(GameEngineNotifierV2 notifier, ComponentModel component) {}
-
-  @override
-  void onDragEnd(GameEngineNotifierV2 notifier, ComponentModel component) {}
-}
 
 class SwitchLogicBehavior implements LogicBehavior {
   @override
@@ -92,19 +68,21 @@ class SwitchLogicBehavior implements LogicBehavior {
   }
 }
 
+
+
 void registerSwitch() {
   Logger.log('registerSwitch() called.');
   registerBehavior<SwitchDrawingBehavior>(() => SwitchDrawingBehavior());
   Logger.log('registerBehavior<SwitchDrawingBehavior> called.');
-  registerBehavior<SwitchInteractionBehavior>(() => SwitchInteractionBehavior());
-  Logger.log('registerBehavior<SwitchInteractionBehavior> called.');
+  registerBehavior<ToggleBehavior>(() => ToggleBehavior());
+  Logger.log('registerBehavior<ToggleBehavior> called.');
   registerBehavior<SwitchLogicBehavior>(() => SwitchLogicBehavior());
   Logger.log('registerBehavior<SwitchLogicBehavior> called.');
 
   ComponentRegistry.register(
     type: 'Component.Switch',
     displayName: 'Switch',
-    behaviors: [SwitchDrawingBehavior, SwitchInteractionBehavior, SwitchLogicBehavior],
+    behaviors: [SwitchDrawingBehavior, ToggleBehavior, SwitchLogicBehavior],
     isDraggable: false, // Switches are not draggable
   );
   Logger.log('registerSwitch() completed.');

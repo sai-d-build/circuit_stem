@@ -129,3 +129,14 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 *   **Root Cause:** Remnants of old code, incomplete cleanup after refactoring, or violations of Riverpod's best practices for state access.
 *   **Impact:** Does not block compilation but indicates code smells, potential for bugs, and reduced maintainability.
 *   **Reference Docs:** Various files, including `lib/behaviors/drag_behavior.dart`, `lib/components/switch.dart`, `lib/core/providers.dart`, `lib/engine/game_engine_core.dart`, `lib/engine/simulation_manager.dart`, `lib/widgets/component_painter.dart`
+
+
+ application is currently failing to launch on Chrome due to persistent compilation errors.
+
+Current Status:
+
+Component Movement Issue: Despite refactoring the movement logic and updating the Timer component, components are still not moving at runtime, with logs indicating "Move failed for component."
+Investigation: I identified that other draggable components (Bulb, Buzzer, and all Wire types) also need the MoveBehavior registered.
+Compilation Errors: Repeated attempts to add the MoveBehavior import to bulb.dart, buzzer.dart, and wire.dart have resulted in recurring compilation errors related to misplaced import statements and MoveBehavior not being recognized as a type.
+Debugging: To diagnose why MoveBehavior instances are not being correctly attached to components, I added enhanced logging to lib/application/services/component_registry.dart to trace the behavior instantiation process.
+The application is currently stuck in a state where it cannot compile due to these unresolved import and type resolution issues, preventing further runtime debugging.

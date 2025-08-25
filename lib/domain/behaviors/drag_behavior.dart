@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/services/providers.dart';
 import '../entities/component.dart';
 import '../../presentation/utils/coordinate_translator.dart';
-import 'behavior.dart';
 
-class DragBehavior extends Behavior {
+
+class DragBehavior {
   final WidgetRef ref;
   final GlobalKey gridKey;
 

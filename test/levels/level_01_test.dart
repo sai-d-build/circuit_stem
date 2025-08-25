@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/level_test_helper.dart';
 import '../helpers/pump_game_screen.dart';
 import '../helpers/mock_asset_manager.dart';
-import '../helpers/mock_audio_service.dart';
+import '../helpers/mock_services.dart';
 
 void main() {
   group('Level 01 Revised Tests - Component Behavior', () {
@@ -35,6 +35,7 @@ void main() {
       // Create mock services
       final mockAssetManager = MockAssetManager();
       final mockAudioService = MockAudioService();
+      final mockAnimationScheduler = MockAnimationScheduler();
       final mockPrefs = await SharedPreferences.getInstance();
 
       // Prime the mock asset manager with the pre-read level files
@@ -51,7 +52,10 @@ void main() {
       level1 = loadedLevel!;
 
       // Create a fresh notifier for each test
-      notifier = GameEngineNotifierV2(audioService: mockAudioService);
+      notifier = GameEngineNotifierV2(
+        audioService: mockAudioService,
+        animationScheduler: mockAnimationScheduler,
+      );
     });
 
     testWidgets('TC-L1-01: Toggle switch interaction', (tester) async {

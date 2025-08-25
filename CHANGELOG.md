@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Refactored
+- **Component Behavior System**: Completed a major architectural refactoring of the component behavior system ("Phase 2: In-Place Behavior Standardization"). This change replaced direct-call, stateful behaviors with a functional, standardized `ComponentBehavior` interface. Behaviors are now pure functions that receive state via a `GameContext` and return a new `ComponentModel` if a change occurs. This makes behaviors more testable and centralizes state management within the `GameEngineNotifierV2`.
+- **Code Cleanup**: As part of the refactoring, several obsolete files from a previous architectural plan (`ComponentEntity`, `ActionContext`, `TranslationService`, etc.) were deleted. All related compilation errors and analysis warnings were fixed, and the application was verified to be stable through tests and a successful runtime on Chrome.
+
 ## [2.0.0] - 2025-08-23 5:00 PM EST - Testing Strategy Overhaul
 
 ### Added

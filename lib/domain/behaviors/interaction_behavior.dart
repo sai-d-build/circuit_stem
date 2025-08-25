@@ -1,24 +1,21 @@
+import 'package:circuit_stem/domain/entities/component.dart';
+import 'package:circuit_stem/application/game_context.dart';
 import 'package:circuit_stem/domain/behaviors/behavior.dart';
-import 'package:circuit_stem/domain/entities/component_entity.dart';
-import 'package:circuit_stem/domain/value_objects/action_context.dart';
 
-class ToggleBehavior extends Behavior {
+/// A behavior that handles user interactions like tapping to toggle a switch.
+class ToggleBehavior implements ComponentBehavior { 
   @override
-  String get type => 'interaction';
-
-  @override
-  bool canExecute(ComponentEntity component, String action) {
-    return action == 'tap';
-  }
+  String get behaviorType => 'interaction';
 
   @override
-  ComponentEntity execute(ComponentEntity component, String action, ActionContext context) {
-    if (action == 'tap') {
-      final currentClosedState = component.state['closed'] as bool? ?? false;
-      final newState = Map<String, dynamic>.from(component.state)
-        ..['closed'] = !currentClosedState;
+  ComponentModel? handle(ComponentModel component, String action, GameContext context) {
+    // Only handle 'tap' action for 'switch' type components
+    if (action == 'tap' && component.type == 'switch') { 
+      final currentState = component.state['closed'] as bool? ?? false;
+      final newState = Map<String, dynamic>.from(component.state);
+      newState['closed'] = !currentState;
       return component.copyWith(state: newState);
     }
-    return component;
+    return null;
   }
 }

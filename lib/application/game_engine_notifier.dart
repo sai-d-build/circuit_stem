@@ -5,21 +5,28 @@ import 'package:circuit_stem/domain/entities/component.dart';
 import 'game_engine_state.dart';
 import '../../infrastructure/audio/audio_service.dart';
 import '../../common/logger.dart';
-import 'simulation_manager.dart';
+import 'services/simulation_service.dart';
 import 'audio_manager.dart';
 import 'input_manager.dart';
-import '../../domain/behaviors/interaction_behavior.dart';
+import 'animation_scheduler.dart';
+
+import 'package:circuit_stem/domain/behaviors/behavior.dart';
+import 'package:circuit_stem/application/game_context.dart';
+import 'package:circuit_stem/application/use_cases/move_component_use_case.dart';
+import 'package:uuid/uuid.dart';
 
 class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
   final InputManager input;
   final AudioManager audio;
-  final SimulationManager simulation;
+  final SimulationService simulation;
+  final AnimationScheduler animationScheduler;
 
   GameEngineNotifierV2({
     required AudioService audioService,
+    required this.animationScheduler,
   })  : input = InputManager(),
         audio = AudioManager(audioService),
-        simulation = SimulationManager(),
+        simulation = SimulationService(),
         super(GameEngineState.empty()) {
     _init();
   }
@@ -41,23 +48,35 @@ class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
     );
     // Run an initial simulation
     grid = simulation.simulatePowerFlow(grid);
-    state = GameEngineState.initial(level).copyWith(grid: grid);
+    state = GameEngineState.initial(level).copyWith(grid: grid, paletteComponents: level.paletteComponents);
   }
 
   void _handleTap(ComponentModel comp) {
     Logger.log('GameEngineNotifierV2: _handleTap called for component ${comp.id}');
-    audio.playSelection();
+    audio.playSelection(); // Keep initial audio for selection
 
-    // Find the interaction behavior for the component and call its onTap
-    final interactionBehavior = comp.behaviors.firstWhere(
-      (b) => b is InteractionBehavior,
-      orElse: () => null,
-    );
+    ComponentModel? updatedComponent;
+    final gameContext = GameContext.from(state); // Create GameContext
 
-    if (interactionBehavior != null) {
-      (interactionBehavior as InteractionBehavior).onTap(this, comp);
-    } else {
-      Logger.log('No InteractionBehavior found for component: ${comp.id} of type ${comp.type}');
+    // Iterate through behaviors associated with the component
+    // Assuming comp.behaviors now contains instances of ComponentBehavior
+    for (final behavior in comp.behaviors.whereType<ComponentBehavior>()) {
+      final result = behavior.handle(comp, 'tap', gameContext);
+      if (result != null) {
+        updatedComponent = result;
+        // Trigger specific audio based on behavior type or component type
+        // This can be refined later with an event bus if needed.
+        if (behavior.behaviorType == 'interaction' && comp.type == 'switch') { 
+            audio.playToggle(); 
+        }
+        break; // Assuming only one behavior handles a 'tap' action
+      }
+    }
+
+    if (updatedComponent != null) {
+      var newGrid = state.grid.copyWithUpdatedComponent(updatedComponent);
+      newGrid = simulation.simulatePowerFlow(newGrid);
+      state = state.copyWith(grid: newGrid);
     }
 
     // Tapping does not change the grid logic, only selection state
@@ -67,19 +86,40 @@ class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
 
   void _moveComponent(String id, int r, int c) {
     Logger.log('[_moveComponent] id: \$id, targetR: \$r, targetC: \$c');
-    final comp = state.grid.componentsById[id];
-    if (comp == null) {
-      Logger.log('[_moveComponent] Component with id \$id not found.');
-      return;
+
+    if (id.endsWith('_palette')) {
+      // This is a component from the palette
+      final paletteComponent = state.paletteComponents.firstWhere((c) => c.id == id);
+      final newId = Uuid().v4();
+      final newComponent = paletteComponent.copyWith(id: newId, r: r, c: c);
+
+      final newPalette = state.paletteComponents.where((c) => c.id != id).toList();
+      var newGrid = state.grid.copyWith(components: [...state.grid.components, newComponent]);
+      newGrid = simulation.simulatePowerFlow(newGrid);
+
+      audio.playPlacement();
+      state = state.copyWith(grid: newGrid, paletteComponents: newPalette);
+    } else {
+      // This is a component already on the grid
+      final useCase = MoveComponentUseCase(simulation);
+      final newGrid = useCase.execute(
+        state.grid,
+        id,
+        toRow: r,
+        toCol: c,
+      );
+
+      if (newGrid == null) {
+        Logger.log('[_moveComponent] Move failed for component \$id');
+        return;
+      }
+
+      final loggedComp = newGrid.componentsById[id];
+      Logger.log('[_moveComponent] Post-UseCase Coords: (${loggedComp?.r}, ${loggedComp?.c})');
+
+      audio.playPlacement();
+      state = state.copyWith(grid: newGrid);
     }
-
-    final moved = comp.copyWith(r: r, c: c);
-    var newGrid = state.grid.copyWithUpdatedComponent(moved);
-    newGrid = simulation.simulatePowerFlow(newGrid);
-
-    audio.playPlacement();
-    state = state.copyWith(grid: newGrid);
-    Logger.log('[_moveComponent] Component \$id moved to (\$r, \$c). Current state grid: \${state.grid.componentsById[id]?.r}, \${state.grid.componentsById[id]?.c}');
   }
 
   void updateComponent(ComponentModel component) {

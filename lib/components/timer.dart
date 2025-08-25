@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:circuit_stem/domain/behaviors/drawing_behavior.dart';
 import 'package:circuit_stem/domain/behaviors/logic_behavior.dart';
+import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
 import 'package:circuit_stem/application/services/component_registry.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
 import 'package:circuit_stem/infrastructure/rendering/asset_manager.dart';
@@ -65,11 +66,16 @@ void registerTimer() {
   Logger.log('registerTimer() called.');
   registerBehavior<TimerDrawingBehavior>(() => TimerDrawingBehavior());
   registerBehavior<TimerLogicBehavior>(() => TimerLogicBehavior());
+  registerBehavior<MoveBehavior>(() => MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.Timer',
     displayName: 'Timer',
-    behaviors: [TimerDrawingBehavior, TimerLogicBehavior],
+    behaviors: [
+      TimerDrawingBehavior,
+      TimerLogicBehavior,
+      MoveBehavior
+    ],
     isDraggable: true,
   );
   Logger.log('registerTimer() completed.');

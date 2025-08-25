@@ -1,48 +1,90 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:circuit_stem/domain/behaviors/interaction_behavior.dart';
-import 'package:circuit_stem/domain/entities/component_entity.dart';
-import 'package:circuit_stem/domain/value_objects/position.dart';
-import 'package:circuit_stem/domain/value_objects/action_context.dart';
-import 'package:circuit_stem/domain/value_objects/component_type.dart';
+import 'package:circuit_stem/domain/entities/component.dart';
+import 'package:circuit_stem/domain/entities/grid.dart';
+import 'package:circuit_stem/application/game_context.dart';
 
 void main() {
   group('ToggleBehavior', () {
-    test('execute with "tap" action should toggle the "closed" state from false to true', () {
+    // Create a mock GameContext
+    final mockContext = GameContext(grid: Grid(rows: 1, cols: 1, components: []));
+
+    test('handle with "tap" action should toggle the "closed" state from false to true', () {
       // ARRANGE
       final behavior = ToggleBehavior();
-      final component = ComponentEntity(
+      final component = ComponentModel(
         id: 's1',
-        type: ComponentType.switchComponent,
-        position: Position(r: 1, c: 1),
+        type: 'switch',
+        r: 0,
+        c: 0,
         state: {'closed': false},
-        behaviors: [behavior],
+        behaviors: [],
       );
-      final context = ActionContext();
 
       // ACT
-      final result = behavior.execute(component, 'tap', context);
+      final result = behavior.handle(component, 'tap', mockContext);
 
       // ASSERT
-      expect(result.state['closed'], isTrue);
+      expect(result, isNotNull);
+      expect(result?.state['closed'], isTrue);
     });
 
-    test('execute with "tap" action should toggle the "closed" state from true to false', () {
+    test('handle with "tap" action should toggle the "closed" state from true to false', () {
       // ARRANGE
       final behavior = ToggleBehavior();
-      final component = ComponentEntity(
+      final component = ComponentModel(
         id: 's1',
-        type: ComponentType.switchComponent,
-        position: Position(r: 1, c: 1),
+        type: 'switch',
+        r: 0,
+        c: 0,
         state: {'closed': true},
-        behaviors: [behavior],
+        behaviors: [],
       );
-      final context = ActionContext();
 
       // ACT
-      final result = behavior.execute(component, 'tap', context);
+      final result = behavior.handle(component, 'tap', mockContext);
 
       // ASSERT
-      expect(result.state['closed'], isFalse);
+      expect(result, isNotNull);
+      expect(result?.state['closed'], isFalse);
+    });
+
+    test('handle with non-tap action should return null', () {
+      // ARRANGE
+      final behavior = ToggleBehavior();
+      final component = ComponentModel(
+        id: 's1',
+        type: 'switch',
+        r: 0,
+        c: 0,
+        state: {'closed': false},
+        behaviors: [],
+      );
+
+      // ACT
+      final result = behavior.handle(component, 'drag', mockContext);
+
+      // ASSERT
+      expect(result, isNull);
+    });
+
+    test('handle with non-switch component should return null', () {
+      // ARRANGE
+      final behavior = ToggleBehavior();
+      final component = ComponentModel(
+        id: 'b1',
+        type: 'battery',
+        r: 0,
+        c: 0,
+        state: {},
+        behaviors: [],
+      );
+
+      // ACT
+      final result = behavior.handle(component, 'tap', mockContext);
+
+      // ASSERT
+      expect(result, isNull);
     });
   });
 }

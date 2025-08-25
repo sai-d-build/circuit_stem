@@ -114,6 +114,7 @@ class TestSetupHelper {
         gameEngineProvider.overrideWith((ref) {
           final notifier = GameEngineNotifierV2(
             audioService: mockAudioService,
+            animationScheduler: mockAnimationScheduler,
           );
           notifier.loadLevel(level); // Load the level after creating the notifier
           return notifier;

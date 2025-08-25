@@ -1,8 +1,14 @@
-import 'package:circuit_stem/domain/entities/component_entity.dart';
-import 'package:circuit_stem/domain/value_objects/action_context.dart';
+import 'package:circuit_stem/domain/entities/component.dart';
+import 'package:circuit_stem/application/game_context.dart';
 
-abstract class Behavior {
-  String get type;
-  bool canExecute(ComponentEntity component, String action);
-  ComponentEntity execute(ComponentEntity component, String action, ActionContext context);
+/// Defines the contract for all component behaviors.
+/// Behaviors are functional: they take a component, an action, and context,
+/// and return a *new* ComponentModel if the state changes, or null otherwise.
+abstract class ComponentBehavior {
+  String get behaviorType; // e.g., 'interaction', 'power_conduction', 'movement'
+  
+  /// Handles a specific action for a component.
+  /// Returns a new ComponentModel if the component's state changes,
+  /// otherwise returns null.
+  ComponentModel? handle(ComponentModel component, String action, GameContext context);
 }

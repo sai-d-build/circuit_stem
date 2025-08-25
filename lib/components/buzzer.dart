@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../domain/behaviors/drawing_behavior.dart';
 import '../domain/behaviors/logic_behavior.dart';
+import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
 import '../application/services/component_registry.dart';
 import '../domain/entities/component.dart';
 import '../infrastructure/rendering/asset_manager.dart';
@@ -73,12 +74,14 @@ void registerBuzzer() {
   Logger.log('registerBuzzer() called.');
   registerBehavior<BuzzerDrawingBehavior>(() => BuzzerDrawingBehavior());
   registerBehavior<BuzzerLogicBehavior>(() => BuzzerLogicBehavior());
+  registerBehavior<MoveBehavior>(() => MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.Buzzer',
     displayName: 'Buzzer',
-    behaviors: [BuzzerDrawingBehavior, BuzzerLogicBehavior],
+    behaviors: [BuzzerDrawingBehavior, BuzzerLogicBehavior, MoveBehavior],
     isDraggable: true,
   );
   Logger.log('registerBuzzer() completed.');
 }
+

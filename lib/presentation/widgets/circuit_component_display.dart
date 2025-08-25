@@ -12,10 +12,10 @@ class CircuitComponentDisplay extends ConsumerWidget {
   final bool isPreview;
   
   const CircuitComponentDisplay({
-    super.key,
     required this.component,
     required this.size,
     this.isPreview = false,
+    Key? key,
   }) : super(key: key);
 
   @override

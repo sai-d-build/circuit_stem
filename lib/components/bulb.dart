@@ -1,15 +1,18 @@
 
+import 'package:circuit_stem/domain/entities/grid.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-import '../domain/behaviors/drawing_behavior.dart';
-import '../domain/behaviors/logic_behavior.dart';
-import '../application/services/component_registry.dart';
-import '../domain/entities/component.dart';
-import '../infrastructure/rendering/asset_manager.dart';
+import 'package:circuit_stem/domain/behaviors/drawing_behavior.dart';
+import 'package:circuit_stem/domain/behaviors/logic_behavior.dart';
+import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
+import 'package:circuit_stem/application/services/component_registry.dart';
+import 'package:circuit_stem/domain/entities/component.dart';
+import 'package:circuit_stem/infrastructure/rendering/asset_manager.dart';
 import '../common/theme.dart';
-import '../domain/entities/grid.dart';
 import '../common/logger.dart';
+
+// --- Bulb --- //
 
 class BulbDrawingBehavior implements DrawingBehavior {
   @override
@@ -81,11 +84,12 @@ void registerBulb() {
   Logger.log('registerBulb() called.');
   registerBehavior<BulbDrawingBehavior>(() => BulbDrawingBehavior());
   registerBehavior<BulbLogicBehavior>(() => BulbLogicBehavior());
+  registerBehavior<MoveBehavior>(() => MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.Bulb',
     displayName: 'Bulb',
-    behaviors: [BulbDrawingBehavior, BulbLogicBehavior],
+    behaviors: [BulbDrawingBehavior, BulbLogicBehavior, MoveBehavior],
     isDraggable: true, // Bulbs are draggable in the palette
   );
   Logger.log('registerBulb() completed.');

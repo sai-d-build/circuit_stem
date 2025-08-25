@@ -179,7 +179,7 @@ class ComponentRegistry {
     Map<String, dynamic>? state,
   }) {
     final behaviorTypes = _behaviors[type];
-    
+
     if (behaviorTypes == null) {
       Logger.log('ComponentRegistry: WARNING - Unknown component type: $type, creating component without behaviors');
       return ComponentModel(
@@ -201,19 +201,19 @@ class ComponentRegistry {
       );
     }
 
-    // CRITICAL FIX: Always instantiate behaviors using the factory registry
     final behaviorInstances = <dynamic>[];
     for (final behaviorType in behaviorTypes) {
       final instance = getBehaviorByType(behaviorType);
+      Logger.log('ComponentRegistry: Attempting to instantiate behavior: \$behaviorType. Instance: \$instance');
       if (instance != null) {
         behaviorInstances.add(instance);
-        Logger.log('ComponentRegistry: Successfully attached behavior: $behaviorType to component $type');
+        Logger.log('ComponentRegistry: Successfully attached behavior: \$behaviorType to component \$type');
       } else {
-        Logger.log('ComponentRegistry: ERROR - Failed to create behavior: $behaviorType for component $type');
+        Logger.log('ComponentRegistry: ERROR - Failed to create behavior: \$behaviorType for component \$type');
       }
     }
 
-    Logger.log('ComponentRegistry: Created component $type with ${behaviorInstances.length}/${behaviorTypes.length} behaviors');
+    Logger.log('ComponentRegistry: Created component $type with ${behaviorInstances.length}/${behaviorTypes.length} behaviors. Attached behaviors: ${behaviorInstances.map((b) => b.runtimeType).join(', ')}');
 
     return ComponentModel(
       id: id,

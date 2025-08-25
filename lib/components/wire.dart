@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import '../domain/behaviors/drawing_behavior.dart';
-import '../domain/behaviors/logic_behavior.dart';
+import 'package:circuit_stem/domain/behaviors/logic_behavior.dart';
+import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
 import '../application/services/component_registry.dart';
 import '../domain/entities/component.dart';
 import '../infrastructure/rendering/asset_manager.dart';
@@ -57,11 +58,12 @@ void registerWireStraight() {
   Logger.log('registerWireStraight() called.');
   registerBehavior<WireStraightDrawingBehavior>(() => WireStraightDrawingBehavior());
   registerBehavior<WireLogicBehavior>(() => WireLogicBehavior()); // Can be shared
+  registerBehavior<MoveBehavior>(() => MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.WireStraight',
     displayName: 'Wire',
-    behaviors: [WireStraightDrawingBehavior, WireLogicBehavior],
+    behaviors: [WireStraightDrawingBehavior, WireLogicBehavior, MoveBehavior],
     isDraggable: true,
   );
   Logger.log('registerWireStraight() completed.');
@@ -103,11 +105,12 @@ class WireCornerDrawingBehavior implements DrawingBehavior {
 void registerWireCorner() {
   Logger.log('registerWireCorner() called.');
   registerBehavior<WireCornerDrawingBehavior>(() => WireCornerDrawingBehavior());
+  registerBehavior<MoveBehavior>(() => MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.WireCorner',
     displayName: 'Corner Wire',
-    behaviors: [WireCornerDrawingBehavior, WireLogicBehavior], // Re-use same logic behavior
+    behaviors: [WireCornerDrawingBehavior, WireLogicBehavior, MoveBehavior], // Re-use same logic behavior
     isDraggable: true,
   );
   Logger.log('registerWireCorner() completed.');
@@ -149,11 +152,12 @@ class WireTDrawingBehavior implements DrawingBehavior {
 void registerWireT() {
   Logger.log('registerWireT() called.');
   registerBehavior<WireTDrawingBehavior>(() => WireTDrawingBehavior());
+  registerBehavior<MoveBehavior>(() => MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.WireT',
     displayName: 'T-Wire',
-    behaviors: [WireTDrawingBehavior, WireLogicBehavior], // Re-use same logic behavior
+    behaviors: [WireTDrawingBehavior, WireLogicBehavior, MoveBehavior], // Re-use same logic behavior
     isDraggable: true,
   );
   Logger.log('registerWireT() completed.');
@@ -200,11 +204,12 @@ class CrossWireDrawingBehavior implements DrawingBehavior {
 void registerCrossWire() {
   Logger.log('registerCrossWire() called.');
   registerBehavior<CrossWireDrawingBehavior>(() => CrossWireDrawingBehavior());
+  registerBehavior<MoveBehavior>(() => MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.CrossWire',
     displayName: 'Cross Wire',
-    behaviors: [CrossWireDrawingBehavior, WireLogicBehavior], // Re-use same logic behavior
+    behaviors: [CrossWireDrawingBehavior, WireLogicBehavior, MoveBehavior], // Re-use same logic behavior
     isDraggable: true,
   );
   Logger.log('registerCrossWire() completed.');

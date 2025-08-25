@@ -271,6 +271,8 @@ Run `flutter test test/domain/behaviors/interaction_behavior_test.dart` and watc
 
 ## **Phase 2: In-Place Behavior Standardization (Tactical Refactoring)**
 
+**Status: COMPLETED on 2025-08-24**
+
 **🎯 Goal:** To standardize the way component behaviors are handled, making them functional, testable, and decoupled from direct state mutation, while leveraging the existing `ComponentModel` and `GameEngineNotifierV2` structure. This approach prioritizes immediate, low-risk improvements over a full architectural overhaul.
 
 **🤔 Why this phase is important:** The previous "Adapter & Bridge" approach (now in "Legacy Approaches") was deemed overly complex and risky for the current scale of the application. This revised Phase 2 focuses on a tactical refactoring that delivers significant benefits (improved testability, clearer responsibilities) with minimal architectural upheaval. It addresses the "god class" problem by making behaviors inform the `Notifier` rather than directly mutate its state.

@@ -16,6 +16,7 @@ import 'components/battery.dart';
 import 'components/timer.dart';
 import 'components/buzzer.dart';
 import 'domain/goals/power_bulb_goal.dart';
+import 'common/debug_utils.dart'; // Import the new debug utility
 
 void registerAllGameEntities() {
   registerBulb();
@@ -45,6 +46,9 @@ void main() async {
   // Register all component and goal behaviors.
   registerAllGameEntities();
   Logger.log('main.dart: All game entities registered.');
+
+  // Run the MoveBehavior attachment check
+  checkMoveBehaviorAttachment(); // Call the new utility
 
   runApp(
     ProviderScope(
