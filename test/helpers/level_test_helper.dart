@@ -39,7 +39,7 @@ class LevelTestHelper {
 
   /// Tap a component by its ID
   static Future<void> tapComponent(
-      WidgetTester tester, GameEngineNotifierV2 notifier, String id) async {
+      WidgetTester tester, GameEngineNotifier notifier, String id) async {
     final comp = findComponentById(notifier.state, id);
     if (comp == null) return;
 
@@ -51,7 +51,7 @@ class LevelTestHelper {
   /// Drag a component by its ID to a new row and column
   static Future<void> dragComponent(
       WidgetTester tester,
-      GameEngineNotifierV2 notifier,
+      GameEngineNotifier notifier,
       String id,
       int toRow,
       int toCol) async {

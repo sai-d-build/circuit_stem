@@ -15,6 +15,7 @@ import '../common/logger.dart';
 // --- Straight Wire --- //
 
 class WireStraightDrawingBehavior implements DrawingBehavior {
+  const WireStraightDrawingBehavior();
   @override
   void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
     final paint = Paint()
@@ -47,6 +48,7 @@ class WireStraightDrawingBehavior implements DrawingBehavior {
 }
 
 class WireLogicBehavior implements LogicBehavior {
+  const WireLogicBehavior();
   @override
   void evaluate(Grid grid, ComponentModel component) {
     Logger.log('WireLogicBehavior: Evaluating wire \${component.id}');
@@ -56,9 +58,9 @@ class WireLogicBehavior implements LogicBehavior {
 
 void registerWireStraight() {
   Logger.log('registerWireStraight() called.');
-  registerBehavior<WireStraightDrawingBehavior>(() => WireStraightDrawingBehavior());
-  registerBehavior<WireLogicBehavior>(() => WireLogicBehavior()); // Can be shared
-  registerBehavior<MoveBehavior>(() => MoveBehavior());
+  registerBehavior<WireStraightDrawingBehavior>(() => const WireStraightDrawingBehavior());
+  registerBehavior<WireLogicBehavior>(() => const WireLogicBehavior()); // Can be shared
+  registerBehavior<MoveBehavior>(() => const MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.WireStraight',
@@ -73,6 +75,7 @@ void registerWireStraight() {
 // --- Corner Wire --- //
 
 class WireCornerDrawingBehavior implements DrawingBehavior {
+  const WireCornerDrawingBehavior();
   @override
   void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
     final paint = Paint()
@@ -104,8 +107,8 @@ class WireCornerDrawingBehavior implements DrawingBehavior {
 
 void registerWireCorner() {
   Logger.log('registerWireCorner() called.');
-  registerBehavior<WireCornerDrawingBehavior>(() => WireCornerDrawingBehavior());
-  registerBehavior<MoveBehavior>(() => MoveBehavior());
+  registerBehavior<WireCornerDrawingBehavior>(() => const WireCornerDrawingBehavior());
+  registerBehavior<MoveBehavior>(() => const MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.WireCorner',
@@ -120,6 +123,7 @@ void registerWireCorner() {
 // --- T-Junction Wire --- //
 
 class WireTDrawingBehavior implements DrawingBehavior {
+  const WireTDrawingBehavior();
   @override
   void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
     final paint = Paint()
@@ -151,8 +155,8 @@ class WireTDrawingBehavior implements DrawingBehavior {
 
 void registerWireT() {
   Logger.log('registerWireT() called.');
-  registerBehavior<WireTDrawingBehavior>(() => WireTDrawingBehavior());
-  registerBehavior<MoveBehavior>(() => MoveBehavior());
+  registerBehavior<WireTDrawingBehavior>(() => const WireTDrawingBehavior());
+  registerBehavior<MoveBehavior>(() => const MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.WireT',
@@ -167,6 +171,7 @@ void registerWireT() {
 // --- Cross Wire --- //
 
 class CrossWireDrawingBehavior implements DrawingBehavior {
+  const CrossWireDrawingBehavior();
   @override
   void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
     final paint = Paint()
@@ -203,8 +208,8 @@ class CrossWireDrawingBehavior implements DrawingBehavior {
 
 void registerCrossWire() {
   Logger.log('registerCrossWire() called.');
-  registerBehavior<CrossWireDrawingBehavior>(() => CrossWireDrawingBehavior());
-  registerBehavior<MoveBehavior>(() => MoveBehavior());
+  registerBehavior<CrossWireDrawingBehavior>(() => const CrossWireDrawingBehavior());
+  registerBehavior<MoveBehavior>(() => const MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.CrossWire',

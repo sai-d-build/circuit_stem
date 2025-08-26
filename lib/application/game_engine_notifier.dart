@@ -5,28 +5,60 @@ import 'package:circuit_stem/domain/entities/component.dart';
 import 'game_engine_state.dart';
 import '../../infrastructure/audio/audio_service.dart';
 import '../../common/logger.dart';
-import 'services/simulation_service.dart';
+import 'services/power_simulation_service.dart';
+import 'services/goal_checking_service.dart';
 import 'audio_manager.dart';
 import 'input_manager.dart';
 import 'animation_scheduler.dart';
+import 'package:circuit_stem/infrastructure/persistence/level_manager.dart';
 
 import 'package:circuit_stem/domain/behaviors/behavior.dart';
 import 'package:circuit_stem/application/game_context.dart';
 import 'package:circuit_stem/application/use_cases/move_component_use_case.dart';
-import 'package:uuid/uuid.dart';
+import 'package:circuit_stem/application/use_cases/create_component_use_case.dart';
+import 'package:circuit_stem/application/use_cases/component_action.dart';
+import 'package:circuit_stem/application/services/component_factory.dart';
 
-class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
+import 'package:circuit_stem/application/use_cases/tap_component_use_case.dart';
+import 'package:circuit_stem/application/use_cases/restart_level_use_case.dart';
+import 'package:circuit_stem/application/use_cases/update_component_use_case.dart';
+import 'package:circuit_stem/application/use_cases/select_palette_component_use_case.dart';
+
+class GameEngineNotifier extends StateNotifier<GameEngineState> {
   final InputManager input;
   final AudioManager audio;
-  final SimulationService simulation;
+  final PowerSimulationService simulation;
+  final GoalCheckingService _goalChecker;
   final AnimationScheduler animationScheduler;
+  final LevelManagerNotifier _levelManager;
 
-  GameEngineNotifierV2({
+  // Use Cases
+  final CreateComponentFromTemplateUseCase _createUseCase;
+  final MoveComponentUseCase _moveUseCase;
+  final TapComponentUseCase _tapUseCase;
+  final RestartLevelUseCase _restartLevelUseCase;
+  final UpdateComponentUseCase _updateComponentUseCase;
+  final SelectPaletteComponentUseCase _selectPaletteComponentUseCase;
+  final ComponentFactory _factory;
+
+  final bool _useNewSystem = true; // FEATURE FLAG
+
+  GameEngineNotifier({
     required AudioService audioService,
     required this.animationScheduler,
+    required LevelManagerNotifier levelManager,
   })  : input = InputManager(),
         audio = AudioManager(audioService),
-        simulation = SimulationService(),
+        simulation = const PowerSimulationService(),
+        _goalChecker = const GoalCheckingService(),
+        _levelManager = levelManager,
+        _factory = const ComponentFactory(),
+        _createUseCase = CreateComponentFromTemplateAction(const PowerSimulationService(), const ComponentFactory()),
+        _moveUseCase = MoveComponentUseCase(const PowerSimulationService()),
+        _tapUseCase = TapComponentUseCase(const PowerSimulationService(), const GoalCheckingService()),
+        _restartLevelUseCase = RestartLevelUseCase(levelManager),
+        _updateComponentUseCase = UpdateComponentUseCase(const PowerSimulationService(), const GoalCheckingService()),
+        _selectPaletteComponentUseCase = const SelectPaletteComponentUseCase(),
         super(GameEngineState.empty()) {
     _init();
   }
@@ -47,89 +79,80 @@ class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
       components: level.initialComponents,
     );
     // Run an initial simulation
-    grid = simulation.simulatePowerFlow(grid);
+    grid = _runPowerSimulation(grid);
+    _checkWinCondition(grid);
     state = GameEngineState.initial(level).copyWith(grid: grid, paletteComponents: level.paletteComponents);
   }
 
-  void _handleTap(ComponentModel comp) {
-    Logger.log('GameEngineNotifierV2: _handleTap called for component ${comp.id}');
-    audio.playSelection(); // Keep initial audio for selection
+  Grid _runPowerSimulation(Grid grid) {
+    return simulation.simulatePowerFlow(grid);
+  }
 
-    ComponentModel? updatedComponent;
-    final gameContext = GameContext.from(state); // Create GameContext
-
-    // Iterate through behaviors associated with the component
-    // Assuming comp.behaviors now contains instances of ComponentBehavior
-    for (final behavior in comp.behaviors.whereType<ComponentBehavior>()) {
-      final result = behavior.handle(comp, 'tap', gameContext);
-      if (result != null) {
-        updatedComponent = result;
-        // Trigger specific audio based on behavior type or component type
-        // This can be refined later with an event bus if needed.
-        if (behavior.behaviorType == 'interaction' && comp.type == 'switch') { 
-            audio.playToggle(); 
+  void _checkWinCondition(Grid grid) {
+    if (state.currentLevel != null) {
+      final isComplete = _goalChecker.isLevelComplete(grid, state.currentLevel!);
+      if (isComplete != state.isWin) {
+        state = state.copyWith(isWin: isComplete);
+        if (isComplete) {
+          // audio.playSuccess();
         }
-        break; // Assuming only one behavior handles a 'tap' action
       }
     }
+  }
 
-    if (updatedComponent != null) {
-      var newGrid = state.grid.copyWithUpdatedComponent(updatedComponent);
-      newGrid = simulation.simulatePowerFlow(newGrid);
-      state = state.copyWith(grid: newGrid);
+  void executeAction(ComponentAction action) {
+    if (!_useNewSystem) return;
+
+    final history = [...state.history, state];
+
+    GameEngineState newState = state;
+    if (action is CreateComponentFromTemplateAction) {
+      newState = _createUseCase.execute(state, action);
+      audio.playPlacement();
+    } else if (action is RotateComponentAction) {
+      final component = state.grid.componentsById[action.componentId];
+      if (component != null) {
+        final updatedComponent = component.copyWith(rotation: action.rotation);
+        var newGrid = state.grid.copyWithUpdatedComponent(updatedComponent);
+        newGrid = _runPowerSimulation(newGrid);
+        _checkWinCondition(newGrid);
+        newState = state.copyWith(grid: newGrid);
+        audio.playToggle();
+      }
+    } else if (action is MoveComponentAction) {
+      final newGrid = _moveUseCase.execute(state.grid, action.componentId, toRow: action.newRow, toCol: action.newCol);
+      if (newGrid != null) {
+        audio.playPlacement();
+        newState = state.copyWith(grid: newGrid);
+      }
+    } else if (action is TapComponentAction) {
+      newState = _tapUseCase.execute(state, action);
+      // Determine if audio should play based on the change in state from the use case
+      // For now, we'll assume a toggle sound if the state changed.
+      if (newState != state) {
+        audio.playToggle();
+      }
+    } else if (action is RestartLevelAction) {
+      newState = await _restartLevelUseCase.execute(state, action);
     }
 
-    // Tapping does not change the grid logic, only selection state
-    // This line should probably be moved or removed if the interaction behavior handles selection
-    state = state.copyWith(selectedComponentId: comp.id);
+    state = newState.copyWith(history: history);
+  }
+
+  void _handleTap(ComponentModel comp) {
+    executeAction(TapComponentAction(componentId: comp.id));
   }
 
   void _moveComponent(String id, int r, int c) {
-    Logger.log('[_moveComponent] id: \$id, targetR: \$r, targetC: \$c');
-
-    if (id.endsWith('_palette')) {
-      // This is a component from the palette
-      Logger.log('[_moveComponent] Attempting to find palette component with ID: $id');
-      Logger.log('[_moveComponent] Current palette components IDs: ${state.paletteComponents.map((comp) => comp.id).join(', ')}');
-      final paletteComponent = state.paletteComponents.firstWhere((c) => c.id == id);
-      Logger.log('[_moveComponent] Found palette component: ${paletteComponent.id}');
-      final newId = Uuid().v4();
-      final newComponent = paletteComponent.copyWith(id: newId, r: r, c: c);
-
-      final newPalette = state.paletteComponents.where((c) => c.id != id).toList();
-      var newGrid = state.grid.copyWith(components: [...state.grid.components, newComponent]);
-      newGrid = simulation.simulatePowerFlow(newGrid);
-
-      audio.playPlacement();
-      state = state.copyWith(grid: newGrid, paletteComponents: newPalette);
-    } else {
-      // This is a component already on the grid
-      final useCase = MoveComponentUseCase(simulation);
-      final newGrid = useCase.execute(
-        state.grid,
-        id,
-        toRow: r,
-        toCol: c,
-      );
-
-      if (newGrid == null) {
-        Logger.log('[_moveComponent] Move failed for component \$id');
-        return;
+    if (_useNewSystem) {
+      if (id.endsWith('_palette')) {
+        executeAction(CreateComponentFromTemplateAction(templateId: id, row: r, col: c));
       }
-
-      final loggedComp = newGrid.componentsById[id];
-      Logger.log('[_moveComponent] Post-UseCase Coords: (${loggedComp?.r}, ${loggedComp?.c})');
-
-      audio.playPlacement();
-      state = state.copyWith(grid: newGrid);
     }
   }
 
   void updateComponent(ComponentModel component) {
-    var newGrid = state.grid.copyWithUpdatedComponent(component);
-    newGrid = simulation.simulatePowerFlow(newGrid);
-    audio.playToggle(); // Assuming this is for switches
-    state = state.copyWith(grid: newGrid);
+    executeAction(UpdateComponentAction(componentId: component.id, newState: component.state));
   }
 
   void selectPaletteComponent(ComponentModel component) {
@@ -145,12 +168,12 @@ class GameEngineNotifierV2 extends StateNotifier<GameEngineState> {
   InputManager get inputManager => input;
 
   void restartLevel() {
-    if (state.currentLevel != null) {
-      loadLevel(state.currentLevel!);
-    }
+    executeAction(const RestartLevelAction());
   }
 
   void undo() {
-    Logger.log('Undo not yet implemented.');
+    if (state.history.isNotEmpty) {
+      state = state.history.last;
+    }
   }
 }

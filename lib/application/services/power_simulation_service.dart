@@ -1,8 +1,8 @@
-import '../../domain/entities/component.dart';
-import '../../domain/entities/grid.dart';
+import 'package:circuit_stem/domain/entities/component.dart';
+import 'package:circuit_stem/domain/entities/grid.dart';
 
-class SimulationService {
-  SimulationService();
+class PowerSimulationService {
+  const PowerSimulationService();
 
   /// Pure function: returns updated grid
   Grid simulatePowerFlow(Grid grid) {

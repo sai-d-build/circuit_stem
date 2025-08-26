@@ -16,6 +16,7 @@ import '../common/logger.dart';
 // --- Switch --- //
 
 class SwitchDrawingBehavior implements DrawingBehavior {
+  const SwitchDrawingBehavior();
   @override
   void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
     final paint = Paint()
@@ -61,6 +62,7 @@ class SwitchDrawingBehavior implements DrawingBehavior {
 
 
 class SwitchLogicBehavior implements LogicBehavior {
+  const SwitchLogicBehavior();
   @override
   void evaluate(Grid grid, ComponentModel component) {
         Logger.log('SwitchLogicBehavior: Evaluating switch ${component.id}');
@@ -72,11 +74,11 @@ class SwitchLogicBehavior implements LogicBehavior {
 
 void registerSwitch() {
   Logger.log('registerSwitch() called.');
-  registerBehavior<SwitchDrawingBehavior>(() => SwitchDrawingBehavior());
+  registerBehavior<SwitchDrawingBehavior>(() { return const SwitchDrawingBehavior(); });
   Logger.log('registerBehavior<SwitchDrawingBehavior> called.');
-  registerBehavior<ToggleBehavior>(() => ToggleBehavior());
+  registerBehavior<ToggleBehavior>(() { return const ToggleBehavior(); });
   Logger.log('registerBehavior<ToggleBehavior> called.');
-  registerBehavior<SwitchLogicBehavior>(() => SwitchLogicBehavior());
+  registerBehavior<SwitchLogicBehavior>(() { return const SwitchLogicBehavior(); });
   Logger.log('registerBehavior<SwitchLogicBehavior> called.');
 
   ComponentRegistry.register(

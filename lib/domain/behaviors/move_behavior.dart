@@ -5,6 +5,8 @@ import 'behavior.dart';
 /// A pure behavior for moving a component.
 /// Depends only on the component + context (no side effects).
 class MoveBehavior extends ComponentBehavior {
+  const MoveBehavior();
+
   @override
   String get behaviorType => 'move';
 

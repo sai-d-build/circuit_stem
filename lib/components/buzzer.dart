@@ -15,6 +15,8 @@ import '../common/logger.dart';
 // --- Buzzer --- //
 
 class BuzzerDrawingBehavior implements DrawingBehavior {
+  const BuzzerDrawingBehavior();
+
   @override
   void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
     final paint = Paint()
@@ -57,13 +59,14 @@ class BuzzerDrawingBehavior implements DrawingBehavior {
 }
 
 class BuzzerLogicBehavior implements LogicBehavior {
+  BuzzerLogicBehavior();
   final AudioService _audioService = AudioService(); // In a real app, inject this
 
   @override
   void evaluate(Grid grid, ComponentModel component) {
     Logger.log('BuzzerLogicBehavior: Evaluating buzzer \${component.id}');
     // This is a simplified logic. A more robust implementation would use the main game
-    // engine to track state changes and avoid playing the sound on every evaluation.
+    // engine to track state changes and and avoid playing the sound on every evaluation.
     if (component.isPowered) {
       _audioService.play(AppAssets.audioSwitch);
     }
@@ -72,9 +75,9 @@ class BuzzerLogicBehavior implements LogicBehavior {
 
 void registerBuzzer() {
   Logger.log('registerBuzzer() called.');
-  registerBehavior<BuzzerDrawingBehavior>(() => BuzzerDrawingBehavior());
+  registerBehavior<BuzzerDrawingBehavior>(() => const BuzzerDrawingBehavior());
   registerBehavior<BuzzerLogicBehavior>(() => BuzzerLogicBehavior());
-  registerBehavior<MoveBehavior>(() => MoveBehavior());
+  registerBehavior<MoveBehavior>(() => const MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.Buzzer',

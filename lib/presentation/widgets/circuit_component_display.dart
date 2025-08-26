@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
@@ -15,20 +16,23 @@ class CircuitComponentDisplay extends ConsumerWidget {
     required this.component,
     required this.size,
     this.isPreview = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Logger.log('CircuitComponentDisplay: Building for component: \${component.id} (type: \${component.type})');
     final assetManager = ref.watch(assetManagerProvider.notifier);
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _ComponentDisplayPainter(
-          component: component,
-          assetManager: assetManager,
+    return Transform.rotate(
+      angle: component.rotation * pi / 2,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: CustomPaint(
+          painter: _ComponentDisplayPainter(
+            component: component,
+            assetManager: assetManager,
+          ),
         ),
       ),
     );

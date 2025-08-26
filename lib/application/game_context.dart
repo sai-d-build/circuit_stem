@@ -6,7 +6,7 @@ class GameContext {
   final int? toRow;
   final int? toCol;
 
-  GameContext({
+  const GameContext({
     required this.grid,
     this.toRow,
     this.toCol,

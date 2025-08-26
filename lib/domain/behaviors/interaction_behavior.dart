@@ -3,7 +3,8 @@ import 'package:circuit_stem/application/game_context.dart';
 import 'package:circuit_stem/domain/behaviors/behavior.dart';
 
 /// A behavior that handles user interactions like tapping to toggle a switch.
-class ToggleBehavior implements ComponentBehavior { 
+class ToggleBehavior implements ComponentBehavior {
+  const ToggleBehavior();
   @override
   String get behaviorType => 'interaction';
 

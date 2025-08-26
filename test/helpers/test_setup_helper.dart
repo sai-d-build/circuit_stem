@@ -4,10 +4,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:circuit_stem/application/services/providers.dart';
-import 'package:circuit_stem/application/game_engine_notifier.dart';
 import 'package:circuit_stem/main.dart';
 import 'package:circuit_stem/domain/entities/level_definition.dart';
-import 'package:circuit_stem/infrastructure/persistence/level_manager.dart';
 import 'package:circuit_stem/presentation/screens/game_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -88,7 +86,7 @@ class TestSetupHelper {
     // 4. Initialize the level manager and load the requested level data.
     await tempContainer.read(levelManagerProvider.notifier).init();
     final loadedLevel = await tempContainer.read(levelManagerProvider.notifier).loadLevelByIndex(levelIndex);
-    expect(loadedLevel, isNotNull, reason: "Test setup failed: Level at index $levelIndex could not be loaded.");
+    expect(loadedLevel, isNotNull, reason: 'Test setup failed: Level at index $levelIndex could not be loaded.');
     
     final level = loadedLevel!;
 
@@ -101,24 +99,7 @@ class TestSetupHelper {
         assetManagerProvider.overrideWith((_) => mockAssetManager),
         sharedPreferencesProvider.overrideWithValue(mockPrefs),
         audioServiceProvider.overrideWithValue(mockAudioService),
-        
-        // Provide the already-initialized level manager.
-        levelManagerProvider.overrideWith((ref) {
-          final manager = LevelManagerNotifier(mockPrefs, mockAssetManager);
-          manager.state = tempContainer.read(levelManagerProvider); // Use state from disposed container
-          manager.setCurrentLevel(level);
-          return manager;
-        }),
-        
-        // Provide the game engine with the pre-loaded level and mocks.
-        gameEngineProvider.overrideWith((ref) {
-          final notifier = GameEngineNotifierV2(
-            audioService: mockAudioService,
-            animationScheduler: mockAnimationScheduler,
-          );
-          notifier.loadLevel(level); // Load the level after creating the notifier
-          return notifier;
-        }),
+        animationSchedulerProvider.overrideWithValue(mockAnimationScheduler),
       ],
     );
 

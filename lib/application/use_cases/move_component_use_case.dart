@@ -1,7 +1,5 @@
 import 'package:circuit_stem/domain/entities/grid.dart';
 import 'package:circuit_stem/application/game_context.dart';
-import 'package:circuit_stem/domain/entities/component.dart';
-import 'package:circuit_stem/domain/behaviors/behavior.dart';
 import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
 import '../services/simulation_service.dart';
 import '../../common/logger.dart';

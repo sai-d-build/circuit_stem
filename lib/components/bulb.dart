@@ -15,6 +15,7 @@ import '../common/logger.dart';
 // --- Bulb --- //
 
 class BulbDrawingBehavior implements DrawingBehavior {
+  const BulbDrawingBehavior();
   @override
   void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
     final paint = Paint()
@@ -72,6 +73,7 @@ class BulbDrawingBehavior implements DrawingBehavior {
 }
 
 class BulbLogicBehavior implements LogicBehavior {
+  const BulbLogicBehavior();
   @override
   void evaluate(Grid grid, ComponentModel component) {
     Logger.log('BulbLogicBehavior: Evaluating bulb \${component.id}');
@@ -82,9 +84,9 @@ class BulbLogicBehavior implements LogicBehavior {
 
 void registerBulb() {
   Logger.log('registerBulb() called.');
-  registerBehavior<BulbDrawingBehavior>(() => BulbDrawingBehavior());
-  registerBehavior<BulbLogicBehavior>(() => BulbLogicBehavior());
-  registerBehavior<MoveBehavior>(() => MoveBehavior());
+  registerBehavior<BulbDrawingBehavior>(() => const BulbDrawingBehavior());
+  registerBehavior<BulbLogicBehavior>(() => const BulbLogicBehavior());
+  registerBehavior<MoveBehavior>(() => const MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.Bulb',

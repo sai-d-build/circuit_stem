@@ -6,10 +6,11 @@ import '../../common/constants.dart';
 import '../../domain/entities/level_definition.dart';
 import '../widgets/grid_widget.dart';
 import '../widgets/component_widget.dart';
-import '../../domain/behaviors/drag_behavior.dart';
+import 'package:circuit_stem/application/use_cases/component_action.dart';
 
 class GameCanvas extends ConsumerStatefulWidget {
   final LevelDefinition levelDefinition;
+  static const double _cellSize = cellSize;
   const GameCanvas({super.key, required this.levelDefinition});
 
   @override
@@ -31,13 +32,32 @@ class GameCanvasState extends ConsumerState<GameCanvas> {
   @override
   Widget build(BuildContext context) {
     final grid = ref.watch(gridProvider);
-    final notifier = ref.read(gameEngineProvider.notifier);
     final assetManager = ref.watch(assetManagerProvider.notifier);
-    final dragBehavior = DragBehavior(ref: ref, gridKey: _gridKey);
 
     return DragTarget<ComponentModel>(
       onAcceptWithDetails: (details) {
-        dragBehavior.onDragEnd(details);
+        final RenderBox renderBox = _gridKey.currentContext!.findRenderObject() as RenderBox;
+        final localPosition = renderBox.globalToLocal(details.offset);
+        final int col = (localPosition.dx / cellSize).floor();
+        final int row = (localPosition.dy / cellSize).floor();
+
+        if (details.data.id.endsWith('_palette')) {
+          ref.read(gameEngineProvider.notifier).executeAction(
+                CreateComponentFromTemplateAction(
+                  templateId: details.data.id,
+                  row: row,
+                  col: col,
+                ),
+              );
+        } else {
+          ref.read(gameEngineProvider.notifier).executeAction(
+                MoveComponentAction(
+                  componentId: details.data.id,
+                  newRow: row,
+                  newCol: col,
+                ),
+              );
+        }
       },
       builder: (context, candidateData, rejectedData) {
         return Stack(
@@ -46,30 +66,20 @@ class GameCanvasState extends ConsumerState<GameCanvas> {
             GridWidget(
               rows: grid.rows,
               cols: grid.cols,
-              cellSize: cellSize,
+              cellSize: GameCanvas._cellSize,
             ),
             ...grid.components.map((component) {
-              int maxR = 0;
-              int maxC = 0;
-              for (final offset in component.shapeOffsets) {
-                if (offset.r > maxR) maxR = offset.r;
-                if (offset.c > maxC) maxC = offset.c;
-              }
-              final componentWidth = (maxC + 1) * cellSize;
-              final componentHeight = (maxR + 1) * cellSize;
+              final bounds = component.getBounds();
 
               return Positioned(
-                left: component.c * cellSize,
-                top: component.r * cellSize,
-                width: componentWidth,
-                height: componentHeight,
+                left: component.c * GameCanvas._cellSize,
+                top: component.r * GameCanvas._cellSize,
+                width: bounds.width * GameCanvas._cellSize,
+                height: bounds.height * GameCanvas._cellSize,
                 child: ComponentWidget(
                   component: component,
                   assetManager: assetManager,
-                  dragBehavior: dragBehavior,
-                  onTap: () {
-                    notifier.inputManager.handleTap(component);
-                  },
+                  onTap: () => _handleComponentTap(component),
                 ),
               );
             }),
@@ -77,5 +87,11 @@ class GameCanvasState extends ConsumerState<GameCanvas> {
         );
       },
     );
+  }
+
+  void _handleComponentTap(ComponentModel component) {
+    ref.read(gameEngineProvider.notifier).executeAction(
+          TapComponentAction(componentId: component.id),
+        );
   }
 }

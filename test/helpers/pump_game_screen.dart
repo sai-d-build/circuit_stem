@@ -10,7 +10,7 @@ import 'package:circuit_stem/domain/entities/level_definition.dart';
 Future<ProviderContainer> pumpGameScreenWithOverrides(
     WidgetTester tester,
     LevelDefinition level,
-    {required GameEngineNotifierV2 notifier}) async {
+    {required GameEngineNotifier notifier}) async {
 
   // Create the provider container with overrides
   final container = ProviderContainer(

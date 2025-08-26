@@ -5,7 +5,7 @@ import '../entities/grid_cell.dart';
 
 
 class MovableBehavior {
-  final GameEngineNotifierV2 gameEngineNotifier;
+  final GameEngineNotifier gameEngineNotifier;
 
   MovableBehavior({required this.gameEngineNotifier});
 

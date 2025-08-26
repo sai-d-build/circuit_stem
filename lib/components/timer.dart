@@ -15,6 +15,7 @@ import '../common/logger.dart';
 // --- Timer --- //
 
 class TimerDrawingBehavior implements DrawingBehavior {
+  const TimerDrawingBehavior();
   @override
   void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
     final paint = Paint()
@@ -55,6 +56,7 @@ class TimerDrawingBehavior implements DrawingBehavior {
 }
 
 class TimerLogicBehavior implements LogicBehavior {
+  const TimerLogicBehavior();
   @override
   void evaluate(Grid grid, ComponentModel component) {
     Logger.log('TimerLogicBehavior: Evaluating timer \${component.id}');
@@ -64,9 +66,9 @@ class TimerLogicBehavior implements LogicBehavior {
 
 void registerTimer() {
   Logger.log('registerTimer() called.');
-  registerBehavior<TimerDrawingBehavior>(() => TimerDrawingBehavior());
-  registerBehavior<TimerLogicBehavior>(() => TimerLogicBehavior());
-  registerBehavior<MoveBehavior>(() => MoveBehavior());
+  registerBehavior<TimerDrawingBehavior>(() => const TimerDrawingBehavior());
+  registerBehavior<TimerLogicBehavior>(() => const TimerLogicBehavior());
+  registerBehavior<MoveBehavior>(() => const MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.Timer',

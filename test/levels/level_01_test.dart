@@ -14,7 +14,7 @@ import '../helpers/mock_services.dart';
 void main() {
   group('Level 01 Revised Tests - Component Behavior', () {
     late LevelDefinition level1;
-    late GameEngineNotifierV2 notifier;
+    late GameEngineNotifier notifier;
 
     // Pre-read file contents outside of testWidgets to avoid Flutter bug
     late String manifestContent;
@@ -52,7 +52,7 @@ void main() {
       level1 = loadedLevel!;
 
       // Create a fresh notifier for each test
-      notifier = GameEngineNotifierV2(
+      notifier = GameEngineNotifier(
         audioService: mockAudioService,
         animationScheduler: mockAnimationScheduler,
       );

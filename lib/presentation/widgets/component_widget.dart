@@ -1,27 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../application/services/providers.dart';
+import '../../application/use_cases/component_action.dart';
 import '../../domain/entities/component.dart';
-import '../../domain/behaviors/drag_behavior.dart';
 import 'component_painter.dart';
 import '../../infrastructure/rendering/asset_manager.dart';
 
-class ComponentWidget extends StatelessWidget {
+class ComponentWidget extends ConsumerWidget {
   final ComponentModel component;
-  final DragBehavior dragBehavior;
   final AssetManagerNotifier assetManager;
   final VoidCallback onTap;
 
   const ComponentWidget({
     super.key,
     required this.component,
-    required this.dragBehavior,
     required this.assetManager,
     required this.onTap,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-        int maxR = 0;
+    final selectedComponentId = ref.watch(gameEngineProvider.select((state) => state.selectedComponentId));
+    final isSelected = component.id == selectedComponentId;
+
+    int maxR = 0;
     int maxC = 0;
     for (final offset in component.shapeOffsets) {
       if (offset.r > maxR) maxR = offset.r;
@@ -41,8 +44,31 @@ class ComponentWidget extends StatelessWidget {
       ),
     );
 
+    final stack = Stack(
+      children: [
+        child,
+        if (isSelected)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.rotate_right),
+              onPressed: () {
+                final newRotation = (component.rotation + 1) % 4;
+                ref.read(gameEngineProvider.notifier).executeAction(
+                      RotateComponentAction(
+                        componentId: component.id,
+                        rotation: newRotation,
+                      ),
+                    );
+              },
+            ),
+          ),
+      ],
+    );
+
     if (!component.isDraggable) {
-      return child;
+      return stack;
     }
 
     return Draggable<ComponentModel>(
@@ -63,7 +89,7 @@ class ComponentWidget extends StatelessWidget {
         ),
       ),
       childWhenDragging: Container(),
-      child: child,
+      child: stack,
     );
   }
 }

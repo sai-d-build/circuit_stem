@@ -52,12 +52,12 @@ final levelDefinitionProvider =
 );
 
 final gameEngineProvider =
-    StateNotifierProvider<GameEngineNotifierV2, GameEngineState>((ref) {
+    StateNotifierProvider<GameEngineNotifier, GameEngineState>((ref) {
   final audioService = ref.watch(audioServiceProvider);
   final animationScheduler = ref.watch(animationSchedulerProvider);
   // The notifier is now created without a level.
   // Levels will be loaded by calling a method on the notifier.
-  return GameEngineNotifierV2(
+  return GameEngineNotifier(
     audioService: audioService,
     animationScheduler: animationScheduler,
   );

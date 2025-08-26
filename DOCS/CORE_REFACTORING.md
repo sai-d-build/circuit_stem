@@ -677,6 +677,45 @@ This phase involves repeating the pattern from Phase 2 for every feature.
 
 **Continue this process for every feature: rotation, goal checking, etc.** With each step, the old `GameEngineNotifierV2` becomes simpler, and your new, clean `domain` and `application` layers become more powerful.
 
+### **Recent Progress & Refined Approach (August 2025 Update)**
+
+This section details the significant progress made in implementing Phase 3, along with key design refinements and lessons learned during the process. The core principle of "Gradual Strangulation" remains, with a strong emphasis on channeling all UI-initiated state changes through a single, unified `executeAction` method in `GameEngineNotifier`.
+
+#### **Key Findings & Design Changes:**
+
+1.  **Unified Action Dispatch:** All user interactions (drag-from-palette, move existing component, tap) are now translated into specific `ComponentAction` types (`CreateComponentFromTemplateAction`, `MoveComponentAction`, `TapComponentAction`) and dispatched via `ref.read(gameEngineProvider.notifier).executeAction(action)`. This centralizes state modification requests and simplifies the UI layer.
+2.  **`GameEngineNotifier` as Action Orchestrator:** The `GameEngineNotifier`'s `executeAction` method now acts as the primary orchestrator, receiving `ComponentAction`s and delegating their execution to specialized Use Cases. This significantly reduces the "god class" burden on the notifier.
+3.  **Refined Component Bounds Calculation:** A `getBounds()` method has been added to `ComponentModel` (`lib/domain/entities/component.dart`) to encapsulate component size calculation, simplifying UI rendering logic in `GameCanvas`.
+4.  **Removal of `DragBehavior`:** The explicit `DragBehavior` class has been removed. Its responsibilities are now directly handled by the `DragTarget` in `GameCanvas` which dispatches appropriate `ComponentAction`s. This streamlines the drag-and-drop implementation.
+5.  **Consistent Naming & Import Resolution:** During this phase, several critical analysis errors were encountered and resolved, primarily due to:
+    *   Inconsistent class naming (`GameEngineNotifierV2` vs. `GameEngineNotifier`).
+    *   Incorrect import paths for domain entities (`domain/models` vs. `domain/entities`).
+    *   Ambiguous action class definitions (action classes were defined in multiple places).
+    *   Missing Riverpod providers for core services (`audioServiceProvider`).
+    These issues highlighted the importance of rigorous project-wide search/replace and consistent adherence to architectural patterns.
+
+#### **Completed Features (August 2025):**
+
+The following core UI-driven interactions have been successfully refactored and integrated into the new action-based system:
+
+*   **Create Component from Palette:** Users can now drag components from the palette onto the grid, and this action is processed via `CreateComponentFromTemplateAction`.
+*   **Move Existing Component:** Users can drag and move components already on the grid, with the interaction processed via `MoveComponentAction`.
+*   **Tap Interaction:** Tapping on components (e.g., switches) is now handled via `TapComponentAction`.
+
+These implementations serve as concrete examples and a template for future refactoring efforts within this phase.
+
+#### **Pending Features for Phase 3:**
+
+The "Gradual Strangulation" continues. The following features still reside within the `GameEngineNotifier`'s legacy logic and need to be refactored into dedicated Use Cases and Actions:
+
+*   **Component Rotation:** Implement `RotateComponentAction` and `RotateComponentUseCase`.
+*   **Power Simulation:** Move the complex power flow logic into a dedicated `SimulatePowerFlowUseCase` that operates on the game state.
+*   **Goal Checking:** Refactor how win/lose conditions are evaluated and updated in the game state.
+*   **Level Restart/Undo:** Convert these operations into action-based use cases.
+*   **Any other direct state mutations:** Identify and refactor any remaining logic in `GameEngineNotifier` that directly modifies `GameEngineState` without going through a Use Case.
+
+This structured approach ensures continued progress towards a fully modular and testable core game engine.
+
 ---
 
 ## **Phase 4: The Final Cutover**

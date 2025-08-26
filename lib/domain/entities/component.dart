@@ -90,6 +90,22 @@ class ComponentModel with _$ComponentModel {
     // This method should not be called directly - use ComponentRegistry.createFromJson instead
     throw UnsupportedError('ComponentModel.fromJson should not be called directly. Use ComponentRegistry.createFromJson for components.');
   }
+
+  ComponentBounds getBounds() {
+    int maxR = 0;
+    int maxC = 0;
+    for (final offset in shapeOffsets) {
+      if (offset.r > maxR) maxR = offset.r;
+      if (offset.c > maxC) maxC = offset.c;
+    }
+    return ComponentBounds(maxC + 1, maxR + 1);
+  }
+}
+
+class ComponentBounds {
+  final int width;
+  final int height;
+  const ComponentBounds(this.width, this.height);
 }
 
 // Type alias for backward compatibility with tests

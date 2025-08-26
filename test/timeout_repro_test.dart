@@ -7,7 +7,7 @@ final simpleProvider = Provider((ref) => 'Hello, World!');
 
 // 2. A minimal widget that uses the provider.
 class MinimalWidget extends ConsumerWidget {
-  const MinimalWidget({Key? key}) : super(key: key);
+  const MinimalWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
