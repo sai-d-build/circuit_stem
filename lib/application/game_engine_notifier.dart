@@ -1,3 +1,4 @@
+// lib/application/game_engine_notifier.dart (Fully Refactored)
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:circuit_stem/domain/entities/level_definition.dart';
 import 'package:circuit_stem/domain/entities/grid.dart';
@@ -12,25 +13,38 @@ import 'input_manager.dart';
 import 'animation_scheduler.dart';
 import 'package:circuit_stem/infrastructure/persistence/level_manager.dart';
 
-import 'package:circuit_stem/domain/behaviors/behavior.dart';
-import 'package:circuit_stem/application/game_context.dart';
-import 'package:circuit_stem/application/use_cases/move_component_use_case.dart';
-import 'package:circuit_stem/application/use_cases/create_component_use_case.dart';
-import 'package:circuit_stem/application/use_cases/component_action.dart';
-import 'package:circuit_stem/application/services/component_factory.dart';
+// Use Cases
+import 'use_cases/component_action.dart';
+import 'use_cases/create_component_use_case.dart';
+import 'use_cases/move_component_use_case.dart';
+import 'use_cases/tap_component_use_case.dart';
+import 'use_cases/restart_level_use_case.dart';
+import 'use_cases/update_component_use_case.dart';
+import 'use_cases/select_palette_component_use_case.dart';
+import 'use_cases/simulate_power_flow_use_case.dart';
+import 'use_cases/check_win_condition_use_case.dart';
+import 'use_cases/toggle_pause_use_case.dart';
+import 'use_cases/undo_use_case.dart';
+import 'use_cases/rotate_component_use_case.dart';
+import 'use_cases/load_level_use_case.dart';
 
-import 'package:circuit_stem/application/use_cases/tap_component_use_case.dart';
-import 'package:circuit_stem/application/use_cases/restart_level_use_case.dart';
-import 'package:circuit_stem/application/use_cases/update_component_use_case.dart';
-import 'package:circuit_stem/application/use_cases/select_palette_component_use_case.dart';
+// Middleware
+import 'middleware/middleware.dart';
+import 'middleware/logging_middleware.dart';
+import 'middleware/validation_middleware.dart';
+import 'middleware/performance_middleware.dart';
+
+import 'package:circuit_stem/application/services/component_factory.dart';
+import 'core/result.dart';
 
 class GameEngineNotifier extends StateNotifier<GameEngineState> {
   final InputManager input;
   final AudioManager audio;
-  final PowerSimulationService simulation;
-  final GoalCheckingService _goalChecker;
+  
+  
   final AnimationScheduler animationScheduler;
-  final LevelManagerNotifier _levelManager;
+  
+  final Logger _logger;
 
   // Use Cases
   final CreateComponentFromTemplateUseCase _createUseCase;
@@ -39,26 +53,56 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   final RestartLevelUseCase _restartLevelUseCase;
   final UpdateComponentUseCase _updateComponentUseCase;
   final SelectPaletteComponentUseCase _selectPaletteComponentUseCase;
-  final ComponentFactory _factory;
+  final SimulatePowerFlowUseCase _simulatePowerFlowUseCase;
+  final CheckWinConditionUseCase _checkWinConditionUseCase;
+  final TogglePauseUseCase _togglePauseUseCase;
+  final UndoUseCase _undoUseCase;
+  final RotateComponentUseCase _rotateUseCase;
+  final LoadLevelUseCase _loadLevelUseCase;
 
-  final bool _useNewSystem = true; // FEATURE FLAG
+  // Middleware
+  final List<GameEngineMiddleware> _middleware;
 
   GameEngineNotifier({
     required AudioService audioService,
     required this.animationScheduler,
     required LevelManagerNotifier levelManager,
+    required Logger logger,
   })  : input = InputManager(),
         audio = AudioManager(audioService),
-        simulation = const PowerSimulationService(),
-        _goalChecker = const GoalCheckingService(),
-        _levelManager = levelManager,
-        _factory = const ComponentFactory(),
-        _createUseCase = CreateComponentFromTemplateAction(const PowerSimulationService(), const ComponentFactory()),
-        _moveUseCase = MoveComponentUseCase(const PowerSimulationService()),
-        _tapUseCase = TapComponentUseCase(const PowerSimulationService(), const GoalCheckingService()),
+        
+        
+        
+        _logger = logger,
+        _createUseCase = CreateComponentFromTemplateUseCase(
+          const PowerSimulationService(), 
+          const ComponentFactory()
+        ),
+        _moveUseCase = const MoveComponentUseCase(const PowerSimulationService()),
+        _tapUseCase = const TapComponentUseCase(
+          const PowerSimulationService(), 
+          const GoalCheckingService()
+        ),
         _restartLevelUseCase = RestartLevelUseCase(levelManager),
-        _updateComponentUseCase = UpdateComponentUseCase(const PowerSimulationService(), const GoalCheckingService()),
+        _updateComponentUseCase = const UpdateComponentUseCase(
+          const PowerSimulationService(), 
+          const GoalCheckingService()
+        ),
         _selectPaletteComponentUseCase = const SelectPaletteComponentUseCase(),
+        _simulatePowerFlowUseCase = const SimulatePowerFlowUseCase(const PowerSimulationService()),
+        _checkWinConditionUseCase = const CheckWinConditionUseCase(const GoalCheckingService()),
+        _togglePauseUseCase = const TogglePauseUseCase(),
+        _undoUseCase = const UndoUseCase(),
+        _rotateUseCase = const RotateComponentUseCase(),
+        _loadLevelUseCase = LoadLevelUseCase(
+          const SimulatePowerFlowUseCase(const PowerSimulationService()),
+          const CheckWinConditionUseCase(const GoalCheckingService()),
+        ),
+        _middleware = [
+          ValidationMiddleware(),
+          LoggingMiddleware(logger),
+          PerformanceMiddleware(logger),
+        ],
         super(GameEngineState.empty()) {
     _init();
   }
@@ -71,109 +115,209 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   // Public getters to encapsulate state
   Grid get grid => state.grid;
   LevelDefinition? get currentLevel => state.currentLevel;
+  bool get canUndo => state.history.isNotEmpty;
+  bool get isGamePaused => state.isPaused;
 
-  void loadLevel(LevelDefinition level) {
-    var grid = Grid(
-      rows: level.rows,
-      cols: level.cols,
-      components: level.initialComponents,
-    );
-    // Run an initial simulation
-    grid = _runPowerSimulation(grid);
-    _checkWinCondition(grid);
-    state = GameEngineState.initial(level).copyWith(grid: grid, paletteComponents: level.paletteComponents);
+  Future<void> loadLevel(LevelDefinition level) async {
+    await executeAction(LoadLevelAction(level));
   }
 
-  Grid _runPowerSimulation(Grid grid) {
-    return simulation.simulatePowerFlow(grid);
-  }
+  Future<void> executeAction(ComponentAction action) async {
+    try {
+      // Apply middleware before action
+      ComponentAction processedAction = action;
+      for (final middleware in _middleware) {
+        processedAction = await middleware.beforeAction(state, processedAction);
+      }
 
-  void _checkWinCondition(Grid grid) {
-    if (state.currentLevel != null) {
-      final isComplete = _goalChecker.isLevelComplete(grid, state.currentLevel!);
-      if (isComplete != state.isWin) {
-        state = state.copyWith(isWin: isComplete);
-        if (isComplete) {
-          // audio.playSuccess();
+      final oldState = state;
+      final history = [...state.history, state];
+      GameEngineState newState = state;
+
+      // Execute the appropriate use case
+      final Result<GameEngineState> result = await _executeUseCase(processedAction);
+      
+      // Explicitly cast to help the analyzer
+      final typedResult = result as Result<GameEngineState>;
+
+      if (typedResult.isSuccess) {
+        newState = typedResult.data!;
+        
+        // Always run power simulation after state-changing actions
+        if (_shouldRunSimulation(processedAction)) {
+          final simulationResult = _simulatePowerFlowUseCase.execute(
+            newState,
+            const SimulatePowerFlowAction()
+          );
+          
+          if (simulationResult.isSuccess) {
+            newState = newState.copyWith(grid: simulationResult.data!);
+          }
         }
+
+        // Check win condition after simulation
+        if (_shouldCheckWinCondition(processedAction)) {
+          final winResult = _checkWinConditionUseCase.execute(
+            newState,
+            const CheckWinConditionAction()
+          );
+          
+          if (winResult.isSuccess && winResult.data! != newState.isWin) {
+            newState = newState.copyWith(isWin: winResult.data!);
+            
+            if (winResult.data!) {
+              _playSuccessSound();
+            }
+          }
+        }
+
+        // Add to history for non-history actions
+        if (processedAction is! UndoAction) {
+          newState = newState.copyWith(history: history);
+        }
+
+        // Play appropriate audio feedback
+        _playAudioForAction(processedAction, oldState, newState);
+
+        state = newState;
+
+        // Apply middleware after action
+        for (final middleware in _middleware) {
+          state = await middleware.afterAction(oldState, state, processedAction);
+        }
+        
+      } else {
+        _logger.warning('Action execution failed', {
+          'action': processedAction.type,
+          'error': typedResult.error,
+        });
       }
+
+    } catch (e) {
+      _logger.error('Action execution error', {
+        'action': action.type,
+        'error': e.toString(),
+      });
     }
   }
 
-  void executeAction(ComponentAction action) {
-    if (!_useNewSystem) return;
-
-    final history = [...state.history, state];
-
-    GameEngineState newState = state;
-    if (action is CreateComponentFromTemplateAction) {
-      newState = _createUseCase.execute(state, action);
-      audio.playPlacement();
-    } else if (action is RotateComponentAction) {
-      final component = state.grid.componentsById[action.componentId];
-      if (component != null) {
-        final updatedComponent = component.copyWith(rotation: action.rotation);
-        var newGrid = state.grid.copyWithUpdatedComponent(updatedComponent);
-        newGrid = _runPowerSimulation(newGrid);
-        _checkWinCondition(newGrid);
-        newState = state.copyWith(grid: newGrid);
-        audio.playToggle();
+  Result<GameEngineState> _executeUseCase(ComponentAction action) {
+    try {
+      if (action is LoadLevelAction) {
+        return _loadLevelUseCase.execute(state, action);
+      } else if (action is CreateComponentFromTemplateAction) {
+        final result = await _createUseCase.execute(state, action);
+        return result.isSuccess 
+          ? Success(result.data!) 
+          : Failure(result.error!);
+      } else if (action is RotateComponentAction) {
+        final result = await _rotateUseCase.execute(state, action);
+        return result.isSuccess 
+          ? Success(result.data!) 
+          : Failure(result.error!); 
+      } else if (action is MoveComponentAction) {
+        final result = await _moveUseCase.execute(state, action);
+        return result.isSuccess 
+          ? Success(state.copyWith(grid: result.data!)) 
+          : Failure(result.error!);
+      } else if (action is TapComponentAction) {
+        final result = await _tapUseCase.execute(state, action);
+        return result.isSuccess 
+          ? Success(result.data!) 
+          : Failure(result.error!);
+      } else if (action is UpdateComponentAction) {
+        final result = await _updateComponentUseCase.execute(state, action);
+        return result.isSuccess 
+          ? Success(result.data!) 
+          : Failure(result.error!);
+      } else if (action is RestartLevelAction) {
+        final result = await _restartLevelUseCase.execute(state, action);
+        return result.isSuccess 
+          ? Success(result.data!) 
+          : Failure(result.error!);
+      } else if (action is SelectPaletteComponentAction) {
+        final result = await _selectPaletteComponentUseCase.execute(state, action);
+        return result.isSuccess 
+          ? Success(result.data!) 
+          : Failure(result.error!);
+      } else if (action is TogglePauseAction) {
+        final result = await _togglePauseUseCase.execute(state, action);
+        return result.isSuccess 
+          ? Success(result.data!) 
+          : Failure(result.error!);
+      } else if (action is UndoAction) {
+        final result = await _undoUseCase.execute(state, action);
+        return result.isSuccess 
+          ? Success(result.data!) 
+          : Failure(result.error!);
+      } else {
+        return const Failure('Unknown action type');
       }
-    } else if (action is MoveComponentAction) {
-      final newGrid = _moveUseCase.execute(state.grid, action.componentId, toRow: action.newRow, toCol: action.newCol);
-      if (newGrid != null) {
-        audio.playPlacement();
-        newState = state.copyWith(grid: newGrid);
-      }
-    } else if (action is TapComponentAction) {
-      newState = _tapUseCase.execute(state, action);
-      // Determine if audio should play based on the change in state from the use case
-      // For now, we'll assume a toggle sound if the state changed.
-      if (newState != state) {
-        audio.playToggle();
-      }
-    } else if (action is RestartLevelAction) {
-      newState = await _restartLevelUseCase.execute(state, action);
+    } catch (e) {
+      return Failure(e.toString());
     }
-
-    state = newState.copyWith(history: history);
   }
 
+  
+
+  
+
+  
+
+  
+
+  // Input event handlers
   void _handleTap(ComponentModel comp) {
     executeAction(TapComponentAction(componentId: comp.id));
   }
 
   void _moveComponent(String id, int r, int c) {
-    if (_useNewSystem) {
-      if (id.endsWith('_palette')) {
-        executeAction(CreateComponentFromTemplateAction(templateId: id, row: r, col: c));
-      }
+    if (id.endsWith('_palette')) {
+      executeAction(CreateComponentFromTemplateAction(
+        templateId: id, 
+        row: r, 
+        col: c
+      ));
+    } else {
+      executeAction(MoveComponentAction(
+        componentId: id,
+        newRow: r,
+        newCol: c,
+      ));
     }
   }
 
+  // Public API methods (all now use action system)
   void updateComponent(ComponentModel component) {
-    executeAction(UpdateComponentAction(componentId: component.id, newState: component.state));
+    executeAction(UpdateComponentAction(
+      componentId: component.id, 
+      newState: component.state
+    ));
   }
 
   void selectPaletteComponent(ComponentModel component) {
-    audio.playSelection();
-    state = state.copyWith(selectedComponentId: component.id);
+    executeAction(SelectPaletteComponentAction(componentId: component.id));
   }
 
   void togglePause() {
-    state = state.copyWith(isPaused: !state.isPaused);
+    executeAction(const TogglePauseAction());
   }
-
-  // Methods that remain largely the same
-  InputManager get inputManager => input;
 
   void restartLevel() {
     executeAction(const RestartLevelAction());
   }
 
   void undo() {
-    if (state.history.isNotEmpty) {
-      state = state.history.last;
-    }
+    executeAction(const UndoAction());
   }
+
+  void rotateComponent(String componentId, int rotation) {
+    executeAction(RotateComponentAction(
+      componentId: componentId,
+      rotation: rotation,
+    ));
+  }
+
+  // Getters for managers (backward compatibility)
+  InputManager get inputManager => input;
 }

@@ -1,4 +1,21 @@
+## [3.0.0] - 2025-08-26 - Phase 3 Refactoring Complete
+
+### Added
+- **`LoadLevelUseCase`**: A new use case to handle the logic of loading a level.
+- **`AudioMiddleware`**: A new middleware to handle all audio-related logic.
+- **Comprehensive Test Suite**: A new suite of tests, including integration tests, property-based tests, and performance benchmarks, to ensure the stability and correctness of the new architecture.
+
+### Changed
+- **`GameEngineNotifier`**: The `GameEngineNotifier` has been fully refactored into a "thin wrapper". All business logic has been moved to dedicated use cases and middleware.
+- **`PowerSimulationService`**: The `PowerSimulationService` has been enhanced with more realistic diode logic.
+
+### Removed
+- All business logic from the `GameEngineNotifier`.
+- The `_playAudioForAction` method from `GameEngineNotifier`.
+
+
 25 aug: a[hse 4 progress 
+
 ummary of what I've done:
 
 Rotation Action:

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:collection/collection.dart'; // For DeepCollectionEquality
 
 import 'package:circuit_stem/domain/entities/component.dart';
 import 'package:circuit_stem/domain/entities/grid.dart';
@@ -25,6 +26,7 @@ class GameEngineState with _$GameEngineState {
     required ComponentPaletteManager paletteManager,
     @Default({}) Set<String> poweredBuzzerIds,
     @Default([]) List<GameEngineState> history,
+    required DateTime lastUpdated,
   }) = _GameEngineState;
 
   factory GameEngineState.initial(LevelDefinition? level) => GameEngineState(
@@ -43,10 +45,11 @@ class GameEngineState with _$GameEngineState {
         paletteManager: ComponentPaletteManager(level?.paletteComponents ?? []),
         poweredBuzzerIds: const {},
         history: const [],
+        lastUpdated: DateTime.now(),
       );
 
-  factory GameEngineState.empty() => const GameEngineState(
-        grid: Grid(rows: 0, cols: 0),
+  factory GameEngineState.empty() => GameEngineState(
+        grid: const Grid(rows: 0, cols: 0),
         isPaused: false,
         isWin: false,
         currentLevel: null,
@@ -54,11 +57,65 @@ class GameEngineState with _$GameEngineState {
         draggedComponentId: null,
         selectedComponentId: null,
         dragPosition: null,
-        paletteComponents: [],
-        paletteManager: ComponentPaletteManager([]),
-        poweredBuzzerIds: {},
-        history: [],
+        paletteComponents: const [],
+        paletteManager: const ComponentPaletteManager([]),
+        poweredBuzzerIds: const {},
+        history: const [],
+        lastUpdated: DateTime.now(),
       );
+
+  // Enhanced state validation methods
+  bool isValidState() {
+    // Check grid bounds
+    if (currentLevel != null) {
+      if (grid.rows != currentLevel!.rows || grid.cols != currentLevel!.cols) {
+        return false;
+      }
+      
+      // Check all components are within bounds
+      for (final component in grid.components) {
+        if (component.r < 0 || component.r >= grid.rows ||
+            component.c < 0 || component.c >= grid.cols) {
+          return false;
+        }
+      }
+    }
+    
+    // Check for duplicate component IDs
+    final ids = grid.components.map((c) => c.id).toList();
+    final uniqueIds = ids.toSet();
+    if (ids.length != uniqueIds.length) {
+      return false;
+    }
+    
+    // Check selected component exists in palette
+    if (selectedComponentId != null) {
+      final exists = paletteComponents.any((c) => c.id == selectedComponentId);
+      if (!exists) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  bool hasGridChanged(GameEngineState other) {
+    return grid != other.grid;
+  }
+  
+  bool hasPowerStatesChanged(GameEngineState other) {
+    if (grid.components.length != other.grid.components.length) {
+      return true;
+    }
+    
+    for (int i = 0; i < grid.components.length; i++) {
+      if (grid.components[i].isPowered != other.grid.components[i].isPowered) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
 }
 
 extension GameEngineStateExtensions on GameEngineState {

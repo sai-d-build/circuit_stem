@@ -1,0 +1,56 @@
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:circuit_stem/application/use_cases/rotate_component_use_case.dart';
+import 'package:circuit_stem/application/game_engine_state.dart';
+import 'package:circuit_stem/domain/entities/component.dart';
+import 'package:circuit_stem/domain/entities/level_definition.dart';
+import 'package:circuit_stem/application/use_cases/component_action.dart';
+
+void main() {
+  group('RotateComponentUseCase', () {
+    late RotateComponentUseCase useCase;
+    late GameEngineState initialState;
+
+    setUp(() {
+      useCase = const RotateComponentUseCase();
+      initialState = GameEngineState.initial(
+        const LevelDefinition(
+          id: 'test_level',
+          name: 'Test Level',
+          rows: 5,
+          cols: 5,
+          initialComponents: [
+            ComponentModel(id: 'c1', type: 'resistor', r: 1, c: 1, rotation: 0),
+          ],
+        ),
+      );
+    });
+
+    test('should rotate a component', () {
+      // Arrange
+      const action = RotateComponentAction(componentId: 'c1', rotation: 1);
+
+      // Act
+      final result = useCase.execute(initialState, action);
+
+      // Assert
+      expect(result.isSuccess, isTrue);
+      final newGrid = result.data!.grid;
+      final rotatedComponent = newGrid.componentsById['c1'];
+      expect(rotatedComponent, isNotNull);
+      expect(rotatedComponent!.rotation, 1);
+    });
+
+    test('should return failure if component is not found', () {
+      // Arrange
+      const action = RotateComponentAction(componentId: 'c2', rotation: 1);
+
+      // Act
+      final result = useCase.execute(initialState, action);
+
+      // Assert
+      expect(result.isFailure, isTrue);
+      expect(result.error, 'Component not found');
+    });
+  });
+}
