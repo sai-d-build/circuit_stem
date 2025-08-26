@@ -24,13 +24,7 @@ class ComponentWidget extends ConsumerWidget {
     final selectedComponentId = ref.watch(gameEngineProvider.select((state) => state.selectedComponentId));
     final isSelected = component.id == selectedComponentId;
 
-    int maxR = 0;
-    int maxC = 0;
-    for (final offset in component.shapeOffsets) {
-      if (offset.r > maxR) maxR = offset.r;
-      if (offset.c > maxC) maxC = offset.c;
-    }
-    final componentSize = Size((maxC + 1) * 100.0, (maxR + 1) * 100.0);
+    final componentSize = component.displaySize;
 
     final child = GestureDetector(
       onTap: onTap,
@@ -55,12 +49,7 @@ class ComponentWidget extends ConsumerWidget {
               icon: const Icon(Icons.rotate_right),
               onPressed: () {
                 final newRotation = (component.rotation + 1) % 4;
-                ref.read(gameEngineProvider.notifier).executeAction(
-                      RotateComponentAction(
-                        componentId: component.id,
-                        rotation: newRotation,
-                      ),
-                    );
+                ref.read(gameEngineProvider.notifier).rotateComponent(component.id, newRotation);
               },
             ),
           ),

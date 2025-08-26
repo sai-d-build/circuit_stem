@@ -24,3 +24,5 @@ final gameEngineProvider = StateNotifierProvider<GameEngineNotifier, GameEngineS
     );
   },
 );
+
+final debugOverlayProvider = StateProvider<bool>((ref) => false);

@@ -32,6 +32,7 @@ mixin _$GameEngineState {
   Set<String> get poweredBuzzerIds => throw _privateConstructorUsedError;
   List<GameEngineState> get history => throw _privateConstructorUsedError;
   DateTime get lastUpdated => throw _privateConstructorUsedError;
+  bool get isDebugOverlayVisible => throw _privateConstructorUsedError;
 
   /// Create a copy of GameEngineState
   /// with the given fields replaced by the non-null parameter values.
@@ -60,7 +61,8 @@ abstract class $GameEngineStateCopyWith<$Res> {
       ComponentPaletteManager paletteManager,
       Set<String> poweredBuzzerIds,
       List<GameEngineState> history,
-      DateTime lastUpdated});
+      DateTime lastUpdated,
+      bool isDebugOverlayVisible});
 
   $GridCopyWith<$Res> get grid;
   $LevelDefinitionCopyWith<$Res>? get currentLevel;
@@ -95,6 +97,7 @@ class _$GameEngineStateCopyWithImpl<$Res, $Val extends GameEngineState>
     Object? poweredBuzzerIds = null,
     Object? history = null,
     Object? lastUpdated = null,
+    Object? isDebugOverlayVisible = null,
   }) {
     return _then(_value.copyWith(
       grid: null == grid
@@ -153,6 +156,10 @@ class _$GameEngineStateCopyWithImpl<$Res, $Val extends GameEngineState>
           ? _value.lastUpdated
           : lastUpdated // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      isDebugOverlayVisible: null == isDebugOverlayVisible
+          ? _value.isDebugOverlayVisible
+          : isDebugOverlayVisible // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
@@ -203,7 +210,8 @@ abstract class _$$GameEngineStateImplCopyWith<$Res>
       ComponentPaletteManager paletteManager,
       Set<String> poweredBuzzerIds,
       List<GameEngineState> history,
-      DateTime lastUpdated});
+      DateTime lastUpdated,
+      bool isDebugOverlayVisible});
 
   @override
   $GridCopyWith<$Res> get grid;
@@ -238,6 +246,7 @@ class __$$GameEngineStateImplCopyWithImpl<$Res>
     Object? poweredBuzzerIds = null,
     Object? history = null,
     Object? lastUpdated = null,
+    Object? isDebugOverlayVisible = null,
   }) {
     return _then(_$GameEngineStateImpl(
       grid: null == grid
@@ -296,6 +305,10 @@ class __$$GameEngineStateImplCopyWithImpl<$Res>
           ? _value.lastUpdated
           : lastUpdated // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      isDebugOverlayVisible: null == isDebugOverlayVisible
+          ? _value.isDebugOverlayVisible
+          : isDebugOverlayVisible // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -317,7 +330,8 @@ class _$GameEngineStateImpl implements _GameEngineState {
       required this.paletteManager,
       final Set<String> poweredBuzzerIds = const {},
       final List<GameEngineState> history = const [],
-      required this.lastUpdated})
+      required this.lastUpdated,
+      this.isDebugOverlayVisible = false})
       : _paletteComponents = paletteComponents,
         _poweredBuzzerIds = poweredBuzzerIds,
         _history = history;
@@ -374,10 +388,13 @@ class _$GameEngineStateImpl implements _GameEngineState {
 
   @override
   final DateTime lastUpdated;
+  @override
+  @JsonKey()
+  final bool isDebugOverlayVisible;
 
   @override
   String toString() {
-    return 'GameEngineState(grid: $grid, isPaused: $isPaused, isWin: $isWin, currentLevel: $currentLevel, draggedComponentId: $draggedComponentId, selectedComponentId: $selectedComponentId, dragPosition: $dragPosition, isShortCircuit: $isShortCircuit, renderState: $renderState, paletteComponents: $paletteComponents, paletteManager: $paletteManager, poweredBuzzerIds: $poweredBuzzerIds, history: $history, lastUpdated: $lastUpdated)';
+    return 'GameEngineState(grid: $grid, isPaused: $isPaused, isWin: $isWin, currentLevel: $currentLevel, draggedComponentId: $draggedComponentId, selectedComponentId: $selectedComponentId, dragPosition: $dragPosition, isShortCircuit: $isShortCircuit, renderState: $renderState, paletteComponents: $paletteComponents, paletteManager: $paletteManager, poweredBuzzerIds: $poweredBuzzerIds, history: $history, lastUpdated: $lastUpdated, isDebugOverlayVisible: $isDebugOverlayVisible)';
   }
 
   @override
@@ -409,7 +426,9 @@ class _$GameEngineStateImpl implements _GameEngineState {
                 .equals(other._poweredBuzzerIds, _poweredBuzzerIds) &&
             const DeepCollectionEquality().equals(other._history, _history) &&
             (identical(other.lastUpdated, lastUpdated) ||
-                other.lastUpdated == lastUpdated));
+                other.lastUpdated == lastUpdated) &&
+            (identical(other.isDebugOverlayVisible, isDebugOverlayVisible) ||
+                other.isDebugOverlayVisible == isDebugOverlayVisible));
   }
 
   @override
@@ -428,7 +447,8 @@ class _$GameEngineStateImpl implements _GameEngineState {
       paletteManager,
       const DeepCollectionEquality().hash(_poweredBuzzerIds),
       const DeepCollectionEquality().hash(_history),
-      lastUpdated);
+      lastUpdated,
+      isDebugOverlayVisible);
 
   /// Create a copy of GameEngineState
   /// with the given fields replaced by the non-null parameter values.
@@ -455,7 +475,8 @@ abstract class _GameEngineState implements GameEngineState {
       required final ComponentPaletteManager paletteManager,
       final Set<String> poweredBuzzerIds,
       final List<GameEngineState> history,
-      required final DateTime lastUpdated}) = _$GameEngineStateImpl;
+      required final DateTime lastUpdated,
+      final bool isDebugOverlayVisible}) = _$GameEngineStateImpl;
 
   @override
   Grid get grid;
@@ -485,6 +506,8 @@ abstract class _GameEngineState implements GameEngineState {
   List<GameEngineState> get history;
   @override
   DateTime get lastUpdated;
+  @override
+  bool get isDebugOverlayVisible;
 
   /// Create a copy of GameEngineState
   /// with the given fields replaced by the non-null parameter values.

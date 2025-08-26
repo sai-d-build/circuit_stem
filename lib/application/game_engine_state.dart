@@ -27,6 +27,7 @@ class GameEngineState with _$GameEngineState {
     @Default({}) Set<String> poweredBuzzerIds,
     @Default([]) List<GameEngineState> history,
     required DateTime lastUpdated,
+    @Default(false) bool isDebugOverlayVisible,
   }) = _GameEngineState;
 
   factory GameEngineState.initial(LevelDefinition? level) => GameEngineState(
@@ -46,6 +47,7 @@ class GameEngineState with _$GameEngineState {
         poweredBuzzerIds: const {},
         history: const [],
         lastUpdated: DateTime.now(),
+        isDebugOverlayVisible: false,
       );
 
   factory GameEngineState.empty() => GameEngineState(
@@ -62,6 +64,7 @@ class GameEngineState with _$GameEngineState {
         poweredBuzzerIds: const {},
         history: const [],
         lastUpdated: DateTime.now(),
+        isDebugOverlayVisible: false,
       );
 
   // Enhanced state validation methods

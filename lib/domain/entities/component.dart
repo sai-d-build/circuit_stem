@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 
 part 'component.freezed.dart';
@@ -99,6 +100,11 @@ class ComponentModel with _$ComponentModel {
       if (offset.c > maxC) maxC = offset.c;
     }
     return ComponentBounds(maxC + 1, maxR + 1);
+  }
+
+  Size get displaySize {
+    final bounds = getBounds();
+    return Size(bounds.width * 100.0, bounds.height * 100.0);
   }
 }
 
