@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:circuit_stem/application/services/providers.dart';
+import 'package:circuit_stem/application/providers.dart';
 import '../helpers/game_test_helper.dart';
 import '../helpers/test_setup_helper.dart';
 

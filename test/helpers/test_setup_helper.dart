@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:circuit_stem/application/services/providers.dart';
+import 'package:circuit_stem/application/providers.dart';
 import 'package:circuit_stem/main.dart';
 import 'package:circuit_stem/domain/entities/level_definition.dart';
 import 'package:circuit_stem/presentation/screens/game_screen.dart';

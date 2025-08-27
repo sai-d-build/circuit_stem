@@ -159,7 +159,11 @@ class GameInitializationNotifier extends AsyncNotifier<GameScreenData> {
 
     Logger.log(
         'GameScreen: Loading level ${levelDefinition.id} into game engine');
-    await gameNotifier.loadLevel(levelDefinition);
+    final result = await gameNotifier.loadLevel(levelDefinition);
+
+    if (result.isFailure) {
+      throw Exception('Failed to initialize game engine: ${result.error}');
+    }
 
     // Allow some time for the engine to process
     await Future.delayed(const Duration(milliseconds: 100));

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../application/services/providers.dart';
+import '../../application/providers.dart';
 import '../../domain/entities/component.dart';
 import 'component_painter.dart';
 import '../../infrastructure/rendering/asset_manager.dart';

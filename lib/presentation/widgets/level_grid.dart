@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../application/services/providers.dart';
+import '../../application/providers.dart';
 import '../../domain/entities/level_metadata.dart';
 
 class LevelGrid extends ConsumerWidget {

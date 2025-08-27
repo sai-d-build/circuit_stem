@@ -103,11 +103,11 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   bool get canUndo => state.history.isNotEmpty;
   bool get isGamePaused => state.isPaused;
 
-  Future<void> loadLevel(LevelDefinition level) async {
-    await executeAction(LoadLevelAction(level));
+  Future<Result<GameEngineState>> loadLevel(LevelDefinition level) async {
+    return await executeAction(LoadLevelAction(level));
   }
 
-  Future<void> executeAction(ComponentAction action) async {
+  Future<Result<GameEngineState>> executeAction(ComponentAction action) async {
     try {
       ComponentAction processedAction = action;
 
@@ -121,7 +121,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
 
       final result = await _executeUseCase(processedAction);
 
-      result.fold(
+      return result.fold(
         (newState) async {
           // Run simulation + win check if applicable
           if (_shouldRunSimulation(processedAction)) {
@@ -163,13 +163,16 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
             state =
                 await middleware.afterAction(oldState, state, processedAction);
           }
+          return Success(state);
         },
         (error) {
           Logger.log('Action execution failed: $error');
+          return Failure(error);
         },
       );
     } catch (e, s) {
       Logger.log('Action execution error', error: e, stackTrace: s);
+      return Failure('Action execution error: $e');
     }
   }
 

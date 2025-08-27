@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
-import 'application/services/providers.dart';
+import 'application/providers.dart';
 import 'common/logger.dart';
 import 'common/assets.dart';
 import 'dart:async';
@@ -78,7 +78,11 @@ class InitializerState extends ConsumerState<Initializer> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeAssets());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final prefs = ref.read(sharedPreferencesProvider);
+      Logger.log('Prefs: $prefs');
+      _initializeAssets();
+    });
   }
 
   Future<void> _initializeAssets() async {
