@@ -7,10 +7,12 @@ import 'package:circuit_stem/application/game_context.dart';
 abstract class ComponentBehavior {
   const ComponentBehavior();
 
-  String get behaviorType; // e.g., 'interaction', 'power_conduction', 'movement'
-  
+  String
+      get behaviorType; // e.g., 'interaction', 'power_conduction', 'movement'
+
   /// Handles a specific action for a component.
   /// Returns a new ComponentModel if the component's state changes,
   /// otherwise returns null.
-  ComponentModel? handle(ComponentModel component, String action, GameContext context);
+  ComponentModel? handle(
+      ComponentModel component, String action, GameContext context);
 }

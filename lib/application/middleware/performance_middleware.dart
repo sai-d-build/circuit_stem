@@ -5,15 +5,17 @@ import '../../common/logger.dart';
 
 class PerformanceMiddleware extends GameEngineMiddleware {
   const PerformanceMiddleware();
-  
+
   @override
-  Future<ComponentAction> beforeAction(GameEngineState state, ComponentAction action) async {
+  Future<ComponentAction> beforeAction(
+      GameEngineState state, ComponentAction action) async {
     action.metadata['startTime'] = DateTime.now().millisecondsSinceEpoch;
     return action;
   }
-  
+
   @override
-  Future<GameEngineState> afterAction(GameEngineState oldState, GameEngineState newState, ComponentAction action) async {
+  Future<GameEngineState> afterAction(GameEngineState oldState,
+      GameEngineState newState, ComponentAction action) async {
     final startTime = action.metadata['startTime'] as int?;
     if (startTime != null) {
       final duration = DateTime.now().millisecondsSinceEpoch - startTime;

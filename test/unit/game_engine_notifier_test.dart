@@ -6,20 +6,20 @@ import 'package:circuit_stem/domain/entities/level_definition.dart';
 import 'package:circuit_stem/infrastructure/audio/audio_service.dart';
 import 'package:circuit_stem/application/animation_scheduler.dart';
 import 'package:circuit_stem/domain/entities/goal.dart';
+import 'package:circuit_stem/infrastructure/persistence/level_manager.dart'; // Added for MockLevelManager
+import 'package:mockito/mockito.dart'; // Added for Mockito
+import 'package:circuit_stem/common/logger.dart'; // Added for MockLogger
 
 // Mocks
-class MockAudioService extends AudioService {
-  @override
-  Future<void> play(String sound) async {}
-  
-  Future<void> stopAll() async {}
+class MockAudioService extends Mock implements AudioService {}
 
-  Future<void> dispose() async {}
-}
+class MockLogger extends Mock implements Logger {}
+
+class MockLevelManager extends Mock implements LevelManagerNotifier {}
 
 class MockAnimationScheduler extends AnimationScheduler {
   void schedule(void Function() callback) {}
-  
+
   void cancel() {}
 }
 
@@ -33,7 +33,7 @@ void main() {
         audioService: MockAudioService(),
         animationScheduler: MockAnimationScheduler(),
         levelManager: MockLevelManager(),
-        logger: MockLogger(),
+        // Removed logger: MockLogger(),
       );
       testLevel = const LevelDefinition(
         id: 'test_level',

@@ -1,4 +1,3 @@
-
 import '../entities/goal.dart';
 import '../entities/grid.dart';
 

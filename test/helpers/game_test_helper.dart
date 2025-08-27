@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,7 +11,8 @@ class GameTestHelper {
   static const double cellSize = 64.0;
 
   // --- State Querying Methods ---
-  static ComponentModel findComponentById(ProviderContainer container, String id) {
+  static ComponentModel findComponentById(
+      ProviderContainer container, String id) {
     final state = container.read(gameEngineProvider);
     return state.grid.components.firstWhere((c) => c.id == id, orElse: () {
       throw StateError('Component with id "$id" not found.');
@@ -28,14 +28,16 @@ class GameTestHelper {
   static bool isSwitchClosed(ProviderContainer container, String componentId) {
     final component = findComponentById(container, componentId);
     assert(component.type == 'switch'); // Changed to component.type
-    return component.state['isClosed'] as bool? ?? false; // Changed to state['isClosed']
+    return component.state['isClosed'] as bool? ??
+        false; // Changed to state['isClosed']
   }
 
   static bool isTimerActive(ProviderContainer container, String componentId) {
     final component = findComponentById(container, componentId);
     assert(component.type == 'timer'); // Changed to component.type
     // Assumes the timer's active state is stored in the 'active' key.
-    return component.state['isActive'] as bool? ?? false; // Changed to state['isActive']
+    return component.state['isActive'] as bool? ??
+        false; // Changed to state['isActive']
   }
 
   static bool isGameInWinState(ProviderContainer container) {
@@ -54,7 +56,11 @@ class GameTestHelper {
   }
 
   static Future<void> dragComponentToGrid(
-      WidgetTester tester, ProviderContainer container, String componentId, int toRow, int toCol) async {
+      WidgetTester tester,
+      ProviderContainer container,
+      String componentId,
+      int toRow,
+      int toCol) async {
     final component = findComponentById(container, componentId);
     final from = gridToPixel(component.r, component.c); // Changed to r, c
     final to = gridToPixel(toRow, toCol);
@@ -69,9 +75,10 @@ class GameTestHelper {
   }
 
   // --- Audio Verification ---
-  static void expectSoundPlayed(MockAudioService audioService, String expectedSound) {
+  static void expectSoundPlayed(
+      MockAudioService audioService, String expectedSound) {
     expect(audioService.playedSounds, contains(expectedSound),
-        reason: "Expected sound '$expectedSound' was not played. Sounds played: ${audioService.playedSounds}");
+        reason:
+            "Expected sound '$expectedSound' was not played. Sounds played: ${audioService.playedSounds}");
   }
 }
-

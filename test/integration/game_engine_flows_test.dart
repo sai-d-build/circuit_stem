@@ -1,7 +1,5 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:circuit_stem/application/game_engine_notifier.dart';
-import 'package:circuit_stem/application/game_engine_state.dart';
 import 'package:circuit_stem/application/use_cases/component_action.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
 import 'package:circuit_stem/domain/entities/level_definition.dart';
@@ -12,7 +10,9 @@ import 'package:circuit_stem/common/logger.dart';
 import 'package:mockito/mockito.dart';
 
 class MockAudioService extends Mock implements AudioService {}
+
 class MockLogger extends Mock implements Logger {}
+
 class MockLevelManager extends Mock implements LevelManagerNotifier {}
 
 void main() {
@@ -32,15 +32,34 @@ void main() {
         cols: 5,
         blockedCells: [],
         initialComponents: [
-          ComponentModel(id: 'battery', type: 'battery', r: 0, c: 0, terminals: [
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power),
-          ]),
+          ComponentModel(
+              id: 'battery',
+              type: 'battery',
+              r: 0,
+              c: 0,
+              terminals: [
+                TerminalSpec(
+                    offset: CellOffset(0, 0),
+                    direction: Dir.south,
+                    type: TerminalType.power),
+              ]),
         ],
         paletteComponents: [
-          ComponentModel(id: 'wire_palette', type: 'wire', r: 0, c: 0, terminals: [
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.north, type: TerminalType.power),
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power),
-          ]),
+          ComponentModel(
+              id: 'wire_palette',
+              type: 'wire',
+              r: 0,
+              c: 0,
+              terminals: [
+                TerminalSpec(
+                    offset: CellOffset(0, 0),
+                    direction: Dir.north,
+                    type: TerminalType.power),
+                TerminalSpec(
+                    offset: CellOffset(0, 0),
+                    direction: Dir.south,
+                    type: TerminalType.power),
+              ]),
         ],
         goals: [],
         hints: [],
@@ -50,7 +69,6 @@ void main() {
         audioService: MockAudioService(),
         animationScheduler: AnimationScheduler(),
         levelManager: MockLevelManager(),
-        logger: MockLogger(),
       );
 
       notifier.loadLevel(testLevel);
@@ -67,7 +85,8 @@ void main() {
       await notifier.executeAction(createAction);
       final stateAfterCreate = notifier.state;
 
-      final wireId = notifier.state.grid.components.firstWhere((c) => c.type == 'wire').id;
+      final wireId =
+          notifier.state.grid.components.firstWhere((c) => c.type == 'wire').id;
       final moveAction = MoveComponentAction(
         componentId: wireId,
         newRow: 2,

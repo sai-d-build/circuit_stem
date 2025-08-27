@@ -42,7 +42,9 @@ class Grid with _$Grid {
     final newComponents = components.map((c) {
       return c.id == component.id ? component : c;
     }).toList();
-    Logger.log('Grid.copyWithUpdatedComponent: Component ''${component.id}'' updated. New state: ${component.state}');
+    Logger.log('Grid.copyWithUpdatedComponent: Component '
+        '${component.id}'
+        ' updated. New state: ${component.state}');
     return copyWith(components: newComponents);
   }
 

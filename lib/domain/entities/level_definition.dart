@@ -7,7 +7,6 @@ import '../../application/services/component_registry.dart';
 import '../../common/logger.dart'; // Import Logger
 
 part 'level_definition.freezed.dart';
- 
 
 @freezed
 class LevelDefinition with _$LevelDefinition {
@@ -33,12 +32,14 @@ class LevelDefinition with _$LevelDefinition {
     final initialComponents = (json['initialComponents'] as List<dynamic>)
         .map((e) => ComponentRegistry.createFromJson(e as Map<String, dynamic>))
         .toList();
-    Logger.log('LevelDefinition.fromJson: Parsed initialComponents: $initialComponents'); // Add logger
-    
+    Logger.log(
+        'LevelDefinition.fromJson: Parsed initialComponents: $initialComponents'); // Add logger
+
     final paletteComponents = (json['paletteComponents'] as List<dynamic>)
         .map((e) => ComponentRegistry.createFromJson(e as Map<String, dynamic>))
         .toList();
-    Logger.log('LevelDefinition.fromJson: Parsed paletteComponents: $paletteComponents'); // Add logger
+    Logger.log(
+        'LevelDefinition.fromJson: Parsed paletteComponents: $paletteComponents'); // Add logger
 
     return _$LevelDefinitionImpl(
       id: json['id'] as String,

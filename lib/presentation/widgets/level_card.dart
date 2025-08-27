@@ -6,7 +6,7 @@ class LevelCard extends StatefulWidget {
   final bool isUnlocked;
   final bool isCompleted;
   final VoidCallback? onTap;
-  
+
   const LevelCard({
     super.key,
     required this.level,
@@ -19,10 +19,10 @@ class LevelCard extends StatefulWidget {
   State<LevelCard> createState() => _LevelCardState();
 }
 
-class _LevelCardState extends State<LevelCard> 
+class _LevelCardState extends State<LevelCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _hoverController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -31,7 +31,7 @@ class _LevelCardState extends State<LevelCard>
       vsync: this,
     );
   }
-  
+
   @override
   void dispose() {
     _hoverController.dispose();
@@ -42,9 +42,11 @@ class _LevelCardState extends State<LevelCard>
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.onTap,
-      onTapDown: widget.onTap != null ? (_) => _hoverController.forward() : null,
+      onTapDown:
+          widget.onTap != null ? (_) => _hoverController.forward() : null,
       onTapUp: widget.onTap != null ? (_) => _hoverController.reverse() : null,
-      onTapCancel: widget.onTap != null ? () => _hoverController.reverse() : null,
+      onTapCancel:
+          widget.onTap != null ? () => _hoverController.reverse() : null,
       child: AnimatedBuilder(
         animation: _hoverController,
         builder: (context, child) {
@@ -55,10 +57,10 @@ class _LevelCardState extends State<LevelCard>
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: widget.isUnlocked 
+                  color: widget.isUnlocked
                       ? Theme.of(context).colorScheme.surface
                       : Theme.of(context).colorScheme.surface.withAlpha(128),
-                  border: widget.isCompleted 
+                  border: widget.isCompleted
                       ? Border.all(
                           color: Theme.of(context).colorScheme.primary,
                           width: 2,
@@ -74,17 +76,26 @@ class _LevelCardState extends State<LevelCard>
                         children: [
                           CircleAvatar(
                             radius: 24,
-                            backgroundColor: widget.isUnlocked 
+                            backgroundColor: widget.isUnlocked
                                 ? Theme.of(context).colorScheme.primaryContainer
-                                : Theme.of(context).colorScheme.surfaceContainerHighest,
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
                             child: Text(
                               '${widget.level.levelNumber}',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: widget.isUnlocked 
-                                    ? Theme.of(context).colorScheme.onPrimaryContainer
-                                    : Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: widget.isUnlocked
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                  ),
                             ),
                           ),
                           if (widget.isCompleted)
@@ -100,7 +111,8 @@ class _LevelCardState extends State<LevelCard>
                                 child: Icon(
                                   Icons.check,
                                   size: 16,
-                                  color: Theme.of(context).colorScheme.onPrimary,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
                                 ),
                               ),
                             ),
@@ -113,7 +125,9 @@ class _LevelCardState extends State<LevelCard>
                                 ),
                                 child: Icon(
                                   Icons.lock,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -123,11 +137,13 @@ class _LevelCardState extends State<LevelCard>
                       Text(
                         widget.level.title,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: widget.isUnlocked 
-                              ? Theme.of(context).colorScheme.onSurface
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                              fontWeight: FontWeight.bold,
+                              color: widget.isUnlocked
+                                  ? Theme.of(context).colorScheme.onSurface
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                            ),
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -136,10 +152,15 @@ class _LevelCardState extends State<LevelCard>
                       Text(
                         widget.level.description,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: widget.isUnlocked 
-                              ? Theme.of(context).colorScheme.onSurfaceVariant
-                              : Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(153),
-                        ),
+                              color: widget.isUnlocked
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withAlpha(153),
+                            ),
                         textAlign: TextAlign.center,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,

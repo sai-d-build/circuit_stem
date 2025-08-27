@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -17,7 +16,8 @@ import '../common/logger.dart';
 class WireStraightDrawingBehavior implements DrawingBehavior {
   const WireStraightDrawingBehavior();
   @override
-  void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
+  void draw(Canvas canvas, Size size, ComponentModel component,
+      AssetManagerNotifier assets) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0;
@@ -25,7 +25,9 @@ class WireStraightDrawingBehavior implements DrawingBehavior {
     final isDark = assets.isDark;
     final wireColor = component.isPowered
         ? (isDark ? DarkModeColors.wirePowered : LightModeColors.wirePowered)
-        : (isDark ? DarkModeColors.wireUnpowered : LightModeColors.wireUnpowered);
+        : (isDark
+            ? DarkModeColors.wireUnpowered
+            : LightModeColors.wireUnpowered);
 
     paint.color = wireColor;
 
@@ -58,8 +60,10 @@ class WireLogicBehavior implements LogicBehavior {
 
 void registerWireStraight() {
   Logger.log('registerWireStraight() called.');
-  registerBehavior<WireStraightDrawingBehavior>(() => const WireStraightDrawingBehavior());
-  registerBehavior<WireLogicBehavior>(() => const WireLogicBehavior()); // Can be shared
+  registerBehavior<WireStraightDrawingBehavior>(
+      () => const WireStraightDrawingBehavior());
+  registerBehavior<WireLogicBehavior>(
+      () => const WireLogicBehavior()); // Can be shared
   registerBehavior<MoveBehavior>(() => const MoveBehavior());
 
   ComponentRegistry.register(
@@ -71,13 +75,13 @@ void registerWireStraight() {
   Logger.log('registerWireStraight() completed.');
 }
 
-
 // --- Corner Wire --- //
 
 class WireCornerDrawingBehavior implements DrawingBehavior {
   const WireCornerDrawingBehavior();
   @override
-  void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
+  void draw(Canvas canvas, Size size, ComponentModel component,
+      AssetManagerNotifier assets) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0;
@@ -85,7 +89,9 @@ class WireCornerDrawingBehavior implements DrawingBehavior {
     final isDark = assets.isDark;
     final wireColor = component.isPowered
         ? (isDark ? DarkModeColors.wirePowered : LightModeColors.wirePowered)
-        : (isDark ? DarkModeColors.wireUnpowered : LightModeColors.wireUnpowered);
+        : (isDark
+            ? DarkModeColors.wireUnpowered
+            : LightModeColors.wireUnpowered);
 
     paint.color = wireColor;
 
@@ -107,25 +113,30 @@ class WireCornerDrawingBehavior implements DrawingBehavior {
 
 void registerWireCorner() {
   Logger.log('registerWireCorner() called.');
-  registerBehavior<WireCornerDrawingBehavior>(() => const WireCornerDrawingBehavior());
+  registerBehavior<WireCornerDrawingBehavior>(
+      () => const WireCornerDrawingBehavior());
   registerBehavior<MoveBehavior>(() => const MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.WireCorner',
     displayName: 'Corner Wire',
-    behaviors: [WireCornerDrawingBehavior, WireLogicBehavior, MoveBehavior], // Re-use same logic behavior
+    behaviors: [
+      WireCornerDrawingBehavior,
+      WireLogicBehavior,
+      MoveBehavior
+    ], // Re-use same logic behavior
     isDraggable: true,
   );
   Logger.log('registerWireCorner() completed.');
 }
-
 
 // --- T-Junction Wire --- //
 
 class WireTDrawingBehavior implements DrawingBehavior {
   const WireTDrawingBehavior();
   @override
-  void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
+  void draw(Canvas canvas, Size size, ComponentModel component,
+      AssetManagerNotifier assets) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0;
@@ -133,7 +144,9 @@ class WireTDrawingBehavior implements DrawingBehavior {
     final isDark = assets.isDark;
     final wireColor = component.isPowered
         ? (isDark ? DarkModeColors.wirePowered : LightModeColors.wirePowered)
-        : (isDark ? DarkModeColors.wireUnpowered : LightModeColors.wireUnpowered);
+        : (isDark
+            ? DarkModeColors.wireUnpowered
+            : LightModeColors.wireUnpowered);
 
     paint.color = wireColor;
 
@@ -146,7 +159,8 @@ class WireTDrawingBehavior implements DrawingBehavior {
     canvas.translate(-center.dx, -center.dx);
 
     // Draw T-junction
-    canvas.drawLine(Offset(center.dx, 0), Offset(center.dx, size.height), paint);
+    canvas.drawLine(
+        Offset(center.dx, 0), Offset(center.dx, size.height), paint);
     canvas.drawLine(center, Offset(size.width, center.dy), paint);
 
     canvas.restore();
@@ -161,19 +175,23 @@ void registerWireT() {
   ComponentRegistry.register(
     type: 'Component.WireT',
     displayName: 'T-Wire',
-    behaviors: [WireTDrawingBehavior, WireLogicBehavior, MoveBehavior], // Re-use same logic behavior
+    behaviors: [
+      WireTDrawingBehavior,
+      WireLogicBehavior,
+      MoveBehavior
+    ], // Re-use same logic behavior
     isDraggable: true,
   );
   Logger.log('registerWireT() completed.');
 }
-
 
 // --- Cross Wire --- //
 
 class CrossWireDrawingBehavior implements DrawingBehavior {
   const CrossWireDrawingBehavior();
   @override
-  void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
+  void draw(Canvas canvas, Size size, ComponentModel component,
+      AssetManagerNotifier assets) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0;
@@ -181,7 +199,9 @@ class CrossWireDrawingBehavior implements DrawingBehavior {
     final isDark = assets.isDark;
     final wireColor = component.isPowered
         ? (isDark ? DarkModeColors.wirePowered : LightModeColors.wirePowered)
-        : (isDark ? DarkModeColors.wireUnpowered : LightModeColors.wireUnpowered);
+        : (isDark
+            ? DarkModeColors.wireUnpowered
+            : LightModeColors.wireUnpowered);
 
     paint.color = wireColor;
 
@@ -208,15 +228,19 @@ class CrossWireDrawingBehavior implements DrawingBehavior {
 
 void registerCrossWire() {
   Logger.log('registerCrossWire() called.');
-  registerBehavior<CrossWireDrawingBehavior>(() => const CrossWireDrawingBehavior());
+  registerBehavior<CrossWireDrawingBehavior>(
+      () => const CrossWireDrawingBehavior());
   registerBehavior<MoveBehavior>(() => const MoveBehavior());
 
   ComponentRegistry.register(
     type: 'Component.CrossWire',
     displayName: 'Cross Wire',
-    behaviors: [CrossWireDrawingBehavior, WireLogicBehavior, MoveBehavior], // Re-use same logic behavior
+    behaviors: [
+      CrossWireDrawingBehavior,
+      WireLogicBehavior,
+      MoveBehavior
+    ], // Re-use same logic behavior
     isDraggable: true,
   );
   Logger.log('registerCrossWire() completed.');
 }
-

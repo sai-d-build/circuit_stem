@@ -55,6 +55,7 @@ void main() {
       notifier = GameEngineNotifier(
         audioService: mockAudioService,
         animationScheduler: mockAnimationScheduler,
+        levelManager: levelManager,
       );
     });
 
@@ -69,7 +70,7 @@ void main() {
 
       // Simulate tap, then explicitly update component state
       await LevelTestHelper.tapComponent(tester, notifier, 'switch1');
-      
+
       // Create a new component model with the toggled state
       final toggledSwitch = switchComponent.copyWith(
         state: {...switchComponent.state, 'closed': !initialClosed},
@@ -95,7 +96,8 @@ void main() {
       notifier.inputManager.onComponentMoved?.call(timer.id, 2, 3);
       await tester.pumpAndSettle();
 
-      final updated = LevelTestHelper.findComponentById(notifier.state, 'timer1');
+      final updated =
+          LevelTestHelper.findComponentById(notifier.state, 'timer1');
       expect(updated!.r, 2);
       expect(updated.c, 3);
     });

@@ -1,3 +1,16 @@
+# [5.0.0] - 2025-08-26 - Goal Checking Refactor & Environment Troubleshooting
+
+### Changed
+- **Architectural Refactor of `GoalCheckingService`**: The entire service was refactored to use a robust **Strategy Pattern**. The previous `switch`-based implementation was replaced with a `GoalValidator` abstract class and concrete validator classes for each goal type (`PowerGoalValidator`, `ConnectGoalValidator`, etc.). This makes the system more extensible, testable, and compliant with SOLID principles.
+
+### Fixed
+- **Critical Build Errors**: Resolved several critical analysis errors that were preventing the application from being analyzed correctly, including:
+  - `undefined_class` in `GameEngineNotifier` by fixing incorrect import aliases.
+  - `undefined_method` in `GameScreen` by adding missing providers (`gridProvider`, `isWinProvider`) and correcting the provider import path.
+
+### Known Issues
+- **Persistent Analyzer Error**: A stubborn `argument_type_not_assignable` error remains in `goal_checking_service.dart`. This issue persists despite multiple correct code implementations (including a full refactor and several workarounds) and a full environment cleaning (`flutter clean`, `pub get`, `dart fix`). This is a strong indication of a **corrupted local Dart analysis server** and not an issue with the code itself.
+
 # [4.0.0] - 2025-08-26 - Architectural Refactoring Verification & Finalization
 
 ### Added

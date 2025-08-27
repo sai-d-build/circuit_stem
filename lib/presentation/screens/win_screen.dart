@@ -4,14 +4,13 @@ class WinScreen extends StatelessWidget {
   final String levelId;
   final VoidCallback onNextLevel;
   final VoidCallback onLevelSelect;
-  
-  const WinScreen({
-    super.key, 
-    required this.levelId,
-    required this.onNextLevel,
-    required this.onLevelSelect
-  });
-  
+
+  const WinScreen(
+      {super.key,
+      required this.levelId,
+      required this.onNextLevel,
+      required this.onLevelSelect});
+
   @override
   Widget build(BuildContext context) {
     return Container(

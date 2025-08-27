@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../domain/entities/level_definition.dart';
 import '../../domain/entities/level_metadata.dart';
 import '../render_state.dart';
 import '../../infrastructure/rendering/asset_manager.dart';

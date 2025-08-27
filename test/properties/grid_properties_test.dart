@@ -1,9 +1,7 @@
-
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:circuit_stem/application/game_engine_notifier.dart';
-import 'package:circuit_stem/application/game_engine_state.dart';
 import 'package:circuit_stem/application/use_cases/component_action.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
 import 'package:circuit_stem/domain/entities/level_definition.dart';
@@ -14,7 +12,9 @@ import 'package:circuit_stem/common/logger.dart';
 import 'package:mockito/mockito.dart';
 
 class MockAudioService extends Mock implements AudioService {}
+
 class MockLogger extends Mock implements Logger {}
+
 class MockLevelManager extends Mock implements LevelManagerNotifier {}
 
 void main() {
@@ -36,8 +36,14 @@ void main() {
         blockedCells: [],
         initialComponents: [],
         paletteComponents: [
-          ComponentModel(id: 'wire_palette', type: 'wire', r: 0, c: 0, terminals: []),
-          ComponentModel(id: 'resistor_palette', type: 'resistor', r: 0, c: 0, terminals: []),
+          ComponentModel(
+              id: 'wire_palette', type: 'wire', r: 0, c: 0, terminals: []),
+          ComponentModel(
+              id: 'resistor_palette',
+              type: 'resistor',
+              r: 0,
+              c: 0,
+              terminals: []),
         ],
         goals: [],
         hints: [],
@@ -47,13 +53,13 @@ void main() {
         audioService: MockAudioService(),
         animationScheduler: AnimationScheduler(),
         levelManager: MockLevelManager(),
-        logger: MockLogger(),
       );
 
       notifier.loadLevel(testLevel);
     });
 
-    test('Property: All components must be within the grid boundaries', () async {
+    test('Property: All components must be within the grid boundaries',
+        () async {
       // Arrange
       const numberOfActions = 100;
 
@@ -62,7 +68,8 @@ void main() {
         if (shouldCreate || notifier.state.grid.components.isEmpty) {
           // Create a new component
           final paletteComponents = notifier.state.paletteComponents;
-          final template = paletteComponents[random.nextInt(paletteComponents.length)];
+          final template =
+              paletteComponents[random.nextInt(paletteComponents.length)];
           final row = random.nextInt(testLevel.rows);
           final col = random.nextInt(testLevel.cols);
           final action = CreateComponentFromTemplateAction(

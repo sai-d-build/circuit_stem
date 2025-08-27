@@ -52,7 +52,8 @@ class SvgCaptureState extends State<SvgCapture> {
     widget.onImagesCaptured(_images);
   }
 
-  Future<ui.Image?> _captureWidget(String key, {required double pixelRatio}) async {
+  Future<ui.Image?> _captureWidget(String key,
+      {required double pixelRatio}) async {
     try {
       final gKey = _keys[key]!;
       final context = gKey.currentContext;

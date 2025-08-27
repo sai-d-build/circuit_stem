@@ -55,7 +55,8 @@ void main() async {
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
       ],
-      child: Initializer(svgProcessor: svgProcessor), // Pass processor to Initializer
+      child: Initializer(
+          svgProcessor: svgProcessor), // Pass processor to Initializer
     ),
   );
   Logger.log('runApp() called');
@@ -81,6 +82,10 @@ class InitializerState extends ConsumerState<Initializer> {
   }
 
   Future<void> _initializeAssets() async {
+    // Initialize LevelManager
+    setState(() => _status = 'Loading levels...');
+    await ref.read(levelManagerProvider.notifier).init();
+
     final assetManager = ref.read(assetManagerProvider.notifier);
     await assetManager.loadAllAssets(); // Load non-svg assets
 
@@ -89,14 +94,16 @@ class InitializerState extends ConsumerState<Initializer> {
     try {
       setState(() => _status = 'Processing SVGs...');
       final images = await widget.svgProcessor.processSvgs(svgPaths);
-      
+
       assetManager.setSvgImages(images);
-      Logger.log('SVG processing complete. ${images.length} images set in AssetManager.');
+      Logger.log(
+          'SVG processing complete. ${images.length} images set in AssetManager.');
 
       setState(() => _ready = true);
     } catch (e) {
       Logger.log('Error during SVG processing: $e');
-      setState(() => _ready = true); // allow app to continue even if svg step failed
+      setState(
+          () => _ready = true); // allow app to continue even if svg step failed
     }
   }
 

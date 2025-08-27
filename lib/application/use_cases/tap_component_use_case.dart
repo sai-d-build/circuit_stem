@@ -5,14 +5,17 @@ import 'package:circuit_stem/application/services/goal_checking_service.dart';
 import 'package:circuit_stem/domain/behaviors/behavior.dart';
 import 'package:circuit_stem/application/game_context.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
+import 'base_use_case.dart'; // Import base_use_case.dart
 
-class TapComponentUseCase {
+class TapComponentUseCase extends UseCase<TapComponentAction> {
   final PowerSimulationService _simulation;
   final GoalCheckingService _goalChecker;
 
   const TapComponentUseCase(this._simulation, this._goalChecker);
 
-  GameEngineState execute(GameEngineState currentState, TapComponentAction action) {
+  @override
+  Future<GameEngineState> executeInternal(
+      GameEngineState currentState, TapComponentAction action) async {
     final component = currentState.grid.componentsById[action.componentId];
 
     if (component == null) {
@@ -32,9 +35,11 @@ class TapComponentUseCase {
     }
 
     if (updatedComponent != null) {
-      var newGrid = currentState.grid.copyWithUpdatedComponent(updatedComponent);
+      var newGrid =
+          currentState.grid.copyWithUpdatedComponent(updatedComponent);
       newGrid = _simulation.simulatePowerFlow(newGrid);
-      final isWin = _goalChecker.isLevelComplete(newGrid, currentState.currentLevel!); // Check win condition
+      final isWin = _goalChecker.isLevelComplete(
+          newGrid, currentState.currentLevel!); // Check win condition
       return currentState.copyWith(grid: newGrid, isWin: isWin);
     }
 

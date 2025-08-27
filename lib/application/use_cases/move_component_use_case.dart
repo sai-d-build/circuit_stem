@@ -1,23 +1,10 @@
-import 'package:circuit_stem/domain/entities/grid.dart';
 import 'package:circuit_stem/application/game_context.dart';
 import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
-import '../services/power_simulation_service.dart';
-import '../../common/logger.dart';
-import '../game_engine_state.dart';
+import 'package:circuit_stem/application/services/power_simulation_service.dart';
+import 'package:circuit_stem/common/logger.dart';
+import 'package:circuit_stem/application/game_engine_state.dart';
 import 'component_action.dart';
 import 'base_use_case.dart';
-
-class MoveComponentAction extends ComponentAction {
-  final String componentId;
-  final int newRow;
-  final int newCol;
-
-  MoveComponentAction({
-    required this.componentId,
-    required this.newRow,
-    required this.newCol,
-  });
-}
 
 class MoveComponentUseCase extends UseCase<MoveComponentAction> {
   final PowerSimulationService simulation;
@@ -25,10 +12,12 @@ class MoveComponentUseCase extends UseCase<MoveComponentAction> {
   MoveComponentUseCase(this.simulation);
 
   @override
-  GameEngineState executeInternal(GameEngineState state, MoveComponentAction action) {
+  Future<GameEngineState> executeInternal(
+      GameEngineState state, MoveComponentAction action) async {
     final comp = state.grid.componentsById[action.componentId];
     if (comp == null) {
-      Logger.log('[MoveComponentUseCase] Component with id ${action.componentId} not found.');
+      Logger.log(
+          '[MoveComponentUseCase] Component with id ${action.componentId} not found.');
       return state; // unchanged
     }
 
@@ -36,7 +25,8 @@ class MoveComponentUseCase extends UseCase<MoveComponentAction> {
 
     final moveBehavior = comp.behaviors.whereType<MoveBehavior>().firstOrNull;
     if (moveBehavior == null) {
-      Logger.log('❌ MoveComponentUseCase: MoveBehavior not found for ${comp.id}');
+      Logger.log(
+          '❌ MoveComponentUseCase: MoveBehavior not found for ${comp.id}');
       return state;
     }
 

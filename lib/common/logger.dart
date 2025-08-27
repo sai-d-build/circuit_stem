@@ -10,14 +10,14 @@ class Logger {
   }
 
   static void info(String message, Map<String, dynamic> metadata) {
-     print('[INFO] $message');
+    print('[INFO] $message');
   }
 
-   static void warning(String message, Map<String, String> map) {
+  static void warning(String message, Map<String, String> map) {
     print('[WARNING] $message');
   }
 
-   static void error(String message, Map<String, String> map) {
+  static void error(String message, Map<String, String> map) {
     print('[ERROR] $message');
   }
 }

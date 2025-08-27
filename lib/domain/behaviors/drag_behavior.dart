@@ -1,11 +1,9 @@
-
 // lib/behaviors/drag_behavior.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/services/providers.dart';
 import '../entities/component.dart';
 import '../../presentation/utils/coordinate_translator.dart';
-
 
 class DragBehavior {
   final WidgetRef ref;
@@ -27,4 +25,3 @@ class DragBehavior {
     }
   }
 }
-

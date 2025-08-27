@@ -8,14 +8,17 @@ import 'svg_processor_base.dart';
 class SvgProcessor implements SvgProcessorBase {
   @override
   Future<Map<String, ui.Image>> processSvgs(List<String> assetPaths) async {
-    Logger.log('SvgProcessor: Starting SVG processing for ${assetPaths.length} assets...');
+    Logger.log(
+        'SvgProcessor: Starting SVG processing for ${assetPaths.length} assets...');
     Logger.log('SvgProcessor: Asset paths: $assetPaths');
     final Map<String, ui.Image> images = {};
     for (final path in assetPaths) {
       try {
         final svgString = await rootBundle.loadString(path);
-        final pictureInfo = await vg.loadPicture(SvgStringLoader(svgString), null);
-        final image = await pictureInfo.picture.toImage(64, 64); // Assuming a default size
+        final pictureInfo =
+            await vg.loadPicture(SvgStringLoader(svgString), null);
+        final image = await pictureInfo.picture
+            .toImage(64, 64); // Assuming a default size
         pictureInfo.picture.dispose();
         images[path] = image;
         Logger.log('SvgProcessor: Successfully processed $path');

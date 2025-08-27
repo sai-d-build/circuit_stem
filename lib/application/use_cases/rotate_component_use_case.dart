@@ -1,14 +1,13 @@
-
-import '../core/result.dart';
 import '../game_engine_state.dart';
 import 'base_use_case.dart';
 import 'component_action.dart';
 
-class RotateComponentUseCase extends UseCase<RotateComponentAction, GameEngineState> {
+class RotateComponentUseCase extends UseCase<RotateComponentAction> {
   const RotateComponentUseCase();
 
   @override
-  GameEngineState executeInternal(GameEngineState state, RotateComponentAction action) {
+  Future<GameEngineState> executeInternal(
+      GameEngineState state, RotateComponentAction action) async {
     final component = state.grid.componentsById[action.componentId];
     if (component == null) {
       throw Exception('Component not found');
@@ -16,7 +15,7 @@ class RotateComponentUseCase extends UseCase<RotateComponentAction, GameEngineSt
 
     final updatedComponent = component.copyWith(rotation: action.rotation);
     final newGrid = state.grid.copyWithUpdatedComponent(updatedComponent);
-    
+
     return state.copyWith(grid: newGrid);
   }
 }

@@ -11,28 +11,28 @@ class MainMenuScreen extends StatefulWidget {
   State<MainMenuScreen> createState() => _MainMenuScreenState();
 }
 
-class _MainMenuScreenState extends State<MainMenuScreen> 
+class _MainMenuScreenState extends State<MainMenuScreen>
     with TickerProviderStateMixin {
   late AnimationController _logoController;
   late AnimationController _buttonController;
   late Animation<double> _logoRotation;
   late Animation<double> _logoScale;
   late Animation<Offset> _buttonSlide;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     _logoController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
-    
+
     _buttonController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    
+
     _logoRotation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -40,7 +40,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
       parent: _logoController,
       curve: const Interval(0.0, 0.7, curve: Curves.elasticOut),
     ));
-    
+
     _logoScale = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -48,7 +48,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
       parent: _logoController,
       curve: const Interval(0.0, 0.8, curve: Curves.elasticOut),
     ));
-    
+
     _buttonSlide = Tween<Offset>(
       begin: const Offset(0, 2),
       end: Offset.zero,
@@ -56,24 +56,24 @@ class _MainMenuScreenState extends State<MainMenuScreen>
       parent: _buttonController,
       curve: Curves.elasticOut,
     ));
-    
+
     // Start animations
     Future.delayed(const Duration(milliseconds: 500), () {
       _logoController.forward();
     });
-    
+
     Future.delayed(const Duration(milliseconds: 1000), () {
       _buttonController.forward();
     });
   }
-  
+
   @override
   void dispose() {
     _logoController.dispose();
     _buttonController.dispose();
     super.dispose();
   }
-  
+
   void _navigateToLevelSelection() {
     Logger.log('MainMenuScreen: Navigating to LevelSelectScreen...');
     Navigator.of(context).push(
@@ -111,7 +111,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Spacer(),
-                
+
                 // Logo and title
                 AnimatedBuilder(
                   animation: _logoController,
@@ -128,7 +128,10 @@ class _MainMenuScreenState extends State<MainMenuScreen>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Theme.of(context).colorScheme.primary.withAlpha(77),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withAlpha(77),
                                 blurRadius: 20,
                                 spreadRadius: 5,
                               ),
@@ -144,37 +147,43 @@ class _MainMenuScreenState extends State<MainMenuScreen>
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 Text(
                   'Circuit Kids',
                   style: Theme.of(context).textTheme.appTitle?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 Text(
                   'Circuit Simulation Game',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withAlpha(204),
-                  ),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withAlpha(204),
+                      ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 Text(
                   'Build circuits, power bulbs, and learn electronics\nthrough interactive gameplay!',
-                  style: Theme.of(context).textTheme.bodyTextSecondary?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyTextSecondary
+                      ?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const Spacer(),
-                
+
                 // Buttons
                 SlideTransition(
                   position: _buttonSlide,
@@ -199,14 +208,14 @@ class _MainMenuScreenState extends State<MainMenuScreen>
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            foregroundColor:
+                                Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                       ),
-                      
                       const SizedBox(height: 16),
-                      
                       SizedBox(
                         width: double.infinity,
                         height: 56,
@@ -233,9 +242,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
                           ),
                         ),
                       ),
-                      
                       const SizedBox(height: 16),
-                      
                       SizedBox(
                         width: double.infinity,
                         height: 56,
@@ -245,13 +252,16 @@ class _MainMenuScreenState extends State<MainMenuScreen>
                           },
                           icon: Icon(
                             Icons.info_outline,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           label: Text(
                             'About',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -259,7 +269,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
               ],
             ),
@@ -268,7 +278,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
       ),
     );
   }
-  
+
   void _showHowToPlay(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -287,7 +297,10 @@ class _MainMenuScreenState extends State<MainMenuScreen>
               height: 4,
               margin: const EdgeInsets.only(top: 8),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(77),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurfaceVariant
+                    .withAlpha(77),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -300,42 +313,36 @@ class _MainMenuScreenState extends State<MainMenuScreen>
                     style: Theme.of(context).textTheme.appTitle,
                   ),
                   const SizedBox(height: 24),
-                  
                   _buildInstructionItem(
                     context,
                     '🔋',
                     'Build Circuits',
                     'Drag components from the palette and place them on the grid to create electrical circuits.',
                   ),
-                  
                   _buildInstructionItem(
                     context,
                     '💡',
                     'Power Components',
                     'Connect batteries to bulbs using wires to complete circuits and power up components.',
                   ),
-                  
                   _buildInstructionItem(
                     context,
                     '🔄',
                     'Interact with Components',
                     'Tap switches to toggle them on/off. Tap other components to rotate their orientation.',
                   ),
-                  
                   _buildInstructionItem(
                     context,
                     '⚠️',
                     'Avoid Short Circuits',
                     'Be careful not to create short circuits! The game will warn you if detected.',
                   ),
-                  
                   _buildInstructionItem(
                     context,
                     '🎯',
                     'Complete Objectives',
                     'Each level has specific goals - usually powering certain bulbs or components.',
                   ),
-                  
                   _buildInstructionItem(
                     context,
                     '🏆',
@@ -350,8 +357,9 @@ class _MainMenuScreenState extends State<MainMenuScreen>
       ),
     );
   }
-  
-  Widget _buildInstructionItem(BuildContext context, String emoji, String title, String description) {
+
+  Widget _buildInstructionItem(
+      BuildContext context, String emoji, String title, String description) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Row(
@@ -389,7 +397,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
       ),
     );
   }
-  
+
   void _showAbout(BuildContext context) {
     showDialog(
       context: context,

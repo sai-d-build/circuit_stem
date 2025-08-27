@@ -8,7 +8,7 @@ class ComponentPalette extends StatelessWidget {
   final List<ComponentModel> availableComponents;
   final Function(ComponentModel component) onComponentSelected;
   final ComponentModel? selectedComponent;
-  
+
   const ComponentPalette({
     super.key,
     required this.availableComponents,
@@ -18,10 +18,12 @@ class ComponentPalette extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Logger.log('ComponentPalette: Building with ${availableComponents.length} available components: $availableComponents');
+    Logger.log(
+        'ComponentPalette: Building with ${availableComponents.length} available components: $availableComponents');
     final componentCounts = <String, int>{};
     for (final component in availableComponents) {
-      componentCounts[component.type] = (componentCounts[component.type] ?? 0) + 1;
+      componentCounts[component.type] =
+          (componentCounts[component.type] ?? 0) + 1;
     }
 
     return Container(
@@ -44,8 +46,8 @@ class ComponentPalette extends StatelessWidget {
           Text(
             '🧩 Component Palette',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 12),
           if (availableComponents.isEmpty)
@@ -54,8 +56,8 @@ class ComponentPalette extends StatelessWidget {
               child: Text(
                 'All components have been placed! 🎉',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.tertiary,
-                ),
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
               ),
             )
           else
@@ -68,7 +70,7 @@ class ComponentPalette extends StatelessWidget {
                 final component = availableComponents.firstWhere(
                   (c) => c.type == componentType,
                 );
-                
+
                 return ComponentPaletteItem(
                   component: component,
                   count: count,
@@ -88,7 +90,7 @@ class ComponentPaletteItem extends StatelessWidget {
   final int count;
   final bool isSelected;
   final VoidCallback onTap;
-  
+
   const ComponentPaletteItem({
     super.key,
     required this.component,
@@ -127,17 +129,17 @@ class ComponentPaletteItem extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildComponentItem(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isSelected 
+        color: isSelected
             ? Theme.of(context).colorScheme.primaryContainer
             : Theme.of(context).colorScheme.surface,
         border: Border.all(
-          color: isSelected 
+          color: isSelected
               ? Theme.of(context).colorScheme.primary
               : Theme.of(context).colorScheme.outline.withAlpha(77),
           width: isSelected ? 2 : 1,
@@ -156,11 +158,11 @@ class ComponentPaletteItem extends StatelessWidget {
           Text(
             ComponentRegistry.getDisplayName(component.type),
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected 
-                  ? Theme.of(context).colorScheme.onPrimaryContainer
-                  : Theme.of(context).colorScheme.onSurface,
-            ),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Theme.of(context).colorScheme.onSurface,
+                ),
           ),
           if (count > 1)
             Container(
@@ -173,9 +175,9 @@ class ComponentPaletteItem extends StatelessWidget {
               child: Text(
                 'x$count',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSecondary,
-                  fontSize: 10,
-                ),
+                      color: Theme.of(context).colorScheme.onSecondary,
+                      fontSize: 10,
+                    ),
               ),
             ),
         ],

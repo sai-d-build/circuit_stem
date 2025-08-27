@@ -1,11 +1,11 @@
 import '../game_engine_state.dart';
 import '../use_cases/component_action.dart';
-import '../core/result.dart';
 
 abstract class GameEngineMiddleware {
   const GameEngineMiddleware();
 
-  Future<ComponentAction> beforeAction(GameEngineState state, ComponentAction action) async {
+  Future<ComponentAction> beforeAction(
+      GameEngineState state, ComponentAction action) async {
     try {
       return action;
     } catch (e) {
@@ -14,7 +14,8 @@ abstract class GameEngineMiddleware {
     }
   }
 
-  Future<GameEngineState> afterAction(GameEngineState oldState, GameEngineState newState, ComponentAction action) async {
+  Future<GameEngineState> afterAction(GameEngineState oldState,
+      GameEngineState newState, ComponentAction action) async {
     try {
       return newState;
     } catch (e) {

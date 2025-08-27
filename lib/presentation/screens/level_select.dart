@@ -25,11 +25,6 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     )..forward();
-    // Initialize the level manager when the screen is first created.
-    // We use a post-frame callback to ensure that the provider is available.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(levelManagerProvider.notifier).init();
-    });
   }
 
   @override
@@ -63,9 +58,9 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
     }
 
     if (levelManagerState.isLoading && levels.isEmpty) {
-        return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-        );
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     final completedLevelsCount = completedLevelIds.length;
@@ -102,11 +97,12 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
                       const SizedBox(height: 8),
                       Text(
                         'Select a Level',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
+                                ),
                       ),
                     ],
                   ),
@@ -135,8 +131,9 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
                   ),
                   const SizedBox(height: 8),
                   LinearProgressIndicator(
-                    value:
-                        totalLevels > 0 ? completedLevelsCount / totalLevels : 0.0,
+                    value: totalLevels > 0
+                        ? completedLevelsCount / totalLevels
+                        : 0.0,
                     backgroundColor:
                         Theme.of(context).colorScheme.surfaceContainerHighest,
                     valueColor: AlwaysStoppedAnimation<Color>(

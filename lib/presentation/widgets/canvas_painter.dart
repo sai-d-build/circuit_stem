@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import '../../common/constants.dart';
 import '../../application/render_state.dart';
@@ -43,24 +41,32 @@ class CanvasPainter extends CustomPainter {
       if (comp.id != renderState!.draggedComponentId) {
         final drawingBehavior = comp.getBehavior<DrawingBehavior>();
         if (drawingBehavior != null) {
-          Logger.log('CanvasPainter: Drawing component: \${comp.id} (type: \${comp.type})');
-          drawingBehavior.draw(canvas, const Size(cellSize, cellSize), comp, assetManager);
+          Logger.log(
+              'CanvasPainter: Drawing component: \${comp.id} (type: \${comp.type})');
+          drawingBehavior.draw(
+              canvas, const Size(cellSize, cellSize), comp, assetManager);
         } else {
-          Logger.log('CanvasPainter: No DrawingBehavior for component: \${comp.id} (type: \${comp.type})');
+          Logger.log(
+              'CanvasPainter: No DrawingBehavior for component: \${comp.id} (type: \${comp.type})');
         }
       }
     }
     Logger.log('CanvasPainter: Components drawn.');
 
     // Draw dragged preview
-    if (renderState!.draggedComponentId != null && renderState!.dragPosition != null) {
-      final comp = renderState!.grid.components.firstWhere((c) => c.id == renderState!.draggedComponentId);
+    if (renderState!.draggedComponentId != null &&
+        renderState!.dragPosition != null) {
+      final comp = renderState!.grid.components
+          .firstWhere((c) => c.id == renderState!.draggedComponentId);
       final drawingBehavior = comp.getBehavior<DrawingBehavior>();
       if (drawingBehavior != null) {
-        Logger.log('CanvasPainter: Drawing dragged component: \${comp.id} (type: \${comp.type})');
-        drawingBehavior.draw(canvas, const Size(cellSize, cellSize), comp, assetManager);
+        Logger.log(
+            'CanvasPainter: Drawing dragged component: \${comp.id} (type: \${comp.type})');
+        drawingBehavior.draw(
+            canvas, const Size(cellSize, cellSize), comp, assetManager);
       } else {
-        Logger.log('CanvasPainter: No DrawingBehavior for dragged component: \${comp.id} (type: \${comp.type})');
+        Logger.log(
+            'CanvasPainter: No DrawingBehavior for dragged component: \${comp.id} (type: \${comp.type})');
       }
     }
     Logger.log('CanvasPainter: Paint complete.');
@@ -72,10 +78,12 @@ class CanvasPainter extends CustomPainter {
       ..strokeWidth = 1.0;
 
     for (int i = 0; i <= rows; i++) {
-      canvas.drawLine(Offset(0, i * cellSize), Offset(size.width, i * cellSize), gridPaint);
+      canvas.drawLine(
+          Offset(0, i * cellSize), Offset(size.width, i * cellSize), gridPaint);
     }
     for (int i = 0; i <= cols; i++) {
-      canvas.drawLine(Offset(i * cellSize, 0), Offset(i * cellSize, size.height), gridPaint);
+      canvas.drawLine(Offset(i * cellSize, 0),
+          Offset(i * cellSize, size.height), gridPaint);
     }
   }
 
@@ -85,5 +93,6 @@ class CanvasPainter extends CustomPainter {
       oldDelegate.assetManager != assetManager ||
       oldDelegate.isDark != isDark ||
       oldDelegate.gridColor != gridColor ||
-      oldDelegate.draggedComponentBackgroundColor != draggedComponentBackgroundColor;
+      oldDelegate.draggedComponentBackgroundColor !=
+          draggedComponentBackgroundColor;
 }

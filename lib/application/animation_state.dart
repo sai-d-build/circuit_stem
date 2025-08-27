@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math' as math;
 
 /// Provides animation state across the app
-final animationStateProvider = StateNotifierProvider<AnimationStateNotifier, AnimationState>((ref) {
+final animationStateProvider =
+    StateNotifierProvider<AnimationStateNotifier, AnimationState>((ref) {
   return AnimationStateNotifier();
 });
 
@@ -65,11 +66,9 @@ class AnimationStateNotifier extends StateNotifier<AnimationState> {
     final now = DateTime.now();
     if (_lastFrameTime != null) {
       final dt = now.difference(_lastFrameTime!).inMicroseconds / 1000000.0;
-      
+
       // Update elapsed time
-      state = state.copyWith(
-        elapsedTime: state.elapsedTime + dt
-      );
+      state = state.copyWith(elapsedTime: state.elapsedTime + dt);
 
       // Execute callbacks
       for (final callback in _callbacks.values) {
@@ -81,16 +80,14 @@ class AnimationStateNotifier extends StateNotifier<AnimationState> {
 
   void addAnimation(String id, AnimationCallback callback) {
     _callbacks[id] = callback;
-    state = state.copyWith(
-      activeAnimations: [...state.activeAnimations, id]
-    );
+    state = state.copyWith(activeAnimations: [...state.activeAnimations, id]);
   }
 
   void removeAnimation(String id) {
     _callbacks.remove(id);
     state = state.copyWith(
-      activeAnimations: state.activeAnimations.where((aid) => aid != id).toList()
-    );
+        activeAnimations:
+            state.activeAnimations.where((aid) => aid != id).toList());
   }
 
   void pause() {

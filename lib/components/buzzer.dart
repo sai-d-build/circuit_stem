@@ -18,7 +18,8 @@ class BuzzerDrawingBehavior implements DrawingBehavior {
   const BuzzerDrawingBehavior();
 
   @override
-  void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
+  void draw(Canvas canvas, Size size, ComponentModel component,
+      AssetManagerNotifier assets) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
@@ -26,8 +27,12 @@ class BuzzerDrawingBehavior implements DrawingBehavior {
 
     final isDark = assets.isDark;
     final componentColor = component.isPowered
-        ? (isDark ? DarkModeColors.componentActive : LightModeColors.componentActive)
-        : (isDark ? DarkModeColors.componentInactive : LightModeColors.componentInactive);
+        ? (isDark
+            ? DarkModeColors.componentActive
+            : LightModeColors.componentActive)
+        : (isDark
+            ? DarkModeColors.componentInactive
+            : LightModeColors.componentInactive);
 
     paint.color = componentColor;
     fillPaint.color = componentColor;
@@ -41,16 +46,20 @@ class BuzzerDrawingBehavior implements DrawingBehavior {
     canvas.translate(-center.dx, -center.dy);
 
     // Draw buzzer body
-    final buzzerRect =
-        Rect.fromCenter(center: center, width: size.width * 0.6, height: size.height * 0.6);
-    canvas.drawRRect(RRect.fromRectAndRadius(buzzerRect, const Radius.circular(4)), fillPaint);
-    canvas.drawRRect(RRect.fromRectAndRadius(buzzerRect, const Radius.circular(4)), paint);
+    final buzzerRect = Rect.fromCenter(
+        center: center, width: size.width * 0.6, height: size.height * 0.6);
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(buzzerRect, const Radius.circular(4)),
+        fillPaint);
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(buzzerRect, const Radius.circular(4)), paint);
 
     // Draw sound waves when powered
     if (component.isPowered) {
       paint.strokeWidth = 1.0;
       for (int i = 1; i < 4; i++) {
-        canvas.drawCircle(center, radius + i * 3, paint..style = PaintingStyle.stroke);
+        canvas.drawCircle(
+            center, radius + i * 3, paint..style = PaintingStyle.stroke);
       }
     }
 
@@ -60,7 +69,8 @@ class BuzzerDrawingBehavior implements DrawingBehavior {
 
 class BuzzerLogicBehavior implements LogicBehavior {
   BuzzerLogicBehavior();
-  final AudioService _audioService = AudioService(); // In a real app, inject this
+  final AudioService _audioService =
+      AudioService(); // In a real app, inject this
 
   @override
   void evaluate(Grid grid, ComponentModel component) {
@@ -87,4 +97,3 @@ void registerBuzzer() {
   );
   Logger.log('registerBuzzer() completed.');
 }
-

@@ -43,7 +43,8 @@ class GameEngineState with _$GameEngineState {
         draggedComponentId: null,
         selectedComponentId: null,
         dragPosition: null,
-        paletteComponents: level?.paletteComponents ?? [], // Keep for coexistence
+        paletteComponents:
+            level?.paletteComponents ?? [], // Keep for coexistence
         paletteManager: ComponentPaletteManager(level?.paletteComponents ?? []),
         poweredBuzzerIds: const {},
         history: const [],
@@ -75,23 +76,25 @@ class GameEngineState with _$GameEngineState {
       if (grid.rows != currentLevel!.rows || grid.cols != currentLevel!.cols) {
         return false;
       }
-      
+
       // Check all components are within bounds
       for (final component in grid.components) {
-        if (component.r < 0 || component.r >= grid.rows ||
-            component.c < 0 || component.c >= grid.cols) {
+        if (component.r < 0 ||
+            component.r >= grid.rows ||
+            component.c < 0 ||
+            component.c >= grid.cols) {
           return false;
         }
       }
     }
-    
+
     // Check for duplicate component IDs
     final ids = grid.components.map((c) => c.id).toList();
     final uniqueIds = ids.toSet();
     if (ids.length != uniqueIds.length) {
       return false;
     }
-    
+
     // Check selected component exists in palette
     if (selectedComponentId != null) {
       final exists = paletteComponents.any((c) => c.id == selectedComponentId);
@@ -99,25 +102,25 @@ class GameEngineState with _$GameEngineState {
         return false;
       }
     }
-    
+
     return true;
   }
-  
+
   bool hasGridChanged(GameEngineState other) {
     return grid != other.grid;
   }
-  
+
   bool hasPowerStatesChanged(GameEngineState other) {
     if (grid.components.length != other.grid.components.length) {
       return true;
     }
-    
+
     for (int i = 0; i < grid.components.length; i++) {
       if (grid.components[i].isPowered != other.grid.components[i].isPowered) {
         return true;
       }
     }
-    
+
     return false;
   }
 

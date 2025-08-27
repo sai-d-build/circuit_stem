@@ -1,4 +1,3 @@
-
 // lib/ui/utils/coordinate_translator.dart
 import 'package:flutter/widgets.dart';
 import '../../domain/entities/grid_cell.dart';
@@ -11,7 +10,7 @@ class CoordinateTranslator {
 
   GridCell? globalToCell(Offset globalOffset, int rows, int cols) {
     final localOffset = gridBox.globalToLocal(globalOffset);
-    
+
     final col = (localOffset.dx / cellSize).floor();
     final row = (localOffset.dy / cellSize).floor();
 

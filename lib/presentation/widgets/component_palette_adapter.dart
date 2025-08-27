@@ -10,14 +10,17 @@ class ComponentPaletteAdapter extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // The adapter now reads from the new paletteManager.
-    final paletteManager = ref.watch(gameEngineProvider.select((s) => s.paletteManager));
+    final paletteManager =
+        ref.watch(gameEngineProvider.select((s) => s.paletteManager));
     final availableComponents = paletteManager.availableTemplates;
-    final selectedComponentId = ref.watch(gameEngineProvider.select((s) => s.selectedComponentId));
-    
+    final selectedComponentId =
+        ref.watch(gameEngineProvider.select((s) => s.selectedComponentId));
+
     ComponentModel? selectedComponent;
     if (selectedComponentId != null) {
       try {
-        selectedComponent = availableComponents.firstWhere((c) => c.id == selectedComponentId);
+        selectedComponent =
+            availableComponents.firstWhere((c) => c.id == selectedComponentId);
       } catch (e) {
         // It's possible for the selected component to disappear, so we handle the error.
         selectedComponent = null;

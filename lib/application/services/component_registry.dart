@@ -36,7 +36,8 @@ void registerBehavior<T>(T Function() factory) {
 dynamic getBehaviorByType(Type type) {
   final factory = _behaviorFactories[type];
   if (factory == null) {
-    Logger.log('ComponentRegistry: ERROR: Behavior factory for type $type not registered.');
+    Logger.log(
+        'ComponentRegistry: ERROR: Behavior factory for type $type not registered.');
     return null;
   }
   Logger.log('ComponentRegistry: Retrieved behavior factory for type: $type');
@@ -57,7 +58,8 @@ class ComponentRegistry {
     _behaviors[type] = behaviors;
     _draggable[type] = isDraggable;
     _displayNames[type] = displayName;
-    Logger.log('ComponentRegistry: Registered component type: $type with ${behaviors.length} behaviors');
+    Logger.log(
+        'ComponentRegistry: Registered component type: $type with ${behaviors.length} behaviors');
   }
 
   static String getDisplayName(String type) {
@@ -86,14 +88,14 @@ class ComponentRegistry {
   static ComponentModel createFromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
     Logger.log('ComponentRegistry: Creating component from JSON - type: $type');
-    
+
     // Parse position data
     final r = (json['position']?['r'] ?? json['r']) as int;
     final c = (json['position']?['c'] ?? json['c']) as int;
     final id = json['id'] as String;
     final rotation = json['rotation'] as int? ?? 0;
     final isPowered = json['isPowered'] as bool? ?? false;
-    
+
     // Parse shape offsets
     final shapeOffsetsJson = json['shapeOffsets'] as List<dynamic>?;
     final shapeOffsets = shapeOffsetsJson != null
@@ -111,22 +113,22 @@ class ComponentRegistry {
     final terminals = terminalsJson != null
         ? terminalsJson.map((e) {
             final termJson = e as Map<String, dynamic>;
-            
+
             // Parse offset
             final offsetJson = termJson['offset'] as Map<String, dynamic>;
             final offset = CellOffset(
               offsetJson['r'] as int,
               offsetJson['c'] as int,
             );
-            
+
             // Parse direction string
             final dirString = termJson['dir'] as String;
             final dir = _dirFromString(dirString);
-            
+
             // Parse type string with null-check and default
             final typeString = termJson['type'] as String? ?? 'power';
             final terminalType = typeString.toTerminalType();
-            
+
             return TerminalSpec(
               offset: offset,
               direction: dir,
@@ -134,17 +136,24 @@ class ComponentRegistry {
             );
           }).toList()
         : const [
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.north, type: TerminalType.power),
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power)
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.north,
+                type: TerminalType.power),
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.south,
+                type: TerminalType.power)
           ];
 
     // Parse internal connections
-    final internalConnectionsJson = json['internalConnections'] as List<dynamic>?;
+    final internalConnectionsJson =
+        json['internalConnections'] as List<dynamic>?;
     final internalConnections = internalConnectionsJson?.map<List<int>>((e) {
-            final connectionJson = e as List<dynamic>;
-            return connectionJson.map<int>((i) => i as int).toList();
-          }).toList() ??
-          const [];
+          final connectionJson = e as List<dynamic>;
+          return connectionJson.map<int>((i) => i as int).toList();
+        }).toList() ??
+        const [];
 
     // Parse state
     final stateJson = json['state'] as Map<String, dynamic>?;
@@ -181,7 +190,8 @@ class ComponentRegistry {
     final behaviorTypes = _behaviors[type];
 
     if (behaviorTypes == null) {
-      Logger.log('ComponentRegistry: WARNING - Unknown component type: $type, creating component without behaviors');
+      Logger.log(
+          'ComponentRegistry: WARNING - Unknown component type: $type, creating component without behaviors');
       return ComponentModel(
         id: id,
         r: r,
@@ -192,10 +202,17 @@ class ComponentRegistry {
         rotation: rotation,
         isPowered: isPowered,
         shapeOffsets: shapeOffsets ?? const [CellOffset(0, 0)],
-        terminals: terminals ?? const [
-          TerminalSpec(offset: CellOffset(0, 0), direction: Dir.north, type: TerminalType.power),
-          TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power)
-        ],
+        terminals: terminals ??
+            const [
+              TerminalSpec(
+                  offset: CellOffset(0, 0),
+                  direction: Dir.north,
+                  type: TerminalType.power),
+              TerminalSpec(
+                  offset: CellOffset(0, 0),
+                  direction: Dir.south,
+                  type: TerminalType.power)
+            ],
         internalConnections: internalConnections ?? const [],
         state: state ?? const {},
       );
@@ -204,16 +221,20 @@ class ComponentRegistry {
     final behaviorInstances = <dynamic>[];
     for (final behaviorType in behaviorTypes) {
       final instance = getBehaviorByType(behaviorType);
-      Logger.log('ComponentRegistry: Attempting to instantiate behavior: \$behaviorType. Instance: \$instance');
+      Logger.log(
+          'ComponentRegistry: Attempting to instantiate behavior: \$behaviorType. Instance: \$instance');
       if (instance != null) {
         behaviorInstances.add(instance);
-        Logger.log('ComponentRegistry: Successfully attached behavior: \$behaviorType to component \$type');
+        Logger.log(
+            'ComponentRegistry: Successfully attached behavior: \$behaviorType to component \$type');
       } else {
-        Logger.log('ComponentRegistry: ERROR - Failed to create behavior: \$behaviorType for component \$type');
+        Logger.log(
+            'ComponentRegistry: ERROR - Failed to create behavior: \$behaviorType for component \$type');
       }
     }
 
-    Logger.log('ComponentRegistry: Created component $type with ${behaviorInstances.length}/${behaviorTypes.length} behaviors. Attached behaviors: ${behaviorInstances.map((b) => b.runtimeType).join(', ')}');
+    Logger.log(
+        'ComponentRegistry: Created component $type with ${behaviorInstances.length}/${behaviorTypes.length} behaviors. Attached behaviors: ${behaviorInstances.map((b) => b.runtimeType).join(', ')}');
 
     return ComponentModel(
       id: id,
@@ -225,10 +246,17 @@ class ComponentRegistry {
       rotation: rotation,
       isPowered: isPowered,
       shapeOffsets: shapeOffsets ?? const [CellOffset(0, 0)],
-      terminals: terminals ?? const [
-        TerminalSpec(offset: CellOffset(0, 0), direction: Dir.north, type: TerminalType.power),
-        TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power)
-      ],
+      terminals: terminals ??
+          const [
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.north,
+                type: TerminalType.power),
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.south,
+                type: TerminalType.power)
+          ],
       internalConnections: internalConnections ?? const [],
       state: state ?? const {},
     );

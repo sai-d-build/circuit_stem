@@ -38,7 +38,7 @@ dependencies:
   shared_preferences: ^2.5.3
   widgets_to_image: ^2.0.1
   meta: ^1.16.0
-  freezed_annotation: ^2.4.4
+  freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
   equatable: ^2.0.5 # Added equatable
 
@@ -48,9 +48,9 @@ dev_dependencies:
 
   # Code generation (stable 2.x toolchain)
   build_runner: ^2.5.4
-  freezed: ^2.5.8
+  freezed: ^3.2.0
   json_serializable: ^6.9.5
-  source_gen: ^2.0.0
+  source_gen: ^3.1.0
 
   # (No riverpod_generator/custom_lint to avoid pulling Freezed 3.x)
   # riverpod_generator: removed

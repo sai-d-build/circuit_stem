@@ -1,4 +1,3 @@
-
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,7 +17,8 @@ class MockAssetManager extends StateNotifier<AssetState>
   ui.Image _createMinimalTestImage() {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
-    canvas.drawRect(const Rect.fromLTWH(0, 0, 1, 1), Paint()..color = Colors.blue);
+    canvas.drawRect(
+        const Rect.fromLTWH(0, 0, 1, 1), Paint()..color = Colors.blue);
     final picture = recorder.endRecording();
     // Use toImageSync for test environments
     return picture.toImageSync(1, 1);

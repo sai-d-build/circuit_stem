@@ -20,13 +20,17 @@ class AppRoutes {
 
       case gameScreen:
         if (settings.arguments is! int) {
-          return MaterialPageRoute(builder: (_) => _errorPage('The game screen requires a levelIndex (int) argument.'));
+          return MaterialPageRoute(
+              builder: (_) => _errorPage(
+                  'The game screen requires a levelIndex (int) argument.'));
         }
         final levelIndex = settings.arguments as int;
-        return MaterialPageRoute(builder: (_) => GameScreen(levelIndex: levelIndex));
+        return MaterialPageRoute(
+            builder: (_) => GameScreen(levelIndex: levelIndex));
 
       default:
-        return MaterialPageRoute(builder: (_) => _errorPage('Unknown route: ${settings.name}'));
+        return MaterialPageRoute(
+            builder: (_) => _errorPage('Unknown route: ${settings.name}'));
     }
   }
 

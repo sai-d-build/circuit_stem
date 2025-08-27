@@ -1,4 +1,3 @@
-
 // lib/models/grid_cell.dart
 class GridCell {
   final int row;

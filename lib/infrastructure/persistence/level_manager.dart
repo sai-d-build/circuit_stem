@@ -37,11 +37,18 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
     try {
       final manifestString =
           await _assetManager.loadString('assets/levels/level_manifest.json');
+      Logger.log(
+          'LevelManagerNotifier: Manifest string loaded: $manifestString');
+
       final manifestJson = json.decode(manifestString) as Map<String, dynamic>;
+      Logger.log('LevelManagerNotifier: Manifest JSON decoded: $manifestJson');
+
       final levelList = manifestJson['levels'] as List<dynamic>;
       final allLevels = levelList
           .map((e) => LevelMetadata.fromJson(e as Map<String, dynamic>))
           .toList();
+      Logger.log(
+          'LevelManagerNotifier: ${allLevels.length} levels parsed from manifest.');
 
       final completedIds =
           _sharedPrefs.getStringList(_prefsKeyCompletedLevels)?.toSet() ?? {};
@@ -58,11 +65,15 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
         }
       }
 
+      Logger.log(
+          'LevelManagerNotifier: Updating state with ${allLevels.length} levels.');
       state = state.copyWith(
         levels: allLevels,
         completedLevelIds: completedIds,
         isLoading: false,
       );
+      Logger.log(
+          'LevelManagerNotifier: State updated. isLoading: ${state.isLoading}, Levels count: ${state.levels.length}');
     } catch (e, stackTrace) {
       Logger.log('Failed to load level manifest: $e\n$stackTrace');
       state = state.copyWith(
@@ -77,7 +88,8 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
     Logger.log('LevelManagerNotifier: loadLevelByIndex index $index');
 
     if (index < 0 || index >= state.levels.length) {
-      Logger.log('Invalid index $index for levels length ${state.levels.length}');
+      Logger.log(
+          'Invalid index $index for levels length ${state.levels.length}');
       return null;
     }
 
@@ -90,10 +102,13 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
     try {
       final jsonString =
           await _assetManager.loadString('assets/levels/${levelMeta.id}.json');
-      Logger.log('LevelManagerNotifier: Loaded JSON string for ${levelMeta.id}: $jsonString'); // Add logger
+      Logger.log(
+          'LevelManagerNotifier: Loaded JSON string for ${levelMeta.id}: $jsonString'); // Add logger
       final decodedJson = json.decode(jsonString) as Map<String, dynamic>;
-      final levelDefinition = LevelDefinition.fromJson(decodedJson); // Store in a variable
-      Logger.log('LevelManagerNotifier: Parsed LevelDefinition for ${levelMeta.id}: $levelDefinition'); // Add logger
+      final levelDefinition =
+          LevelDefinition.fromJson(decodedJson); // Store in a variable
+      Logger.log(
+          'LevelManagerNotifier: Parsed LevelDefinition for ${levelMeta.id}: $levelDefinition'); // Add logger
       return levelDefinition; // Return the variable
     } catch (e, stackTrace) {
       Logger.log('Failed to load level ${levelMeta.id}: $e\n$stackTrace');
@@ -102,15 +117,17 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
   }
 
   /// Sets the current level in state without fetching JSON.
+  /// This method should be added to the LevelManagerNotifier class.
   void setCurrentLevel(LevelDefinition level) {
     state = state.copyWith(currentLevelDefinition: level);
-    Logger.log('Current level set: ${level.id}');
+    Logger.log('LevelManagerNotifier: Current level set to ${level.id}');
   }
 
   /// Marks the current level as complete and unlocks the next one.
   Future<void> markCurrentLevelComplete() async {
     final currentLevelId = state.currentLevelDefinition?.id;
-    if (currentLevelId == null || state.completedLevelIds.contains(currentLevelId)) {
+    if (currentLevelId == null ||
+        state.completedLevelIds.contains(currentLevelId)) {
       return;
     }
 
@@ -125,8 +142,8 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
     final newLevels = state.levels.asMap().entries.map((entry) {
       final i = entry.key;
       final level = entry.value;
-      final unlocked =
-          level.unlocked || (i > 0 && newCompletedIds.contains(state.levels[i - 1].id));
+      final unlocked = level.unlocked ||
+          (i > 0 && newCompletedIds.contains(state.levels[i - 1].id));
       return level.copyWith(unlocked: unlocked);
     }).toList();
 

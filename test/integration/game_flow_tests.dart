@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -12,27 +11,32 @@ void main() {
       await TestSetupHelper.initializeTestEnvironment();
     });
 
-    testWidgets('TC-L1-28: Restart button resets component positions', (tester) async {
+    testWidgets('TC-L1-28: Restart button resets component positions',
+        (tester) async {
       // ARRANGE
       final setup = await TestSetupHelper.pumpGameScreenForLevel(tester, 0);
       final container = setup.container;
       final movableId = 'bulb1';
 
       // Get the component's starting position.
-      final initialComponent = GameTestHelper.findComponentById(container, movableId);
+      final initialComponent =
+          GameTestHelper.findComponentById(container, movableId);
 
       // ACT 1: Move the component to a new, valid position.
-      await GameTestHelper.dragComponentToGrid(tester, container, movableId, 4, 4);
+      await GameTestHelper.dragComponentToGrid(
+          tester, container, movableId, 4, 4);
 
       // ASSERT 1: Verify the component has moved.
-      final movedComponent = GameTestHelper.findComponentById(container, movableId);
+      final movedComponent =
+          GameTestHelper.findComponentById(container, movableId);
       expect(movedComponent.r, isNot(equals(initialComponent.r)));
 
       // ACT 2: Tap the restart button.
       await GameTestHelper.tapButton(tester, const Key('restart_button'));
 
       // ASSERT 2: Verify the component is back in its original position.
-      final finalComponent = GameTestHelper.findComponentById(container, movableId);
+      final finalComponent =
+          GameTestHelper.findComponentById(container, movableId);
       expect(finalComponent.r, equals(initialComponent.r));
       expect(finalComponent.c, equals(initialComponent.c));
     });
@@ -44,25 +48,31 @@ void main() {
       final movableId = 'bulb1';
 
       // Get the component's starting position.
-      final initialComponent = GameTestHelper.findComponentById(container, movableId);
+      final initialComponent =
+          GameTestHelper.findComponentById(container, movableId);
 
       // ACT 1: Move the component to a new, valid position.
-      await GameTestHelper.dragComponentToGrid(tester, container, movableId, 4, 4);
+      await GameTestHelper.dragComponentToGrid(
+          tester, container, movableId, 4, 4);
 
       // ASSERT 1: Verify the component has moved.
-      final movedComponent = GameTestHelper.findComponentById(container, movableId);
+      final movedComponent =
+          GameTestHelper.findComponentById(container, movableId);
       expect(movedComponent.r, isNot(equals(initialComponent.r)));
 
       // ACT 2: Tap the undo button.
       await GameTestHelper.tapButton(tester, const Key('undo_button'));
 
       // ASSERT 2: Verify the component is back in its original position.
-      final finalComponent = GameTestHelper.findComponentById(container, movableId);
+      final finalComponent =
+          GameTestHelper.findComponentById(container, movableId);
       expect(finalComponent.r, equals(initialComponent.r));
       expect(finalComponent.c, equals(initialComponent.c));
     });
 
-    testWidgets('TC-L1-30: Rapidly tapping a switch does not queue multiple animations', (tester) async {
+    testWidgets(
+        'TC-L1-30: Rapidly tapping a switch does not queue multiple animations',
+        (tester) async {
       // ARRANGE
       final setup = await TestSetupHelper.pumpGameScreenForLevel(tester, 0);
       final scheduler = setup.scheduler;

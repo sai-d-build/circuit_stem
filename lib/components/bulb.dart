@@ -1,4 +1,3 @@
-
 import 'package:circuit_stem/domain/entities/grid.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -17,7 +16,8 @@ import '../common/logger.dart';
 class BulbDrawingBehavior implements DrawingBehavior {
   const BulbDrawingBehavior();
   @override
-  void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
+  void draw(Canvas canvas, Size size, ComponentModel component,
+      AssetManagerNotifier assets) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
@@ -29,8 +29,12 @@ class BulbDrawingBehavior implements DrawingBehavior {
 
     final isDark = assets.isDark;
     final componentColor = component.isPowered
-        ? (isDark ? DarkModeColors.componentActive : LightModeColors.componentActive)
-        : (isDark ? DarkModeColors.componentInactive : LightModeColors.componentInactive);
+        ? (isDark
+            ? DarkModeColors.componentActive
+            : LightModeColors.componentActive)
+        : (isDark
+            ? DarkModeColors.componentInactive
+            : LightModeColors.componentInactive);
 
     // Draw bulb circle
     paint.color = componentColor;

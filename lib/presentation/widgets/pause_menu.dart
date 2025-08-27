@@ -27,7 +27,8 @@ class PauseMenu extends StatelessWidget {
               const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Go back to previous screen (e.g., main menu)
+                  Navigator.of(context)
+                      .pop(); // Go back to previous screen (e.g., main menu)
                 },
                 child: const Text('Quit'),
               ),

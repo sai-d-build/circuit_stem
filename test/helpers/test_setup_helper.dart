@@ -1,4 +1,3 @@
-
 // test/helpers/test_setup_helper.dart
 import 'dart:convert';
 import 'dart:io';
@@ -34,7 +33,7 @@ class TestSetupHelper {
   /// This MUST be called once in a `setUpAll` block before any tests run.
   static Future<void> initializeTestEnvironment() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    
+
     // Set up mock shared preferences.
     SharedPreferences.setMockInitialValues({});
 
@@ -85,9 +84,13 @@ class TestSetupHelper {
 
     // 4. Initialize the level manager and load the requested level data.
     await tempContainer.read(levelManagerProvider.notifier).init();
-    final loadedLevel = await tempContainer.read(levelManagerProvider.notifier).loadLevelByIndex(levelIndex);
-    expect(loadedLevel, isNotNull, reason: 'Test setup failed: Level at index $levelIndex could not be loaded.');
-    
+    final loadedLevel = await tempContainer
+        .read(levelManagerProvider.notifier)
+        .loadLevelByIndex(levelIndex);
+    expect(loadedLevel, isNotNull,
+        reason:
+            'Test setup failed: Level at index $levelIndex could not be loaded.');
+
     final level = loadedLevel!;
 
     // 5. Dispose the temporary container as it's no longer needed.
@@ -112,9 +115,9 @@ class TestSetupHelper {
         ),
       ),
     );
-    
+
     await tester.pumpAndSettle();
-    
+
     // 8. Return the complete test setup bundle.
     return (
       container: testContainer,

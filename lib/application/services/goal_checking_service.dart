@@ -3,8 +3,153 @@ import '../../domain/entities/level_definition.dart';
 import '../../domain/entities/goal.dart';
 import '../../domain/entities/component.dart';
 
+// Abstract base class for goal validation
+abstract class GoalValidator {
+  bool validate(Goal goal, Grid grid);
+}
+
+// Concrete validators for each goal type
+class PowerGoalValidator extends GoalValidator {
+  @override
+  bool validate(Goal goal, Grid grid) {
+    final targetComponent = grid.componentsById[goal.targetId];
+    if (targetComponent == null) return false;
+
+    final requiredPower = goal.parameters?['minPower'] ?? 0;
+    return targetComponent.isPowered &&
+        (targetComponent.state['power'] ?? 0) >= requiredPower;
+  }
+}
+
+class UnpowerGoalValidator extends GoalValidator {
+  @override
+  bool validate(Goal goal, Grid grid) {
+    final targetComponent = grid.componentsById[goal.targetId];
+    if (targetComponent == null) return false;
+
+    return !targetComponent.isPowered;
+  }
+}
+
+class ConnectGoalValidator extends GoalValidator {
+  @override
+  bool validate(Goal goal, Grid grid) {
+    // Validate sourceId from parameters
+    final params = goal.parameters ?? {};
+    final sourceParam = params['sourceId'];
+
+    // Multiple validation layers for sourceId
+    if (sourceParam == null) return false;
+    if (sourceParam is! String) return false;
+    if (sourceParam.isEmpty) return false;
+
+    // Validate targetId from goal
+    if (goal.targetId == null) return false;
+    if (goal.targetId!.isEmpty) return false;
+
+    // Both sourceId and targetId are now confirmed to be non-null, non-empty strings
+    final String confirmedSourceId = sourceParam;
+    final String confirmedTargetId = goal.targetId!;
+
+    return _performConnectivityCheck(
+        confirmedSourceId, confirmedTargetId, grid);
+  }
+
+  bool _performConnectivityCheck(String sourceId, String targetId, Grid grid) {
+    final source = grid.componentsById[sourceId];
+    final target = grid.componentsById[targetId];
+
+    if (source == null || target == null) return false;
+
+    // BFS connectivity check
+    final visited = <String>{};
+    final toVisit = [sourceId];
+
+    for (int i = 0; i < toVisit.length; i++) {
+      final currentId = toVisit[i];
+
+      if (visited.contains(currentId)) continue;
+      visited.add(currentId);
+
+      if (currentId == targetId) return true;
+
+      final current = grid.componentsById[currentId];
+      if (current == null) continue;
+
+      // Add neighbors to visit list
+      final neighbors = _findNeighbors(current, grid);
+      for (final neighborId in neighbors) {
+        if (!visited.contains(neighborId)) {
+          toVisit.add(neighborId);
+        }
+      }
+    }
+
+    return false;
+  }
+
+  List<String> _findNeighbors(ComponentModel component, Grid grid) {
+    final neighbors = <String>[];
+
+    for (final terminal in component.terminals) {
+      final terminalR = component.r + terminal.offset.r;
+      final terminalC = component.c + terminal.offset.c;
+
+      final (nextR, nextC) = switch (terminal.direction) {
+        Dir.north => (terminalR - 1, terminalC),
+        Dir.east => (terminalR, terminalC + 1),
+        Dir.south => (terminalR + 1, terminalC),
+        Dir.west => (terminalR, terminalC - 1),
+      };
+
+      final neighbor = grid.componentAt(nextR, nextC);
+      if (neighbor != null) {
+        neighbors.add(neighbor.id);
+      }
+    }
+
+    return neighbors;
+  }
+}
+
+class VoltageGoalValidator extends GoalValidator {
+  @override
+  bool validate(Goal goal, Grid grid) {
+    final targetComponent = grid.componentsById[goal.targetId];
+    if (targetComponent == null) return false;
+
+    final requiredVoltage = goal.parameters?['voltage'] ?? 0;
+    final actualVoltage = targetComponent.state['voltage'] ?? 0;
+
+    return (actualVoltage - requiredVoltage).abs() < 0.1;
+  }
+}
+
+class CurrentGoalValidator extends GoalValidator {
+  @override
+  bool validate(Goal goal, Grid grid) {
+    final targetComponent = grid.componentsById[goal.targetId];
+    if (targetComponent == null) return false;
+
+    final requiredCurrent = goal.parameters?['current'] ?? 0;
+    final actualCurrent = targetComponent.state['current'] ?? 0;
+
+    return (actualCurrent - requiredCurrent).abs() < 0.01;
+  }
+}
+
+// Main service using factory pattern
 class GoalCheckingService {
   const GoalCheckingService();
+
+  // Factory map for goal validators
+  static final Map<String, GoalValidator> _validators = {
+    'power': PowerGoalValidator(),
+    'unpower': UnpowerGoalValidator(),
+    'connect': ConnectGoalValidator(),
+    'voltage': VoltageGoalValidator(),
+    'current': CurrentGoalValidator(),
+  };
 
   bool isLevelComplete(Grid grid, LevelDefinition level) {
     if (level.goals.isEmpty) {
@@ -12,136 +157,18 @@ class GoalCheckingService {
     }
 
     try {
-      return level.goals.every((goal) => _checkGoal(goal, grid));
+      return level.goals.every((goal) => _validateGoal(goal, grid));
     } catch (e) {
       return false; // If goal checking fails, level is not complete
     }
   }
 
-  bool _checkGoal(Goal goal, Grid grid) {
-    switch (goal.type) {
-      case 'power':
-        return _checkPowerGoal(goal, grid);
-      case 'unpower':
-        return _checkUnpowerGoal(goal, grid);
-      case 'connect':
-        return _checkConnectGoal(goal, grid);
-      case 'voltage':
-        return _checkVoltageGoal(goal, grid);
-      case 'current':
-        return _checkCurrentGoal(goal, grid);
-      default:
-        return false; // Unknown goal type
+  bool _validateGoal(Goal goal, Grid grid) {
+    final validator = _validators[goal.type];
+    if (validator == null) {
+      return false; // Unknown goal type
     }
-  }
 
-  bool _checkPowerGoal(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.targetId];
-    if (targetComponent == null) return false;
-    
-    final requiredPower = goal.parameters?['minPower'] ?? 0;
-    return targetComponent.isPowered && 
-           (targetComponent.state['power'] ?? 0) >= requiredPower;
-  }
-
-  bool _checkUnpowerGoal(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.targetId];
-    if (targetComponent == null) return false;
-    
-    return !targetComponent.isPowered;
-  }
-
-  bool _checkConnectGoal(Goal goal, Grid grid) {
-    final sourceId = goal.parameters?['sourceId'];
-    final targetId = goal.targetId;
-    
-    if (sourceId == null) return false;
-    
-    return _areComponentsConnected(sourceId, targetId, grid);
-  }
-
-  bool _checkVoltageGoal(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.targetId];
-    if (targetComponent == null) return false;
-    
-    final requiredVoltage = goal.parameters?['voltage'] ?? 0;
-    final actualVoltage = targetComponent.state['voltage'] ?? 0;
-    
-    return (actualVoltage - requiredVoltage).abs() < 0.1; // Allow small tolerance
-  }
-
-  bool _checkCurrentGoal(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.targetId];
-    if (targetComponent == null) return false;
-    
-    final requiredCurrent = goal.parameters?['current'] ?? 0;
-    final actualCurrent = targetComponent.state['current'] ?? 0;
-    
-    return (actualCurrent - requiredCurrent).abs() < 0.01; // Allow small tolerance
-  }
-
-  bool _areComponentsConnected(String sourceId, String targetId, Grid grid) {
-    final source = grid.componentsById[sourceId];
-    final target = grid.componentsById[targetId];
-    
-    if (source == null || target == null) return false;
-    
-    // Use BFS to check connectivity
-    final visited = <String>{};
-    final queue = <String>[sourceId];
-    
-    while (queue.isNotEmpty) {
-      final currentId = queue.removeAt(0);
-      if (visited.contains(currentId)) continue;
-      visited.add(currentId);
-      
-      if (currentId == targetId) return true;
-      
-      final current = grid.componentsById[currentId];
-      if (current == null) continue;
-      
-      // Add connected components to queue
-      for (final neighbor in _getConnectedComponentIds(current, grid)) {
-        if (!visited.contains(neighbor)) {
-          queue.add(neighbor);
-        }
-      }
-    }
-    
-    return false;
-  }
-
-  List<String> _getConnectedComponentIds(ComponentModel component, Grid grid) {
-    final connected = <String>[];
-    
-    for (final terminal in component.terminals) {
-      final terminalR = component.r + terminal.offset.r;
-      final terminalC = component.c + terminal.offset.c;
-
-      int nextR = terminalR;
-      int nextC = terminalC;
-      
-      switch (terminal.direction) {
-        case Dir.north:
-          nextR--;
-          break;
-        case Dir.east:
-          nextC++;
-          break;
-        case Dir.south:
-          nextR++;
-          break;
-        case Dir.west:
-          nextC--;
-          break;
-      }
-
-      final neighbor = grid.componentAt(nextR, nextC);
-      if (neighbor != null) {
-        connected.add(neighbor.id);
-      }
-    }
-    
-    return connected;
+    return validator.validate(goal, grid);
   }
 }

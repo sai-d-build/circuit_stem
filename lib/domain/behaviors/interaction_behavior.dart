@@ -9,9 +9,10 @@ class ToggleBehavior implements ComponentBehavior {
   String get behaviorType => 'interaction';
 
   @override
-  ComponentModel? handle(ComponentModel component, String action, GameContext context) {
+  ComponentModel? handle(
+      ComponentModel component, String action, GameContext context) {
     // Only handle 'tap' action for 'switch' type components
-    if (action == 'tap' && component.type == 'switch') { 
+    if (action == 'tap' && component.type == 'switch') {
       final currentState = component.state['closed'] as bool? ?? false;
       final newState = Map<String, dynamic>.from(component.state);
       newState['closed'] = !currentState;

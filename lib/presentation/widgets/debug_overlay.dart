@@ -23,9 +23,12 @@ class DebugOverlay extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Components: ${gameState.grid.components.length}', style: const TextStyle(color: Colors.white)),
-              Text('Selected: ${gameState.selectedComponentId ?? 'none'}', style: const TextStyle(color: Colors.white)),
-              Text('Win: ${gameState.isWin}', style: const TextStyle(color: Colors.white)),
+              Text('Components: ${gameState.grid.components.length}',
+                  style: const TextStyle(color: Colors.white)),
+              Text('Selected: ${gameState.selectedComponentId ?? 'none'}',
+                  style: const TextStyle(color: Colors.white)),
+              Text('Win: ${gameState.isWin}',
+                  style: const TextStyle(color: Colors.white)),
             ],
           ),
         ),

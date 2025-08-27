@@ -16,7 +16,8 @@ void main() {
     test('returns false when goal is not met', () {
       // Arrange
       final components = [
-        const ComponentModel(id: 'bulb', type: 'bulb', r: 0, c: 0, isPowered: false),
+        const ComponentModel(
+            id: 'bulb', type: 'bulb', r: 0, c: 0, isPowered: false),
       ];
       final grid = Grid(rows: 1, cols: 1, components: components);
       final level = const LevelDefinition(
@@ -45,7 +46,8 @@ void main() {
     test('returns true when goal is met', () {
       // Arrange
       final components = [
-        const ComponentModel(id: 'bulb', type: 'bulb', r: 0, c: 0, isPowered: true),
+        const ComponentModel(
+            id: 'bulb', type: 'bulb', r: 0, c: 0, isPowered: true),
       ];
       final grid = Grid(rows: 1, cols: 1, components: components);
       final level = const LevelDefinition(
@@ -68,7 +70,8 @@ void main() {
       final result = goalCheckingService.isLevelComplete(grid, level);
 
       // Assert
-      expect(result, isFalse); // Placeholder, this should be true when implemented
+      expect(
+          result, isFalse); // Placeholder, this should be true when implemented
     });
   });
 }

@@ -8,15 +8,15 @@ class AnimationState {
 
   double get elapsedTime => _elapsedTime;
   bool get isActive => _isActive;
-  
+
   void addCallback(AnimationCallback callback) {
     _callbacks.add(callback);
   }
-  
+
   void removeCallback(AnimationCallback callback) {
     _callbacks.remove(callback);
   }
-  
+
   void clearCallbacks() {
     _callbacks.clear();
   }
@@ -81,7 +81,7 @@ class AnimationScheduler {
     if (_lastFrameTime != null) {
       final dt = now.difference(_lastFrameTime!).inMicroseconds / 1000000.0;
       _state._elapsedTime += dt;
-      
+
       for (final callback in _state._callbacks) {
         callback(dt);
       }

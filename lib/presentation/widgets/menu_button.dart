@@ -30,8 +30,8 @@ class MenuButton extends StatelessWidget {
             Text(
               text,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),

@@ -1,12 +1,8 @@
 import '../game_engine_state.dart';
 import 'component_action.dart';
-import '../core/result.dart';
+
 import '../use_cases/base_use_case.dart';
 import 'package:circuit_stem/infrastructure/persistence/level_manager.dart';
-
-class RestartLevelAction extends ComponentAction {
-  const RestartLevelAction();
-}
 
 class RestartLevelUseCase extends UseCase<RestartLevelAction> {
   final LevelManagerNotifier _levelManager;
@@ -14,12 +10,14 @@ class RestartLevelUseCase extends UseCase<RestartLevelAction> {
   const RestartLevelUseCase(this._levelManager);
 
   @override
-  GameEngineState executeInternal(GameEngineState state, RestartLevelAction action) {
+  Future<GameEngineState> executeInternal(
+      GameEngineState state, RestartLevelAction action) async {
     if (state.currentLevel == null) {
       return state;
     }
 
-    final reloaded = _levelManager.loadLevelByIndexSync(
+    final reloaded = await _levelManager.loadLevelByIndex(
+      // Use await and loadLevelByIndex
       state.currentLevel!.levelNumber - 1,
     );
 

@@ -1,4 +1,3 @@
-
 import 'package:circuit_stem/application/audio_manager.dart';
 import 'package:circuit_stem/application/game_engine_state.dart';
 import 'package:circuit_stem/application/use_cases/component_action.dart';
@@ -11,15 +10,19 @@ class AudioMiddleware extends GameEngineMiddleware {
   const AudioMiddleware(this._audioManager);
 
   @override
-  Future<ComponentAction> beforeAction(GameEngineState state, ComponentAction action) async {
+  Future<ComponentAction> beforeAction(
+      GameEngineState state, ComponentAction action) async {
     return action;
   }
 
   @override
-  Future<GameEngineState> afterAction(GameEngineState oldState, GameEngineState newState, ComponentAction action) async {
-    if (action is CreateComponentFromTemplateAction || action is MoveComponentAction) {
+  Future<GameEngineState> afterAction(GameEngineState oldState,
+      GameEngineState newState, ComponentAction action) async {
+    if (action is CreateComponentFromTemplateAction ||
+        action is MoveComponentAction) {
       _audioManager.playPlacement();
-    } else if (action is TapComponentAction || action is RotateComponentAction) {
+    } else if (action is TapComponentAction ||
+        action is RotateComponentAction) {
       if (oldState != newState) {
         _audioManager.playToggle();
       }

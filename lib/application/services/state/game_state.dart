@@ -11,7 +11,7 @@ class GameState with _$GameState {
     required Grid grid,
     required bool isPaused,
     required bool isWin,
-  required List<ComponentModel> availableComponents,
+    required List<ComponentModel> availableComponents,
     String? draggedComponentId,
     @Default(false) bool isShortCircuit,
     @Default({}) Map<String, bool> poweredComponents,

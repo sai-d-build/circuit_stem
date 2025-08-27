@@ -5,16 +5,18 @@ import 'component_action.dart';
 abstract class UseCase<TAction extends ComponentAction> {
   const UseCase();
 
-  Result<GameEngineState> execute(GameEngineState state, TAction action) {
+  Future<Result<GameEngineState>> execute(
+      GameEngineState state, TAction action) async {
     final validationResult = validate(state, action);
     if (validationResult.isFailure) {
       return Failure<GameEngineState>(validationResult.error!);
     }
 
     try {
-      final updatedState = executeInternal(state, action);
+      final updatedState =
+          await executeInternal(state, action); // Make executeInternal async
       return Success(updatedState);
-    } catch (e, s) {
+    } catch (e) {
       // Ideally log stack trace here
       return Failure<GameEngineState>('UseCase error: $e');
     }
@@ -25,5 +27,6 @@ abstract class UseCase<TAction extends ComponentAction> {
   }
 
   /// Each use case returns a full new GameEngineState
-  GameEngineState executeInternal(GameEngineState state, TAction action);
+  Future<GameEngineState> executeInternal(
+      GameEngineState state, TAction action); // Make executeInternal async
 }

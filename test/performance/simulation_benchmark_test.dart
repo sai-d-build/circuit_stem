@@ -1,4 +1,3 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:circuit_stem/application/services/power_simulation_service.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
@@ -28,10 +27,22 @@ void main() {
               r: r,
               c: c,
               terminals: [
-                const TerminalSpec(offset: CellOffset(0, 0), direction: Dir.north, type: TerminalType.power),
-                const TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power),
-                const TerminalSpec(offset: CellOffset(0, 0), direction: Dir.east, type: TerminalType.power),
-                const TerminalSpec(offset: CellOffset(0, 0), direction: Dir.west, type: TerminalType.power),
+                const TerminalSpec(
+                    offset: CellOffset(0, 0),
+                    direction: Dir.north,
+                    type: TerminalType.power),
+                const TerminalSpec(
+                    offset: CellOffset(0, 0),
+                    direction: Dir.south,
+                    type: TerminalType.power),
+                const TerminalSpec(
+                    offset: CellOffset(0, 0),
+                    direction: Dir.east,
+                    type: TerminalType.power),
+                const TerminalSpec(
+                    offset: CellOffset(0, 0),
+                    direction: Dir.west,
+                    type: TerminalType.power),
               ],
             ),
           );
@@ -50,7 +61,8 @@ void main() {
 
       // Assert
       final averageTime = stopwatch.elapsedMilliseconds / numberOfRuns;
-      print('Average simulation time for a $gridSize x $gridSize grid: $averageTime ms');
+      print(
+          'Average simulation time for a $gridSize x $gridSize grid: $averageTime ms');
       expect(averageTime, lessThan(1000)); // Expect it to be reasonably fast
     });
   });

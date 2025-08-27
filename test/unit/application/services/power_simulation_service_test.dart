@@ -20,7 +20,10 @@ void main() {
           r: 0,
           c: 0,
           terminals: [
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power),
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.south,
+                type: TerminalType.power),
           ],
         ),
         const ComponentModel(
@@ -30,8 +33,14 @@ void main() {
           c: 0,
           rotation: 0, // Assuming 0 degrees is anode at top, cathode at bottom
           terminals: [
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.north, type: TerminalType.power), // Anode
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power), // Cathode
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.north,
+                type: TerminalType.power), // Anode
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.south,
+                type: TerminalType.power), // Cathode
           ],
         ),
         const ComponentModel(
@@ -40,7 +49,10 @@ void main() {
           r: 2,
           c: 0,
           terminals: [
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.north, type: TerminalType.power),
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.north,
+                type: TerminalType.power),
           ],
         ),
       ];
@@ -64,7 +76,10 @@ void main() {
           r: 0,
           c: 0,
           terminals: [
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power),
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.south,
+                type: TerminalType.power),
           ],
         ),
         const ComponentModel(
@@ -72,10 +87,17 @@ void main() {
           type: 'diode',
           r: 1,
           c: 0,
-          rotation: 2, // Assuming 2 is 180 degrees, so cathode at top, anode at bottom
+          rotation:
+              2, // Assuming 2 is 180 degrees, so cathode at top, anode at bottom
           terminals: [
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.north, type: TerminalType.power), // Cathode
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power), // Anode
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.north,
+                type: TerminalType.power), // Cathode
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.south,
+                type: TerminalType.power), // Anode
           ],
         ),
         const ComponentModel(
@@ -84,7 +106,10 @@ void main() {
           r: 2,
           c: 0,
           terminals: [
-            TerminalSpec(offset: CellOffset(0, 0), direction: Dir.north, type: TerminalType.power),
+            TerminalSpec(
+                offset: CellOffset(0, 0),
+                direction: Dir.north,
+                type: TerminalType.power),
           ],
         ),
       ];

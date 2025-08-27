@@ -36,7 +36,8 @@ class GameCanvasState extends ConsumerState<GameCanvas> {
 
     return DragTarget<ComponentModel>(
       onAcceptWithDetails: (details) {
-        final RenderBox renderBox = _gridKey.currentContext!.findRenderObject() as RenderBox;
+        final RenderBox renderBox =
+            _gridKey.currentContext!.findRenderObject() as RenderBox;
         final localPosition = renderBox.globalToLocal(details.offset);
         final int col = (localPosition.dx / cellSize).floor();
         final int row = (localPosition.dy / cellSize).floor();

@@ -7,9 +7,12 @@ import 'package:circuit_stem/application/game_context.dart';
 void main() {
   group('ToggleBehavior', () {
     // Create a mock GameContext
-    const mockContext = GameContext(grid: Grid(rows: 1, cols: 1, components: []));
+    const mockContext =
+        GameContext(grid: Grid(rows: 1, cols: 1, components: []));
 
-    test('handle with "tap" action should toggle the "closed" state from false to true', () {
+    test(
+        'handle with "tap" action should toggle the "closed" state from false to true',
+        () {
       // ARRANGE
       const behavior = ToggleBehavior();
       const component = ComponentModel(
@@ -29,7 +32,9 @@ void main() {
       expect(result?.state['closed'], isTrue);
     });
 
-    test('handle with "tap" action should toggle the "closed" state from true to false', () {
+    test(
+        'handle with "tap" action should toggle the "closed" state from true to false',
+        () {
       // ARRANGE
       const behavior = ToggleBehavior();
       const component = ComponentModel(

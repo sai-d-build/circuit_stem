@@ -17,7 +17,8 @@ import '../common/logger.dart';
 class TimerDrawingBehavior implements DrawingBehavior {
   const TimerDrawingBehavior();
   @override
-  void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
+  void draw(Canvas canvas, Size size, ComponentModel component,
+      AssetManagerNotifier assets) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
@@ -25,8 +26,12 @@ class TimerDrawingBehavior implements DrawingBehavior {
 
     final isDark = assets.isDark;
     final componentColor = component.isPowered
-        ? (isDark ? DarkModeColors.componentActive : LightModeColors.componentActive)
-        : (isDark ? DarkModeColors.componentInactive : LightModeColors.componentInactive);
+        ? (isDark
+            ? DarkModeColors.componentActive
+            : LightModeColors.componentActive)
+        : (isDark
+            ? DarkModeColors.componentInactive
+            : LightModeColors.componentInactive);
 
     paint.color = componentColor;
     fillPaint.color = componentColor.withAlpha(51);
@@ -45,8 +50,10 @@ class TimerDrawingBehavior implements DrawingBehavior {
 
     // Draw clock hands (simplified)
     paint.strokeWidth = 2.0;
-    canvas.drawLine(center, Offset(center.dx, center.dy - radius * 0.6), paint); // Minute hand
-    canvas.drawLine(center, Offset(center.dx + radius * 0.4, center.dy), paint); // Hour hand
+    canvas.drawLine(center, Offset(center.dx, center.dy - radius * 0.6),
+        paint); // Minute hand
+    canvas.drawLine(center, Offset(center.dx + radius * 0.4, center.dy),
+        paint); // Hour hand
 
     // Draw center dot
     canvas.drawCircle(center, 2, paint..style = PaintingStyle.fill);
@@ -73,11 +80,7 @@ void registerTimer() {
   ComponentRegistry.register(
     type: 'Component.Timer',
     displayName: 'Timer',
-    behaviors: [
-      TimerDrawingBehavior,
-      TimerLogicBehavior,
-      MoveBehavior
-    ],
+    behaviors: [TimerDrawingBehavior, TimerLogicBehavior, MoveBehavior],
     isDraggable: true,
   );
   Logger.log('registerTimer() completed.');

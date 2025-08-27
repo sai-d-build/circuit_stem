@@ -5,7 +5,7 @@ class AppTheme {
   static const _primaryColor = Color(0xFF2196F3);
   static const _accentColor = Color(0xFFFFC107);
   static const _errorColor = Color(0xFFE57373);
-  
+
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(

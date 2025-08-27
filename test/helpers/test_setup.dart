@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
 class TestSetup {
   final ProviderContainer container;
   final List<ProviderSubscription> _listeners = [];

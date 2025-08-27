@@ -5,10 +5,12 @@ class MockAnimationScheduler implements AnimationScheduler {
   final List<AnimationCallback> _callbacks = [];
   bool _isRunning = false;
   int _frameCount = 0;
-  static const int _maxFrames = 60; // Auto-stop after 60 frames (~1 second at 60fps)
+  static const int _maxFrames =
+      60; // Auto-stop after 60 frames (~1 second at 60fps)
 
   @override
-  double get bulbIntensity => _isRunning ? 0.5 + 0.5 * (_frameCount / _maxFrames) : 1.0;
+  double get bulbIntensity =>
+      _isRunning ? 0.5 + 0.5 * (_frameCount / _maxFrames) : 1.0;
 
   @override
   double get wireOffset => _isRunning ? (_frameCount % 10) / 10.0 : 0.0;
@@ -71,19 +73,20 @@ class MockAnimationScheduler implements AnimationScheduler {
 
   void triggerManualFrame(double dt) {
     if (!_isRunning) return;
-    
+
     _frameCount++;
     Logger.log('[MockAnimationScheduler] Triggering frame: $_frameCount');
-    
+
     // Create a copy to avoid concurrent modification issues
     final List<AnimationCallback> currentCallbacks = List.from(_callbacks);
     for (final callback in currentCallbacks) {
       callback(dt);
     }
-    
+
     // Auto-stop after enough frames to simulate animation completion
     if (_frameCount >= _maxFrames) {
-      Logger.log('[MockAnimationScheduler] Max frames reached, stopping animation');
+      Logger.log(
+          '[MockAnimationScheduler] Max frames reached, stopping animation');
       _isRunning = false;
       _frameCount = 0;
     }

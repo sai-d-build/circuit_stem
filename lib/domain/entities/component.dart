@@ -2,7 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-
 part 'component.freezed.dart';
 
 @freezed
@@ -49,11 +48,10 @@ class TerminalSpec with _$TerminalSpec {
   // Custom fromJson to handle offset -> cellIndex conversion
   factory TerminalSpec.fromJson() {
     // This method should not be called directly - use ComponentRegistry.createFromJson instead
-    throw UnsupportedError('TerminalSpec.fromJson should not be called directly. Use ComponentRegistry.createFromJson for components.');
+    throw UnsupportedError(
+        'TerminalSpec.fromJson should not be called directly. Use ComponentRegistry.createFromJson for components.');
   }
 }
-
-
 
 @freezed
 class ComponentModel with _$ComponentModel {
@@ -69,9 +67,16 @@ class ComponentModel with _$ComponentModel {
     @Default({}) Map<String, dynamic> state,
     @Default([CellOffset(0, 0)]) List<CellOffset> shapeOffsets,
     @Default([
-      TerminalSpec(offset: CellOffset(0, 0), direction: Dir.north, type: TerminalType.power),
-      TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power)
-    ]) List<TerminalSpec> terminals,
+      TerminalSpec(
+          offset: CellOffset(0, 0),
+          direction: Dir.north,
+          type: TerminalType.power),
+      TerminalSpec(
+          offset: CellOffset(0, 0),
+          direction: Dir.south,
+          type: TerminalType.power)
+    ])
+    List<TerminalSpec> terminals,
     @Default([]) List<List<int>> internalConnections,
     @Default([]) List<dynamic> behaviors,
     @Default(false) bool isDraggable,
@@ -89,7 +94,8 @@ class ComponentModel with _$ComponentModel {
   // Custom fromJson to handle complex parsing - but this should not be called directly
   factory ComponentModel.fromJson() {
     // This method should not be called directly - use ComponentRegistry.createFromJson instead
-    throw UnsupportedError('ComponentModel.fromJson should not be called directly. Use ComponentRegistry.createFromJson for components.');
+    throw UnsupportedError(
+        'ComponentModel.fromJson should not be called directly. Use ComponentRegistry.createFromJson for components.');
   }
 
   ComponentBounds getBounds() {
@@ -116,7 +122,6 @@ class ComponentBounds {
 
 // Type alias for backward compatibility with tests
 typedef Component = ComponentModel;
-
 
 enum Dir { north, east, south, west }
 

@@ -29,7 +29,8 @@ void checkMoveBehaviorAttachment() {
         r: 0,
         c: 0,
       );
-      final hasMoveBehavior = dummyComponent.getBehavior<MoveBehavior>() != null;
+      final hasMoveBehavior =
+          dummyComponent.getBehavior<MoveBehavior>() != null;
 
       if (hasMoveBehavior) {
         Logger.log('✅ $type has MoveBehavior attached');
@@ -38,7 +39,8 @@ void checkMoveBehaviorAttachment() {
       }
 
       // Optional: List all attached behaviors
-      Logger.log('   Attached behaviors for $type: ${dummyComponent.behaviors.map((b) => b.runtimeType).join(', ')}');
+      Logger.log(
+          '   Attached behaviors for $type: ${dummyComponent.behaviors.map((b) => b.runtimeType).join(', ')}');
     } catch (e) {
       Logger.log('Error checking $type: $e');
     }

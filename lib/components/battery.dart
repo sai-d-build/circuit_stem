@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -15,14 +14,17 @@ import '../common/logger.dart';
 
 class BatteryDrawingBehavior implements DrawingBehavior {
   @override
-  void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
+  void draw(Canvas canvas, Size size, ComponentModel component,
+      AssetManagerNotifier assets) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     final fillPaint = Paint()..style = PaintingStyle.fill;
 
     final isDark = assets.isDark;
-    final componentColor = isDark ? DarkModeColors.componentInactive : LightModeColors.componentInactive;
+    final componentColor = isDark
+        ? DarkModeColors.componentInactive
+        : LightModeColors.componentInactive;
 
     paint.color = componentColor;
     fillPaint.color = componentColor;
@@ -35,10 +37,13 @@ class BatteryDrawingBehavior implements DrawingBehavior {
     canvas.translate(-center.dx, -center.dy);
 
     // Draw battery body
-    final batteryRect =
-        Rect.fromCenter(center: center, width: size.width * 0.8, height: size.height * 0.4);
-    canvas.drawRRect(RRect.fromRectAndRadius(batteryRect, const Radius.circular(4)), fillPaint);
-    canvas.drawRRect(RRect.fromRectAndRadius(batteryRect, const Radius.circular(4)), paint);
+    final batteryRect = Rect.fromCenter(
+        center: center, width: size.width * 0.8, height: size.height * 0.4);
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(batteryRect, const Radius.circular(4)),
+        fillPaint);
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(batteryRect, const Radius.circular(4)), paint);
 
     // Draw terminals
     final terminalHeight = size.height * 0.2;
@@ -46,25 +51,25 @@ class BatteryDrawingBehavior implements DrawingBehavior {
 
     // Positive terminal
     canvas.drawRect(
-      Rect.fromLTWH(
-          batteryRect.right, center.dy - terminalHeight / 2, terminalWidth, terminalHeight),
+      Rect.fromLTWH(batteryRect.right, center.dy - terminalHeight / 2,
+          terminalWidth, terminalHeight),
       fillPaint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(
-          batteryRect.right, center.dy - terminalHeight / 2, terminalWidth, terminalHeight),
+      Rect.fromLTWH(batteryRect.right, center.dy - terminalHeight / 2,
+          terminalWidth, terminalHeight),
       paint,
     );
 
     // Negative terminal
     canvas.drawRect(
-      Rect.fromLTWH(
-          batteryRect.left - terminalWidth, center.dy - terminalHeight / 2, terminalWidth, terminalHeight),
+      Rect.fromLTWH(batteryRect.left - terminalWidth,
+          center.dy - terminalHeight / 2, terminalWidth, terminalHeight),
       fillPaint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(
-          batteryRect.left - terminalWidth, center.dy - terminalHeight / 2, terminalWidth, terminalHeight),
+      Rect.fromLTWH(batteryRect.left - terminalWidth,
+          center.dy - terminalHeight / 2, terminalWidth, terminalHeight),
       paint,
     );
 
@@ -73,29 +78,39 @@ class BatteryDrawingBehavior implements DrawingBehavior {
       text: TextSpan(
         text: '+',
         style: TextStyle(
-            color: isDark ? DarkModeColors.darkOnPrimary : LightModeColors.lightOnPrimary,
+            color: isDark
+                ? DarkModeColors.darkOnPrimary
+                : LightModeColors.lightOnPrimary,
             fontSize: 12,
             fontWeight: FontWeight.bold),
       ),
       textDirection: TextDirection.ltr,
     );
     textPainterPlus.layout();
-    textPainterPlus.paint(canvas,
-        Offset(batteryRect.right + terminalWidth / 2 - textPainterPlus.width / 2, center.dy - textPainterPlus.height / 2));
+    textPainterPlus.paint(
+        canvas,
+        Offset(
+            batteryRect.right + terminalWidth / 2 - textPainterPlus.width / 2,
+            center.dy - textPainterPlus.height / 2));
 
     final textPainterMinus = TextPainter(
       text: TextSpan(
         text: '−',
         style: TextStyle(
-            color: isDark ? DarkModeColors.darkOnPrimary : LightModeColors.lightOnPrimary,
+            color: isDark
+                ? DarkModeColors.darkOnPrimary
+                : LightModeColors.lightOnPrimary,
             fontSize: 12,
             fontWeight: FontWeight.bold),
       ),
       textDirection: TextDirection.ltr,
     );
     textPainterMinus.layout();
-    textPainterMinus.paint(canvas,
-        Offset(batteryRect.left - terminalWidth / 2 - textPainterMinus.width / 2, center.dy - textPainterMinus.height / 2));
+    textPainterMinus.paint(
+        canvas,
+        Offset(
+            batteryRect.left - terminalWidth / 2 - textPainterMinus.width / 2,
+            center.dy - textPainterMinus.height / 2));
 
     canvas.restore();
   }

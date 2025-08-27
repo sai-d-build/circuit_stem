@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../helpers/game_test_helper.dart';
@@ -10,7 +9,8 @@ void main() {
       await TestSetupHelper.initializeTestEnvironment();
     });
 
-    testWidgets('TC-L1-11: Tapping hint button makes hint visible', (tester) async {
+    testWidgets('TC-L1-11: Tapping hint button makes hint visible',
+        (tester) async {
       // ARRANGE
       await TestSetupHelper.pumpGameScreenForLevel(tester, 0);
 
@@ -24,10 +24,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // ASSERT: Verify that the hint is now visible.
-      expect(find.byKey(const Key('hint_ghost_wire')), findsOneWidget, reason: 'Hint UI should be visible after tapping the hint button');
+      expect(find.byKey(const Key('hint_ghost_wire')), findsOneWidget,
+          reason: 'Hint UI should be visible after tapping the hint button');
     });
 
-    testWidgets('TC-L1-20: Hint ghost wire fades after a duration', (tester) async {
+    testWidgets('TC-L1-20: Hint ghost wire fades after a duration',
+        (tester) async {
       // ARRANGE
       await TestSetupHelper.pumpGameScreenForLevel(tester, 0);
 
@@ -44,7 +46,8 @@ void main() {
       await tester.pumpAndSettle(); // Let the UI rebuild after the animation.
 
       // ASSERT 2: Verify that the hint is no longer visible.
-      expect(find.byKey(const Key('hint_ghost_wire')), findsNothing, reason: 'Hint UI should fade and be removed after its duration');
+      expect(find.byKey(const Key('hint_ghost_wire')), findsNothing,
+          reason: 'Hint UI should fade and be removed after its duration');
     });
   });
 }

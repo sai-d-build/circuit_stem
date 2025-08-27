@@ -5,13 +5,19 @@ import 'package:circuit_stem/domain/entities/component.dart';
 void main() {
   group('Grid Model Tests', () {
     test('componentAt returns the correct component', () {
-      const grid = Grid(rows: 3, cols: 3, components: [ComponentModel(id: 'c1', type: 'test', r: 1, c: 1)]);
+      const grid = Grid(
+          rows: 3,
+          cols: 3,
+          components: [ComponentModel(id: 'c1', type: 'test', r: 1, c: 1)]);
       expect(grid.componentAt(1, 1)?.id, equals('c1'));
       expect(grid.componentAt(0, 0), isNull);
     });
 
     test('isCellOccupied works correctly', () {
-      const grid = Grid(rows: 3, cols: 3, components: [ComponentModel(id: 'c1', type: 'test', r: 1, c: 1)]);
+      const grid = Grid(
+          rows: 3,
+          cols: 3,
+          components: [ComponentModel(id: 'c1', type: 'test', r: 1, c: 1)]);
       expect(grid.isCellOccupied(1, 1), isTrue);
       expect(grid.isCellOccupied(0, 0), isFalse);
       expect(grid.isCellOccupied(1, 1, excludeComponentId: 'c1'), isFalse);

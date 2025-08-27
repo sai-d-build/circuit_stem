@@ -33,7 +33,10 @@ class AssetManagerNotifier extends StateNotifier<AssetState> {
   }
 
   Future<void> _loadAudio() async {
-    final audioFiles = AppAssets.all.where((p) => p.endsWith('.wav')).map((p) => p.split('/').last).toList();
+    final audioFiles = AppAssets.all
+        .where((p) => p.endsWith('.wav'))
+        .map((p) => p.split('/').last)
+        .toList();
     Logger.log('AssetManager: Loading audio files: $audioFiles');
     for (final file in audioFiles) {
       try {
@@ -48,7 +51,14 @@ class AssetManagerNotifier extends StateNotifier<AssetState> {
 
   Future<String> loadString(String path) async {
     Logger.log('AssetManager: Loading string from path: $path');
-    return await rootBundle.loadString(path);
+    try {
+      final content = await rootBundle.loadString(path);
+      Logger.log('AssetManager: Successfully loaded string from path: $path');
+      return content;
+    } catch (e) {
+      Logger.log('AssetManager: ERROR loading string from path: $path - $e');
+      rethrow;
+    }
   }
 
   Image? getSvgAsImage(String path) {

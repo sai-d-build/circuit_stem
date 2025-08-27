@@ -1,4 +1,3 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:circuit_stem/application/use_cases/rotate_component_use_case.dart';
 import 'package:circuit_stem/application/game_engine_state.dart';
@@ -34,12 +33,12 @@ void main() {
       );
     });
 
-    test('should rotate a component', () {
+    test('should rotate a component', () async {
       // Arrange
       const action = RotateComponentAction(componentId: 'c1', rotation: 1);
 
       // Act
-      final result = useCase.execute(initialState, action);
+      final result = await useCase.execute(initialState, action);
 
       // Assert
       expect(result.isSuccess, isTrue);
@@ -49,12 +48,12 @@ void main() {
       expect(rotatedComponent!.rotation, 1);
     });
 
-    test('should return failure if component is not found', () {
+    test('should return failure if component is not found', () async {
       // Arrange
       const action = RotateComponentAction(componentId: 'c2', rotation: 1);
 
       // Act
-      final result = useCase.execute(initialState, action);
+      final result = await useCase.execute(initialState, action);
 
       // Assert
       expect(result.isFailure, isTrue);

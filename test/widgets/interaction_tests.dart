@@ -1,4 +1,3 @@
-
 import 'package:circuit_stem/common/assets.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -14,11 +13,14 @@ void main() {
       await TestSetupHelper.initializeTestEnvironment();
     });
 
-    testWidgets('TC-L1-04: Attempting to drag an immovable component (Battery) fails', (tester) async {
+    testWidgets(
+        'TC-L1-04: Attempting to drag an immovable component (Battery) fails',
+        (tester) async {
       // ARRANGE
       final setup = await TestSetupHelper.pumpGameScreenForLevel(tester, 0);
       final batteryId = 'bat1';
-      final initialComponent = GameTestHelper.findComponentById(setup.container, batteryId);
+      final initialComponent =
+          GameTestHelper.findComponentById(setup.container, batteryId);
 
       // ACT
       await GameTestHelper.dragComponentToGrid(
@@ -30,16 +32,20 @@ void main() {
       );
 
       // ASSERT
-      final finalComponent = GameTestHelper.findComponentById(setup.container, batteryId);
+      final finalComponent =
+          GameTestHelper.findComponentById(setup.container, batteryId);
       expect(finalComponent.r, equals(initialComponent.r));
       expect(finalComponent.c, equals(initialComponent.c));
     });
 
-    testWidgets('TC-L1-05: Attempting to drag an immovable component (Switch) fails', (tester) async {
+    testWidgets(
+        'TC-L1-05: Attempting to drag an immovable component (Switch) fails',
+        (tester) async {
       // ARRANGE
       final setup = await TestSetupHelper.pumpGameScreenForLevel(tester, 0);
       final switchId = 'switch1';
-      final initialComponent = GameTestHelper.findComponentById(setup.container, switchId);
+      final initialComponent =
+          GameTestHelper.findComponentById(setup.container, switchId);
 
       // ACT
       await GameTestHelper.dragComponentToGrid(
@@ -51,12 +57,14 @@ void main() {
       );
 
       // ASSERT
-      final finalComponent = GameTestHelper.findComponentById(setup.container, switchId);
+      final finalComponent =
+          GameTestHelper.findComponentById(setup.container, switchId);
       expect(finalComponent.r, equals(initialComponent.r));
       expect(finalComponent.c, equals(initialComponent.c));
     });
 
-    testWidgets('TC-L1-06: Dragging a component onto an occupied tile fails and gives feedback',
+    testWidgets(
+        'TC-L1-06: Dragging a component onto an occupied tile fails and gives feedback',
         (tester) async {
       // ARRANGE
       final setup = await TestSetupHelper.pumpGameScreenForLevel(tester, 0);
@@ -65,8 +73,10 @@ void main() {
       final movableId = 'bulb1'; // The bulb is movable
       final stationaryId = 'bat1'; // The battery is not
 
-      final movableInitial = GameTestHelper.findComponentById(setup.container, movableId);
-      final stationary = GameTestHelper.findComponentById(setup.container, stationaryId);
+      final movableInitial =
+          GameTestHelper.findComponentById(setup.container, movableId);
+      final stationary =
+          GameTestHelper.findComponentById(setup.container, stationaryId);
 
       // ACT
       // Attempt to drag the bulb onto the battery's position
@@ -80,7 +90,8 @@ void main() {
 
       // ASSERT
       // 1. The component should have returned to its original position.
-      final movableFinal = GameTestHelper.findComponentById(setup.container, movableId);
+      final movableFinal =
+          GameTestHelper.findComponentById(setup.container, movableId);
       expect(movableFinal.r, equals(movableInitial.r));
       expect(movableFinal.c, equals(movableInitial.c));
 
@@ -88,12 +99,14 @@ void main() {
       GameTestHelper.expectSoundPlayed(audioService, AppAssets.audioWarning);
     });
 
-    testWidgets('TC-L1-02: Move bulb component to a valid position', (tester) async {
+    testWidgets('TC-L1-02: Move bulb component to a valid position',
+        (tester) async {
       // ARRANGE
       final setup = await TestSetupHelper.pumpGameScreenForLevel(tester, 0);
       final container = setup.container;
       final bulbId = 'bulb1';
-      final initialComponent = GameTestHelper.findComponentById(container, bulbId);
+      final initialComponent =
+          GameTestHelper.findComponentById(container, bulbId);
       final targetRow = initialComponent.r + 2;
       final targetCol = initialComponent.c + 2;
 
@@ -107,7 +120,8 @@ void main() {
       );
 
       // ASSERT
-      final finalComponent = GameTestHelper.findComponentById(container, bulbId);
+      final finalComponent =
+          GameTestHelper.findComponentById(container, bulbId);
       expect(finalComponent.r, equals(targetRow));
       expect(finalComponent.c, equals(targetCol));
     });

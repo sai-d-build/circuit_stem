@@ -77,7 +77,8 @@ class AssetManager {
 
     try {
       final byteData = await rootBundle.load(assetPath);
-      final codec = await ui.instantiateImageCodec(byteData.buffer.asUint8List());
+      final codec =
+          await ui.instantiateImageCodec(byteData.buffer.asUint8List());
       final frame = await codec.getNextFrame();
       _imageCache[path] = frame.image;
       return frame.image;
@@ -89,11 +90,12 @@ class AssetManager {
     }
   }
 
-  Future<ui.Image> _createCustomComponentImage(String path, int width, int height) async {
+  Future<ui.Image> _createCustomComponentImage(
+      String path, int width, int height) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
     final size = Size(width.toDouble(), height.toDouble());
-    
+
     // Clear background
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, size.height),
@@ -108,7 +110,7 @@ class AssetManager {
     } else {
       _drawGenericComponent(canvas, size);
     }
-    
+
     final picture = recorder.endRecording();
     final image = await picture.toImage(width, height);
     picture.dispose();
@@ -126,10 +128,10 @@ class AssetManager {
       width: size.width * 0.6,
       height: size.height * 0.4,
     );
-    
+
     // Battery body
     canvas.drawRect(bodyRect, paint);
-    
+
     // Battery terminal
     final terminalRect = Rect.fromLTWH(
       bodyRect.right,
@@ -153,7 +155,7 @@ class AssetManager {
       Offset(bodyRect.left + bodyRect.width * 0.275, centerY + 7),
       paint,
     );
-    
+
     // Minus sign
     canvas.drawLine(
       Offset(bodyRect.left + bodyRect.width * 0.65, centerY),
@@ -179,7 +181,7 @@ class AssetManager {
       paint.style = PaintingStyle.fill;
       paint.color = Colors.yellow.shade200;
       canvas.drawCircle(center, radius, paint);
-      
+
       // Draw light rays
       paint.style = PaintingStyle.stroke;
       paint.color = Colors.orange;
@@ -236,7 +238,7 @@ class AssetManager {
     path.moveTo(size.width * 0.1, size.height / 2);
     path.lineTo(size.width / 2, size.height / 2);
     path.lineTo(size.width / 2, size.height * 0.9);
-    
+
     canvas.drawPath(path, paint);
   }
 
@@ -252,7 +254,7 @@ class AssetManager {
       Offset(size.width * 0.9, size.height / 2),
       paint,
     );
-    
+
     // Vertical line
     canvas.drawLine(
       Offset(size.width / 2, size.height / 2),
@@ -311,7 +313,8 @@ class AssetManager {
 
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromLTWH(size.width * 0.2, size.height * 0.2, size.width * 0.6, size.height * 0.6),
+        Rect.fromLTWH(size.width * 0.2, size.height * 0.2, size.width * 0.6,
+            size.height * 0.6),
         const Radius.circular(8),
       ),
       paint,
@@ -322,17 +325,20 @@ class AssetManager {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
     final paint = Paint()..color = Colors.grey.shade300;
-    
+
     // Draw a simple placeholder rectangle
-    canvas.drawRect(Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()), paint);
-    
+    canvas.drawRect(
+        Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()), paint);
+
     // Draw an X to indicate missing image
     final strokePaint = Paint()
       ..color = Colors.grey.shade600
       ..strokeWidth = 2;
-    canvas.drawLine(const Offset(10, 10), Offset(width - 10.0, height - 10.0), strokePaint);
-    canvas.drawLine(Offset(width - 10.0, 10), Offset(10, height - 10.0), strokePaint);
-    
+    canvas.drawLine(
+        const Offset(10, 10), Offset(width - 10.0, height - 10.0), strokePaint);
+    canvas.drawLine(
+        Offset(width - 10.0, 10), Offset(10, height - 10.0), strokePaint);
+
     final picture = recorder.endRecording();
     final image = await picture.toImage(width, height);
     picture.dispose();

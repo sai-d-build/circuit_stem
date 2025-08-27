@@ -30,7 +30,10 @@ class GameEngineCore {
       grid: newGrid, // Use newGrid directly
       renderState: RenderState(
         grid: newGrid, // Use newGrid directly
-        poweredComponentIds: newGrid.components.where((c) => c.isPowered).map((c) => c.id).toSet(), // Get powered IDs from the grid
+        poweredComponentIds: newGrid.components
+            .where((c) => c.isPowered)
+            .map((c) => c.id)
+            .toSet(), // Get powered IDs from the grid
         draggedComponentId: draggedComponentId ?? oldState.draggedComponentId,
         dragPosition: dragPosition ?? oldState.dragPosition,
       ),

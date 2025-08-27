@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -18,7 +17,8 @@ import '../common/logger.dart';
 class SwitchDrawingBehavior implements DrawingBehavior {
   const SwitchDrawingBehavior();
   @override
-  void draw(Canvas canvas, Size size, ComponentModel component, AssetManagerNotifier assets) {
+  void draw(Canvas canvas, Size size, ComponentModel component,
+      AssetManagerNotifier assets) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
@@ -27,8 +27,12 @@ class SwitchDrawingBehavior implements DrawingBehavior {
     final isSwitchClosed = component.state['closed'] as bool? ?? false;
 
     final componentColor = component.isPowered
-        ? (isDark ? DarkModeColors.componentActive : LightModeColors.componentActive)
-        : (isDark ? DarkModeColors.componentInactive : LightModeColors.componentInactive);
+        ? (isDark
+            ? DarkModeColors.componentActive
+            : LightModeColors.componentActive)
+        : (isDark
+            ? DarkModeColors.componentInactive
+            : LightModeColors.componentInactive);
 
     paint.color = componentColor;
 
@@ -59,26 +63,28 @@ class SwitchDrawingBehavior implements DrawingBehavior {
   }
 }
 
-
-
 class SwitchLogicBehavior implements LogicBehavior {
   const SwitchLogicBehavior();
   @override
   void evaluate(Grid grid, ComponentModel component) {
-        Logger.log('SwitchLogicBehavior: Evaluating switch ${component.id}');
+    Logger.log('SwitchLogicBehavior: Evaluating switch ${component.id}');
     // Logic is handled by the main engine based on the 'closed' state and terminals.
   }
 }
 
-
-
 void registerSwitch() {
   Logger.log('registerSwitch() called.');
-  registerBehavior<SwitchDrawingBehavior>(() { return const SwitchDrawingBehavior(); });
+  registerBehavior<SwitchDrawingBehavior>(() {
+    return const SwitchDrawingBehavior();
+  });
   Logger.log('registerBehavior<SwitchDrawingBehavior> called.');
-  registerBehavior<ToggleBehavior>(() { return const ToggleBehavior(); });
+  registerBehavior<ToggleBehavior>(() {
+    return const ToggleBehavior();
+  });
   Logger.log('registerBehavior<ToggleBehavior> called.');
-  registerBehavior<SwitchLogicBehavior>(() { return const SwitchLogicBehavior(); });
+  registerBehavior<SwitchLogicBehavior>(() {
+    return const SwitchLogicBehavior();
+  });
   Logger.log('registerBehavior<SwitchLogicBehavior> called.');
 
   ComponentRegistry.register(

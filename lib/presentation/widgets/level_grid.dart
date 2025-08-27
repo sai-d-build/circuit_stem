@@ -79,7 +79,9 @@ class _LevelCard extends StatelessWidget {
               Icon(
                 isLocked
                     ? Icons.lock
-                    : (isCompleted ? Icons.check_circle : Icons.lightbulb_outline),
+                    : (isCompleted
+                        ? Icons.check_circle
+                        : Icons.lightbulb_outline),
                 size: 32,
                 color: color,
               ),

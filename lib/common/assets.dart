@@ -1,9 +1,11 @@
 /// A class to hold all asset paths for the application.
 class AppAssets {
   // Audio assets
-  static const String audioPlacement = 'assets/audio/place.wav'; // Renamed from audioPlace
+  static const String audioPlacement =
+      'assets/audio/place.wav'; // Renamed from audioPlace
   static const String audioSuccess = 'assets/audio/success.wav';
-  static const String audioSwitch = 'assets/audio/toggle.wav'; // Renamed from audioToggle
+  static const String audioSwitch =
+      'assets/audio/toggle.wav'; // Renamed from audioToggle
   static const String audioWarning = 'assets/audio/warning.wav';
 
   // Image assets
