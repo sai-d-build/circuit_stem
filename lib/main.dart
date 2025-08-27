@@ -9,29 +9,8 @@ import 'common/assets.dart';
 import 'dart:async';
 import 'infrastructure/rendering/svg_processor.dart';
 import 'infrastructure/rendering/svg_processor_base.dart';
-import 'components/bulb.dart';
-import 'components/wire.dart';
-import 'components/switch.dart';
-import 'components/battery.dart';
-import 'components/timer.dart';
-import 'components/buzzer.dart';
-import 'domain/goals/power_bulb_goal.dart';
 import 'common/debug_utils.dart'; // Import the new debug utility
-
-void registerAllGameEntities() {
-  registerBulb();
-  registerWireStraight();
-  registerWireCorner();
-  registerWireT();
-  registerSwitch();
-  registerBattery();
-  registerTimer();
-  registerCrossWire();
-  registerBuzzer();
-
-  // Goals
-  registerPowerBulbGoal();
-}
+import 'application/services/component_registry.dart';
 
 void main() async {
   Logger.log('main() called');
@@ -44,7 +23,7 @@ void main() async {
   final SvgProcessorBase svgProcessor = SvgProcessor();
 
   // Register all component and goal behaviors.
-  registerAllGameEntities();
+  ComponentRegistry.registerAllGameEntities();
   Logger.log('main.dart: All game entities registered.');
 
   // Run the MoveBehavior attachment check

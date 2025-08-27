@@ -7,6 +7,7 @@ import '../../domain/entities/level_definition.dart';
 import '../widgets/grid_widget.dart';
 import '../widgets/component_widget.dart';
 import 'package:circuit_stem/application/use_cases/component_action.dart';
+import '../../common/logger.dart';
 
 class GameCanvas extends ConsumerStatefulWidget {
   final LevelDefinition levelDefinition;
@@ -33,6 +34,11 @@ class GameCanvasState extends ConsumerState<GameCanvas> {
   Widget build(BuildContext context) {
     final grid = ref.watch(gridProvider);
     final assetManager = ref.watch(assetManagerProvider.notifier);
+
+    Logger.log("GameCanvas: Building with ${grid.components.length} components on the grid.");
+    for (var component in grid.components) {
+      Logger.log("GameCanvas: Component on grid: ${component.id} (type: ${component.type}) at r:${component.r}, c:${component.c}");
+    }
 
     return DragTarget<ComponentModel>(
       onAcceptWithDetails: (details) {

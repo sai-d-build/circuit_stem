@@ -35,6 +35,7 @@ class GameEngineState with _$GameEngineState {
         grid: Grid(
           rows: level?.rows ?? 0,
           cols: level?.cols ?? 0,
+          components: level?.initialComponents ?? [], // Add initial components to the grid
         ),
         isPaused: false,
         isWin: false,

@@ -37,8 +37,10 @@ class BatteryDrawingBehavior implements DrawingBehavior {
     canvas.translate(-center.dx, -center.dy);
 
     // Draw battery body
+    final batteryWidth = size.width * 0.8;
+    final batteryHeight = size.height * 0.8;
     final batteryRect = Rect.fromCenter(
-        center: center, width: size.width * 0.8, height: size.height * 0.4);
+        center: center, width: batteryWidth, height: batteryHeight);
     canvas.drawRRect(
         RRect.fromRectAndRadius(batteryRect, const Radius.circular(4)),
         fillPaint);
@@ -46,30 +48,34 @@ class BatteryDrawingBehavior implements DrawingBehavior {
         RRect.fromRectAndRadius(batteryRect, const Radius.circular(4)), paint);
 
     // Draw terminals
-    final terminalHeight = size.height * 0.2;
-    final terminalWidth = size.width * 0.1;
+    final terminalHeight = size.height * 0.1; // 10% of total height
+    final terminalWidth = size.width * 0.2; // 20% of total width
 
-    // Positive terminal
+    // Positive terminal (top)
     canvas.drawRect(
-      Rect.fromLTWH(batteryRect.right, center.dy - terminalHeight / 2,
+      Rect.fromLTWH(center.dx - terminalWidth / 2, // Center horizontally
+          batteryRect.top, // Align with battery body top
           terminalWidth, terminalHeight),
       fillPaint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(batteryRect.right, center.dy - terminalHeight / 2,
+      Rect.fromLTWH(center.dx - terminalWidth / 2,
+          batteryRect.top,
           terminalWidth, terminalHeight),
       paint,
     );
 
-    // Negative terminal
+    // Negative terminal (bottom)
     canvas.drawRect(
-      Rect.fromLTWH(batteryRect.left - terminalWidth,
-          center.dy - terminalHeight / 2, terminalWidth, terminalHeight),
+      Rect.fromLTWH(center.dx - terminalWidth / 2, // Center horizontally
+          batteryRect.bottom - terminalHeight, // Align with battery body bottom
+          terminalWidth, terminalHeight),
       fillPaint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(batteryRect.left - terminalWidth,
-          center.dy - terminalHeight / 2, terminalWidth, terminalHeight),
+      Rect.fromLTWH(center.dx - terminalWidth / 2,
+          batteryRect.bottom - terminalHeight,
+          terminalWidth, terminalHeight),
       paint,
     );
 
@@ -90,8 +96,8 @@ class BatteryDrawingBehavior implements DrawingBehavior {
     textPainterPlus.paint(
         canvas,
         Offset(
-            batteryRect.right + terminalWidth / 2 - textPainterPlus.width / 2,
-            center.dy - textPainterPlus.height / 2));
+            center.dx - textPainterPlus.width / 2,
+            batteryRect.top + terminalHeight / 2 - textPainterPlus.height / 2));
 
     final textPainterMinus = TextPainter(
       text: TextSpan(
@@ -109,8 +115,8 @@ class BatteryDrawingBehavior implements DrawingBehavior {
     textPainterMinus.paint(
         canvas,
         Offset(
-            batteryRect.left - terminalWidth / 2 - textPainterMinus.width / 2,
-            center.dy - textPainterMinus.height / 2));
+            center.dx - textPainterMinus.width / 2,
+            batteryRect.bottom - terminalHeight / 2 - textPainterMinus.height / 2));
 
     canvas.restore();
   }

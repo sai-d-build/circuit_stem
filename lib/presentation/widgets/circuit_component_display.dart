@@ -22,7 +22,7 @@ class CircuitComponentDisplay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Logger.log(
-        'CircuitComponentDisplay: Building for component: \${component.id} (type: \${component.type})');
+        "CircuitComponentDisplay: Building for component: ${component.id} (type: ${component.type})");
     final assetManager = ref.watch(assetManagerProvider.notifier);
     return Transform.rotate(
       angle: component.rotation * pi / 2,
@@ -50,15 +50,15 @@ class _ComponentDisplayPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Logger.log(
-        '_ComponentDisplayPainter: Painting component: \${component.id} (type: \${component.type})');
+        "_ComponentDisplayPainter: Painting component: ${component.id} (type: ${component.type})");
     final behavior = component.getBehavior<DrawingBehavior>();
     if (behavior != null) {
       Logger.log(
-          '_ComponentDisplayPainter: Found DrawingBehavior for \${component.type}. Drawing...');
+          "_ComponentDisplayPainter: Found DrawingBehavior for ${component.type}. Drawing...");
       behavior.draw(canvas, size, component, assetManager);
     } else {
       Logger.log(
-          '_ComponentDisplayPainter: No DrawingBehavior found for component: \${component.type}');
+          "_ComponentDisplayPainter: No DrawingBehavior found for component: ${component.type}");
     }
   }
 

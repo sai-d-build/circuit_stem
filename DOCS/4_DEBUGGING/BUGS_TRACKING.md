@@ -22,6 +22,7 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 | `BUG-012` | Open     | Integration Tests                            | `GameEngineNotifier Integration Tests` failing with `Bad state: No element`. | 2025-08-27    |               | High     |
 | `BUG-013` | Open     | Property-Based Tests                         | `Grid Properties Tests` failing with `RangeError`.                          | 2025-08-27    |               | Medium   |
 | `BUG-014` | Open     | Performance                                  | `PowerSimulationService Benchmarks` performance regression.                 | 2025-08-27    |               | Medium   |
+| `BUG-015` | Open     | UI, State Management                       | Initial components are not rendered on the grid due to a race condition. | 2025-08-27    |               | High     |
 
 ---
 
@@ -194,3 +195,54 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 *   **Root Cause:** Inefficient algorithm or implementation in the power simulation service.
 *   **Impact:** Poor performance, especially on larger levels.
 *   **Reference Docs:** `test/performance/simulation_benchmark_test.dart`
+---
+
+### ID: `BUG-015`
+*   **Date:** 2025-08-27
+*   **Status:** Open
+*   **Module/Feature:** UI, State Management
+*   **Priority:** High
+*   **Description:** Initial components defined in a level's JSON file (e.g., the battery in `level_01.json`) are not rendered on the game grid when the level first loads. The grid appears empty until the user interacts with the component palette.
+*   **Root Cause:** A race condition exists between `GameScreen` and `GameCanvas`. Both widgets attempt to load the level data into the `gameEngineProvider`. The `GameCanvas` is built before the `GameScreen` has finished initializing the level, so it initially renders an empty grid. The `GameCanvas` should not be responsible for loading level data.
+*   **Analysis & Logs:**
+    *   Logs from `GameScreen` confirm that the `levelDefinition` contains the correct initial components:
+        ```
+        [LOG] GameScreen: Initial components from level definition: 4
+        [LOG] GameScreen: Initial component: bat1 (type: Component.Battery) at r:1, c:1
+        ```
+    *   However, the immediately following log from `GameCanvas` shows it is building with an empty grid:
+        ```
+        [LOG] GameCanvas: Building with 0 components on the grid.
+        ```
+    *   This indicates the `gridProvider` is empty when `GameCanvas` first builds.
+*   **Reference Code Snippets:**
+    *   **Problematic code in `GameCanvas` (`lib/presentation/widgets/game_canvas.dart`):** The `initState` method incorrectly triggers a level load, causing the race condition.
+        ```dart
+        // lib/presentation/widgets/game_canvas.dart
+        class GameCanvasState extends ConsumerState<GameCanvas> {
+          @override
+          void initState() {
+            super.initState();
+            // THIS IS THE PROBLEM: Redundant level loading
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(gameEngineProvider.notifier).loadLevel(widget.levelDefinition);
+            });
+          }
+          // ...
+        }
+        ```
+    *   **Correct loading logic in `GameScreen` (`lib/presentation/screens/game_screen.dart`):** The `GameScreen` already handles the initialization correctly.
+        ```dart
+        // lib/presentation/screens/game_screen.dart
+        class GameInitializationNotifier extends AsyncNotifier<GameScreenData> {
+          // ...
+          Future<void> _initializeGameEngine(LevelDefinition levelDefinition) async {
+            final gameNotifier = ref.read(gameEngineProvider.notifier);
+            await gameNotifier.loadLevel(levelDefinition);
+            // ...
+          }
+          // ...
+        }
+        ```
+*   **Suggested Fix:**
+    *   Remove the entire `initState` method from `GameCanvasState` in `lib/presentation/widgets/game_canvas.dart`. The `GameScreen` is the single source of truth for level initialization, and the `GameCanvas` should be a dumb widget that only renders the state provided by the `gridProvider`.

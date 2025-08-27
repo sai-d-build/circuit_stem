@@ -1,3 +1,19 @@
+# [5.1.0] - 2025-08-27 - Initial Component & Rendering Fixes
+
+### Fixed
+- **Initial Components Not Appearing on Grid**: Resolved a critical bug where initial components (e.g., Battery, Bulb) defined in `level.json` were not rendered on the game grid at level start.
+  - **Root Cause 1**: The `GameEngineState.initial` factory constructor in `lib/application/game_engine_state.dart` was not adding `level.initialComponents` to the `Grid` object during initialization.
+  - **Root Cause 2**: Static internal maps (`_behaviors`, `_draggable`, `_displayNames`) in `ComponentRegistry` (`lib/application/services/component_registry.dart`) were not reliably cleared on hot restart, leading to "Unknown component type" warnings and preventing proper component creation.
+- **Battery Positioning & Visual Alignment**: Corrected the drawing of the Battery component in `lib/components/battery.dart`. Previously, it appeared misaligned and its terminals were not correctly positioned within its allocated multi-cell grid space. The `BatteryDrawingBehavior` now correctly scales and positions the battery body and terminals.
+
+### Changed
+- **Component Registry Initialization**: The `registerAllGameEntities()` method in `lib/application/services/component_registry.dart` now explicitly clears its internal static maps (`_behaviors`, `_draggable`, `_displayNames`) at the beginning of its execution. This ensures a clean state for component registration, especially crucial for consistent behavior during Flutter's hot restart.
+
+### Known Issues
+- **Bulb Rendering**: The Bulb component's visual quality is poor and it appears oversized. Its drawing logic needs to be updated, ideally to use SVG assets for better scaling and appearance.
+- **Switch Interaction**: The Switch component cannot be toggled on/off by user interaction.
+- **Timer Functionality**: The Timer component currently shows no visible functionality or interaction.
+
 # [5.0.0] - 2025-08-26 - Goal Checking Refactor & Environment Troubleshooting
 
 ### Changed

@@ -1,5 +1,12 @@
 import '../../domain/entities/component.dart';
 import '../../common/logger.dart';
+import '../../components/battery.dart';
+import '../../components/bulb.dart';
+import '../../components/buzzer.dart';
+import '../../components/switch.dart';
+import '../../components/timer.dart';
+import '../../components/wire.dart';
+import '../../domain/goals/power_bulb_goal.dart';
 
 // Helper function to convert direction strings to Dir enum
 Dir _dirFromString(String dir) {
@@ -45,6 +52,34 @@ dynamic getBehaviorByType(Type type) {
 }
 
 class ComponentRegistry {
+  // static bool _isRegistered = false; // Commented out to fix hot restart bug
+
+  static void registerAllGameEntities() {
+    Logger.log('REGISTRY: registerAllGameEntities called.');
+    _behaviors.clear(); // Ensure a clean slate for hot restart/reload
+    _draggable.clear();
+    _displayNames.clear();
+
+    // if (_isRegistered) {
+    //   Logger.log('REGISTRY: Registration already done, skipping.');
+    //   return;
+    // }
+    registerBulb();
+    registerWireStraight();
+    registerWireCorner();
+    registerWireT();
+    registerSwitch();
+    registerBattery();
+    registerTimer();
+    registerCrossWire();
+    registerBuzzer();
+
+    // Goals
+    registerPowerBulbGoal();
+    Logger.log('REGISTRY: Finished registering all entities.');
+    // _isRegistered = true;
+  }
+
   static final Map<String, List<Type>> _behaviors = {};
   static final Map<String, bool> _draggable = {};
   static final Map<String, String> _displayNames = {};

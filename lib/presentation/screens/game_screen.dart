@@ -388,6 +388,12 @@ class _GameScreenState extends ConsumerState<GameScreen>
   }
 
   Widget _buildGameInterface(LevelDefinition levelDefinition) {
+    Logger.log('GameScreen: Building UI for level: ${levelDefinition.id}');
+    Logger.log('GameScreen: Initial components from level definition: ${levelDefinition.initialComponents.length}');
+    for (var component in levelDefinition.initialComponents) {
+      Logger.log('GameScreen: Initial component: ${component.id} (type: ${component.type}) at r:${component.r}, c:${component.c}');
+    }
+
     // Listen to win condition
     ref.listen<bool>(isWinProvider, (previous, isWin) {
       if (isWin) {
