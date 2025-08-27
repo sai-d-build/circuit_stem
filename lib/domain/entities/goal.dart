@@ -14,6 +14,7 @@ class Goal with _$Goal {
     int? c,
     String? from,
     String? to,
+    Map<String, dynamic>? parameters,
     @Default([]) List<dynamic> behaviors,
   }) = _Goal;
 

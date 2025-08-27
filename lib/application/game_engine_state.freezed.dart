@@ -315,7 +315,7 @@ class __$$GameEngineStateImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$GameEngineStateImpl implements _GameEngineState {
+class _$GameEngineStateImpl extends _GameEngineState {
   const _$GameEngineStateImpl(
       {required this.grid,
       required this.isPaused,
@@ -334,7 +334,8 @@ class _$GameEngineStateImpl implements _GameEngineState {
       this.isDebugOverlayVisible = false})
       : _paletteComponents = paletteComponents,
         _poweredBuzzerIds = poweredBuzzerIds,
-        _history = history;
+        _history = history,
+        super._();
 
   @override
   final Grid grid;
@@ -460,7 +461,7 @@ class _$GameEngineStateImpl implements _GameEngineState {
           this, _$identity);
 }
 
-abstract class _GameEngineState implements GameEngineState {
+abstract class _GameEngineState extends GameEngineState {
   const factory _GameEngineState(
       {required final Grid grid,
       required final bool isPaused,
@@ -477,6 +478,7 @@ abstract class _GameEngineState implements GameEngineState {
       final List<GameEngineState> history,
       required final DateTime lastUpdated,
       final bool isDebugOverlayVisible}) = _$GameEngineStateImpl;
+  const _GameEngineState._() : super._();
 
   @override
   Grid get grid;

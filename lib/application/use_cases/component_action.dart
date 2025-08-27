@@ -205,20 +205,6 @@ class SelectPaletteComponentAction extends ComponentAction {
   Map<String, dynamic> get metadata => {'componentId': componentId};
 }
 
-class SimulatePowerFlowAction extends ComponentAction {
-  const SimulatePowerFlowAction();
-  
-  @override
-  List<Object?> get props => [];
-}
-
-class CheckWinConditionAction extends ComponentAction {
-  const CheckWinConditionAction();
-  
-  @override
-  List<Object?> get props => [];
-}
-
 class TogglePauseAction extends ComponentAction {
   const TogglePauseAction();
   

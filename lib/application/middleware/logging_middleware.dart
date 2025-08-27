@@ -4,22 +4,17 @@ import '../use_cases/component_action.dart';
 import 'middleware.dart';
 
 class LoggingMiddleware extends GameEngineMiddleware {
-  final Logger _logger;
-  
-  const LoggingMiddleware(this._logger);
+  const LoggingMiddleware();
   
   @override
   Future<ComponentAction> beforeAction(GameEngineState state, ComponentAction action) async {
-    _logger.info('Executing action: ${action.type}', action.metadata);
+    Logger.log('Executing action: ${action.type}');
     return action;
   }
   
   @override
   Future<GameEngineState> afterAction(GameEngineState oldState, GameEngineState newState, ComponentAction action) async {
-    _logger.info('Action completed: ${action.type}', {
-      'stateChanged': oldState != newState,
-      'gridChanged': oldState.grid != newState.grid,
-    });
+    Logger.log('Action completed: ${action.type}');
     return newState;
   }
 }

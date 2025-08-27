@@ -32,6 +32,8 @@ void main() {
       notifier = GameEngineNotifier(
         audioService: MockAudioService(),
         animationScheduler: MockAnimationScheduler(),
+        levelManager: MockLevelManager(),
+        logger: MockLogger(),
       );
       testLevel = const LevelDefinition(
         id: 'test_level',

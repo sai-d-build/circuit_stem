@@ -4,9 +4,7 @@ import 'middleware.dart';
 import '../../common/logger.dart';
 
 class PerformanceMiddleware extends GameEngineMiddleware {
-  final Logger _logger;
-  
-  const PerformanceMiddleware(this._logger);
+  const PerformanceMiddleware();
   
   @override
   Future<ComponentAction> beforeAction(GameEngineState state, ComponentAction action) async {
@@ -19,10 +17,7 @@ class PerformanceMiddleware extends GameEngineMiddleware {
     final startTime = action.metadata['startTime'] as int?;
     if (startTime != null) {
       final duration = DateTime.now().millisecondsSinceEpoch - startTime;
-      _logger.info('Action performance', {
-        'action': action.type,
-        'duration_ms': duration,
-      });
+      Logger.log('Action performance: ${action.type}, duration_ms: $duration');
     }
     return newState;
   }

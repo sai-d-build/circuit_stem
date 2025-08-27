@@ -1,25 +1,32 @@
-import 'package:circuit_stem/application/game_engine_state.dart';
-import 'package:circuit_stem/application/use_cases/component_action.dart';
+import '../game_engine_state.dart';
+import 'component_action.dart';
+import '../core/result.dart';
+import '../use_cases/base_use_case.dart';
 import 'package:circuit_stem/infrastructure/persistence/level_manager.dart';
 
-class RestartLevelUseCase {
+class RestartLevelAction extends ComponentAction {
+  const RestartLevelAction();
+}
+
+class RestartLevelUseCase extends UseCase<RestartLevelAction> {
   final LevelManagerNotifier _levelManager;
 
   const RestartLevelUseCase(this._levelManager);
 
-  Future<GameEngineState> execute(GameEngineState currentState, RestartLevelAction action) async {
-    if (currentState.currentLevel == null) {
-      return currentState; // No level to restart
+  @override
+  GameEngineState executeInternal(GameEngineState state, RestartLevelAction action) {
+    if (state.currentLevel == null) {
+      return state;
     }
 
-    // Reload the current level by its index
-    final reloadedLevel = await _levelManager.loadLevelByIndex(currentState.currentLevel!.levelNumber - 1); // Assuming levelNumber is 1-based
+    final reloaded = _levelManager.loadLevelByIndexSync(
+      state.currentLevel!.levelNumber - 1,
+    );
 
-    if (reloadedLevel == null) {
-      return currentState; // Failed to reload level
+    if (reloaded == null) {
+      return state;
     }
 
-    // Create a new initial state for the reloaded level
-    return GameEngineState.initial(reloadedLevel);
+    return GameEngineState.initial(reloaded);
   }
 }

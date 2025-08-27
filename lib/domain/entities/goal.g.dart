@@ -13,6 +13,7 @@ _$GoalImpl _$$GoalImplFromJson(Map<String, dynamic> json) => _$GoalImpl(
       c: (json['c'] as num?)?.toInt(),
       from: json['from'] as String?,
       to: json['to'] as String?,
+      parameters: json['parameters'] as Map<String, dynamic>?,
       behaviors: json['behaviors'] as List<dynamic>? ?? const [],
     );
 
@@ -24,5 +25,6 @@ Map<String, dynamic> _$$GoalImplToJson(_$GoalImpl instance) =>
       'c': instance.c,
       'from': instance.from,
       'to': instance.to,
+      'parameters': instance.parameters,
       'behaviors': instance.behaviors,
     };

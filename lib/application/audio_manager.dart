@@ -11,4 +11,7 @@ class AudioManager {
   void playToggle() => _audio.play('toggle.wav');
   void playWin() => _audio.play('success.wav');
   void playLose() => _audio.play('warning.wav');
+  void playSuccess() {
+    _audioService.play('audio/success.wav');
+  }
 }

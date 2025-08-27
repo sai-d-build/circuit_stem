@@ -1,4 +1,4 @@
-// lib/application/game_engine_notifier.dart (Fully Refactored)
+Corrected lib/application/game_engine_notifier.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:circuit_stem/domain/entities/level_definition.dart';
 import 'package:circuit_stem/domain/entities/grid.dart';
@@ -12,8 +12,6 @@ import 'audio_manager.dart';
 import 'input_manager.dart';
 import 'animation_scheduler.dart';
 import 'package:circuit_stem/infrastructure/persistence/level_manager.dart';
-
-// Use Cases
 import 'use_cases/component_action.dart';
 import 'use_cases/create_component_use_case.dart';
 import 'use_cases/move_component_use_case.dart';
@@ -22,31 +20,24 @@ import 'use_cases/restart_level_use_case.dart';
 import 'use_cases/update_component_use_case.dart';
 import 'use_cases/select_palette_component_use_case.dart';
 import 'use_cases/simulate_power_flow_use_case.dart';
+import 'use_cases/simulate_power_flow_action.dart';
 import 'use_cases/check_win_condition_use_case.dart';
 import 'use_cases/toggle_pause_use_case.dart';
 import 'use_cases/undo_use_case.dart';
 import 'use_cases/rotate_component_use_case.dart';
 import 'use_cases/load_level_use_case.dart';
-
-// Middleware
 import 'middleware/middleware.dart';
 import 'middleware/logging_middleware.dart';
 import 'middleware/validation_middleware.dart';
 import 'middleware/performance_middleware.dart';
-
 import 'package:circuit_stem/application/services/component_factory.dart';
 import 'core/result.dart';
 
 class GameEngineNotifier extends StateNotifier<GameEngineState> {
   final InputManager input;
   final AudioManager audio;
-  
-  
   final AnimationScheduler animationScheduler;
-  
-  final Logger _logger;
 
-  // Use Cases
   final CreateComponentFromTemplateUseCase _createUseCase;
   final MoveComponentUseCase _moveUseCase;
   final TapComponentUseCase _tapUseCase;
@@ -60,48 +51,42 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   final RotateComponentUseCase _rotateUseCase;
   final LoadLevelUseCase _loadLevelUseCase;
 
-  // Middleware
   final List<GameEngineMiddleware> _middleware;
 
   GameEngineNotifier({
     required AudioService audioService,
     required this.animationScheduler,
     required LevelManagerNotifier levelManager,
-    required Logger logger,
   })  : input = InputManager(),
         audio = AudioManager(audioService),
-        
-        
-        
-        _logger = logger,
         _createUseCase = CreateComponentFromTemplateUseCase(
-          const PowerSimulationService(), 
-          const ComponentFactory()
+          const PowerSimulationService(),
+          const ComponentFactory(),
         ),
-        _moveUseCase = const MoveComponentUseCase(const PowerSimulationService()),
+        _moveUseCase = const MoveComponentUseCase(PowerSimulationService()),
         _tapUseCase = const TapComponentUseCase(
-          const PowerSimulationService(), 
-          const GoalCheckingService()
+          PowerSimulationService(),
+          GoalCheckingService(),
         ),
         _restartLevelUseCase = RestartLevelUseCase(levelManager),
         _updateComponentUseCase = const UpdateComponentUseCase(
-          const PowerSimulationService(), 
-          const GoalCheckingService()
+          PowerSimulationService(),
+          GoalCheckingService(),
         ),
         _selectPaletteComponentUseCase = const SelectPaletteComponentUseCase(),
-        _simulatePowerFlowUseCase = const SimulatePowerFlowUseCase(const PowerSimulationService()),
-        _checkWinConditionUseCase = const CheckWinConditionUseCase(const GoalCheckingService()),
+        _simulatePowerFlowUseCase = const SimulatePowerFlowUseCase(PowerSimulationService()),
+        _checkWinConditionUseCase = const CheckWinConditionUseCase(GoalCheckingService()),
         _togglePauseUseCase = const TogglePauseUseCase(),
         _undoUseCase = const UndoUseCase(),
         _rotateUseCase = const RotateComponentUseCase(),
         _loadLevelUseCase = LoadLevelUseCase(
-          const SimulatePowerFlowUseCase(const PowerSimulationService()),
-          const CheckWinConditionUseCase(const GoalCheckingService()),
+          const SimulatePowerFlowUseCase(PowerSimulationService()),
+          const CheckWinConditionUseCase(GoalCheckingService()),
         ),
         _middleware = [
           ValidationMiddleware(),
-          LoggingMiddleware(logger),
-          PerformanceMiddleware(logger),
+          LoggingMiddleware(),
+          PerformanceMiddleware(),
         ],
         super(GameEngineState.empty()) {
     _init();
@@ -112,7 +97,6 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     input.onComponentMoved = _moveComponent;
   }
 
-  // Public getters to encapsulate state
   Grid get grid => state.grid;
   LevelDefinition? get currentLevel => state.currentLevel;
   bool get canUndo => state.history.isNotEmpty;
@@ -124,7 +108,6 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
 
   Future<void> executeAction(ComponentAction action) async {
     try {
-      // Apply middleware before action
       ComponentAction processedAction = action;
       for (final middleware in _middleware) {
         processedAction = await middleware.beforeAction(state, processedAction);
@@ -133,13 +116,11 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
       final oldState = state;
       final history = [...state.history, oldState];
 
-      // Execute the appropriate use case
       final result = await _executeUseCase(processedAction);
 
       if (result.isSuccess) {
         var newState = result.data!;
 
-        // Run power simulation and check win condition
         if (_shouldRunSimulation(processedAction)) {
           final simulationResult = _simulatePowerFlowUseCase.execute(newState, const SimulatePowerFlowAction());
           if (simulationResult.isSuccess) {
@@ -155,7 +136,6 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
           }
         }
 
-        // Add to history for non-history actions
         if (processedAction is! UndoAction) {
           newState = newState.copyWith(history: history);
         }
@@ -164,50 +144,54 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
 
         state = newState;
 
-        // Apply middleware after action
         for (final middleware in _middleware) {
           state = await middleware.afterAction(oldState, state, processedAction);
         }
       } else {
-        _logger.warning('Action execution failed', {
-          'action': processedAction.type,
-          'error': result.error,
-        });
+        Logger.log('Action execution failed: ${result.error}');
       }
-    } catch (e) {
-      _logger.error('Action execution error', {
-        'action': action.type,
-        'error': e.toString(),
-      });
+    } catch (e, s) {
+      Logger.log('Action execution error', error: e, stackTrace: s);
     }
   }
 
   Future<Result<GameEngineState>> _executeUseCase(ComponentAction action) async {
+    Result<GameEngineState> result;
     switch (action.runtimeType) {
       case LoadLevelAction:
-        return _loadLevelUseCase.execute(state, action as LoadLevelAction);
+        result = _loadLevelUseCase.execute(state, action as LoadLevelAction);
+        break;
       case CreateComponentFromTemplateAction:
-        return _createUseCase.execute(state, action as CreateComponentFromTemplateAction);
+        result = _createUseCase.execute(state, action as CreateComponentFromTemplateAction);
+        break;
       case RotateComponentAction:
-        return _rotateUseCase.execute(state, action as RotateComponentAction);
+        result = _rotateUseCase.execute(state, action as RotateComponentAction);
+        break;
       case MoveComponentAction:
-        final result = await _moveUseCase.execute(state, action as MoveComponentAction);
-        return result.isSuccess ? Success(state.copyWith(grid: result.data!)) : Failure(result.error!);
+        result = _moveUseCase.execute(state, action as MoveComponentAction);
+        break;
       case TapComponentAction:
-        return _tapUseCase.execute(state, action as TapComponentAction);
+        result = _tapUseCase.execute(state, action as TapComponentAction);
+        break;
       case UpdateComponentAction:
-        return _updateComponentUseCase.execute(state, action as UpdateComponentAction);
+        result = _updateComponentUseCase.execute(state, action as UpdateComponentAction);
+        break;
       case RestartLevelAction:
-        return _restartLevelUseCase.execute(state, action as RestartLevelAction);
+        result = await _restartLevelUseCase.execute(state, action as RestartLevelAction);
+        break;
       case SelectPaletteComponentAction:
-        return _selectPaletteComponentUseCase.execute(state, action as SelectPaletteComponentAction);
+        result = _selectPaletteComponentUseCase.execute(state, action as SelectPaletteComponentAction);
+        break;
       case TogglePauseAction:
-        return _togglePauseUseCase.execute(state, action as TogglePauseAction);
+        result = _togglePauseUseCase.execute(state, action as TogglePauseAction);
+        break;
       case UndoAction:
-        return _undoUseCase.execute(state, action as UndoAction);
+        result = _undoUseCase.execute(state, action as UndoAction);
+        break;
       default:
-        return const Failure('Unknown action type');
+        result = const Failure('Unknown action type');
     }
+    return result;
   }
 
   void _playAudioForAction(ComponentAction action, GameEngineState oldState, GameEngineState newState) {
@@ -228,7 +212,6 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
         action is! UndoAction;
   }
 
-  // Input event handlers
   void _handleTap(ComponentModel comp) {
     executeAction(TapComponentAction(componentId: comp.id));
   }
@@ -236,9 +219,9 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   void _moveComponent(String id, int r, int c) {
     if (id.endsWith('_palette')) {
       executeAction(CreateComponentFromTemplateAction(
-        templateId: id, 
-        row: r, 
-        col: c
+        templateId: id,
+        row: r,
+        col: c,
       ));
     } else {
       executeAction(MoveComponentAction(
@@ -249,11 +232,10 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     }
   }
 
-  // Public API methods (all now use action system)
   void updateComponent(ComponentModel component) {
     executeAction(UpdateComponentAction(
-      componentId: component.id, 
-      newState: component.state
+      componentId: component.id,
+      newState: component.state,
     ));
   }
 
@@ -280,7 +262,6 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     ));
   }
 
-  // Getters for managers (backward compatibility)
   InputManager get inputManager => input;
 
   void toggleDebugOverlay() {

@@ -23,9 +23,14 @@ void main() {
     setUp(() {
       testLevel = const LevelDefinition(
         id: 'test_level',
-        name: 'Test Level',
+        title: 'Test Level',
+        description: 'A simple test level',
+        levelNumber: 1,
+        author: 'Test Author',
+        version: 1,
         rows: 5,
         cols: 5,
+        blockedCells: [],
         initialComponents: [
           ComponentModel(id: 'battery', type: 'battery', r: 0, c: 0, terminals: [
             TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power),
@@ -37,6 +42,8 @@ void main() {
             TerminalSpec(offset: CellOffset(0, 0), direction: Dir.south, type: TerminalType.power),
           ]),
         ],
+        goals: [],
+        hints: [],
       );
 
       notifier = GameEngineNotifier(

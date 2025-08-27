@@ -8,15 +8,15 @@ class RotateComponentUseCase extends UseCase<RotateComponentAction, GameEngineSt
   const RotateComponentUseCase();
 
   @override
-  Result<GameEngineState> execute(GameEngineState state, RotateComponentAction action) {
+  GameEngineState executeInternal(GameEngineState state, RotateComponentAction action) {
     final component = state.grid.componentsById[action.componentId];
     if (component == null) {
-      return const Failure('Component not found');
+      throw Exception('Component not found');
     }
 
     final updatedComponent = component.copyWith(rotation: action.rotation);
     final newGrid = state.grid.copyWithUpdatedComponent(updatedComponent);
     
-    return Success(state.copyWith(grid: newGrid));
+    return state.copyWith(grid: newGrid);
   }
 }

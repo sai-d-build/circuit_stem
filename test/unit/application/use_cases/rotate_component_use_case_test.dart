@@ -16,12 +16,20 @@ void main() {
       initialState = GameEngineState.initial(
         const LevelDefinition(
           id: 'test_level',
-          name: 'Test Level',
+          title: 'Test Level',
+          description: 'A simple test level',
+          levelNumber: 1,
+          author: 'Test Author',
+          version: 1,
           rows: 5,
           cols: 5,
+          blockedCells: [],
           initialComponents: [
             ComponentModel(id: 'c1', type: 'resistor', r: 1, c: 1, rotation: 0),
           ],
+          paletteComponents: [],
+          goals: [],
+          hints: [],
         ),
       );
     });

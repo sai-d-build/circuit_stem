@@ -1,5 +1,6 @@
 import '../../domain/entities/component.dart';
 import '../../domain/entities/grid.dart';
+import '../../domain/entities/component.dart'; // Import Terminal and Dir
 import '../core/result.dart';
 
 class PowerSimulationService {
@@ -93,7 +94,7 @@ class PowerSimulationService {
   bool _canReceivePower(ComponentModel component, ComponentModel source) {
     switch (component.type) {
       case 'diode':
-        return _checkDiodeDirection(component, source);
+        return _checkDiodeDirection(component, source, grid);
       case 'capacitor':
         return !component.state['charged'] == true;
       default:
@@ -101,7 +102,7 @@ class PowerSimulationService {
     }
   }
 
-  bool _checkDiodeDirection(ComponentModel diode, ComponentModel source) {
+  bool _checkDiodeDirection(ComponentModel diode, ComponentModel source, Grid grid) {
     // A diode allows power to flow from anode to cathode.
     // We need to determine which terminal of the diode is connected to the source
     // and if that terminal is the anode.
@@ -115,14 +116,14 @@ class PowerSimulationService {
     final anodeTerminal = diode.terminals[0];
 
     // Check if the source is connected to the anode
-    final connectedToAnode = _getConnectedComponent(diode, anodeTerminal, diode.grid) == source;
+    final connectedToAnode = _getConnectedComponent(diode, anodeTerminal, grid) == source;
 
     return connectedToAnode;
   }
 
-  ComponentModel? _getConnectedComponent(
+    ComponentModel? _getConnectedComponent(
     ComponentModel current, 
-    Terminal terminal, 
+    TerminalSpec terminal, 
     Grid grid
   ) {
     final terminalR = current.r + terminal.offset.r;

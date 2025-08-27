@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:collection/collection.dart'; // For DeepCollectionEquality
 
 import 'package:circuit_stem/domain/entities/component.dart';
 import 'package:circuit_stem/domain/entities/grid.dart';
@@ -12,6 +11,8 @@ part 'game_engine_state.freezed.dart';
 
 @freezed
 class GameEngineState with _$GameEngineState {
+  const GameEngineState._(); // Add this line
+
   const factory GameEngineState({
     required Grid grid,
     required bool isPaused,
@@ -119,9 +120,7 @@ class GameEngineState with _$GameEngineState {
     
     return false;
   }
-}
 
-extension GameEngineStateExtensions on GameEngineState {
   bool get hasLevel => currentLevel != null;
   bool get isPlaying => hasLevel && !isPaused && !isWin;
   bool get isDragging => draggedComponentId != null;

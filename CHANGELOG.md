@@ -1,3 +1,30 @@
+# [4.0.0] - 2025-08-26 - Architectural Refactoring Verification & Finalization
+
+### Added
+- **`COMPREHENSIVE_CORE_REFACTORING_GUIDE.md`**: A new, single source of truth for the entire refactoring journey, combining the high-level strategy and detailed technical implementation plans.
+- **`REFACTOR_STATUS.md`**: A new document to track the completion status of the core refactoring components.
+- **Static `Logger` Class**: A new `lib/common/logger.dart` was created with static methods to provide a globally accessible, instance-free logging utility.
+
+### Changed
+- **`GameEngineNotifier`**: The notifier is now fully decoupled from the `Logger` instance, using the new static methods for all logging.
+- **Middleware (`LoggingMiddleware`, `PerformanceMiddleware`)**: Refactored to use the static `Logger` and removed constructor dependencies.
+- **Service Providers (`providers.dart`)**: The dependency injection setup has been finalized. The `gameEngineProvider` now correctly receives all its required dependencies (`levelManager`, `audioService`, etc.) and obsolete providers (`loggerProvider`, `debugOverlayControllerProvider`) have been removed.
+
+### Fixed
+- **CRITICAL: Resolved All 50+ Analysis Errors**: A massive effort was undertaken to fix the entire suite of analysis errors that were blocking the build and leaving the application in a non-functional state. This included:
+  - **Undefined Classes & Imports**: Fixed all broken imports and incorrect class/type names (e.g., `Terminal` vs `TerminalSpec`, `SimulatePowerFlowUseCase`).
+  - **Broken Dependency Injection**: Correctly configured all Riverpod providers.
+  - **`freezed` Code Generation**: Resolved a blocking syntax error and successfully ran `build_runner` to synchronize all `.freezed.dart` files, fixing the `Missing concrete implementations` error.
+  - **Incorrect Method Calls & Types**: Corrected all method signatures, return types (`Result<T>`), and parameter passing, especially within `GameEngineNotifier`.
+  - **Static vs. Instance Errors**: Corrected all incorrect calls to static methods on instances.
+
+### Removed
+- **Legacy Refactoring Documents**: The old `CORE_REFACTORING.md` and `CORE_REFACTORING-PHASE3-REFAVCTOR.md` files have been renamed to `LEGACY_...` to serve as an archive.
+- **Obsolete Providers**: Removed the `debugOverlayControllerProvider` and `loggerProvider`.
+
+---
+
+
 ## [3.0.0] - 2025-08-26 - Phase 3 Refactoring Complete
 
 ### Added

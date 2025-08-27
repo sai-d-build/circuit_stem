@@ -2,25 +2,28 @@ import '../core/result.dart';
 import '../game_engine_state.dart';
 import 'component_action.dart';
 
-abstract class UseCase<TAction extends ComponentAction, TResult> {
+abstract class UseCase<TAction extends ComponentAction> {
   const UseCase();
-  
-  Result<TResult> execute(GameEngineState state, TAction action) {
+
+  Result<GameEngineState> execute(GameEngineState state, TAction action) {
     final validationResult = validate(state, action);
     if (validationResult.isFailure) {
-      return Failure(validationResult.error!);
+      return Failure<GameEngineState>(validationResult.error!);
     }
-    
+
     try {
-      return Success(executeInternal(state, action));
-    } catch (e) {
-      return Failure(e.toString());
+      final updatedState = executeInternal(state, action);
+      return Success(updatedState);
+    } catch (e, s) {
+      // Ideally log stack trace here
+      return Failure<GameEngineState>('UseCase error: $e');
     }
   }
-  
+
   Result<void> validate(GameEngineState state, TAction action) {
     return const Success(null);
   }
-  
-  TResult executeInternal(GameEngineState state, TAction action);
+
+  /// Each use case returns a full new GameEngineState
+  GameEngineState executeInternal(GameEngineState state, TAction action);
 }

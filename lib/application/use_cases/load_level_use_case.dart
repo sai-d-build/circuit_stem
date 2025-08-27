@@ -1,6 +1,6 @@
-
 import 'package:circuit_stem/application/use_cases/check_win_condition_use_case.dart';
 import 'package:circuit_stem/application/use_cases/simulate_power_flow_use_case.dart';
+import 'package:circuit_stem/application/use_cases/simulate_power_flow_action.dart';
 import 'package:circuit_stem/domain/entities/grid.dart';
 
 import '../core/result.dart';
@@ -15,7 +15,7 @@ class LoadLevelUseCase extends UseCase<LoadLevelAction, GameEngineState> {
   const LoadLevelUseCase(this._simulatePowerFlowUseCase, this._checkWinConditionUseCase);
 
   @override
-  Result<GameEngineState> execute(GameEngineState state, LoadLevelAction action) {
+  GameEngineState executeInternal(GameEngineState state, LoadLevelAction action) {
     try {
       final level = action.level;
       var grid = Grid(
@@ -43,11 +43,11 @@ class LoadLevelUseCase extends UseCase<LoadLevelAction, GameEngineState> {
         const CheckWinConditionAction()
       );
 
-      return Success(newState.copyWith(
+      return newState.copyWith(
         isWin: winResult.isSuccess ? winResult.data! : false,
-      ));
+      );
     } catch (e) {
-      return Failure(e.toString());
+      rethrow; // Rethrow to be caught by the base UseCase
     }
   }
 }

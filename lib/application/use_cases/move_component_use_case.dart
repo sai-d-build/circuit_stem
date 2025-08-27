@@ -1,68 +1,65 @@
 import 'package:circuit_stem/domain/entities/grid.dart';
 import 'package:circuit_stem/application/game_context.dart';
 import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
-import '../services/simulation_service.dart';
+import '../services/power_simulation_service.dart';
 import '../../common/logger.dart';
+import '../game_engine_state.dart';
+import 'component_action.dart';
+import 'base_use_case.dart';
 
-/// Application service that orchestrates a component move:
-///  - Finds the component
-///  - Delegates to MoveBehavior
-///  - Updates the grid
-///  - Runs simulation
-class MoveComponentUseCase {
-  final SimulationService simulation;
+class MoveComponentAction extends ComponentAction {
+  final String componentId;
+  final int newRow;
+  final int newCol;
+
+  MoveComponentAction({
+    required this.componentId,
+    required this.newRow,
+    required this.newCol,
+  });
+}
+
+class MoveComponentUseCase extends UseCase<MoveComponentAction> {
+  final PowerSimulationService simulation;
 
   MoveComponentUseCase(this.simulation);
 
-  Grid? execute(
-    Grid grid,
-    String componentId, {
-    required int toRow,
-    required int toCol,
-  }) {
-    final comp = grid.componentsById[componentId];
+  @override
+  GameEngineState executeInternal(GameEngineState state, MoveComponentAction action) {
+    final comp = state.grid.componentsById[action.componentId];
     if (comp == null) {
-      Logger.log('[MoveComponentUseCase] Component with id $componentId not found.');
-      return null;
+      Logger.log('[MoveComponentUseCase] Component with id ${action.componentId} not found.');
+      return state; // unchanged
     }
 
-    Logger.log('[MoveComponentUseCase] Found component: ${comp.id}, behaviors: ${comp.behaviors.map((b) => b.runtimeType).join(', ')}');
+    Logger.log('[MoveComponentUseCase] Found component: ${comp.id}');
 
-    // Look for a MoveBehavior attached to this component
-    final moveBehavior = comp.behaviors
-        .whereType<MoveBehavior>()
-        .cast<MoveBehavior?>()
-        .firstOrNull;
-
+    final moveBehavior = comp.behaviors.whereType<MoveBehavior>().firstOrNull;
     if (moveBehavior == null) {
-      Logger.log('❌ MoveComponentUseCase: MoveBehavior NOT found on component "${comp.type}" (ID: ${comp.id})');
-      return null;
+      Logger.log('❌ MoveComponentUseCase: MoveBehavior not found for ${comp.id}');
+      return state;
     }
-
-    Logger.log('✅ MoveComponentUseCase: Found MoveBehavior for component ${comp.id}');
 
     final context = GameContext(
-      grid: grid,
-      toRow: toRow,
-      toCol: toCol,
+      grid: state.grid,
+      toRow: action.newRow,
+      toCol: action.newCol,
     );
 
     final updated = moveBehavior.handle(comp, 'move', context);
     if (updated == null) {
-      Logger.log('❌ MoveComponentUseCase: MoveBehavior.handle returned null for component "${comp.type}" (ID: ${comp.id})');
-      return null;
+      Logger.log('❌ MoveComponentUseCase: handle returned null for ${comp.id}');
+      return state;
     }
 
-    Logger.log('✅ MoveComponentUseCase: MoveBehavior.handle returned updated component: ${updated.id}');
-
-    var newGrid = grid.copyWithUpdatedComponent(updated);
+    var newGrid = state.grid.copyWithUpdatedComponent(updated);
     newGrid = simulation.simulatePowerFlow(newGrid);
 
-    return newGrid;
+    return state.copyWith(grid: newGrid);
   }
 }
 
-// Small helper to avoid errors on empty .firstOrNull
-extension<T> on Iterable<T> {
+// Safe extension
+extension FirstOrNull<T> on Iterable<T> {
   T? get firstOrNull => isEmpty ? null : first;
 }

@@ -3,18 +3,20 @@ import 'package:circuit_stem/application/use_cases/component_action.dart';
 import 'package:circuit_stem/application/services/power_simulation_service.dart';
 import 'package:circuit_stem/application/services/goal_checking_service.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
+import 'base_use_case.dart';
 
-class UpdateComponentUseCase {
+class UpdateComponentUseCase extends UseCase<UpdateComponentAction, GameEngineState> {
   final PowerSimulationService _simulation;
   final GoalCheckingService _goalChecker;
 
   const UpdateComponentUseCase(this._simulation, this._goalChecker);
 
-  GameEngineState execute(GameEngineState currentState, UpdateComponentAction action) {
+  @override
+  GameEngineState executeInternal(GameEngineState currentState, UpdateComponentAction action) {
     final component = currentState.grid.componentsById[action.componentId];
 
     if (component == null) {
-      return currentState; // Component not found
+      throw Exception('Component not found');
     }
 
     final updatedComponent = component.copyWith(state: action.newState);

@@ -26,13 +26,21 @@ void main() {
     setUp(() {
       testLevel = const LevelDefinition(
         id: 'test_level',
-        name: 'Test Level',
+        title: 'Test Level',
+        description: 'A simple test level',
+        levelNumber: 1,
+        author: 'Test Author',
+        version: 1,
         rows: 10,
         cols: 10,
+        blockedCells: [],
+        initialComponents: [],
         paletteComponents: [
           ComponentModel(id: 'wire_palette', type: 'wire', r: 0, c: 0, terminals: []),
           ComponentModel(id: 'resistor_palette', type: 'resistor', r: 0, c: 0, terminals: []),
         ],
+        goals: [],
+        hints: [],
       );
 
       notifier = GameEngineNotifier(

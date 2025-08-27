@@ -4,6 +4,7 @@ import 'package:circuit_stem/application/services/power_simulation_service.dart'
 import 'package:circuit_stem/application/services/goal_checking_service.dart';
 import 'package:circuit_stem/domain/behaviors/behavior.dart';
 import 'package:circuit_stem/application/game_context.dart';
+import 'package:circuit_stem/domain/entities/component.dart';
 
 class TapComponentUseCase {
   final PowerSimulationService _simulation;

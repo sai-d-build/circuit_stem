@@ -5,6 +5,7 @@ import 'package:circuit_stem/application/game_engine_state.dart';
 import 'package:circuit_stem/infrastructure/audio/audio_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:circuit_stem/infrastructure/persistence/level_manager.dart';
+import 'package:circuit_stem/common/logger.dart';
 
 // Provider for the simple AnimationScheduler
 final animationSchedulerProvider = Provider((ref) => AnimationScheduler());
@@ -17,10 +18,12 @@ final gameEngineProvider = StateNotifierProvider<GameEngineNotifier, GameEngineS
     final audioService = ref.watch(audioServiceProvider);
     final animationScheduler = ref.watch(animationSchedulerProvider);
     final levelManager = ref.watch(levelManagerProvider.notifier);
+    final logger = ref.watch(loggerProvider);
     return GameEngineNotifier(
       audioService: audioService,
       animationScheduler: animationScheduler,
       levelManager: levelManager,
+      logger: logger,
     );
   },
 );
