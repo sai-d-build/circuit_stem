@@ -17,6 +17,11 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 | `BUG-007` | Open     | Various (Audio, Grid, Components, UI)        | Undefined Methods/Getters Across Refactored Components.                     | 2025-08-22    |               | High     |
 | `BUG-008` | Resolved | Game Engine                                  | Invalid `this` Reference in `GameEngineNotifierV2` Initializer.             | 2025-08-22    | 2025-08-25    | High     |
 | `BUG-009` | Open     | Code Quality, Riverpod Usage                 | Unused Code and Improper State Access Warnings.                             | 2025-08-22    |               | Low      |
+| `BUG-010` | Open     | Test Setup                                   | `UnimplementedError: SharedPreferences provider must be overridden` in widget tests. | 2025-08-27    |               | High     |
+| `BUG-011` | Open     | Core Logic & State Management                | Multiple failures in `RotateComponentUseCase`, `GoalCheckingService`, `PowerSimulationService`, `GameEngineNotifier`. | 2025-08-27    |               | High     |
+| `BUG-012` | Open     | Integration Tests                            | `GameEngineNotifier Integration Tests` failing with `Bad state: No element`. | 2025-08-27    |               | High     |
+| `BUG-013` | Open     | Property-Based Tests                         | `Grid Properties Tests` failing with `RangeError`.                          | 2025-08-27    |               | Medium   |
+| `BUG-014` | Open     | Performance                                  | `PowerSimulationService Benchmarks` performance regression.                 | 2025-08-27    |               | Medium   |
 
 ---
 
@@ -131,90 +136,61 @@ This document tracks the status of known bugs and planned tasks for the Circuit 
 *   **Impact:** Does not block compilation but indicates code smells, potential for bugs, and reduced maintainability.
 *   **Reference Docs:** Various files, including `lib/behaviors/drag_behavior.dart`, `lib/components/switch.dart`, `lib/core/providers.dart`, `lib/engine/game_engine_core.dart`, `lib/engine/simulation_manager.dart`, `lib/widgets/component_painter.dart`
 
+---
 
- application is currently failing to launch on Chrome due to persistent compilation errors.
+### ID: `BUG-010`
+*   **Date:** 2025-08-27
+*   **Status:** Open
+*   **Module/Feature:** Test Setup
+*   **Description:** Widget tests are failing with `UnimplementedError: SharedPreferences provider must be overridden`. This causes `pumpAndSettle` to time out, as the UI cannot initialize correctly.
+*   **Root Cause:** The `sharedPreferencesProvider` is not being overridden in the test environment, specifically in the `pumpGameScreenWithOverrides` helper function.
+*   **Impact:** Blocks all widget tests from running successfully.
+*   **Reference Docs:** `test/helpers/pump_game_screen.dart`, `test/levels/level_01_test.dart`
 
-Current Status:
+---
 
-Component Movement Issue: Despite refactoring the movement logic and updating the Timer component, components are still not moving at runtime, with logs indicating "Move failed for component."
-Investigation: I identified that other draggable components (Bulb, Buzzer, and all Wire types) also need the MoveBehavior registered.
-Compilation Errors: Repeated attempts to add the MoveBehavior import to bulb.dart, buzzer.dart, and wire.dart have resulted in recurring compilation errors related to misplaced import statements and MoveBehavior not being recognized as a type.
-Debugging: To diagnose why MoveBehavior instances are not being correctly attached to components, I added enhanced logging to lib/application/services/component_registry.dart to trace the behavior instantiation process.
-The application is currently stuck in a state where it cannot compile due to these unresolved import and type resolution issues, preventing further runtime debugging.
-The application successfully launched and initialized, registering all game components and behaviors as expected. This confirms that the initial setup and ComponentRegistry are functioning correctly.
+### ID: `BUG-011`
+*   **Date:** 2025-08-27
+*   **Status:** Open
+*   **Module/Feature:** Core Logic & State Management
+*   **Description:** Multiple unit tests are failing in core application logic.
+    *   `RotateComponentUseCase`: Fails to rotate a component and returns an incorrect error message.
+    *   `GoalCheckingService`: Incorrectly identifies whether a goal is met.
+    *   `PowerSimulationService`: Fails to power a circuit with a correctly oriented diode.
+    *   `GameEngineNotifier`: `undo` functionality is broken, fails to update component rotation, and throws "Component not found" and "No actions to undo" errors.
+*   **Root Cause:** Likely regressions or bugs introduced during refactoring of the game engine.
+*   **Impact:** Core gameplay logic is broken.
+*   **Reference Docs:** `test/unit/application/use_cases/rotate_component_use_case_test.dart`, `test/unit/application/services/goal_checking_service_test.dart`, `test/unit/application/services/power_simulation_service_test.dart`, `test/unit/game_engine_notifier_test.dart`
 
-However, the logs reveal a critical runtime error: StateError: Bad state: No element. This exception occurs within GameEngineNotifierV2._moveComponent at line 92, specifically when attempting to find a palette component using state.paletteComponents.firstWhere((c) => c.id == id).
+---
 
-Detailed Issue Analysis:
+### ID: `BUG-012`
+*   **Date:** 2025-08-27
+*   **Status:** Open
+*   **Module/Feature:** Integration Tests
+*   **Description:** `GameEngineNotifier Integration Tests` are failing with a `Bad state: No element` error.
+*   **Root Cause:** An issue in the sequence of actions within the game engine, likely related to state management during integration tests.
+*   **Impact:** Core gameplay flows are not working as expected.
+*   **Reference Docs:** `test/integration/game_engine_flows_test.dart`
 
-StateError: Bad state: No element in GameEngineNotifierV2._moveComponent (line 92):
-Cause: This error indicates that when a user attempts to drag a component from the palette (identified by its ID ending with _palette), the GameEngineNotifierV2 cannot find a matching component within its state.paletteComponents list. The firstWhere method fails because no element satisfies the condition.
-Impact: This directly prevents users from dragging and placing new components from the palette onto the game grid, effectively blocking core gameplay functionality.
-Root Cause (Hypothesis): The id of the component being dragged from the palette does not precisely match any of the IDs currently present in state.paletteComponents. This could be due to:
-ID Mismatch: The ID generated or used by the UI for the dragged palette component might differ from the actual IDs stored in state.paletteComponents.
-Incorrect Palette Population/Maintenance: state.paletteComponents might not be correctly populated during level loading, or components might be inadvertently removed from it before a drag operation completes.
-Comparison to Previous Analysis:
+---
 
-My previous analysis of the "Component Movement Issue" focused on the scenario where components already on the grid fail to move due to MoveBehavior not being found. The current logs highlight a different, earlier problem: the inability to even start moving components from the palette. This suggests the "Component Movement Issue" is multi-faceted. The StateError is a more immediate, blocking issue than the MoveBehavior attachment problem for existing grid components.
+### ID: `BUG-013`
+*   **Date:** 2025-08-27
+*   **Status:** Open
+*   **Module/Feature:** Property-Based Tests
+*   **Description:** `Grid Properties Tests` are failing with a `RangeError`.
+*   **Root Cause:** Components may be placed outside the grid boundaries.
+*   **Impact:** Potential for unexpected behavior and crashes related to component placement.
+*   **Reference Docs:** `test/properties/grid_properties_test.dart`
 
-To further diagnose this StateError, I need more specific information:
+---
 
-What is the exact id of the component being dragged from the palette when this error occurs?
-What are the contents (IDs) of state.paletteComponents at the moment the error is thrown?
-
-A deeper analysis before making changes is the right approach. It will ensure the solution is precise and correct.
-
-Here is my plan:
-
-Analyze Dependent Files: I will read the source code of the key architectural files that the GameEngineNotifier depends on. This includes result.dart, base_use_case.dart, a few concrete UseCase implementations, and the middleware.dart contract.
-Summarize Functionality: I will summarize the intended purpose and functionality of each of these files based on their code.
-Compare with Notifier Errors: I will then draw a direct comparison between the intended functionality of these files and the specific errors we observed in GameEngineNotifier. For example, I will show how the design of the Result class is being violated by the invalid_assignment errors in the notifier.
-Design a Detailed Solution: Finally, I will present a detailed, step-by-step solution for fixing the GameEngineNotifier based on this deeper understanding.
-I will begin by reading the selected architectural files.
-
-check
-ReadManyFiles.../middleware.dart
-Thinking
-stat_minus_1
-I have thoroughly analyzed the functionality of the dependent files and compared them with the errors in GameEngineNotifier.
-
-Functionality Summary of Dependent Files:
-lib/application/core/result.dart: This file defines a Result<T> sealed class with Success<T> and Failure<T> subclasses. It's designed for explicit error handling without exceptions. Operations return a Result object, which callers must then check (isSuccess, isFailure) and unwrap (data, error) or use the fold method.
-lib/application/use_cases/base_use_case.dart: This abstract class provides a standardized execute method for all Use Cases. It handles validation (delegating to the action's validate method) and wraps the result of executeInternal (the core business logic) in a Result<TResult>.
-lib/application/use_cases/move_component_use_case.dart: A concrete Use Case that implements executeInternal to return a Grid object (the TResult for this Use Case) after moving a component.
-lib/application/use_cases/restart_level_use_case.dart: A concrete Use Case that implements executeInternal to return a GameEngineState object (the TResult for this Use Case) after restarting the level. It's an async operation.
-lib/application/middleware/middleware.dart: Defines the GameEngineMiddleware interface with beforeAction and afterAction methods, allowing for cross-cutting concerns to be applied to actions.
-Comparison with Errors in GameEngineNotifier:
-The errors in GameEngineNotifier stem from a fundamental misunderstanding of how to interact with the Result pattern and the varying TResult types returned by different Use Cases.
-
-invalid_assignment errors: The GameEngineNotifier is attempting to directly assign the data payload (e.g., GameEngineState or Grid) from a Result object to a variable that is still typed as Result<GameEngineState>. The execute method of BaseUseCase always returns a Result<TResult>, not the raw TResult. The notifier needs to explicitly check isSuccess and then access result.data!.
-missing_required_argument and argument_type_not_assignable errors: The _executeUseCase method in GameEngineNotifier is not correctly handling the specific TResult type returned by each Use Case. For example, MoveComponentUseCase returns a Grid, but the notifier is trying to assign it as if it were a GameEngineState. Additionally, some action constructors are being called without their required named parameters.
-const_with_non_const errors: The GameEngineNotifier constructor is attempting to instantiate Use Cases and Middleware with the const keyword, but their constructors are not marked as const.
-Designed Solution to Fix GameEngineNotifier (Group 1 Errors)
-The solution involves correctly unwrapping Result objects, handling the specific TResult type for each Use Case, and correcting constructor calls.
-
-Detailed Plan:
-
-Refactor _executeUseCase to correctly handle Result<TResult>:
-
-For each case in the switch (action.runtimeType):
-Call the Use Case's execute method, which returns a Result<TResult>.
-Check result.isSuccess.
-If isSuccess, extract result.data!.
-Then, based on the specific TResult type of that Use Case, update the GameEngineState accordingly.
-If TResult is GameEngineState, assign result.data! directly to newState.
-If TResult is Grid, update newState = newState.copyWith(grid: result.data!).
-If TResult is bool (for CheckWinConditionUseCase), update newState = newState.copyWith(isWin: result.data!).
-If isFailure, return the Failure result directly.
-Correct const constructor calls:
-
-Remove the const keyword from the instantiation of Use Cases and Middleware in the GameEngineNotifier constructor where the corresponding class constructors are not const.
-Fix _moveComponent and rotateComponent action instantiations:
-
-Ensure MoveComponentAction is called with newRow and newCol named parameters.
-Ensure RotateComponentAction is called with rotation named parameter.
-This systematic approach will resolve the invalid_assignment, missing_required_argument, argument_type_not_assignable, and const_with_non_const errors in lib/application/game_engine_notifier.dart.
-
-MoveComponentUseCase and RestartLevelUseCase errors in game_engine_notifier.dart persist, so I'll table that. Now, I'll tackle test file errors: undefined_named_parameter for logger in game_engine_flows_test.dart and grid_properties_test.dart, undefined_getter for Result in rotate_component_use_case_test.dart, and undefined_function/undefined_named_parameter for MockLevelManager/MockLogger in game_engine_notifier_test.dart. Starting with game_engine_flows_test.dart.
-
-MoveComponentUseCase and RestartLevelUseCase errors in game_engine_notifier.dart persist, so I'll table that. Now, I'll tackle test file errors: undefined_named_parameter for logger in game_engine_flows_test.dart and grid_properties_test.dart, undefined_getter for Result in rotate_component_use_case_test.dart, and undefined_function/undefined_named_parameter for MockLevelManager/MockLogger in game_engine_notifier_test.dart. Starting with game_engine_flows_test.dart.
+### ID: `BUG-014`
+*   **Date:** 2025-08-27
+*   **Status:** Open
+*   **Module/Feature:** Performance
+*   **Description:** `PowerSimulationService Benchmarks` are showing a significant performance regression.
+*   **Root Cause:** Inefficient algorithm or implementation in the power simulation service.
+*   **Impact:** Poor performance, especially on larger levels.
+*   **Reference Docs:** `test/performance/simulation_benchmark_test.dart`
