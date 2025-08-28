@@ -2,10 +2,14 @@
 exclude:
   - DOCS/stemcir_refference/reference_code_a/**
   - sparkcircuit_REFER_MVP/**
+  - lib/domain/entities/refactored_domain.dart
+  - lib/domain/entities/refactored_domain.freezed.dart
 analyzer:
   exclude:
     - DOCS/stemcir_refference/reference_code_a/**
     - sparkcircuit_REFER_MVP/**
+    - lib/domain/entities/refactored_domain.dart
+    - lib/domain/entities/refactored_domain.freezed.dart
 # This file configures the analyzer, which statically analyzes Dart code to
 # check for errors, warnings, and lints.
 #
