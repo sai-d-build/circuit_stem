@@ -39,17 +39,21 @@ final levelManagerProvider = StateNotifierProvider<LevelManagerNotifier, LevelMa
   return LevelManagerNotifier(prefs, assetManager); // Pass both arguments
 });
 
+final animationSchedulerProvider = Provider<AnimationScheduler>((ref) {
+  return AnimationScheduler();
+});
+
 // The core GameEngine provider that wraps the existing notifier
 final gameEngineProvider =
     StateNotifierProvider<GameEngineNotifier, GameEngineState>((ref) {
   final audioService = ref.watch(audioServiceProvider);
-  final levelManager = ref.watch(levelManagerProvider);
+  final levelManager = ref.watch(levelManagerProvider.notifier);
+  final animationScheduler = ref.watch(animationSchedulerProvider);
   // The existing GameEngineNotifier is instantiated here with its dependencies
   return GameEngineNotifier(
     audioService: audioService,
     levelManager: levelManager,
-    // TODO: Refactor AnimationScheduler to be provided by a provider
-    animationScheduler: AnimationScheduler(),
+    animationScheduler: animationScheduler,
   );
 });
 

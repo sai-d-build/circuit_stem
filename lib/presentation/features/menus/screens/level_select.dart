@@ -40,17 +40,19 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = levelManager.state.isLoading;
-    final levels = levelManager.state.levels;
-    final completedLevelIds = levelManager.state.completedLevelIds;
-    final errorMessage = levelManager.state.errorMessage;
+    // FIXED: Use proper provider access patterns
+    final levels = ref.watch(levelsProvider);
+    final completedLevelIds = ref.watch(completedLevelIdsProvider);
+    final levelManagerState = ref.watch(levelManagerProvider);
+    final isLoading = levelManagerState.isLoading;
+    final errorMessage = levelManagerState.errorMessage;
 
-    if (levelManagerState.errorMessage != null) {
+    if (errorMessage != null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Error')),
         body: Center(
           child: Text(
-            levelManagerState.errorMessage!,
+            errorMessage,
             style: Theme.of(context).textTheme.titleMedium,
             textAlign: TextAlign.center,
           ),
@@ -58,7 +60,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
       );
     }
 
-    if (levelManagerState.isLoading && levels.isEmpty) {
+    if (isLoading && levels.isEmpty) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );

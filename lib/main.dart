@@ -55,6 +55,10 @@ class InitializerState extends ConsumerState<Initializer> {
   }
 
   Future<void> _initializeAssets() async {
+    // Await shared preferences before initializing dependent providers
+    setState(() => _status = 'Loading preferences...');
+    await ref.read(sharedPreferencesProvider.future);
+
     // Initialize LevelManager
     setState(() => _status = 'Loading levels...');
     // Reading the provider will initialize it, thanks to Riverpod.

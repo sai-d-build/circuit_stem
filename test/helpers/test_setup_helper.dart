@@ -2,10 +2,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:circuit_stem/application/providers.dart';
-
+import 'package:circuit_stem/application/services/component_registry.dart';
 import 'package:circuit_stem/domain/entities/level_definition.dart';
 import 'package:circuit_stem/presentation/features/game/screens/game_screen.dart'; // Corrected import
+import 'package:circuit_stem/presentation/state/game_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -78,7 +78,7 @@ class TestSetupHelper {
     final tempContainer = ProviderContainer(
       overrides: [
         assetManagerProvider.overrideWith((_) => mockAssetManager),
-        sharedPreferencesProvider.overrideWithValue(mockPrefs),
+        sharedPreferencesProvider.overrideWith((_) async => mockPrefs),
       ],
     );
 
@@ -100,7 +100,7 @@ class TestSetupHelper {
     final testContainer = ProviderContainer(
       overrides: [
         assetManagerProvider.overrideWith((_) => mockAssetManager),
-        sharedPreferencesProvider.overrideWithValue(mockPrefs),
+        sharedPreferencesProvider.overrideWith((_) async => mockPrefs),
         audioServiceProvider.overrideWithValue(mockAudioService),
         animationSchedulerProvider.overrideWithValue(mockAnimationScheduler),
       ],

@@ -1,3 +1,19 @@
+# [6.0.1] - 2025-08-27 - Post-Migration Bug Fixes & Stabilization
+
+### Fixed
+- **Critical Runtime Crash on Startup**: Resolved an `Unexpected null value` error that occurred because the `LevelManager` was trying to access `SharedPreferences` before they were loaded. The app's startup sequence in `main.dart` now explicitly `await`s `SharedPreferences` before initializing dependent providers.
+- **Broken Provider Dependencies**:
+  - Corrected the `gameEngineProvider` in `lib/presentation/state/game_state.dart` to request the `LevelManagerNotifier` (`.notifier`) instead of its state, fixing a critical type mismatch.
+  - Added the missing `animationSchedulerProvider` to `lib/presentation/state/game_state.dart` and updated the `gameEngineProvider` to use it, resolving a `TODO` and fixing test setup errors.
+- **Incorrect State Access in UI**: Fixed multiple `undefined_identifier` errors in `lib/presentation/features/menus/screens/level_select.dart` by replacing direct variable access with the correct Riverpod `ref.watch()` patterns.
+- **Broken Test Setup**:
+  - Resolved `undefined_identifier` errors in `test/helpers/test_setup_helper.dart` by adding the missing import for `game_state.dart` (to bring providers into scope).
+  - Fixed test failures by replacing incorrect `overrideWithValue` calls on a `FutureProvider` with the correct `overrideWith` method.
+  - Added the missing import for `ComponentRegistry` in the test helper to resolve `undefined_identifier` errors.
+
+### Changed
+- **Improved App Initialization**: The `Initializer` widget in `lib/main.dart` is now more robust, ensuring asynchronous dependencies are loaded in the correct order before the main app runs.
+
 # [6.0.0] - 2025-08-27 - UI Migration to Riverpod & Feature-Based Structure
 
 ### Added
