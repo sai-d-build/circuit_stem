@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:circuit_stem/application/providers.dart';
-import 'package:circuit_stem/main.dart';
+
 import 'package:circuit_stem/domain/entities/level_definition.dart';
-import 'package:circuit_stem/presentation/screens/game_screen.dart';
+import 'package:circuit_stem/presentation/features/game/screens/game_screen.dart'; // Corrected import
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,7 +38,7 @@ class TestSetupHelper {
     SharedPreferences.setMockInitialValues({});
 
     // Register all component and goal behaviors.
-    registerAllGameEntities();
+    ComponentRegistry.registerAllGameEntities(); // Corrected call
 
     // Read the manifest file to discover all level files.
     final manifestPath = 'assets/levels/level_manifest.json';
@@ -127,3 +127,4 @@ class TestSetupHelper {
     );
   }
 }
+

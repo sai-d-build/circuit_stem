@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:circuit_stem/application/services/power_simulation_service.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
 import 'package:circuit_stem/domain/entities/grid.dart';
+import 'package:circuit_stem/common/logger.dart'; // New import
 
 void main() {
   group('PowerSimulationService Benchmarks', () {
@@ -61,7 +62,7 @@ void main() {
 
       // Assert
       final averageTime = stopwatch.elapsedMilliseconds / numberOfRuns;
-      print(
+      Logger.log(
           'Average simulation time for a $gridSize x $gridSize grid: $averageTime ms');
       expect(averageTime, lessThan(1000)); // Expect it to be reasonably fast
     });

@@ -1,9 +1,11 @@
 # Exclude reference MVP files from analysis
 exclude:
   - DOCS/stemcir_refference/reference_code_a/**
+  - sparkcircuit_REFER_MVP/**
 analyzer:
   exclude:
     - DOCS/stemcir_refference/reference_code_a/**
+    - sparkcircuit_REFER_MVP/**
 # This file configures the analyzer, which statically analyzes Dart code to
 # check for errors, warnings, and lints.
 #

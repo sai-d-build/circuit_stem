@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:circuit_stem/application/game_engine_notifier.dart';
 import 'package:circuit_stem/domain/entities/level_definition.dart';
 import 'package:circuit_stem/infrastructure/persistence/level_manager.dart';
-import 'package:circuit_stem/main.dart'; // Import for registerAllGameEntities
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,6 +10,7 @@ import '../helpers/level_test_helper.dart';
 import '../helpers/pump_game_screen.dart';
 import '../helpers/mock_asset_manager.dart';
 import '../helpers/mock_services.dart';
+import 'package:circuit_stem/application/services/component_registry.dart'; // New import
 
 void main() {
   group('Level 01 Revised Tests - Component Behavior', () {
@@ -28,7 +29,7 @@ void main() {
           await File('assets/levels/level_manifest.json').readAsString();
       level1Content = await File('assets/levels/level_01.json').readAsString();
 
-      registerAllGameEntities();
+      ComponentRegistry.registerAllGameEntities();
     });
 
     setUp(() async {

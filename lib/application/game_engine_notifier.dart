@@ -1,4 +1,4 @@
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:circuit_stem/domain/entities/level_definition.dart';
 import 'package:circuit_stem/domain/entities/grid.dart';
 import 'package:circuit_stem/domain/entities/component.dart';

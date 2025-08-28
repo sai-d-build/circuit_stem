@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:circuit_stem/application/providers.dart';
-import 'package:circuit_stem/presentation/screens/game_screen.dart';
+import 'package:circuit_stem/presentation/features/game/screens/game_screen.dart'; // Corrected import
 import 'package:circuit_stem/application/game_engine_notifier.dart';
 import 'package:circuit_stem/domain/entities/level_definition.dart';
 

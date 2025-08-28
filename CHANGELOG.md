@@ -1,3 +1,23 @@
+# [6.0.0] - 2025-08-27 - UI Migration to Riverpod & Feature-Based Structure
+
+### Added
+- **New State Management Layer**: Introduced `lib/presentation/state/game_state.dart` and `lib/presentation/state/hud_state.dart` to centralize and modernize state management using Riverpod.
+- **Feature-Based UI Structure**: Reorganized the entire `lib/presentation` directory into a modular, feature-based architecture (`lib/presentation/features/`, `lib/presentation/core/`) for improved maintainability and scalability.
+
+### Changed
+- **Core Provider Migration**: All application-wide providers (e.g., `sharedPreferencesProvider`, `assetManagerProvider`, `levelManagerProvider`, `gameEngineProvider`, `levelsProvider`, `completedLevelIdsProvider`, `gridProvider`, `debugOverlayProvider`) have been successfully migrated from `lib/application/providers.dart` to the new `lib/presentation/state` files.
+- **`gameEngineProvider` Correction**: Identified and corrected an error in the migration plan; `gameEngineProvider` was reverted to `StateNotifierProvider` (from `ChangeNotifierProvider`) to correctly support `.select()` methods, which are crucial for efficient UI updates.
+- **UI Component Refactoring**: All UI widgets and classes (`main.dart`, `debug_overlay.dart`, `level_grid.dart`, `component_widget.dart`, `game_canvas.dart`, `level_select.dart`, `component_palette_adapter.dart`, `circuit_component_display.dart`, `drag_behavior.dart`, `canvas_painter.dart`, `component_painter.dart`, `grid_widget.dart`, `win_screen.dart`, `pause_menu.dart`, `main_menu.dart`, `settings_screen.dart`) have been refactored to consume state from the new Riverpod providers and use updated import paths.
+- **File Organization**: All UI-related files have been physically moved to their new feature-specific directories.
+
+### Fixed
+- **Analysis Errors from Reference Code**: Added `sparkcircuit_REFER_MVP/` to `analysis_options.yaml` exclude list to prevent analysis errors from reference code.
+- **File Move Workaround**: Successfully moved `component_palette.dart` despite persistent `mv` command failures by reading, writing to the new location, and then deleting the old file.
+- **Broken Import Paths**: Systematically updated all internal and external import paths across the codebase to reflect the new file organization, resolving all broken references.
+
+### Notes
+- **Architectural Debt (`drag_behavior.dart`)**: The `lib/domain/behaviors/drag_behavior.dart` still directly accesses Riverpod providers. While functional, this violates Clean Architecture principles and is flagged for future refactoring.
+
 # [5.1.0] - 2025-08-27 - Initial Component & Rendering Fixes
 
 ### Fixed

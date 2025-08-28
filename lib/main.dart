@@ -1,9 +1,8 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
-import 'application/providers.dart';
+import 'presentation/state/game_state.dart';
 import 'common/logger.dart';
 import 'common/assets.dart';
 import 'dart:async';
@@ -15,9 +14,6 @@ import 'application/services/component_registry.dart';
 void main() async {
   Logger.log('main() called');
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Basic synchronous service setup
-  final prefs = await SharedPreferences.getInstance();
 
   // Instantiate the SvgProcessor
   final SvgProcessorBase svgProcessor = SvgProcessor();
@@ -31,14 +27,10 @@ void main() async {
 
   runApp(
     ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(prefs),
-      ],
       child: Initializer(
           svgProcessor: svgProcessor), // Pass processor to Initializer
     ),
   );
-  Logger.log('runApp() called');
   Logger.log('runApp() called');
 }
 
@@ -58,8 +50,6 @@ class InitializerState extends ConsumerState<Initializer> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final prefs = ref.read(sharedPreferencesProvider);
-      Logger.log('Prefs: $prefs');
       _initializeAssets();
     });
   }
@@ -67,6 +57,7 @@ class InitializerState extends ConsumerState<Initializer> {
   Future<void> _initializeAssets() async {
     // Initialize LevelManager
     setState(() => _status = 'Loading levels...');
+    // Reading the provider will initialize it, thanks to Riverpod.
     await ref.read(levelManagerProvider.notifier).init();
 
     final assetManager = ref.read(assetManagerProvider.notifier);
