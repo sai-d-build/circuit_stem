@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:circuit_stem/application/services/power_simulation_service.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
 import 'package:circuit_stem/domain/entities/grid.dart';
+import 'package:circuit_stem/common/logger.dart'; // Added import
 
 void main() {
   group('PowerSimulationService', () {
@@ -64,6 +65,7 @@ void main() {
       // Assert
       final wire = grid.componentsById['wire'];
       expect(wire, isNotNull);
+      Logger.log('Wire isPowered: ${wire!.isPowered}'); // Added log
       expect(wire!.isPowered, isTrue);
     });
 

@@ -268,8 +268,8 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     executeAction(const RestartLevelAction());
   }
 
-  void undo() {
-    executeAction(const UndoAction());
+  Future<void> undo() async {
+    await executeAction(const UndoAction());
   }
 
   void rotateComponent(String componentId, int rotation) {

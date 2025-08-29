@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
 import 'package:circuit_stem/domain/behaviors/drawing_behavior.dart';
-import 'package:circuit_stem/presentation/state/game_state.dart';
+import 'package:circuit_stem/application/providers.dart';
 import 'package:circuit_stem/infrastructure/rendering/asset_manager.dart';
 import 'package:circuit_stem/common/logger.dart';
 

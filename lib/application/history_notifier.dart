@@ -4,6 +4,12 @@ import 'game_engine_state.dart';
 class HistoryNotifier extends StateNotifier<List<GameEngineState>> {
   HistoryNotifier() : super([]);
 
+  // Public snapshot getter for safe read access
+  List<GameEngineState> get current => state;
+
+  // Public setter for controlled writes
+  void setState(List<GameEngineState> newState) => state = newState;
+
   // Add a new state to history
   void addToHistory(GameEngineState state) {
     this.state = [...this.state, state];
@@ -30,7 +36,22 @@ class HistoryNotifier extends StateNotifier<List<GameEngineState>> {
 
   // Method to execute actions in transaction
   Future<void> executeInTransaction(dynamic action, dynamic transaction) async {
-    // Implementation for transaction-based history updates
-    // This will be expanded based on the specific action types
+    // Store current state for rollback
+    final previousState = state;
+    
+    // Register rollback handler
+    transaction.onRollback(() {
+      state = previousState;
+    });
+    
+    // Register commit handler - execute the history update
+    transaction.onCommit(() async {
+      // History management: only add to history for non-undo actions
+      if (!action.toString().contains('Undo')) {
+        // TODO: Add current game state to history
+        // This will be properly implemented when we have the full game state
+        // For now, this is a placeholder
+      }
+    });
   }
 }

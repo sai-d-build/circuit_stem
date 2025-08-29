@@ -36,6 +36,12 @@ class GameProgressState {
 class GameProgressNotifier extends StateNotifier<GameProgressState> {
   GameProgressNotifier() : super(GameProgressState.initial());
 
+  // Public snapshot getter for safe read access
+  GameProgressState get current => state;
+
+  // Public setter for controlled writes
+  void setState(GameProgressState newState) => state = newState;
+
   // Update win state
   void setWinState(bool isWin) {
     state = state.copyWith(isWin: isWin);
@@ -58,7 +64,26 @@ class GameProgressNotifier extends StateNotifier<GameProgressState> {
 
   // Method to execute actions in transaction
   Future<void> executeInTransaction(dynamic action, dynamic transaction) async {
-    // Implementation for transaction-based progress updates
-    // This will be expanded based on the specific action types
+    // Store current state for rollback
+    final previousState = state;
+    
+    // Register rollback handler
+    transaction.onRollback(() {
+      state = previousState;
+    });
+    
+    // Register commit handler - execute progress updates
+    transaction.onCommit(() async {
+      // Update progress based on action type
+      if (action.toString().contains('CheckWin')) {
+        // TODO: Implement win condition checking
+        // This would evaluate the current grid state and update isWin
+      } else if (action.toString().contains('TogglePause')) {
+        togglePause();
+      } else if (action.toString().contains('Restart')) {
+        reset();
+      }
+      // Score updates would be handled based on specific action types
+    });
   }
 }

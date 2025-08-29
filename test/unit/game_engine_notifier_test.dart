@@ -28,7 +28,7 @@ void main() {
     late GameEngineNotifier notifier;
     late LevelDefinition testLevel;
 
-    setUp(() {
+    setUp(() async {
       notifier = GameEngineNotifier(
         audioService: MockAudioService(),
         animationScheduler: MockAnimationScheduler(),
@@ -52,20 +52,20 @@ void main() {
         goals: [Goal(type: 'power')],
         hints: [],
       );
-      notifier.loadLevel(testLevel);
+      await notifier.loadLevel(testLevel);
     });
 
-    test('handles RotateComponentAction and updates component rotation', () {
+    test('handles RotateComponentAction and updates component rotation', () async {
       // Arrange
       const componentId = 'c1';
-      const newRotation = 1;
+      const newRotation = 90;
       const action = RotateComponentAction(
         componentId: componentId,
         rotation: newRotation,
       );
 
       // Act
-      notifier.executeAction(action);
+      await notifier.executeAction(action);
 
       // Assert
       final updatedComponent = notifier.state.grid.componentsById[componentId];
@@ -73,20 +73,20 @@ void main() {
       expect(updatedComponent!.rotation, equals(newRotation));
     });
 
-    test('undo restores the previous state', () {
+    test('undo restores the previous state', () async {
       // Arrange
       final initialState = notifier.state;
       const componentId = 'c1';
-      const newRotation = 1;
+      const newRotation = 90;
       const action = RotateComponentAction(
         componentId: componentId,
         rotation: newRotation,
       );
 
       // Act
-      notifier.executeAction(action);
+      await notifier.executeAction(action);
       final stateAfterAction = notifier.state;
-      notifier.undo();
+      await notifier.undo();
       final stateAfterUndo = notifier.state;
 
       // Assert

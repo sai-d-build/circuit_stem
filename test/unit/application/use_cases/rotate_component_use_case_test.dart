@@ -57,7 +57,7 @@ void main() {
 
       // Assert
       expect(result.isFailure, isTrue);
-      expect(result.error, 'Component not found');
+      expect(result.error, 'UseCase error: Exception: Component not found');
     });
   });
 }

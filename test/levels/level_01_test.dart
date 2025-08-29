@@ -16,6 +16,8 @@ void main() {
   group('Level 01 Revised Tests - Component Behavior', () {
     late LevelDefinition level1;
     late GameEngineNotifier notifier;
+    late SharedPreferences mockPrefs;
+    late MockAssetManager mockAssetManager;
 
     // Pre-read file contents outside of testWidgets to avoid Flutter bug
     late String manifestContent;
@@ -30,19 +32,18 @@ void main() {
       level1Content = await File('assets/levels/level_01.json').readAsString();
 
       ComponentRegistry.registerAllGameEntities();
+
+      mockAssetManager = MockAssetManager();
+      mockAssetManager.primeFile(
+          'assets/levels/level_manifest.json', manifestContent);
+      mockAssetManager.primeFile('assets/levels/level_01.json', level1Content);
     });
 
     setUp(() async {
       // Create mock services
-      final mockAssetManager = MockAssetManager();
       final mockAudioService = MockAudioService();
       final mockAnimationScheduler = MockAnimationScheduler();
-      final mockPrefs = await SharedPreferences.getInstance();
-
-      // Prime the mock asset manager with the pre-read level files
-      mockAssetManager.primeFile(
-          'assets/levels/level_manifest.json', manifestContent);
-      mockAssetManager.primeFile('assets/levels/level_01.json', level1Content);
+      mockPrefs = await SharedPreferences.getInstance();
 
       // Create LevelManagerNotifier directly and load level data
       final levelManager = LevelManagerNotifier(mockPrefs, mockAssetManager);
@@ -61,7 +62,7 @@ void main() {
     });
 
     testWidgets('TC-L1-01: Toggle switch interaction', (tester) async {
-      await pumpGameScreenWithOverrides(tester, level1, notifier: notifier);
+      await pumpGameScreenWithOverrides(tester, level1, notifier: notifier, prefs: mockPrefs);
 
       final switchComponent =
           LevelTestHelper.findComponentById(notifier.state, 'switch1');
@@ -87,7 +88,7 @@ void main() {
     });
 
     testWidgets('TC-L1-02: Move timer component', (tester) async {
-      await pumpGameScreenWithOverrides(tester, level1, notifier: notifier);
+      await pumpGameScreenWithOverrides(tester, level1, notifier: notifier, prefs: mockPrefs);
 
       final timer = LevelTestHelper.findComponentById(notifier.state, 'timer1');
       expect(timer, isNotNull);

@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:circuit_stem/domain/entities/component.dart'; // Corrected import
 import 'package:circuit_stem/common/constants.dart'; // Corrected import
 import 'package:circuit_stem/domain/entities/level_definition.dart'; // Corrected import
-import 'package:circuit_stem/presentation/state/game_state.dart'; // Corrected import
+import 'package:circuit_stem/presentation/state/game_state.dart' hide gameEngineProvider, gridProvider; // Hide to avoid conflicts
+import 'package:circuit_stem/application/providers.dart'; // Use consolidated providers
 import '../widgets/grid_widget.dart';
 import '../widgets/component_widget.dart';
 import 'package:circuit_stem/application/use_cases/component_action.dart';
@@ -25,7 +26,7 @@ class GameCanvasState extends ConsumerState<GameCanvas> {
     super.initState();
     // Load the level into the notifier when the widget is first created.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(gameEngineProvider.notifier).loadLevel(widget.levelDefinition);
+      ref.read(gameEngineNotifierProvider).loadLevel(widget.levelDefinition);
     });
   }
 
@@ -46,7 +47,7 @@ class GameCanvasState extends ConsumerState<GameCanvas> {
         final int row = gridCoords.dy.toInt();
 
         if (details.data.id.endsWith('_palette')) {
-          ref.read(gameEngineProvider.notifier).executeAction(
+          ref.read(gameEngineNotifierProvider).executeAction(
                 CreateComponentFromTemplateAction(
                   templateId: details.data.id,
                   row: row,
@@ -54,7 +55,7 @@ class GameCanvasState extends ConsumerState<GameCanvas> {
                 ),
               );
         } else {
-          ref.read(gameEngineProvider.notifier).executeAction(
+          ref.read(gameEngineNotifierProvider).executeAction(
                 MoveComponentAction(
                   componentId: details.data.id,
                   newRow: row,
@@ -93,7 +94,7 @@ class GameCanvasState extends ConsumerState<GameCanvas> {
   }
 
   void _handleComponentTap(ComponentModel component) {
-    ref.read(gameEngineProvider.notifier).executeAction(
+    ref.read(gameEngineNotifierProvider).executeAction(
           TapComponentAction(componentId: component.id),
         );
   }

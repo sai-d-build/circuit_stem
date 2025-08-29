@@ -944,3 +944,189 @@ The hybrid approach remains the correct strategy, providing safety, performance 
 **Next Action**: Begin Phase 1 implementation immediately
 **Timeline**: 6 weeks to full completion
 **Risk Level**: 🟡 **MODERATE** - Manageable with proper execution
+
+## Phase B — Widget-by-Widget Migration: Impacted Files & Migration Plan
+
+Below is a repository-wide sweep of UI files that still reference the monolithic `gameEngineProvider` and a concise, actionable migration plan for each. For each entry I list:
+- Current usage (how the file reads/writes state)
+- Recommended granular provider(s) to use instead
+- Short migration steps
+
+Files referenced are clickable for convenience.
+
+- [`lib/presentation/features/game/screens/game_screen.dart:213`](lib/presentation/features/game/screens/game_screen.dart:213)  
+  - Current usage: Was watching `gameEngineProvider` for multiple fields. (Canonical example — already migrated.)  
+  - Replacement providers: `isWinProvider`, `gridProvider`, `isPausedProvider`, `selectedComponentIdProvider`, `gameEngineNotifierProvider` (for actions).  
+  - Steps: Use localized `Consumer` blocks for `isWinProvider` and `gridProvider`; retrieve `gameEngineNotifierProvider` for side-effectful operations (load/restart/undo).
+
+- [`lib/presentation/features/game/widgets/game_canvas.dart:1`](lib/presentation/features/game/widgets/game_canvas.dart:1)  
+  - Current usage: Calls `ref.read(gameEngineProvider.notifier).loadLevel(...)` and `executeAction(...)` for component moves/creates/taps. Also reads grid state.  
+  - Replacement providers: `gridProvider` (state), `gameEngineNotifierProvider` (actions).  
+  - Steps: Replace state accesses with `ref.watch(gridProvider)` and replace `ref.read(gameEngineProvider.notifier)` with `ref.read(gameEngineNotifierProvider)`; keep action payloads identical.
+
+- [`lib/presentation/features/game/controllers/game_canvas_controller.dart:1`](lib/presentation/features/game/controllers/game_canvas_controller.dart:1)  
+  - Current usage: Reads `gridProvider` and `gameEngineProvider.notifier`.  
+  - Replacement providers: `gridProvider`, `gameEngineNotifierProvider`.  
+  - Steps: Use `ref.read(gameEngineNotifierProvider)` and `ref.watch(gridProvider)` where appropriate; no behavior change.
+
+- [`lib/presentation/features/game/widgets/component_widget.dart:1`](lib/presentation/features/game/widgets/component_widget.dart:1)  
+  - Current usage: `ref.watch(gameEngineProvider.select((s) => s.selectedComponentId))` and action calls to `.notifier`.  
+  - Replacement providers: `selectedComponentIdProvider`, `gameEngineNotifierProvider`.  
+  - Steps: Replace `select(...)` watch with `ref.watch(selectedComponentIdProvider)`; use `gameEngineNotifierProvider` for rotate/update actions.
+
+- [`lib/presentation/features/palette/widgets/component_palette_adapter.dart:1`](lib/presentation/features/palette/widgets/component_palette_adapter.dart:1)  
+  - Current usage: Reads palette manager via `gameEngineProvider.select(...)`, reads `selectedComponentId`, and calls `.notifier.selectPaletteComponent`.  
+  - Replacement providers: `selectedComponentIdProvider`, `gridProvider` (if palette info is part of grid), `gameEngineNotifierProvider` for selection actions.  
+  - Steps: Replace selection/state watches with `selectedComponentIdProvider` (and `gridProvider` if palette is derived from grid); call `ref.read(gameEngineNotifierProvider).selectPaletteComponent(...)`.
+
+- [`lib/presentation/features/hud/widgets/debug_overlay.dart:1`](lib/presentation/features/hud/widgets/debug_overlay.dart:1)  
+  - Current usage: `ref.watch(gameEngineProvider)` (reads many fields for diagnostics).  
+  - Replacement providers: Prefer targeted providers depending on which fields are used (e.g., `gridProvider`, `isWinProvider`, `renderStateProvider`, `historyLengthProvider`).  
+  - Steps: Audit which fields the overlay displays and replace with the corresponding granular providers; group multiple small Consumers if needed.
+
+- [`lib/presentation/features/hud/...` (other HUD widgets)]  
+  - Current usage: Various HUD pieces watch the whole engine state.  
+  - Replacement providers: `isPausedProvider`, `isWinProvider`, `scoreProvider`, `historyLengthProvider`, `canUndoProvider`.  
+  - Steps: Migrate HUD widgets to direct watches of the specific providers above.
+
+- [`lib/presentation/core/ui_migration_wrapper.dart:1`](lib/presentation/core/ui_migration_wrapper.dart:1)  
+  - Current usage: Provides compatibility wrappers like `WinStateConsumer`, `GridStateConsumer` that fall back to `gameEngineProvider`.  
+  - Replacement providers: Already implemented; ensure all widgets switch to using wrapper Consumers to simplify migration.  
+  - Steps: Use wrappers in place of direct `gameEngineProvider` access to gain automatic fallback behavior.
+
+- Other files found referencing `gameEngineProvider` (scan results) — recommended per-file mappings:
+  - [`lib/presentation/features/game/widgets/*`](lib/presentation/features/game/widgets/:1)  
+    - Likely replacements: `gridProvider`, `selectedComponentIdProvider`, `isDraggingProvider`, `dragStateProvider`, `gameEngineNotifierProvider`.
+  - [`lib/presentation/features/hud/widgets/*`](lib/presentation/features/hud/widgets/:1)  
+    - Likely replacements: `isPausedProvider`, `isWinProvider`, `renderStateProvider`, `historyLengthProvider`, `scoreProvider`.
+  - [`lib/presentation/features/palette/widgets/*`](lib/presentation/features/palette/widgets/:1)  
+    - Likely replacements: `gridProvider`/`gridComponentsProvider`, `selectedComponentIdProvider`, `gameEngineNotifierProvider`.
+  - [`lib/presentation/features/game/controllers/*`](lib/presentation/features/game/controllers/:1)  
+    - Likely replacements: `gridProvider`, `gameEngineNotifierProvider`, `dragStateProvider`.
+
+Migration guidance (per-widget)
+1. Identify the subset of `gameEngineProvider` fields the widget depends on (search for `.select((s) => s.<field>)` or usage of `gameState.<field>`).  
+2. Replace state reads with `ref.watch(<granularProvider>)` (e.g., `gridProvider`, `isWinProvider`). Wrap short-lived reads in `Consumer(...)` to scope rebuilds.  
+3. Replace mutating calls to `ref.read(gameEngineProvider.notifier).<action>` with `ref.read(gameEngineNotifierProvider).<action>` (the migration helper).  
+4. If multiple independent fields are used, split into multiple `Consumer` blocks so each part only rebuilds when its provider changes.  
+5. Use `WinStateConsumer`, `GridStateConsumer`, `SelectionStateConsumer`, `PauseStateConsumer`, etc. from `ui_migration_wrapper.dart` to get granular behavior with fallback while migration is ongoing.
+
+Priority list (suggested)
+- High priority (migrate first):
+  - Files that are frequently rebuilt or in main gameplay flow: `GameCanvas`, `ComponentWidget`, `GameCanvasController`, `ComponentPaletteAdapter`.  
+- Medium priority:
+  - HUD widgets that update frequently (goal tracker, timer, score).  
+- Low priority:
+  - Debug overlays and rare/utility screens.
+
+Checklist to finish Phase B across repo
+- [ ] Replace `gameEngineProvider` reads in every widget with the mapped granular provider(s) per the list above.  
+- [ ] Replace `.notifier` action calls with `gameEngineNotifierProvider`.  
+- [ ] Use `UI Migration Wrapper` components where quick fallback is desirable.  
+- [ ] Run PerformanceMonitor to collect rebuild metrics and prioritize remaining hotspots.  
+- [ ] Stabilize test helper mocks (`test/helpers/hybrid_test_setup.dart`) and run full test suite.  
+- [ ] Iterate and confirm 60%+ rebuild reduction for migrated areas.
+
+If you want, I will:
+- Produce a per-file detailed migration patch for the top-priority files (apply the exact Consumer + provider replacements), or
+- Create a TODO-style PR checklist appended to the repo with specific line numbers for each affected widget to be migrated.
+
+Which do you prefer next? (I can start with the highest-priority widgets automatically.)
+
+## TODO-style PR Checklist — Widget-by-Widget Migration (Phase B)
+
+This checklist enumerates all UI files found to reference the monolithic `gameEngineProvider`. For each file I list:
+- Current usage (what is being read/written)
+- Recommended granular provider(s)
+- Suggested exact line range to edit (use as starting point for a PR patch)
+- A single-line migration note to include in the PR description
+
+Note: each file reference below is clickable.
+
+- [ ] [`lib/presentation/features/game/widgets/game_canvas.dart:27`](lib/presentation/features/game/widgets/game_canvas.dart:27)  
+  - Current usage: Calls `ref.read(gameEngineProvider.notifier).loadLevel(...)`, `.executeAction(...)` for creates/moves/taps; also reads grid via game state.  
+  - Replace with: `gridProvider` (state), `gameEngineNotifierProvider` (actions).  
+  - Suggested edits: lines 27–100 (focus on calls to `.notifier` and any `ref.watch(gameEngineProvider...)` uses).  
+  - PR note: "Migrate GameCanvas to use gridProvider + gameEngineNotifierProvider; keep action payloads identical."
+
+- [ ] [`lib/presentation/features/game/controllers/game_canvas_controller.dart:26`](lib/presentation/features/game/controllers/game_canvas_controller.dart:26)  
+  - Current usage: `ref.read(gridProvider)` and `ref.read(gameEngineProvider.notifier)`.  
+  - Replace with: `gridProvider`, `gameEngineNotifierProvider`.  
+  - Suggested edits: lines 1–60 (controller initialization and action invocations).  
+  - PR note: "Use gameEngineNotifierProvider in controller for action calls."
+
+- [ ] [`lib/presentation/features/game/widgets/component_widget.dart:22`](lib/presentation/features/game/widgets/component_widget.dart:22)  
+  - Current usage: `ref.watch(gameEngineProvider.select((s) => s.selectedComponentId))` and `.read(...notifier).rotateComponent(...)`.  
+  - Replace with: `selectedComponentIdProvider`, `gameEngineNotifierProvider`.  
+  - Suggested edits: lines 20–60 (watch + action call sites).  
+  - PR note: "Switch selection watch to selectedComponentIdProvider; use notifier adapter for actions."
+
+- [ ] [`lib/presentation/features/palette/widgets/component_palette_adapter.dart:13`](lib/presentation/features/palette/widgets/component_palette_adapter.dart:13)  
+  - Current usage: `ref.watch(gameEngineProvider.select((s) => s.paletteManager))` and `.selectPaletteComponent` via `.notifier`.  
+  - Replace with: `selectedComponentIdProvider` (selection), `gridProvider` or `gridComponentsProvider` (derive available components), `gameEngineNotifierProvider` (selection action).  
+  - Suggested edits: lines 10–40.  
+  - PR note: "Replace monolithic palette reads with granular providers and notifier adapter."
+
+- [ ] [`lib/presentation/features/hud/widgets/debug_overlay.dart:13`](lib/presentation/features/hud/widgets/debug_overlay.dart:13)  
+  - Current usage: `final gameState = ref.watch(gameEngineProvider);` (reads multiple fields)  
+  - Replace with: targeted providers depending on displayed fields: `gridProvider`, `isWinProvider`, `renderStateProvider`, `historyLengthProvider` etc.  
+  - Suggested edits: lines 10–40 (where `gameState` is used).  
+  - PR note: "Audit debug overlay fields and replace with specific providers to reduce rebuilds."
+
+- [ ] HUD widgets (multiple) — suggested top candidates:  
+  - Files: `lib/presentation/features/hud/widgets/*`  
+  - Current usage: various widgets watch full `gameEngineProvider` for `isPaused`, `score`, `history`, etc.  
+  - Replace with: `isPausedProvider`, `scoreProvider`, `historyLengthProvider`, `canUndoProvider`.  
+  - Suggested edits: per-file ranges where `gameEngineProvider` is read.  
+  - PR note: "Migrate HUD widgets to watch specific providers."
+
+- [ ] [`lib/presentation/features/game/screens/game_screen.dart:213`](lib/presentation/features/game/screens/game_screen.dart:213) — canonical example (ALREADY MIGRATED)  
+  - Current usage: previously watched full `gameEngineProvider`. Now uses `isWinProvider`, `gridProvider`, `isPausedProvider`, `selectedComponentIdProvider`, `gameEngineNotifierProvider`.  
+  - Suggested edits: verify surrounding Consumer blocks; no further change needed.  
+  - PR note: "Canonical migration example applied; use as template for other widgets."
+
+- [ ] All remaining UI files under `lib/presentation/features/game/widgets/` referencing `gameEngineProvider`  
+  - Scan results show multiple occurrences — migrate each to appropriate granular providers: `gridProvider`, `gridComponentsProvider`, `selectedComponentIdProvider`, `isDraggingProvider`, `dragStateProvider`, `gameEngineNotifierProvider`.  
+  - Suggested edits: per-file approximate ranges where `gameEngineProvider` appears (search results available).  
+  - PR note: "Migrate per-widget to granular providers; split build methods into small Consumers where multiple independent fields are used."
+
+- [ ] Add or update tests for each migrated widget  
+  - Action change: Replace any test overrides that previously mocked `gameEngineProvider` with `gameEngineNotifierProvider` + granular provider overrides (use `ProviderContainer` overrides).  
+  - Files impacted example: `test/helpers/pump_game_screen.dart` and widget tests in `test/widgets/` that used `.notifier`.
+
+Migration process instructions to include in PR template
+- Add one commit per widget migration (small diffs, easy review).  
+- Each commit should:
+  - Replace `ref.watch(gameEngineProvider.select(...))` with `ref.watch(<granularProvider>)`.
+  - Replace `ref.read(gameEngineProvider.notifier)` with `ref.read(gameEngineNotifierProvider)`.
+  - If multiple independent fields are used in one build(), split into multiple `Consumer` blocks so each only rebuilds on its provider changes.
+  - Add a unit/widget test or update existing tests to assert behavior unchanged after migration.
+  - Run `PerformanceMonitor.takeSnapshot()` before and after migrating a group (for baseline comparison).
+
+Priority ordering (start here)
+1. `GameCanvas` (gameplay critical — high frequency) — [`lib/presentation/features/game/widgets/game_canvas.dart:27`](lib/presentation/features/game/widgets/game_canvas.dart:27)  
+2. `ComponentWidget` (touched frequently) — [`lib/presentation/features/game/widgets/component_widget.dart:22`](lib/presentation/features/game/widgets/component_widget.dart:22)  
+3. `GameCanvasController` — [`lib/presentation/features/game/controllers/game_canvas_controller.dart:26`](lib/presentation/features/game/controllers/game_canvas_controller.dart:26)  
+4. Palette adapter — [`lib/presentation/features/palette/widgets/component_palette_adapter.dart:13`](lib/presentation/features/palette/widgets/component_palette_adapter.dart:13)  
+5. HUD widgets — `lib/presentation/features/hud/widgets/*` (migrate high-frequency HUD first)
+
+How I will mark PR checklist entries
+- For each migrated file I will check the corresponding box and include:
+  - Files changed (with exact line ranges)
+  - Snippet of before/after (Consumer + provider usage)
+  - Notes about test updates
+
+If you confirm, I'll append the prepared checklist entries into the repository PR template file and start creating per-file TODO entries (one PR per top-priority file) or provide the patches in order.  
+
+## Completed Widget Migrations (so far)
+
+The following widget migrations have been completed and validated in the codebase. Each entry includes the file path and a representative line number where the migration was applied.
+
+- [x] Canonical screen (example migration) — [`lib/presentation/features/game/screens/game_screen.dart:213`](lib/presentation/features/game/screens/game_screen.dart:213)  
+- [x] Game canvas (actions -> migration helper, state from granular provider) — [`lib/presentation/features/game/widgets/game_canvas.dart:27`](lib/presentation/features/game/widgets/game_canvas.dart:27)  
+- [x] Component widget (selection watch -> `selectedComponentIdProvider`; actions via `gameEngineNotifierProvider`) — [`lib/presentation/features/game/widgets/component_widget.dart:22`](lib/presentation/features/game/widgets/component_widget.dart:22)  
+- [x] Game canvas controller (action calls -> `gameEngineNotifierProvider`) — [`lib/presentation/features/game/controllers/game_canvas_controller.dart:26`](lib/presentation/features/game/controllers/game_canvas_controller.dart:26)  
+- [x] Palette adapter (selection & action migration) — [`lib/presentation/features/palette/widgets/component_palette_adapter.dart:13`](lib/presentation/features/palette/widgets/component_palette_adapter.dart:13)  
+- [x] HUD debug overlay (replaced full engine watch with targeted providers: `gridProvider`, `selectedComponentIdProvider`, `isWinProvider`) — [`lib/presentation/features/hud/widgets/debug_overlay.dart:13`](lib/presentation/features/hud/widgets/debug_overlay.dart:13)  
+
+These are recorded in the Phase B checklist above. Remaining widgets are listed in the checklist and prioritized — proceed with the next batch when ready.

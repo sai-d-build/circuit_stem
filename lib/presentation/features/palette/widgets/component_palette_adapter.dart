@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:circuit_stem/presentation/state/game_state.dart';
+import 'package:circuit_stem/presentation/state/game_state.dart' hide gameEngineProvider;
+import 'package:circuit_stem/application/providers.dart';
 import 'package:circuit_stem/presentation/features/palette/widgets/component_palette.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
 
@@ -14,7 +15,7 @@ class ComponentPaletteAdapter extends ConsumerWidget {
         ref.watch(gameEngineProvider.select((s) => s.paletteManager));
     final availableComponents = paletteManager.availableTemplates;
     final selectedComponentId =
-        ref.watch(gameEngineProvider.select((s) => s.selectedComponentId));
+        ref.watch(selectedComponentIdProvider);
 
     ComponentModel? selectedComponent;
     if (selectedComponentId != null) {
@@ -33,7 +34,7 @@ class ComponentPaletteAdapter extends ConsumerWidget {
       availableComponents: availableComponents,
       selectedComponent: selectedComponent,
       onComponentSelected: (component) {
-        ref.read(gameEngineProvider.notifier).selectPaletteComponent(component);
+        ref.read(gameEngineNotifierProvider).selectPaletteComponent(component);
       },
     );
   }

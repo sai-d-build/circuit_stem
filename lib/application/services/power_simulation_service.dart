@@ -1,5 +1,6 @@
 import '../../domain/entities/component.dart';
 import '../../domain/entities/grid.dart';
+import '../../common/logger.dart'; // Added import
 // Import Terminal and Dir
 
 class PowerSimulationService {
@@ -52,6 +53,7 @@ class PowerSimulationService {
     if (index != -1 && !components[index].isPowered) {
       components[index] = current.copyWith(isPowered: true);
       changed = true;
+      Logger.log('Propagating power to ${current.id}'); // Added log
     }
 
     // Handle different component behaviors
@@ -120,7 +122,7 @@ class PowerSimulationService {
     // Check if the source is connected to the anode
     final connectedToAnode =
         _getConnectedComponent(diode, anodeTerminal, grid) == source;
-
+    Logger.log('Diode ${diode.id} connected to anode: $connectedToAnode'); // Added log
     return connectedToAnode;
   }
 
@@ -150,3 +152,4 @@ class PowerSimulationService {
     return grid.componentAt(nextR, nextC);
   }
 }
+

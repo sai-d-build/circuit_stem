@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
-import 'package:circuit_stem/presentation/state/game_state.dart';
+import 'package:circuit_stem/presentation/state/game_state.dart' hide gameEngineProvider, assetManagerProvider; // Hide to avoid conflicts
+import 'package:circuit_stem/application/providers.dart'; // Use consolidated providers
 import 'package:circuit_stem/presentation/features/game/painters/component_painter.dart';
 
 
@@ -19,8 +20,7 @@ class ComponentWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final assetManager = ref.watch(assetManagerProvider.notifier);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final selectedComponentId = ref
-        .watch(gameEngineProvider.select((state) => state.selectedComponentId));
+    final selectedComponentId = ref.watch(selectedComponentIdProvider);
     final isSelected = component.id == selectedComponentId;
 
     final componentSize = component.displaySize;
@@ -49,7 +49,7 @@ class ComponentWidget extends ConsumerWidget {
               onPressed: () {
                 final newRotation = (component.rotation + 1) % 4;
                 ref
-                    .read(gameEngineProvider.notifier)
+                    .read(gameEngineNotifierProvider)
                     .rotateComponent(component.id, newRotation);
               },
             ),

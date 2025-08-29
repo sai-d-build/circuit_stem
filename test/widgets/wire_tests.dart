@@ -28,7 +28,7 @@ void main() {
       // 2. Manually trigger the rotation, simulating the UI's rotate button.
       final newRotation = (initialRotation + 90) % 360;
       final updatedWire = initialWire.copyWith(rotation: newRotation);
-      container.read(gameEngineProvider.notifier).updateComponent(updatedWire);
+      container.read(gameEngineNotifierProvider).updateComponent(updatedWire);
       await tester.pumpAndSettle();
 
       // ASSERT

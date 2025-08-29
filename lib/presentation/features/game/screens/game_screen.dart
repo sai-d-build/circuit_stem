@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:circuit_stem/domain/entities/component.dart';
 import 'package:circuit_stem/domain/entities/level_definition.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:circuit_stem/presentation/state/game_state.dart';
+import 'package:circuit_stem/presentation/state/game_state.dart' hide
+    levelManagerProvider, gameEngineProvider, levelsProvider, gridProvider;
 import 'package:circuit_stem/common/logger.dart';
+import 'package:circuit_stem/application/providers.dart';
+import 'package:circuit_stem/presentation/core/ui_migration_wrapper.dart';
 
 import 'package:circuit_stem/presentation/features/hud/screens/pause_menu.dart';
 import 'package:circuit_stem/presentation/features/game/widgets/game_canvas.dart';
@@ -155,7 +158,7 @@ class GameInitializationNotifier extends AsyncNotifier<GameScreenData> {
   }
 
   Future<void> _initializeGameEngine(LevelDefinition levelDefinition) async {
-    final gameNotifier = ref.read(gameEngineProvider.notifier);
+    final gameNotifier = ref.read(gameEngineNotifierProvider);
 
     Logger.log(
         'GameScreen: Loading level ${levelDefinition.id} into game engine');
@@ -394,18 +397,17 @@ class _GameScreenState extends ConsumerState<GameScreen>
       Logger.log('GameScreen: Initial component: ${component.id} (type: ${component.type}) at r:${component.r}, c:${component.c}');
     }
 
-    // Listen to win condition
-    ref.listen<bool>(isGameWonProvider, (previous, isWin) { // Corrected provider name
+    // Listen to win condition - using granular provider for performance
+    ref.listen<bool>(isWinProvider, (previous, isWin) {
       if (isWin) {
         _handleLevelWin();
       }
     });
 
-    final gameNotifier = ref.read(gameEngineProvider.notifier);
+    final gameNotifier = ref.read(gameEngineNotifierProvider);
     final grid = ref.watch(gridProvider);
-    final isPaused = ref.watch(gameEngineProvider.select((s) => s.isPaused));
-    final selectedComponentId =
-        ref.watch(gameEngineProvider.select((s) => s.selectedComponentId));
+    final isPaused = ref.watch(isPausedProvider); // Granular provider optimization
+    final selectedComponentId = ref.watch(selectedComponentIdProvider); // Granular provider optimization
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final gridComponentIds = grid.components.map((c) => c.id).toSet();

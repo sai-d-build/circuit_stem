@@ -70,8 +70,7 @@ void main() {
       final result = goalCheckingService.isLevelComplete(grid, level);
 
       // Assert
-      expect(
-          result, isFalse); // Placeholder, this should be true when implemented
+      expect(result, isTrue);
     });
   });
 }

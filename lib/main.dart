@@ -1,8 +1,11 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
-import 'presentation/state/game_state.dart';
+import 'application/providers.dart';
+import 'application/feature_flag_service.dart';
+
 import 'common/logger.dart';
 import 'common/assets.dart';
 import 'dart:async';
@@ -14,6 +17,12 @@ import 'application/services/component_registry.dart';
 void main() async {
   Logger.log('main() called');
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
+
+  // Initialize FeatureFlagService
+  FeatureFlagService.initialize();
 
   // Instantiate the SvgProcessor
   final SvgProcessorBase svgProcessor = SvgProcessor();
@@ -27,6 +36,9 @@ void main() async {
 
   runApp(
     ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
       child: Initializer(
           svgProcessor: svgProcessor), // Pass processor to Initializer
     ),
@@ -55,13 +67,8 @@ class InitializerState extends ConsumerState<Initializer> {
   }
 
   Future<void> _initializeAssets() async {
-    // Await shared preferences before initializing dependent providers
-    setState(() => _status = 'Loading preferences...');
-    await ref.read(sharedPreferencesProvider.future);
-
-    // Initialize LevelManager
+    // SharedPreferences is now initialized in main(), so we can directly init LevelManager.
     setState(() => _status = 'Loading levels...');
-    // Reading the provider will initialize it, thanks to Riverpod.
     await ref.read(levelManagerProvider.notifier).init();
 
     final assetManager = ref.read(assetManagerProvider.notifier);

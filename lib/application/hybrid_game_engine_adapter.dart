@@ -12,7 +12,7 @@ import 'core/result.dart';
 import 'audio_manager.dart';
 import 'input_manager.dart';
 import 'animation_scheduler.dart';
-import 'hybrid_providers.dart';
+import 'providers.dart';
 
 /// Hybrid adapter that maintains the existing GameEngineNotifier API
 /// while delegating to the new orchestrator and granular notifiers internally.

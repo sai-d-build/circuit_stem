@@ -38,6 +38,12 @@ class InteractionState {
 class InteractionStateNotifier extends StateNotifier<InteractionState> {
   InteractionStateNotifier() : super(InteractionState.initial());
 
+  // Public snapshot getter for safe read access
+  InteractionState get current => state;
+
+  // Public setter for controlled writes
+  void setState(InteractionState newState) => state = newState;
+
   // Start dragging a component
   void startDrag(String componentId, Offset position) {
     state = state.copyWith(
@@ -66,7 +72,23 @@ class InteractionStateNotifier extends StateNotifier<InteractionState> {
 
   // Method to execute actions in transaction
   Future<void> executeInTransaction(dynamic action, dynamic transaction) async {
-    // Implementation for transaction-based interaction updates
-    // This will be expanded based on the specific action types
+    // Store current state for rollback
+    final previousState = state;
+    
+    // Register rollback handler
+    transaction.onRollback(() {
+      state = previousState;
+    });
+    
+    // Register commit handler - execute interaction updates
+    transaction.onCommit(() async {
+      // Handle drag and drop related actions
+      if (action.toString().contains('StartDrag')) {
+        // TODO: Extract componentId and position from action
+        // For now this is a placeholder until we have proper action types
+      } else if (action.toString().contains('EndDrag') || action.toString().contains('CancelDrag')) {
+        endDrag();
+      }
+    });
   }
 }

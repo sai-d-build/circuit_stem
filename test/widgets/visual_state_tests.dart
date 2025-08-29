@@ -25,7 +25,7 @@ void main() {
           ..['closed'] = true;
         final updatedSwitch = switchComp.copyWith(state: newSwitchState);
         container
-            .read(gameEngineProvider.notifier)
+            .read(gameEngineNotifierProvider)
             .updateComponent(updatedSwitch);
         await tester.pumpAndSettle();
       }
@@ -55,7 +55,7 @@ void main() {
         ..['closed'] = !initialClosedState;
       final updatedSwitch = initialSwitch.copyWith(state: newSwitchState);
       container
-          .read(gameEngineProvider.notifier)
+          .read(gameEngineNotifierProvider)
           .updateComponent(updatedSwitch);
       await tester.pumpAndSettle();
 
@@ -81,7 +81,7 @@ void main() {
           ..['closed'] = true;
         final updatedSwitch = switchComp.copyWith(state: newSwitchState);
         container
-            .read(gameEngineProvider.notifier)
+            .read(gameEngineNotifierProvider)
             .updateComponent(updatedSwitch);
         await tester.pumpAndSettle();
       }

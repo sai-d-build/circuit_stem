@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:circuit_stem/presentation/state/game_state.dart';
-import 'package:circuit_stem/presentation/state/hud_state.dart';
+import 'package:circuit_stem/presentation/state/game_state.dart' hide gameEngineProvider, gridProvider; // Avoid monolithic provider and name clashes
+import 'package:circuit_stem/application/providers.dart'; // Granular providers
+import 'package:circuit_stem/presentation/state/hud_state.dart' hide debugOverlayProvider;
 
 class DebugOverlay extends ConsumerWidget {
   const DebugOverlay({super.key});
@@ -11,7 +12,10 @@ class DebugOverlay extends ConsumerWidget {
     final isVisible = ref.watch(debugOverlayProvider);
     if (!isVisible) return const SizedBox.shrink();
 
-    final gameState = ref.watch(gameEngineProvider);
+    // Use granular providers to minimize rebuilds
+    final grid = ref.watch(gridProvider);
+    final selectedComponentId = ref.watch(selectedComponentIdProvider);
+    final isWin = ref.watch(isWinProvider);
 
     return Positioned(
       top: 40,
@@ -24,11 +28,11 @@ class DebugOverlay extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Components: ${gameState.grid.components.length}',
+              Text('Components: ${grid.components.length}',
                   style: const TextStyle(color: Colors.white)),
-              Text('Selected: ${gameState.selectedComponentId ?? 'none'}',
+              Text('Selected: ${selectedComponentId ?? 'none'}',
                   style: const TextStyle(color: Colors.white)),
-              Text('Win: ${gameState.isWin}',
+              Text('Win: $isWin',
                   style: const TextStyle(color: Colors.white)),
             ],
           ),

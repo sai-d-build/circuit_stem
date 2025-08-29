@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:circuit_stem/presentation/state/game_state.dart'; // Corrected import
+import 'package:circuit_stem/application/providers.dart';
 import 'package:circuit_stem/domain/entities/level_metadata.dart'; // Corrected import
 
 class LevelGrid extends ConsumerWidget {

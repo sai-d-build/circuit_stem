@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:circuit_stem/routes.dart';
 import 'package:circuit_stem/presentation/features/hud/widgets/level_card.dart';
 import 'package:circuit_stem/common/theme.dart';
-import 'package:circuit_stem/presentation/state/game_state.dart';
+import 'package:circuit_stem/application/providers.dart';
 
 class LevelSelectScreen extends ConsumerStatefulWidget {
   const LevelSelectScreen({super.key});

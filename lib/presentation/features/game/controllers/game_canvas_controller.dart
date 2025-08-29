@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:circuit_stem/common/constants.dart'; // For cellSize
 import 'package:circuit_stem/domain/entities/component.dart';
-import 'package:circuit_stem/presentation/state/game_state.dart';
+import 'package:circuit_stem/presentation/state/game_state.dart' hide gameEngineProvider, gridProvider; // Hide to avoid conflicts
+import 'package:circuit_stem/application/providers.dart'; // Use consolidated providers
 import 'package:circuit_stem/presentation/utils/coordinate_translator.dart';
 
 class GameCanvasController extends StateNotifier<void> {
@@ -24,7 +25,7 @@ class GameCanvasController extends StateNotifier<void> {
     if (renderBox == null) return;
 
     final grid = ref.read(gridProvider);
-    final notifier = ref.read(gameEngineProvider.notifier);
+    final notifier = ref.read(gameEngineNotifierProvider);
     final translator = CoordinateTranslator(renderBox);
     final cell = translator.globalToCell(details.offset, grid.rows, grid.cols);
 
