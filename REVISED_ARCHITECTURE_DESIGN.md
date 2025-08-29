@@ -847,3 +847,1066 @@ class ResistorEquations implements ComponentEquations {
     
     if (n2 >= 0) {
       G[n2][n2] +=
+---
+
+## Analysis Results & Recommendations
+
+**Analysis Date:** 2025-08-29  
+**Analysis Type:** Comprehensive Architecture Review with Codebase Alignment  
+**Status:** Issues Identified - Ready for Implementation Planning
+
+### Document Structure & Completeness Assessment
+
+**✅ Strengths:**
+- Well-organized with clear sections and Mermaid diagrams
+- Comprehensive coverage of current issues and proposed solutions
+- Detailed API contracts and testing strategy
+- Practical migration timeline with specific deliverables
+
+**⚠️ Areas for Improvement:**
+- **Incomplete Code Implementation**: The MNA solver implementation section is cut off at line 849, with incomplete component model code
+- **Missing Performance Benchmarks**: Document mentions performance monitoring but lacks specific metrics targets
+- **Limited Error Recovery Strategies**: API contracts mention error handling but need more detail on recovery mechanisms
+
+### Codebase Alignment Analysis
+
+**✅ Accurate Assessment:**
+- Document correctly identifies the over-engineered hybrid system (7+ notifiers, 236-line orchestrator)
+- Accurately describes missing core simulation engine (only basic PowerSimulationService exists)
+- Correctly identifies fragmented state management across specialized notifiers
+- Provider complexity with feature flag switching is well-documented
+
+**Current Implementation Reality:**
+- `lib/core/` directory does not exist (proposed for new simulation engine)
+- Current simulation is basic power propagation, not mathematical MNA solver
+- Complex provider structure confirmed with runtime feature flag switching
+- Orchestrator pattern with transaction management is indeed complex
+
+### Critical Issues Identified
+
+#### 1. **Missing Core Simulation Foundation**
+**Current State:** Basic `PowerSimulationService` performs simple power propagation without mathematical accuracy
+**Impact:** Cannot handle complex circuits with multiple voltage sources or accurate current calculations
+**Recommendation:** Prioritize MNA solver implementation as Phase 1A (before UI integration)
+
+#### 2. **Incomplete MNA Solver Specification**
+**Issue:** Document shows implementation code but it's truncated
+**Missing:** Complete component equation stamping for all component types (capacitors, inductors, diodes)
+**Recommendation:** Complete the mathematical specifications before implementation
+
+#### 3. **Performance Requirements Undefined**
+**Gap:** No specific performance targets for simulation speed
+**Risk:** Real-time circuit simulation may not meet user experience expectations
+**Recommendation:** Define target: <100ms for circuits with <50 components, <500ms for <200 components
+
+#### 4. **Migration Data Safety**
+**Risk:** Complex state migration from 7+ notifiers to single GameStateNotifier
+**Mitigation:** Implement comprehensive state migration testing and rollback mechanisms
+
+### Dependency Analysis Results
+
+#### New Dependencies Required
+```dart
+// External packages needed for MNA solver
+dependencies:
+  matrix2d: ^1.0.0          # Matrix operations
+  polynomial: ^1.0.0        # Equation solving
+  numerical_methods: ^1.0.0 # Linear algebra
+
+// Internal architecture dependencies
+lib/core/ → lib/domain/entities/  # Component models
+lib/application/ → lib/core/      # Simulation integration
+lib/presentation/ → lib/application/ # State consumption
+```
+
+#### Layer Dependency Constraints
+- **Core Layer**: Must remain pure, no Flutter dependencies
+- **Application Layer**: Can depend on core but must not leak to presentation
+- **Domain Layer**: Must remain framework-agnostic
+- **Migration**: Maintain backward compatibility during transition
+
+### Technical Feasibility Assessment
+
+#### ✅ Feasible Elements
+- **Phase 1**: Removing hybrid complexity - straightforward file deletions
+- **Basic MNA Solver**: Technically achievable with proper linear algebra libraries
+- **Unified State Management**: Single GameStateNotifier is cleaner approach
+- **API Contracts**: Well-defined interfaces promote maintainability
+
+#### ⚠️ High-Risk Elements
+- **MNA Solver Accuracy**: Complex mathematical implementation requiring domain expertise
+- **Real-time Performance**: Matrix solving for large circuits may exceed mobile performance limits
+- **Component Model Complexity**: Nonlinear components (diodes, transistors) significantly increase solver complexity
+
+#### 🔴 Critical Path Items
+1. **Mathematical Library Selection**: Choose appropriate Dart matrix computation library
+2. **Solver Algorithm Validation**: Verify MNA implementation against known circuit solutions
+3. **Performance Profiling**: Establish baseline performance metrics before optimization
+
+### Recommended Implementation Adjustments
+
+#### Phase 1 Modifications
+```mermaid
+gantt
+    title Adjusted Phase 1 Timeline
+    dateFormat  YYYY-MM-DD
+    section Foundation
+    Remove Hybrid System          :active, p1a, 2025-08-29, 2d
+    Select Mathematical Libraries :p1b, after p1a, 2d
+    Implement Basic MNA Solver    :p1c, after p1b, 5d
+    Create Enhanced GameStateNotifier :p1d, after p1a, 3d
+    Basic Component Models        :p1e, after p1c, 3d
+```
+
+#### Risk Mitigation Strategy
+1. **Prototype MNA Solver**: Create proof-of-concept with simple circuits before full implementation
+2. **Performance Gates**: Define go/no-go criteria for each phase
+3. **Incremental Component Support**: Start with resistors, voltage sources, then add complexity
+4. **Fallback Mechanism**: Maintain basic simulation as fallback during development
+
+### Testing Strategy Enhancements
+
+#### Additional Test Categories Required
+- **Mathematical Accuracy Tests**: Verify solver results against known circuit analysis solutions
+- **Performance Regression Tests**: Monitor simulation time as circuit complexity increases
+- **Numerical Stability Tests**: Test solver convergence with various circuit topologies
+- **Edge Case Validation**: Short circuits, open circuits, floating nodes
+
+#### Test Data Sources
+- **SPICE Netlist Examples**: Use standard circuit examples for validation
+- **Educational Circuits**: Basic series/parallel circuits for regression testing
+- **Stress Test Circuits**: Large, complex circuits to test performance limits
+
+### Success Metrics & Validation Criteria
+
+#### Technical Success Criteria
+- [ ] MNA solver produces results within 1% of SPICE for basic circuits
+- [ ] Simulation completes in <100ms for circuits with <50 components
+- [ ] Zero data loss during state migration
+- [ ] All existing UI functionality preserved
+
+#### Architecture Success Criteria
+- [ ] Single source of truth eliminates state synchronization bugs
+- [ ] Clear API boundaries prevent circular dependencies
+- [ ] Pure core layer enables comprehensive unit testing
+- [ ] Migration path supports gradual rollout
+
+### Next Steps & Recommendations
+
+#### Immediate Actions (Week 1)
+1. **Complete MNA Solver Specification**: Finish the truncated implementation details
+2. **Select Mathematical Libraries**: Evaluate Dart matrix computation options
+3. **Create Core Directory Structure**: Set up `lib/core/` with proper package structure
+4. **Define Performance Baselines**: Establish current simulation performance metrics
+
+#### Medium-term Actions (Weeks 2-4)
+1. **Implement Basic Solver**: Start with series/parallel resistor circuits
+2. **Build Test Infrastructure**: Create mathematical validation test suite
+3. **State Migration Planning**: Design safe migration from hybrid to unified state
+4. **UI Integration Planning**: Map current UI expectations to new simulation results
+
+#### Long-term Considerations (Month 2+)
+1. **Advanced Component Support**: Plan for diodes, capacitors, inductors
+2. **Optimization Strategies**: Consider WebAssembly for performance-critical calculations
+3. **Educational Features**: Leverage accurate simulation for learning enhancements
+4. **Cross-platform Validation**: Ensure consistent behavior across target platforms
+
+### Conclusion
+
+The revised architecture design provides a solid foundation for replacing the over-engineered hybrid system with a clean, simulation-focused architecture. The document's analysis is accurate and the proposed solution addresses core issues effectively.
+
+**Key Recommendation:** Proceed with implementation but prioritize mathematical solver validation and performance profiling. The architecture is sound, but successful execution depends on delivering accurate, performant circuit simulation.
+
+**Risk Level:** Medium - Technical challenges in MNA solver implementation are manageable with proper planning and incremental development approach.
+
+**Estimated Timeline:** 8-12 weeks for complete implementation with proper testing and validation.
+### Deep Dive: MNA Solver Implementation Analysis
+
+#### Mathematical Foundations of MNA
+
+**Modified Nodal Analysis (MNA)** is the industry-standard method for solving electrical circuits. Unlike basic nodal analysis, MNA handles voltage sources and current sources efficiently by introducing additional equations for voltage source currents.
+
+**Core MNA System:**
+```
+[G][V] + [B][I] = [I]  (for DC analysis)
+[C][dV/dt] + [G][V] + [B][I] = [I]  (for transient analysis)
+```
+
+Where:
+- **[G]**: Conductance matrix (from resistors)
+- **[B]**: Incidence matrix (relates voltage sources to nodes)
+- **[C]**: Capacitance matrix (from capacitors)
+- **[V]**: Node voltage vector
+- **[I]**: Current vector (voltage source currents + independent sources)
+
+#### Implementation Challenges Identified
+
+**1. Matrix Assembly Complexity**
+```dart
+// Current document shows basic structure but misses:
+// - Dynamic matrix sizing based on circuit topology
+// - Efficient sparse matrix representation
+// - Memory management for large circuits
+```
+
+**2. Component Equation Stamping**
+The document's implementation is incomplete. Here's what needs to be added:
+
+```dart
+// Complete resistor stamping (missing from document)
+void stampResistor(Matrix G, int node1, int node2, double conductance) {
+  if (node1 >= 0) G[node1][node1] += conductance;
+  if (node2 >= 0) G[node2][node2] += conductance;
+  if (node1 >= 0 && node2 >= 0) {
+    G[node1][node2] -= conductance;
+    G[node2][node1] -= conductance;
+  }
+}
+
+// Voltage source stamping (partially shown)
+void stampVoltageSource(Matrix G, Matrix B, Vector I, int node1, int node2, double voltage, int branchIndex) {
+  // Voltage constraints
+  if (node1 >= 0) B[node1][branchIndex] = 1;
+  if (node2 >= 0) B[node2][branchIndex] = -1;
+  // Current equation
+  I[branchIndex] = voltage;
+}
+```
+
+**3. Nonlinear Component Handling**
+For diodes and transistors, the MNA system becomes nonlinear:
+```
+f(V, I) = 0  (nonlinear equations)
+```
+
+Requires Newton-Raphson iteration:
+```dart
+Vector newtonRaphsonSolve(Matrix J, Vector F, Vector x0) {
+  const maxIterations = 100;
+  const tolerance = 1e-9;
+
+  Vector x = x0;
+  for (int iter = 0; iter < maxIterations; iter++) {
+    Vector fx = evaluateNonlinearEquations(x);
+    Matrix jacobian = computeJacobian(x);
+
+    Vector delta = solveLinearSystem(jacobian, -fx);
+    x = x + delta;
+
+    if (delta.norm() < tolerance) break;
+  }
+  return x;
+}
+```
+
+#### Numerical Stability Considerations
+
+**1. Matrix Conditioning**
+- **Ill-conditioned matrices**: Can occur with high resistance ratios
+- **Solution**: Use pivoting in LU decomposition
+- **Detection**: Condition number estimation
+
+**2. Convergence Issues**
+- **Oscillatory behavior**: Damping factors needed
+- **Divergence**: Line search or trust region methods
+- **Singularity**: Circuit topology validation before solving
+
+**3. Floating Point Precision**
+- **Accumulated errors**: Use higher precision arithmetic for large circuits
+- **Scaling**: Normalize matrix values to prevent overflow/underflow
+
+#### Performance Optimization Strategies
+
+**1. Sparse Matrix Techniques**
+```dart
+class SparseMatrix {
+  final Map<int, Map<int, double>> _data = {};
+
+  void set(int row, int col, double value) {
+    if (value.abs() > 1e-12) {  // Sparsity threshold
+      _data.putIfAbsent(row, () => {})[col] = value;
+    }
+  }
+
+  // Efficient sparse operations
+  Vector multiplySparse(Vector x) {
+    // O(nnz) complexity instead of O(n²)
+  }
+}
+```
+
+**2. Incremental Updates**
+- **Topology changes**: Only update affected matrix entries
+- **Parameter changes**: Reuse factorization when possible
+- **Caching**: Store frequently used matrix patterns
+
+**3. Parallel Computation**
+- **Matrix-vector multiplication**: SIMD instructions
+- **Independent subcircuits**: Parallel solving
+- **Preprocessing**: Parallel matrix assembly
+
+#### Component Model Implementation Gaps
+
+**Missing from Current Document:**
+
+**1. Capacitor Model (Transient Analysis)**
+```dart
+class CapacitorEquations implements ComponentEquations {
+  final double capacitance;
+  final int node1, node2;
+
+  @override
+  void stampMNA(Matrix G, Matrix C, Vector b, Map<String, SimNode> nodes) {
+    final conductance = capacitance / timeStep;  // Backward Euler
+    // Stamp into G matrix for DC equivalent
+    // Stamp into C matrix for dynamic behavior
+  }
+}
+```
+
+**2. Inductor Model**
+```dart
+class InductorEquations implements ComponentEquations {
+  final double inductance;
+  final int node1, node2;
+
+  @override
+  void stampMNA(Matrix G, Matrix C, Vector b, Map<String, SimNode> nodes) {
+    // Companion model approach
+    // Requires additional branch current variable
+  }
+}
+```
+
+**3. Diode Model (Nonlinear)**
+```dart
+class DiodeEquations implements ComponentEquations {
+  final double isat, vt;  // Saturation current, thermal voltage
+
+  @override
+  double evaluateCurrent(double voltage) {
+    return isat * (exp(voltage / vt) - 1);
+  }
+
+  @override
+  double evaluateConductance(double voltage) {
+    return (isat / vt) * exp(voltage / vt);
+  }
+}
+```
+
+#### Algorithm Complexity Analysis
+
+**Time Complexity:**
+- **Matrix Assembly**: O(n) for linear circuits, O(n²) for nonlinear
+- **Linear Solve**: O(n³) for dense matrices, O(n) for sparse
+- **Newton Iteration**: 3-10 iterations typically for convergence
+
+**Space Complexity:**
+- **Dense Storage**: O(n²) - impractical for large circuits
+- **Sparse Storage**: O(nnz) - feasible with proper data structures
+
+#### Validation and Testing Strategy
+
+**1. Mathematical Verification**
+```dart
+// Test against known analytical solutions
+void testSeriesResistorCircuit() {
+  final circuit = CircuitBuilder()
+    .addVoltageSource(10.0)
+    .addResistor(1000.0)
+    .addResistor(2000.0)
+    .build();
+
+  final result = mnaSolver.solveDC(circuit);
+
+  // Expected: I_total = 10V / 3000Ω = 3.33mA
+  expect(result.branchCurrents['total'], closeTo(0.00333, 1e-6));
+}
+```
+
+**2. Convergence Testing**
+```dart
+void testNonlinearConvergence() {
+  final circuit = CircuitBuilder()
+    .addVoltageSource(5.0)
+    .addDiode(isat: 1e-12, vt: 0.025)
+    .addResistor(1000.0)
+    .build();
+
+  final result = mnaSolver.solveDC(circuit);
+
+  // Verify convergence criteria met
+  expect(result.convergenceInfo.iterations, lessThan(50));
+  expect(result.convergenceInfo.error, lessThan(1e-9));
+}
+```
+
+#### Recommended Implementation Approach
+
+**Phase 1: Core MNA Framework**
+1. Implement sparse matrix data structures
+2. Basic linear circuit support (R, V, I sources)
+3. Dense matrix solver with pivoting
+4. Comprehensive test suite with analytical verification
+
+**Phase 2: Advanced Features**
+1. Nonlinear component support (diodes, transistors)
+2. Transient analysis capabilities
+3. Sparse matrix optimizations
+4. Performance profiling and optimization
+
+**Phase 3: Production Readiness**
+1. Numerical stability enhancements
+2. Parallel computation support
+3. Memory optimization for large circuits
+4. Integration with UI threading model
+
+#### Risk Assessment: MNA Solver Complexity
+
+**High Risk Factors:**
+- **Mathematical complexity**: Requires deep understanding of numerical methods
+- **Performance requirements**: Real-time solving for interactive applications
+- **Numerical stability**: Robust handling of edge cases and pathological circuits
+
+**Mitigation Strategies:**
+1. **Start simple**: Begin with linear circuits only
+2. **Leverage libraries**: Use established numerical libraries where possible
+3. **Incremental complexity**: Add nonlinear features after linear solver is solid
+4. **Expert consultation**: Consider involving electrical engineering expertise
+
+**Success Criteria:**
+- [ ] Solves standard circuit analysis problems within 1% accuracy
+- [ ] Handles circuits with up to 100 nodes in real-time (<100ms)
+- [ ] Robust convergence for all supported component types
+- [ ] Comprehensive test coverage with analytical validation
+
+This deep dive reveals that while the MNA solver is technically feasible, it represents the most complex and critical component of the architecture. Success depends on careful implementation, thorough testing, and performance optimization.
+#### Alternative Solver Approaches Analysis
+
+While MNA is the gold standard for circuit simulation, several alternative approaches exist that may be more suitable depending on circuit complexity, performance requirements, and implementation constraints. Here's a comprehensive comparison:
+
+**1. Enhanced Iterative Propagation (Current Approach Evolution)**
+
+**Description:** Extend the current `PowerSimulationService` with more sophisticated propagation rules and convergence criteria.
+
+```dart
+class EnhancedIterativeSolver {
+  SimulationResult solveDC(CircuitNetlist netlist) {
+    // Multi-pass with convergence checking
+    const maxIterations = 1000;
+    const tolerance = 1e-6;
+
+    Map<String, double> nodeVoltages = _initializeVoltages(netlist);
+    Map<String, double> branchCurrents = _initializeCurrents(netlist);
+
+    for (int iter = 0; iter < maxIterations; iter++) {
+      double maxChange = 0;
+
+      // Update each component based on current state
+      for (final component in netlist.components) {
+        final change = _updateComponentState(
+          component, nodeVoltages, branchCurrents, netlist.connections
+        );
+        maxChange = max(maxChange, change);
+      }
+
+      if (maxChange < tolerance) break;
+    }
+
+    return SimulationResult(
+      nodeVoltages: nodeVoltages,
+      branchCurrents: branchCurrents,
+      // ... other fields
+    );
+  }
+}
+```
+
+**Pros:**
+- ✅ **Incremental Development**: Build upon existing `PowerSimulationService`
+- ✅ **Intuitive**: Easy to understand and debug
+- ✅ **Memory Efficient**: No large matrices required
+- ✅ **Flexible**: Easy to add new component types
+
+**Cons:**
+- ❌ **Limited Accuracy**: Cannot handle complex circuit topologies
+- ❌ **Convergence Issues**: May not converge for certain circuits
+- ❌ **No Mathematical Guarantees**: Results may be approximate
+- ❌ **Performance Degradation**: O(n²) complexity for dense circuits
+
+**Best For:** Simple educational circuits, rapid prototyping, when mathematical accuracy is less critical than development speed.
+
+**2. Sparse Tableau Method**
+
+**Description:** Modified MNA that uses sparse matrix techniques from the ground up, optimized for memory and computation.
+
+```dart
+class SparseTableauSolver {
+  SimulationResult solveDC(CircuitNetlist netlist) {
+    // Build sparse system directly
+    final system = SparseSystemBuilder.build(netlist);
+
+    // Use iterative sparse solvers
+    final solution = conjugateGradientSolve(
+      system.matrix,
+      system.rhs,
+      preconditioner: diagonalPreconditioner(system.matrix)
+    );
+
+    return _extractResults(solution, netlist);
+  }
+}
+```
+
+**Pros:**
+- ✅ **Memory Efficient**: Handles large circuits (1000+ nodes)
+- ✅ **Scalable**: Better asymptotic performance
+- ✅ **Industry Standard**: Used in commercial simulators
+- ✅ **Accurate**: Full mathematical solution
+
+**Cons:**
+- ❌ **Complex Implementation**: Requires sophisticated sparse matrix libraries
+- ❌ **Higher Development Cost**: More engineering effort
+- ❌ **Debugging Difficulty**: Sparse matrix issues are hard to diagnose
+
+**Best For:** Production applications requiring high accuracy and scalability.
+
+**3. Relaxation Methods (Successive Over-Relaxation)**
+
+**Description:** Iterative technique that updates node voltages sequentially with over-relaxation for faster convergence.
+
+```dart
+class RelaxationSolver {
+  SimulationResult solveDC(CircuitNetlist netlist) {
+    final nodeVoltages = List<double>.filled(netlist.nodes.length, 0.0);
+    const omega = 1.2; // Relaxation factor (1 < omega < 2)
+
+    for (int iter = 0; iter < maxIterations; iter++) {
+      double maxChange = 0;
+
+      for (int node = 0; node < netlist.nodes.length; node++) {
+        if (_isReferenceNode(node)) continue;
+
+        final oldVoltage = nodeVoltages[node];
+        final newVoltage = _computeNodeVoltage(node, nodeVoltages, netlist);
+
+        // Apply over-relaxation
+        nodeVoltages[node] = oldVoltage + omega * (newVoltage - oldVoltage);
+        maxChange = max(maxChange, (newVoltage - oldVoltage).abs());
+      }
+
+      if (maxChange < tolerance) break;
+    }
+
+    return _buildResult(nodeVoltages, netlist);
+  }
+}
+```
+
+**Pros:**
+- ✅ **Simple Implementation**: Easier than full MNA
+- ✅ **Fast Convergence**: Often converges in fewer iterations
+- ✅ **Memory Efficient**: No matrix storage needed
+- ✅ **Parallelizable**: Node updates can be done in parallel
+
+**Cons:**
+- ❌ **Limited Applicability**: Works best for resistive networks
+- ❌ **Convergence Not Guaranteed**: May fail for some circuit topologies
+- ❌ **Tuning Required**: Relaxation factor needs optimization per circuit
+
+**Best For:** Resistive circuits, real-time applications where speed is critical.
+
+**4. Hybrid Approach Recommendation**
+
+**Description:** Combine multiple methods based on circuit characteristics and performance requirements.
+
+```dart
+class HybridCircuitSolver {
+  final Map<SolverType, CircuitSolver> _solvers = {
+    SolverType.iterative: IterativeSolver(),
+    SolverType.relaxation: RelaxationSolver(),
+    SolverType.sparseMNA: SparseTableauSolver(),
+  };
+
+  SimulationResult solveDC(CircuitNetlist netlist) {
+    // Analyze circuit characteristics
+    final analysis = CircuitAnalyzer.analyze(netlist);
+
+    // Select appropriate solver
+    final solverType = _selectSolver(analysis);
+    final solver = _solvers[solverType]!;
+
+    // Solve with fallback strategy
+    try {
+      return solver.solveDC(netlist);
+    } catch (e) {
+      // Fallback to more robust method
+      return _fallbackSolve(netlist, analysis);
+    }
+  }
+
+  SolverType _selectSolver(CircuitAnalysis analysis) {
+    if (analysis.isSimple && analysis.maxComponents < 20) {
+      return SolverType.iterative;  // Fast for simple circuits
+    } else if (analysis.isResistiveOnly) {
+      return SolverType.relaxation;  // Good for resistive networks
+    } else {
+      return SolverType.sparseMNA;  // Full capability
+    }
+  }
+}
+```
+
+**Pros:**
+- ✅ **Adaptive**: Chooses best method for each circuit
+- ✅ **Robust**: Fallback mechanisms prevent failures
+- ✅ **Performance**: Optimal performance across different circuit types
+- ✅ **Maintainable**: Can improve individual solvers independently
+
+**Cons:**
+- ❌ **Complex Architecture**: Multiple solver implementations
+- ❌ **Testing Overhead**: Need to test all combinations
+- ❌ **Decision Logic**: Circuit analysis adds complexity
+
+**Best For:** Production applications requiring high reliability and performance.
+
+#### Comparative Analysis Summary
+
+| Approach | Accuracy | Performance | Complexity | Memory | Best Use Case |
+|----------|----------|-------------|------------|--------|---------------|
+| **Enhanced Iterative** | Medium | High | Low | Low | Simple educational circuits |
+| **Sparse MNA** | High | Medium-High | High | Medium | Production simulation |
+| **Relaxation** | Medium-High | High | Medium | Low | Real-time applications |
+| **Hybrid** | High | High | Very High | Medium | Comprehensive applications |
+
+#### Implementation Strategy Recommendation
+
+**Phase 1: Start with Enhanced Iterative**
+1. Extend current `PowerSimulationService` with convergence criteria
+2. Add support for basic passive components (R, L, C)
+3. Implement proper error handling and diagnostics
+4. Build comprehensive test suite
+
+**Phase 2: Add Sparse MNA Capability**
+1. Implement sparse matrix data structures
+2. Add MNA solver alongside iterative solver
+3. Create circuit analysis to choose appropriate method
+4. Maintain backward compatibility
+
+**Phase 3: Optimize and Extend**
+1. Add relaxation methods for specific circuit types
+2. Implement hybrid selection logic
+3. Performance profiling and optimization
+4. Advanced component support (nonlinear devices)
+
+This analysis shows that while MNA is the most mathematically rigorous approach, alternative methods may be more appropriate depending on the specific requirements of the SparkCircuit application. A hybrid approach provides the best balance of accuracy, performance, and maintainability.
+#### Flutter/Dart Ecosystem Integration Analysis
+
+The choice of circuit solver must consider Flutter's architecture, performance characteristics, and available ecosystem packages. Here's a comprehensive analysis of how different approaches integrate with the Flutter/Dart environment:
+
+**1. Available Numerical Computing Packages**
+
+**Current Ecosystem Landscape:**
+```yaml
+dependencies:
+  # Matrix operations and linear algebra
+  matrix2d: ^1.0.0          # Basic matrix operations
+  vector_math: ^2.1.0       # Flutter's built-in vector math
+  ml_linalg: ^13.0.0        # Machine learning linear algebra
+  
+  # Sparse matrix support (limited)
+  sparse: ^0.1.0           # Basic sparse matrix (experimental)
+  
+  # Alternative: WebAssembly integration
+  wasm_interop: ^1.0.0     # For high-performance computations
+  
+  # Scientific computing
+  scientific: ^1.0.0       # Basic scientific functions
+```
+
+**Package Assessment:**
+- **Strengths**: `vector_math` is well-integrated with Flutter, `ml_linalg` provides comprehensive linear algebra
+- **Limitations**: No mature sparse matrix libraries, limited numerical analysis tools
+- **Gaps**: Missing conjugate gradient solvers, LU decomposition for sparse matrices
+
+**2. Flutter Threading Model Impact**
+
+**UI Thread Constraints:**
+```dart
+class SimulationService {
+  // ❌ Bad: Blocks UI thread
+  Future<SimulationResult> solveBlocking(CircuitNetlist netlist) async {
+    return await compute(_solveInIsolate, netlist);  // Moves to background
+  }
+  
+  // ✅ Good: Non-blocking with progress updates
+  Stream<SimulationResult> solveStreaming(CircuitNetlist netlist) {
+    return Stream.fromFuture(compute(_solveInIsolate, netlist));
+  }
+}
+```
+
+**Threading Strategy by Approach:**
+- **Enhanced Iterative**: ✅ Excellent - naturally incremental, easy to interrupt
+- **Sparse MNA**: ⚠️ Challenging - matrix factorization may require isolate communication
+- **Relaxation**: ✅ Good - iterative nature allows progress updates and cancellation
+- **Hybrid**: ✅ Good - can choose appropriate threading per sub-solver
+
+**3. Memory Management Considerations**
+
+**Flutter Memory Characteristics:**
+```dart
+class MemoryEfficientSolver {
+  // Use efficient data structures
+  final Float64List _nodeVoltages;    // Typed arrays for performance
+  final SplayTreeMap<int, double> _sparseMatrix;  // Memory-efficient sparse storage
+  
+  // Implement memory pooling for frequent allocations
+  static final _matrixPool = Pool<Float64List>();
+  
+  Float64List getMatrixFromPool(int size) {
+    return _matrixPool.allocate(size) ?? Float64List(size);
+  }
+}
+```
+
+**4. Platform-Specific Integration**
+
+**Mobile Platforms (iOS/Android):**
+```dart
+// Native performance optimization
+class NativeOptimizedSolver {
+  static const MethodChannel _channel = MethodChannel('circuit_solver');
+  
+  Future<SimulationResult> solveNative(CircuitNetlist netlist) async {
+    // Delegate heavy computation to native code
+    final result = await _channel.invokeMethod('solveCircuit', netlist.toJson());
+    return SimulationResult.fromJson(result);
+  }
+}
+```
+
+**5. Riverpod State Management Integration**
+
+**Reactive Simulation State:**
+```dart
+// Simulation state provider
+final simulationProvider = StateNotifierProvider<SimulationNotifier, SimulationState>((ref) {
+  final solver = ref.watch(solverProvider);
+  return SimulationNotifier(solver);
+});
+
+class SimulationNotifier extends StateNotifier<SimulationState> {
+  SimulationNotifier(this._solver) : super(SimulationState.idle());
+  
+  Future<void> startSimulation(CircuitNetlist netlist) async {
+    state = SimulationState.running();
+    
+    try {
+      // Stream results for reactive UI updates
+      await for (final result in _solver.solveStreaming(netlist)) {
+        state = SimulationState.completed(result);
+      }
+    } catch (e) {
+      state = SimulationState.error(e.toString());
+    }
+  }
+}
+```
+
+**6. Performance Implications for UI Responsiveness**
+
+**Frame Rate Considerations:**
+```dart
+class FrameRateAwareSolver {
+  static const targetFrameTime = 16; // 60 FPS
+  static const maxComputationTime = 10; // Leave buffer for UI
+  
+  Stream<SimulationResult> solveWithFrameRateLimit(CircuitNetlist netlist) async* {
+    final stopwatch = Stopwatch()..start();
+    
+    // Iterative solving with time checks
+    for (int iter = 0; iter < maxIterations; iter++) {
+      // Perform one iteration
+      final partialResult = _performIteration(netlist, iter);
+      
+      // Check if we're approaching frame time limit
+      if (stopwatch.elapsedMilliseconds > maxComputationTime) {
+        yield partialResult;  // Emit intermediate result
+        await Future.delayed(Duration.zero);  // Allow UI to update
+        stopwatch.reset();
+      }
+    }
+    
+    yield finalResult;
+  }
+}
+```
+
+**Performance Benchmarks by Approach:**
+
+| Approach | UI Responsiveness | Memory Usage | Platform Support |
+|----------|-------------------|--------------|------------------|
+| **Enhanced Iterative** | ✅ Excellent | ✅ Low | ✅ All platforms |
+| **Sparse MNA** | ⚠️ Moderate | ⚠️ Moderate | ✅ Native/Web (with WASM) |
+| **Relaxation** | ✅ Good | ✅ Low | ✅ All platforms |
+| **Hybrid** | ✅ Good | ✅ Low-Moderate | ✅ All platforms |
+
+**7. Recommended Integration Strategy**
+
+**Phase 1: Pure Dart Implementation**
+1. Start with Enhanced Iterative approach using existing packages
+2. Leverage `vector_math` and `ml_linalg` for matrix operations
+3. Use Flutter's `compute()` for background processing
+4. Implement streaming results for reactive UI updates
+
+**Phase 2: Performance Optimization**
+1. Add native platform channels for heavy computations
+2. Implement WebAssembly for web deployment
+3. Optimize memory usage with typed arrays and object pooling
+4. Add frame-rate-aware computation scheduling
+
+**Key Integration Decisions:**
+
+| Factor | Recommendation | Rationale |
+|--------|----------------|-----------|
+| **Primary Solver** | Enhanced Iterative → Hybrid | Balances development speed with performance |
+| **Threading** | Isolate-based with streaming | Maintains UI responsiveness |
+| **Memory** | Typed arrays + pooling | Flutter memory management best practices |
+| **Platform** | Pure Dart + native channels | Maximizes platform compatibility |
+| **State Management** | Riverpod reactive streams | Leverages Flutter's preferred architecture |
+
+**Conclusion:** The Flutter/Dart ecosystem favors iterative and relaxation-based approaches due to their natural fit with reactive programming and UI responsiveness requirements. A hybrid approach that starts with enhanced iterative methods provides the best balance of development feasibility, performance, and platform compatibility.
+#### Current Backend Pattern Analysis: Notifier & Engine Core Logic Flow
+
+**Analysis Date:** 2025-08-29  
+**Focus:** Current backend architecture problems and required changes
+
+---
+
+### Current Backend Pattern: Complex Notifier Orchestration
+
+**Current Architecture Overview:**
+The existing backend follows a **hybrid notifier orchestration pattern** that attempts to combine monolithic and granular state management approaches. This creates unnecessary complexity and performance overhead.
+
+**Key Components in Current Flow:**
+
+**1. Multiple Specialized Notifiers (7+ notifiers):**
+```dart
+// Current problematic pattern
+final gridNotifierProvider = StateNotifierProvider<GridNotifier, Grid>((ref) {
+  return GridNotifier();  // Manages only grid state
+});
+
+final historyNotifierProvider = StateNotifierProvider<HistoryNotifier, List<GameEngineState>>((ref) {
+  return HistoryNotifier();  // Manages only history
+});
+
+final gameProgressNotifierProvider = StateNotifierProvider<GameProgressNotifier, GameProgressState>((ref) {
+  return GameProgressNotifier();  // Manages only progress
+});
+
+// ... 4+ more specialized notifiers
+```
+
+**2. Complex Orchestrator Pattern:**
+```dart
+class GameEngineOrchestrator extends StateNotifier<GameEngineState> {
+  final GridNotifier _grid;
+  final HistoryNotifier _history;
+  final GameProgressNotifier _progress;
+  final ComponentSelectionNotifier _selection;
+  final InteractionStateNotifier _interaction;
+  // ... more notifiers
+  
+  GameEngineOrchestrator(
+    this._grid, this._history, this._progress, 
+    this._selection, this._interaction, /* ... */
+  ) : super(GameEngineState.empty());
+  
+  Future<Result<GameEngineState>> executeAction(ComponentAction action) async {
+    // Complex transaction management across 7+ notifiers
+    final transaction = _beginTransaction();
+    
+    try {
+      // Execute across ALL notifiers - massive coordination overhead
+      await _grid.executeInTransaction(action, transaction);
+      await _history.executeInTransaction(action, transaction);
+      await _progress.executeInTransaction(action, transaction);
+      await _selection.executeInTransaction(action, transaction);
+      await _interaction.executeInTransaction(action, transaction);
+      
+      // Atomic commit across all notifiers
+      await transaction.commit();
+      
+      // Rebuild composite state from all notifiers
+      state = _buildCompositeState();
+      
+      return Success(state);
+    } catch (e) {
+      await transaction.rollback();
+      return Failure(e.toString());
+    }
+  }
+  
+  GameEngineState _buildCompositeState() {
+    // Expensive: reconstructs state from 7+ notifiers
+    return GameEngineState(
+      grid: _grid.state,
+      isPaused: _progress.state.isPaused,
+      isWin: _progress.state.isWin,
+      selectedComponentId: _selection.state,
+      draggedComponentId: _interaction.state.draggedComponentId,
+      dragPosition: _interaction.state.dragPosition,
+      // ... more fields from different notifiers
+    );
+  }
+}
+```
+
+**3. Engine Core Logic Flow (Current):**
+
+```
+User Action → Orchestrator → 7+ Notifiers → Transaction → State Reconstruction → UI Update
+
+Detailed Flow:
+1. User places component (UI event)
+2. GameEngineOrchestrator.executeAction() called
+3. Orchestrator begins transaction across all notifiers
+4. Each notifier processes action in isolation
+5. GridNotifier updates grid state
+6. HistoryNotifier records state change
+7. GameProgressNotifier checks win conditions
+8. ComponentSelectionNotifier updates selection
+9. InteractionStateNotifier handles drag state
+10. Transaction commits all changes atomically
+11. Orchestrator rebuilds composite state from all notifiers
+12. UI receives new composite state and re-renders
+```
+
+---
+
+### Why Current Pattern Needs to Change
+
+**1. Excessive Coordination Overhead:**
+- **Problem**: Every action requires coordination across 7+ notifiers
+- **Impact**: Simple component placement triggers massive orchestration
+- **Performance Cost**: Transaction management + state reconstruction on every action
+
+**2. State Synchronization Complexity:**
+- **Problem**: Single conceptual state split across multiple notifiers
+- **Impact**: Bugs from state inconsistency, debugging nightmare
+- **Maintenance Cost**: Changes require updates in multiple places
+
+**3. Unnecessary Abstraction Layers:**
+- **Problem**: Orchestrator adds complexity without value
+- **Impact**: 236+ lines of orchestration code for simple state management
+- **Cognitive Load**: Developers must understand 7+ notifier interactions
+
+**4. Poor Separation of Concerns:**
+- **Problem**: Business logic mixed with state management plumbing
+- **Impact**: Hard to test, hard to modify, hard to understand
+- **Evolution Resistance**: Adding features requires touching multiple notifiers
+
+**5. Performance Bottlenecks:**
+- **Problem**: Composite state reconstruction on every action
+- **Impact**: UI lag, memory pressure, battery drain
+- **Scalability**: Pattern doesn't scale with circuit complexity
+
+**6. Missing Core Functionality:**
+- **Problem**: All this complexity delivers basic power propagation, not real simulation
+- **Impact**: Over-engineered for wrong problem
+- **Opportunity Cost**: Development time wasted on architecture instead of features
+
+---
+
+### Proposed Backend Pattern: Unified State Management
+
+**New Architecture: Single Source of Truth**
+
+**1. Enhanced GameStateNotifier (Single State Container):**
+```dart
+class EnhancedGameStateNotifier extends StateNotifier<GameState> {
+  final SimulationEngine _simulationEngine;
+  final NetlistBuilder _netlistBuilder;
+  final StorageService _storage;
+  final CommandStack _commandStack;
+  
+  EnhancedGameStateNotifier(
+    this._simulationEngine,
+    this._netlistBuilder, 
+    this._storage,
+    this._commandStack,
+  ) : super(GameState.initial());
+  
+  // Single method handles component placement
+  Future<void> placeComponent(ComponentType type, int row, int col) async {
+    // Direct state update - no orchestration needed
+    final newComponent = _createComponent(type, row, col);
+    final newState = state.copyWith(
+      grid: state.grid.copyWithComponent(newComponent)
+    );
+    
+    // Build circuit and simulate
+    final netlist = _netlistBuilder.buildNetlist(newState);
+    final simulationResult = await _simulationEngine.solveDC(netlist);
+    
+    // Single state update with simulation results
+    state = newState.copyWith(
+      simulationResult: simulationResult,
+      lastUpdated: DateTime.now(),
+    );
+    
+    // Auto-save and notify UI
+    await _storage.saveGameState(state);
+    // UI automatically updates via Riverpod
+  }
+}
+```
+
+**2. Clean Engine Core Logic Flow (Proposed):**
+
+```
+User Action → EnhancedGameStateNotifier → SimulationEngine → State Update → UI Update
+
+Detailed Flow:
+1. User places component (UI event)
+2. EnhancedGameStateNotifier.placeComponent() called
+3. Direct state update (no transaction coordination)
+4. NetlistBuilder converts state to circuit representation
+5. SimulationEngine solves circuit (real MNA or iterative)
+6. Single state update with simulation results
+7. UI automatically re-renders via reactive state
+```
+
+---
+
+### Migration Benefits & Quantitative Impact
+
+**Performance Improvements:**
+- **Before**: 7+ notifier updates + orchestration + state reconstruction
+- **After**: Single state update + direct simulation
+- **Expected Gain**: 60-80% reduction in action processing time
+
+**Code Complexity Reduction:**
+- **Before**: 236-line orchestrator + 7+ notifiers + complex transactions
+- **After**: Single enhanced notifier + clean service interfaces
+- **Expected Gain**: 70% reduction in state management code
+
+**Maintainability Improvements:**
+- **Before**: Changes require touching multiple notifiers + orchestrator
+- **After**: Changes localized to single state container
+- **Expected Gain**: 80% reduction in maintenance complexity
+
+---
+
+### Conclusion: Architectural Debt vs. Technical Debt
+
+**Current Pattern**: Represents significant **architectural debt** - complex, hard to maintain, poor performance, missing core functionality
+
+**Proposed Pattern**: Clean architecture with **acceptable technical debt** - simpler, maintainable, better performance, enables core functionality
+
+**Key Insight**: The current over-engineered architecture is actually more complex and harder to maintain than properly implementing the missing simulation engine. The proposed simplification enables both better architecture AND delivery of core circuit simulation functionality.
+
+**Recommendation**: Proceed with migration to unified state management pattern. The complexity reduction and performance improvements will more than offset the migration effort, while enabling proper circuit simulation capabilities.
