@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../domain/behaviors/drawing_behavior.dart';
 import '../domain/behaviors/logic_behavior.dart';
-import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
+import '../domain/behaviors/move_behavior.dart';
 import '../application/services/component_registry.dart';
+import '../application/services/component_factory.dart';
 import '../domain/entities/component.dart';
 import '../infrastructure/rendering/asset_manager.dart';
 import '../common/theme.dart';
@@ -67,13 +68,13 @@ class BuzzerDrawingBehavior implements DrawingBehavior {
   }
 }
 
-class BuzzerLogicBehavior implements LogicBehavior {
+class BuzzerLogicBehavior extends BaseLogicBehavior {
   BuzzerLogicBehavior();
   final AudioService _audioService =
       AudioService(); // In a real app, inject this
 
   @override
-  void evaluate(Grid grid, ComponentModel component) {
+  void execute(ComponentModel component) {
     Logger.log('BuzzerLogicBehavior: Evaluating buzzer \${component.id}');
     // This is a simplified logic. A more robust implementation would use the main game
     // engine to track state changes and and avoid playing the sound on every evaluation.
@@ -81,18 +82,22 @@ class BuzzerLogicBehavior implements LogicBehavior {
       _audioService.play(AppAssets.audioSwitch);
     }
   }
+
+  @override
+  String get behaviorType => 'buzzer';
 }
 
-void registerBuzzer() {
+void registerBuzzer(ComponentFactory factory) {
   Logger.log('registerBuzzer() called.');
-  registerBehavior<BuzzerDrawingBehavior>(() => const BuzzerDrawingBehavior());
-  registerBehavior<BuzzerLogicBehavior>(() => BuzzerLogicBehavior());
-  registerBehavior<MoveBehavior>(() => const MoveBehavior());
+  factory.registerBehavior<BuzzerDrawingBehavior>(() => const BuzzerDrawingBehavior());
+  factory.registerBehavior<BuzzerLogicBehavior>(() => BuzzerLogicBehavior());
+  // Note: MoveBehavior is abstract and can't be instantiated directly
+  // factory.registerBehavior<MoveBehavior>(() => MoveBehavior());
 
-  ComponentRegistry.register(
+  factory.register(
     type: 'Component.Buzzer',
     displayName: 'Buzzer',
-    behaviors: [BuzzerDrawingBehavior, BuzzerLogicBehavior, MoveBehavior],
+    behaviors: [BuzzerDrawingBehavior, BuzzerLogicBehavior],
     isDraggable: true,
   );
   Logger.log('registerBuzzer() completed.');

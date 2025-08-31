@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:circuit_stem/presentation/features/menus/screens/main_menu.dart';
-import 'package:circuit_stem/presentation/features/menus/screens/level_select.dart'; // Corrected import
-import 'package:circuit_stem/presentation/features/game/screens/game_screen.dart'; // Corrected import
+import 'presentation/features/menus/screens/main_menu.dart';
+import 'presentation/features/menus/screens/level_select.dart';
+import 'presentation/features/game/screens/game_screen.dart';
 
 class AppRoutes {
   static const String mainMenu = '/';
@@ -26,7 +26,7 @@ class AppRoutes {
         }
         final levelIndex = settings.arguments as int;
         return MaterialPageRoute(
-            builder: (_) => GameScreen(levelIndex: levelIndex));
+            builder: (_) => GameScreen(levelId: levelIndex));
 
       default:
         return MaterialPageRoute(

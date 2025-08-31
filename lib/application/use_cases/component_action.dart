@@ -1,5 +1,9 @@
 import 'package:equatable/equatable.dart';
-import 'package:circuit_stem/domain/entities/level_definition.dart';
+
+// Domain entities
+import '../../domain/entities/level_definition.dart';
+
+// Application core
 import '../core/result.dart';
 import '../game_engine_state.dart';
 

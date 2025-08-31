@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:circuit_stem/common/logger.dart';
+import '../../common/logger.dart';
 import 'svg_processor_base.dart';
 
 class SvgProcessor implements SvgProcessorBase {

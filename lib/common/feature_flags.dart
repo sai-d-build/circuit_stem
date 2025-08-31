@@ -1,74 +1,167 @@
-/// Feature flags for controlling hybrid engine rollout and other experimental features.
-/// 
-/// This system supports both compile-time and runtime feature flags for maximum flexibility.
-/// Compile-time flags use --dart-define for build-time control.
-/// Runtime flags can be updated dynamically for gradual rollouts.
-class FeatureFlags {
-  /// Enable the hybrid GameEngine architecture instead of the original monolithic GameEngineNotifier.
-  /// 
-  /// When enabled, the system uses:
-  /// - GameEngineOrchestrator for atomic transactions
-  /// - Granular notifiers (Grid, History, Progress, Selection, Interaction)
-  /// - HybridGameEngineAdapter for backward compatibility
-  /// 
-  /// Usage:
-  /// - Build with hybrid ON: flutter build --dart-define=USE_HYBRID_ENGINE=true
-  /// - Build with hybrid OFF: flutter build --dart-define=USE_HYBRID_ENGINE=false (default)
-  static const bool useHybridEngine = bool.fromEnvironment(
-    'USE_HYBRID_ENGINE',
-    defaultValue: false,
-  );
+// Feature flag system for gradual rollout of educational gaming features
+enum FeatureFlag {
+  // Architecture migration flags
+  useUnifiedStateManagement,
+  useNewSimulationEngine,
+  useEnhancedUI,
+  enablePerformanceMonitoring,
 
-  /// Enable performance monitoring to track UI rebuilds and action execution times.
-  /// 
-  /// When enabled:
-  /// - Tracks widget rebuild frequency
-  /// - Measures action execution latency
-  /// - Collects memory usage metrics
-  /// - Provides monitoring dashboard
-  static const bool enablePerformanceMonitoring = bool.fromEnvironment(
-    'ENABLE_PERFORMANCE_MONITORING',
-    defaultValue: false,
-  );
+  // Educational gaming flags
+  enableLevelSystem,
+  enableAchievementSystem,
+  enableInteractiveMechanics,
+  enableEducationalContent,
+  enableHintSystem,
+  enableScoringSystem,
+  enableMultipleSolutions,
 
-  /// Enable granular provider usage for performance optimization.
-  /// 
-  /// When enabled, UI widgets use specific providers (gridProvider, isWinProvider)
-  /// instead of watching the entire gameEngineProvider.
-  /// This dramatically reduces UI rebuild frequency.
-  static const bool enableGranularProviders = bool.fromEnvironment(
-    'ENABLE_GRANULAR_PROVIDERS',
-    defaultValue: false,
-  );
+  // Animation and visual effects flags
+  enableAnimations,
+  enableParticleEffects,
+  enableVisualFeedback,
+  enableRiveAnimations,
+  enableLottieAnimations,
 
-  /// Enable debug logging for hybrid system troubleshooting.
-  static const bool enableHybridDebugLogs = bool.fromEnvironment(
-    'ENABLE_HYBRID_DEBUG_LOGS',
-    defaultValue: false,
-  );
+  // Performance optimization flags
+  enableQualityAdjustment,
+  enableMemoryOptimization,
+  migrationComplete,
+}
 
-  /// Enable transaction debugging to track atomic operations.
-  static const bool enableTransactionDebug = bool.fromEnvironment(
-    'ENABLE_TRANSACTION_DEBUG',
-    defaultValue: false,
-  );
+class FeatureFlagService {
+  static bool isEnabled(FeatureFlag flag) {
+    // Check compile-time and runtime flags
+    switch (flag) {
+      // Architecture flags - enable for development
+      case FeatureFlag.useUnifiedStateManagement:
+        return true;
+      case FeatureFlag.useNewSimulationEngine:
+        return false; // Keep old simulation during migration
+      case FeatureFlag.useEnhancedUI:
+        return true;
+      case FeatureFlag.enablePerformanceMonitoring:
+        return true;
 
-  /// Summary of current feature flag state for debugging and monitoring.
-  static Map<String, bool> get currentFlags => {
-        'useHybridEngine': useHybridEngine,
-        'enablePerformanceMonitoring': enablePerformanceMonitoring,
-        'enableGranularProviders': enableGranularProviders,
-        'enableHybridDebugLogs': enableHybridDebugLogs,
-        'enableTransactionDebug': enableTransactionDebug,
-      };
+      // Educational gaming flags - gradual rollout
+      case FeatureFlag.enableLevelSystem:
+        return true; // Enable level progression
+      case FeatureFlag.enableAchievementSystem:
+        return false; // Roll out gradually
+      case FeatureFlag.enableInteractiveMechanics:
+        return true; // Enable drag-and-drop, rotation
+      case FeatureFlag.enableEducationalContent:
+        return true; // Enable learning objectives
+      case FeatureFlag.enableHintSystem:
+        return false; // Enable after level validation
+      case FeatureFlag.enableScoringSystem:
+        return true; // Enable basic scoring
+      case FeatureFlag.enableMultipleSolutions:
+        return false; // Advanced feature, enable later
 
-  /// Check if hybrid system features are fully enabled.
-  static bool get isHybridFullyEnabled =>
-      useHybridEngine && enableGranularProviders;
+      // Animation and visual effects flags
+      case FeatureFlag.enableAnimations:
+        return true; // Enable rich animations
+      case FeatureFlag.enableParticleEffects:
+        return false; // Enable particle systems
+      case FeatureFlag.enableVisualFeedback:
+        return true; // Enable visual feedback
+      case FeatureFlag.enableRiveAnimations:
+        return false; // Enable Rive animations
+      case FeatureFlag.enableLottieAnimations:
+        return false; // Enable Lottie animations
 
-  /// Check if any experimental features are enabled.
-  static bool get hasExperimentalFeatures =>
-      useHybridEngine ||
-      enablePerformanceMonitoring ||
-      enableGranularProviders;
+      // Performance optimization flags
+      case FeatureFlag.enableQualityAdjustment:
+        return true; // Enable quality adjustment
+      case FeatureFlag.enableMemoryOptimization:
+        return true; // Enable memory optimization
+      case FeatureFlag.migrationComplete:
+        return false; // Migration completion flag
+
+      default:
+        return false;
+    }
+  }
+
+  // Get all enabled features for debugging
+  static List<FeatureFlag> getEnabledFeatures() {
+    return FeatureFlag.values.where(isEnabled).toList();
+  }
+
+  // Runtime flag storage
+  static final Map<FeatureFlag, bool> _runtimeFlags = {};
+
+  // Enable feature at runtime
+  static void enableFeature(FeatureFlag flag) {
+    _runtimeFlags[flag] = true;
+    _persistFlag(flag, true);
+    _logFeatureChange(flag, true);
+  }
+
+  // Disable feature at runtime
+  static void disableFeature(FeatureFlag flag) {
+    _runtimeFlags[flag] = false;
+    _persistFlag(flag, false);
+    _logFeatureChange(flag, false);
+  }
+
+  // Enable all educational features
+  static void enableAllEducationalFeatures() {
+    final educationalFlags = [
+      FeatureFlag.enableLevelSystem,
+      FeatureFlag.enableAchievementSystem,
+      FeatureFlag.enableInteractiveMechanics,
+      FeatureFlag.enableEducationalContent,
+      FeatureFlag.enableHintSystem,
+      FeatureFlag.enableScoringSystem,
+      FeatureFlag.enableMultipleSolutions,
+    ];
+
+    for (final flag in educationalFlags) {
+      enableFeature(flag);
+    }
+  }
+
+  // Disable all educational features
+  static void disableAllEducationalFeatures() {
+    final educationalFlags = [
+      FeatureFlag.enableLevelSystem,
+      FeatureFlag.enableAchievementSystem,
+      FeatureFlag.enableInteractiveMechanics,
+      FeatureFlag.enableEducationalContent,
+      FeatureFlag.enableHintSystem,
+      FeatureFlag.enableScoringSystem,
+      FeatureFlag.enableMultipleSolutions,
+    ];
+
+    for (final flag in educationalFlags) {
+      disableFeature(flag);
+    }
+  }
+
+  // Get runtime flag value
+  static bool? _getRuntimeFlagValue(FeatureFlag flag) {
+    return _runtimeFlags[flag];
+  }
+
+  // Persist flag to storage (placeholder for actual implementation)
+  static void _persistFlag(FeatureFlag flag, bool value) {
+    // TODO: Implement persistent storage using SharedPreferences
+    // For now, just store in memory
+    print('Persisting flag ${flag.name}: $value');
+  }
+
+  // Log feature flag changes
+  static void _logFeatureChange(FeatureFlag flag, bool enabled) {
+    print('Feature flag ${flag.name} ${enabled ? 'enabled' : 'disabled'} at ${DateTime.now()}');
+  }
+
+  // Check if migration is complete
+  static bool isMigrationComplete() {
+    return isEnabled(FeatureFlag.useNewSimulationEngine) &&
+           isEnabled(FeatureFlag.enableAchievementSystem) &&
+           isEnabled(FeatureFlag.enableHintSystem) &&
+           isEnabled(FeatureFlag.enableMultipleSolutions) &&
+           isEnabled(FeatureFlag.migrationComplete);
+  }
 }

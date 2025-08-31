@@ -1,32 +1,39 @@
-import 'package:circuit_stem/domain/entities/grid.dart';
-import 'package:circuit_stem/application/animation_scheduler.dart';
-import 'package:circuit_stem/application/game_engine_notifier.dart';
-import 'package:circuit_stem/application/game_engine_state.dart';
-import 'package:circuit_stem/infrastructure/audio/audio_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:circuit_stem/infrastructure/persistence/level_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:circuit_stem/infrastructure/rendering/asset_manager.dart';
-import 'package:circuit_stem/infrastructure/rendering/asset_manager_state.dart';
-import 'package:circuit_stem/infrastructure/persistence/level_manager_state.dart';
-import 'package:circuit_stem/domain/entities/level_definition.dart';
-import 'package:circuit_stem/domain/entities/level_metadata.dart';
-import 'package:circuit_stem/application/render_state.dart';
 
-// Hybrid system imports
-import 'package:circuit_stem/domain/entities/component.dart';
-import 'grid_notifier.dart';
-import 'history_notifier.dart';
-import 'game_progress_notifier.dart';
-import 'component_selection_notifier.dart';
-import 'interaction_state_notifier.dart';
-import 'game_engine_orchestrator.dart';
-import 'hybrid_game_engine_adapter.dart';
-import 'services/component_palette_manager.dart';
+// Application layer
+import 'animation_scheduler.dart';
+import 'enhanced_game_state_notifier.dart';
+import 'enhanced_game_state.dart'; // Explicitly import GameState
+import 'services/component_factory.dart';
+
+// Infrastructure layer
+import '../infrastructure/audio/audio_service.dart';
+import '../infrastructure/persistence/level_manager.dart';
+import '../infrastructure/persistence/level_manager_state.dart';
+import '../infrastructure/rendering/asset_manager.dart';
+import '../infrastructure/rendering/asset_manager_state.dart';
+
+// Core Services
+import '../core/persistence/storage_service.dart';
+import '../core/commands/command_stack.dart';
+import '../core/commands/in_memory_command_stack.dart';
+import '../core/simulation/simulation_engine.dart';
+import '../core/simulation/basic_simulation_engine.dart';
+import '../core/simulation/netlist_builder.dart';
+
+// Educational gaming service imports (keep if still relevant)
+import '../core/services/level_system.dart';
+import '../core/services/achievement_system.dart';
+import '../core/services/interactive_mechanics.dart';
+import '../core/services/hint_system.dart';
+import '../core/services/animation_system.dart';
+import '../core/services/visual_feedback_system.dart';
+// import '../core/services/educational_validator.dart'; // Removed for now
+import '../core/services/learning_analytics.dart';
 
 // Feature flag imports
 import '../common/feature_flags.dart';
-import 'feature_flag_service.dart';
 
 // =============================================================================
 // FOUNDATIONAL SERVICE PROVIDERS
@@ -52,243 +59,126 @@ final levelManagerProvider =
 });
 
 // =============================================================================
-// HYBRID NOTIFIER PROVIDERS (only available when hybrid is enabled)
+// NEW CORE SERVICE PROVIDERS
 // =============================================================================
 
-final gridNotifierProvider = StateNotifierProvider<GridNotifier, Grid>((ref) {
-  if (!FeatureFlags.useHybridEngine && !FeatureFlagService.useHybridEngine) {
-    throw UnsupportedError('GridNotifier requires hybrid engine to be enabled');
-  }
-  return GridNotifier();
+final storageServiceProvider = Provider<StorageService>((ref) {
+  return StorageService();
 });
 
-final historyNotifierProvider = 
-    StateNotifierProvider<HistoryNotifier, List<GameEngineState>>((ref) {
-  if (!FeatureFlags.useHybridEngine && !FeatureFlagService.useHybridEngine) {
-    throw UnsupportedError('HistoryNotifier requires hybrid engine to be enabled');
-  }
-  return HistoryNotifier();
+final commandStackProvider = Provider<CommandStack>((ref) {
+  return InMemoryCommandStack();
 });
 
-final gameProgressNotifierProvider = 
-    StateNotifierProvider<GameProgressNotifier, GameProgressState>((ref) {
-  if (!FeatureFlags.useHybridEngine && !FeatureFlagService.useHybridEngine) {
-    throw UnsupportedError('GameProgressNotifier requires hybrid engine to be enabled');
-  }
-  return GameProgressNotifier();
+final simulationEngineProvider = Provider<SimulationEngine>((ref) {
+  return BasicSimulationEngine();
 });
 
-final componentSelectionNotifierProvider = 
-    StateNotifierProvider<ComponentSelectionNotifier, String?>((ref) {
-  if (!FeatureFlags.useHybridEngine && !FeatureFlagService.useHybridEngine) {
-    throw UnsupportedError('ComponentSelectionNotifier requires hybrid engine to be enabled');
-  }
-  return ComponentSelectionNotifier();
+final netlistBuilderProvider = Provider<NetlistBuilder>((ref) {
+  return NetlistBuilder();
 });
 
-final interactionStateNotifierProvider = 
-    StateNotifierProvider<InteractionStateNotifier, InteractionState>((ref) {
-  if (!FeatureFlags.useHybridEngine && !FeatureFlagService.useHybridEngine) {
-    throw UnsupportedError('InteractionStateNotifier requires hybrid engine to be enabled');
+final componentFactoryProvider = Provider<ComponentFactory>((ref) => ComponentFactory());
+
+// =============================================================================
+// EDUCATIONAL GAMING SERVICE PROVIDERS (retained for now)
+// =============================================================================
+
+// Level System Provider
+final levelSystemProvider = Provider<LevelSystem>((ref) {
+  if (!FeatureFlagService.isEnabled(FeatureFlag.enableLevelSystem)) {
+    throw UnsupportedError('Level system is not enabled');
   }
-  return InteractionStateNotifier();
+  final sharedPrefs = ref.watch(sharedPreferencesProvider);
+  return LevelSystem(sharedPrefs);
+});
+
+// Achievement System Provider
+final achievementSystemProvider = Provider<AchievementSystem>((ref) {
+  if (!FeatureFlagService.isEnabled(FeatureFlag.enableAchievementSystem)) {
+    throw UnsupportedError('Achievement system is not enabled');
+  }
+  final sharedPrefs = ref.watch(sharedPreferencesProvider);
+  return AchievementSystem(sharedPrefs);
+});
+
+// Interactive Mechanics Provider
+final interactiveMechanicsProvider = Provider<InteractiveMechanics>((ref) {
+  if (!FeatureFlagService.isEnabled(FeatureFlag.enableInteractiveMechanics)) {
+    throw UnsupportedError('Interactive mechanics are not enabled');
+  }
+  return InteractiveMechanics();
+});
+
+// Hint System Provider
+final hintSystemProvider = Provider<HintSystem>((ref) {
+  if (!FeatureFlagService.isEnabled(FeatureFlag.enableHintSystem)) {
+    throw UnsupportedError('Hint system is not enabled');
+  }
+  return HintSystem();
+});
+
+// Animation System Provider
+final animationSystemProvider = Provider<AnimationSystem>((ref) {
+  if (!FeatureFlagService.isEnabled(FeatureFlag.enableAnimations)) {
+    throw UnsupportedError('Animation system is not enabled');
+  }
+  return AnimationSystem();
+});
+
+// Visual Feedback System Provider
+final visualFeedbackSystemProvider = Provider<VisualFeedbackSystem>((ref) {
+  if (!FeatureFlagService.isEnabled(FeatureFlag.enableVisualFeedback)) {
+    throw UnsupportedError('Visual feedback system is not enabled');
+  }
+  return VisualFeedbackSystem();
+});
+
+// Educational Validator Provider (Removed for now)
+// final educationalValidatorProvider = Provider<EducationalValidator>((ref) {
+//   if (!FeatureFlagService.isEnabled(FeatureFlag.enableEducationalContent)) {
+//     throw UnsupportedError('Educational content is not enabled');
+//   }
+//   final simulationEngine = ref.watch(simulationEngineProvider);
+//   return EducationalValidator(simulationEngine);
+// });
+
+// Learning Analytics Provider
+final learningAnalyticsProvider = Provider<LearningAnalytics>((ref) {
+  if (!FeatureFlagService.isEnabled(FeatureFlag.enableEducationalContent)) {
+    throw UnsupportedError('Educational content is not enabled');
+  }
+  final sharedPrefs = ref.watch(sharedPreferencesProvider);
+  return LearningAnalytics(sharedPrefs);
 });
 
 // =============================================================================
-// ORCHESTRATOR PROVIDER (hybrid only)
+// UNIFIED ENHANCED GAME STATE PROVIDER
 // =============================================================================
 
-final gameEngineOrchestratorProvider =
-    StateNotifierProvider<GameEngineOrchestrator, GameEngineState>((ref) {
-  if (!FeatureFlags.useHybridEngine && !FeatureFlagService.useHybridEngine) {
-    throw UnsupportedError('GameEngineOrchestrator requires hybrid engine to be enabled');
-  }
-  
-  final gridNotifier = ref.watch(gridNotifierProvider.notifier);
-  final historyNotifier = ref.watch(historyNotifierProvider.notifier);
-  final progressNotifier = ref.watch(gameProgressNotifierProvider.notifier);
-  final selectionNotifier = ref.watch(componentSelectionNotifierProvider.notifier);
-  final interactionNotifier = ref.watch(interactionStateNotifierProvider.notifier);
-  
-  return GameEngineOrchestrator(
-    gridNotifier,
-    historyNotifier,
-    progressNotifier,
-    selectionNotifier,
-    interactionNotifier,
-    const ComponentPaletteManager([]),
+final enhancedGameStateNotifierProvider =
+    StateNotifierProvider<EnhancedGameStateNotifier, dynamic>((ref) {
+  final storageService = ref.watch(storageServiceProvider);
+  final commandStack = ref.watch(commandStackProvider);
+  final simulationEngine = ref.watch(simulationEngineProvider);
+  final netlistBuilder = ref.watch(netlistBuilderProvider);
+  final componentFactory = ref.watch(componentFactoryProvider);
+
+  // Pass all necessary dependencies to the notifier
+  return EnhancedGameStateNotifier(
+    storageService: storageService,
+    commandStack: commandStack,
+    simulationEngine: simulationEngine,
+    netlistBuilder: netlistBuilder,
+    componentFactory: componentFactory,
   );
 });
 
-final hybridGameEngineAdapterProvider =
-    StateNotifierProvider<HybridGameEngineAdapter, GameEngineState>((ref) {
-  if (!FeatureFlags.useHybridEngine && !FeatureFlagService.useHybridEngine) {
-    throw UnsupportedError('HybridGameEngineAdapter requires hybrid engine to be enabled');
-  }
-  
-  // This would be implemented similar to the hybrid_providers.dart version
-  // For now, we'll delegate to the orchestrator
-  return ref.watch(hybridGameEngineProvider.notifier) as HybridGameEngineAdapter;
-});
-
 // =============================================================================
-// ORIGINAL GAME ENGINE PROVIDER (for non-hybrid mode)
+// LEGACY PROVIDERS (preserved for compatibility, to be removed later)
 // =============================================================================
 
-final _originalGameEngineProvider =
-    StateNotifierProvider<GameEngineNotifier, GameEngineState>((ref) {
-  final audioService = ref.watch(audioServiceProvider);
-  final animationScheduler = ref.watch(animationSchedulerProvider);
-  final levelManager = ref.watch(levelManagerProvider.notifier);
-
-  return GameEngineNotifier(
-    audioService: audioService,
-    animationScheduler: animationScheduler,
-    levelManager: levelManager,
-  );
-});
-
-// =============================================================================
-// UNIFIED GAME ENGINE PROVIDER (feature flag switching)
-// =============================================================================
-
-final gameEngineProvider = Provider<GameEngineState>((ref) {
-  // Check both compile-time and runtime flags
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    // Use hybrid system - composite state from orchestrator and granular notifiers
-    final orchestratorState = ref.watch(gameEngineOrchestratorProvider);
-    final selectedComponentId = ref.watch(componentSelectionNotifierProvider);
-    final interactionState = ref.watch(interactionStateNotifierProvider);
-    
-    return orchestratorState.copyWith(
-      selectedComponentId: selectedComponentId,
-      draggedComponentId: interactionState.draggedComponentId,
-      dragPosition: interactionState.dragPosition,
-    );
-  } else {
-    // Use original monolithic system
-    return ref.watch(_originalGameEngineProvider);
-  }
-});
-
-// =============================================================================
-// GRANULAR STATE PROVIDERS (with feature flag switching)
-// =============================================================================
-
-final gridProvider = Provider<Grid>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(gridNotifierProvider);
-  } else {
-    return ref.watch(gameEngineProvider.select((state) => state.grid));
-  }
-});
-
-final isWinProvider = Provider<bool>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(gameProgressNotifierProvider.select((progress) => progress.isWin));
-  } else {
-    return ref.watch(gameEngineProvider.select((state) => state.isWin));
-  }
-});
-
-// Additional granular providers (hybrid only)
-final gridComponentsProvider = Provider<List<ComponentModel>>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(gridNotifierProvider.select((grid) => grid.components));
-  } else {
-    return ref.watch(gameEngineProvider.select((state) => state.grid.components));
-  }
-});
-
-final isPausedProvider = Provider<bool>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(gameProgressNotifierProvider.select((progress) => progress.isPaused));
-  } else {
-    return ref.watch(gameEngineProvider.select((state) => state.isPaused));
-  }
-});
-
-final scoreProvider = Provider<int>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(gameProgressNotifierProvider.select((progress) => progress.score));
-  } else {
-    // Original system doesn't have score in progress, might be in game state
-    return 0; // Default value
-  }
-});
-
-final selectedComponentIdProvider = Provider<String?>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(componentSelectionNotifierProvider);
-  } else {
-    return ref.watch(gameEngineProvider.select((state) => state.selectedComponentId));
-  }
-});
-
-final dragStateProvider = Provider<InteractionState>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(interactionStateNotifierProvider);
-  } else {
-    final state = ref.watch(gameEngineProvider);
-    return InteractionState(
-      draggedComponentId: state.draggedComponentId,
-      dragPosition: state.dragPosition,
-      isDragging: state.draggedComponentId != null,
-    );
-  }
-});
-
-final isDraggingProvider = Provider<bool>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(interactionStateNotifierProvider.select((state) => state.isDragging));
-  } else {
-    return ref.watch(gameEngineProvider.select((state) => state.draggedComponentId != null));
-  }
-});
-
-final canUndoProvider = Provider<bool>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(historyNotifierProvider.select((history) => history.isNotEmpty));
-  } else {
-    return ref.watch(gameEngineProvider.select((state) => state.history.isNotEmpty));
-  }
-});
-
-final historyLengthProvider = Provider<int>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(historyNotifierProvider.select((history) => history.length));
-  } else {
-    return ref.watch(gameEngineProvider.select((state) => state.history.length));
-  }
-});
-
-// =============================================================================
-// LEGACY PROVIDERS (preserved for compatibility)
-// =============================================================================
-
-final levelsProvider = Provider<List<LevelMetadata>>((ref) {
+final levelsProvider = Provider<List<dynamic>>((ref) {
   return ref.watch(levelManagerProvider).levels;
 });
 
@@ -300,38 +190,11 @@ final levelIsLoadingProvider = Provider<bool>((ref) {
   return ref.watch(levelManagerProvider).isLoading;
 });
 
-final renderStateProvider = Provider<RenderState?>((ref) {
-  return ref.watch(gameEngineProvider.select((state) => state.renderState));
-});
-
-final levelDefinitionProvider =
-    FutureProvider.family<LevelDefinition?, int>((ref, levelIndex) async {
-  final levelManager = ref.watch(levelManagerProvider.notifier);
-  return await levelManager.loadLevelByIndex(levelIndex);
-});
+// Removed for now
+// final levelDefinitionProvider =
+//     FutureProvider.family<LevelDefinition?, int>((ref, levelIndex) async {
+//   final levelManager = ref.watch(levelManagerProvider.notifier);
+//   return await levelManager.loadLevelByIndex(levelIndex);
+// });
 
 final debugOverlayProvider = StateProvider<bool>((ref) => false);
-
-// =============================================================================
-// MIGRATION HELPERS
-// =============================================================================
-
-final gameEngineActionsProvider = Provider<dynamic>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(gameEngineOrchestratorProvider.notifier);
-  } else {
-    return ref.watch(_originalGameEngineProvider.notifier);
-  }
-});
-
-final gameEngineNotifierProvider = Provider<dynamic>((ref) {
-  final useHybrid = FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
-  
-  if (useHybrid) {
-    return ref.watch(gameEngineOrchestratorProvider.notifier);
-  } else {
-    return ref.watch(_originalGameEngineProvider.notifier);
-  }
-});

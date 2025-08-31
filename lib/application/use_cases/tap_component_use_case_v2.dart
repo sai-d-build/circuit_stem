@@ -1,9 +1,9 @@
-import 'package:circuit_stem/application/services/power_simulation_service.dart';
-import 'package:circuit_stem/application/services/goal_checking_service.dart';
-import 'package:circuit_stem/domain/behaviors/behavior.dart';
-import 'package:circuit_stem/application/game_context.dart';
-import 'package:circuit_stem/domain/entities/component.dart';
-import 'package:circuit_stem/common/logger.dart';
+import '../services/power_simulation_service.dart';
+import '../services/goal_checking_service.dart';
+import '../../domain/behaviors/behavior.dart';
+import '../game_context.dart';
+import '../../domain/entities/component.dart';
+import '../../common/logger.dart';
 import '../core/result.dart';
 import '../transaction.dart';
 import 'component_action.dart';

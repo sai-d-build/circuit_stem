@@ -1,145 +1,271 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:flutter/foundation.dart';
+// Core component entity for SparkCircuit
+// This defines the basic structure for all circuit components
+
 import 'package:flutter/material.dart';
+import '../../common/logger.dart';
 
-part 'component.freezed.dart';
-
-@freezed
-class CellOffset with _$CellOffset {
-  const CellOffset._();
-  const factory CellOffset(
-    int r,
-    int c,
-  ) = _CellOffset;
-
-  factory CellOffset.fromJson(Map<String, dynamic> json) {
-    return CellOffset(
-      json['r'] as int,
-      json['c'] as int,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {'r': r, 'c': c};
+enum ComponentType {
+  battery,
+  resistor,
+  capacitor,
+  inductor,
+  diode,
+  transistor,
+  switch_,
+  bulb,
+  buzzer,
+  timer,
+  wire,
+  ground,
 }
 
-enum TerminalType { power, signal }
-
-extension TerminalTypeExtension on String {
-  TerminalType toTerminalType() {
-    switch (toLowerCase()) {
-      case 'power':
-        return TerminalType.power;
-      case 'signal':
-        return TerminalType.signal;
-      default:
-        throw ArgumentError('Unknown terminal type: $this');
-    }
-  }
+enum ComponentState {
+  normal,
+  powered,
+  error,
+  selected,
+  dragging,
 }
 
-@freezed
-class TerminalSpec with _$TerminalSpec {
-  const factory TerminalSpec({
-    required CellOffset offset,
-    required Dir direction,
-    required TerminalType type,
-  }) = _TerminalSpec;
-
-  // Custom fromJson to handle offset -> cellIndex conversion
-  factory TerminalSpec.fromJson() {
-    // This method should not be called directly - use ComponentRegistry.createFromJson instead
-    throw UnsupportedError(
-        'TerminalSpec.fromJson should not be called directly. Use ComponentRegistry.createFromJson for components.');
-  }
-}
-
-@freezed
-class ComponentModel with _$ComponentModel {
-  const ComponentModel._();
-
-  const factory ComponentModel({
-    required String id,
-    required String type,
-    required int r,
-    required int c,
-    @Default(0) int rotation,
-    @Default(false) bool isPowered,
-    @Default({}) Map<String, dynamic> state,
-    @Default([CellOffset(0, 0)]) List<CellOffset> shapeOffsets,
-    @Default([
-      TerminalSpec(
-          offset: CellOffset(0, 0),
-          direction: Dir.north,
-          type: TerminalType.power),
-      TerminalSpec(
-          offset: CellOffset(0, 0),
-          direction: Dir.south,
-          type: TerminalType.power)
-    ])
-    List<TerminalSpec> terminals,
-    @Default([]) List<List<int>> internalConnections,
-    @Default([]) List<dynamic> behaviors,
-    @Default(false) bool isDraggable,
-  }) = _ComponentModel;
-
-  T? getBehavior<T>() {
-    for (final behavior in behaviors) {
-      if (behavior is T) {
-        return behavior;
-      }
-    }
+// Extension to add map-like access to ComponentState
+extension ComponentStateExtension on ComponentState {
+  dynamic operator [](String key) {
+    // This is a simplified implementation
+    // In a real implementation, you'd want to store state data separately
     return null;
   }
 
-  // Custom fromJson to handle complex parsing - but this should not be called directly
-  factory ComponentModel.fromJson() {
-    // This method should not be called directly - use ComponentRegistry.createFromJson instead
-    throw UnsupportedError(
-        'ComponentModel.fromJson should not be called directly. Use ComponentRegistry.createFromJson for components.');
-  }
-
-  ComponentBounds getBounds() {
-    int maxR = 0;
-    int maxC = 0;
-    for (final offset in shapeOffsets) {
-      if (offset.r > maxR) maxR = offset.r;
-      if (offset.c > maxC) maxC = offset.c;
-    }
-    return ComponentBounds(maxC + 1, maxR + 1);
-  }
-
-  Size get displaySize {
-    final bounds = getBounds();
-    return Size(bounds.width * 100.0, bounds.height * 100.0);
+  void operator []=(String key, dynamic value) {
+    // This is a simplified implementation
+    // In a real implementation, you'd want to store state data separately
   }
 }
 
-class ComponentBounds {
-  final int width;
-  final int height;
-  const ComponentBounds(this.width, this.height);
-}
+class ComponentModel {
+  final String id;
+  final ComponentType type;
+  final int row;
+  final int col;
+  final ComponentState state;
+  final Map<String, dynamic> properties;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-// Type alias for backward compatibility with tests
-typedef Component = ComponentModel;
+  // Component behaviors (simplified for now)
+  final List<String> behaviors;
 
-enum Dir { north, east, south, west }
+  // Rotation angle in degrees
+  final int rotation;
 
-extension DirExtension on Dir {
-  Dir get opposite {
-    switch (this) {
-      case Dir.north:
-        return Dir.south;
-      case Dir.east:
-        return Dir.west;
-      case Dir.south:
-        return Dir.north;
-      case Dir.west:
-        return Dir.east;
-    }
+  ComponentModel({
+    required this.id,
+    required this.type,
+    required this.row,
+    required this.col,
+    ComponentState? state,
+    Map<String, dynamic>? properties,
+    List<String>? behaviors,
+    int? rotation,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) :
+    state = state ?? ComponentState.normal,
+    properties = properties ?? {},
+    behaviors = behaviors ?? [],
+    rotation = rotation ?? 0,
+    createdAt = createdAt ?? DateTime.now(),
+    updatedAt = updatedAt ?? DateTime.now();
+
+  ComponentModel copyWith({
+    String? id,
+    ComponentType? type,
+    int? row,
+    int? col,
+    ComponentState? state,
+    Map<String, dynamic>? properties,
+    List<String>? behaviors,
+    int? rotation,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return ComponentModel(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      row: row ?? this.row,
+      col: col ?? this.col,
+      state: state ?? this.state,
+      properties: properties ?? this.properties,
+      behaviors: behaviors ?? this.behaviors,
+      rotation: rotation ?? this.rotation,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
   }
 
-  Dir rotate(int steps) {
-    return Dir.values[(index + steps) % 4];
+  // Legacy compatibility properties
+  bool get isPowered => state == ComponentState.powered;
+  bool get isSelected => state == ComponentState.selected;
+
+  // Position as Offset for Flutter compatibility
+  Offset get position => Offset(row.toDouble(), col.toDouble());
+
+  // Component-specific properties
+  double get resistance => properties['resistance'] ?? 0.0;
+  double get voltage => properties['voltage'] ?? 0.0;
+  double get capacitance => properties['capacitance'] ?? 0.0;
+  double get inductance => properties['inductance'] ?? 0.0;
+  bool get isOn => properties['isOn'] ?? false;
+
+  // Utility methods
+  bool isAtPosition(int r, int c) => row == r && col == c;
+
+  void logState() {
+    Logger.logComponentEvent(id, 'state_changed', {
+      'type': type.toString(),
+      'state': state.toString(),
+      'position': '($row, $col)',
+      'properties': properties,
+    });
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ComponentModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
+  // Serialization
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'type': type.toString(),
+      'row': row,
+      'col': col,
+      'state': state.toString(),
+      'properties': properties,
+      'behaviors': behaviors,
+      'rotation': rotation,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  factory ComponentModel.fromJson(Map<String, dynamic> json) {
+    return ComponentModel(
+      id: json['id'],
+      type: ComponentType.values.firstWhere(
+        (e) => e.toString() == json['type'],
+      ),
+      row: json['row'],
+      col: json['col'],
+      state: ComponentState.values.firstWhere(
+        (e) => e.toString() == json['state'],
+        orElse: () => ComponentState.normal,
+      ),
+      properties: Map<String, dynamic>.from(json['properties'] ?? {}),
+      behaviors: List<String>.from(json['behaviors'] ?? []),
+      rotation: json['rotation'] ?? 0,
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+    );
+  }
+
+  @override
+  String toString() {
+    return 'ComponentModel(id: $id, type: $type, position: ($row, $col), state: $state)';
+  }
+}
+
+// Component definition for creating new instances
+class ComponentDefinition {
+  final ComponentType type;
+  final String name;
+  final String description;
+  final Map<String, dynamic> defaultProperties;
+  final List<String> requiredConnections;
+
+  const ComponentDefinition({
+    required this.type,
+    required this.name,
+    required this.description,
+    this.defaultProperties = const {},
+    this.requiredConnections = const [],
+  });
+
+  ComponentModel createInstance(String id, int row, int col) {
+    return ComponentModel(
+      id: id,
+      type: type,
+      row: row,
+      col: col,
+      properties: Map.from(defaultProperties),
+    );
+  }
+}
+
+// Predefined component definitions
+class ComponentDefinitions {
+  static const battery = ComponentDefinition(
+    type: ComponentType.battery,
+    name: 'Battery',
+    description: 'Power source for the circuit',
+    defaultProperties: {'voltage': 9.0},
+    requiredConnections: ['positive', 'negative'],
+  );
+
+  static const resistor = ComponentDefinition(
+    type: ComponentType.resistor,
+    name: 'Resistor',
+    description: 'Limits current flow in the circuit',
+    defaultProperties: {'resistance': 1000.0},
+    requiredConnections: ['a', 'b'],
+  );
+
+  static const bulb = ComponentDefinition(
+    type: ComponentType.bulb,
+    name: 'Light Bulb',
+    description: 'Lights up when current flows through it',
+    defaultProperties: {'resistance': 100.0},
+    requiredConnections: ['positive', 'negative'],
+  );
+
+  static const switch_ = ComponentDefinition(
+    type: ComponentType.switch_,
+    name: 'Switch',
+    description: 'Controls current flow in the circuit',
+    defaultProperties: {'isOn': false},
+    requiredConnections: ['input', 'output'],
+  );
+
+  static const wire = ComponentDefinition(
+    type: ComponentType.wire,
+    name: 'Wire',
+    description: 'Connects components in the circuit',
+    requiredConnections: ['start', 'end'],
+  );
+
+  static ComponentDefinition getDefinition(ComponentType type) {
+    switch (type) {
+      case ComponentType.battery:
+        return battery;
+      case ComponentType.resistor:
+        return resistor;
+      case ComponentType.bulb:
+        return bulb;
+      case ComponentType.switch_:
+        return switch_;
+      case ComponentType.wire:
+        return wire;
+      default:
+        return ComponentDefinition(
+          type: type,
+          name: type.toString(),
+          description: 'Generic component',
+        );
+    }
   }
 }

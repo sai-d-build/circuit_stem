@@ -1,14 +1,15 @@
-import 'package:circuit_stem/domain/entities/grid.dart';
+import '../domain/entities/grid.dart';
 
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-import 'package:circuit_stem/domain/behaviors/drawing_behavior.dart';
-import 'package:circuit_stem/domain/behaviors/logic_behavior.dart';
-import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
-import 'package:circuit_stem/application/services/component_registry.dart';
-import 'package:circuit_stem/domain/entities/component.dart';
-import 'package:circuit_stem/infrastructure/rendering/asset_manager.dart';
+import '../domain/behaviors/drawing_behavior.dart';
+import '../domain/behaviors/logic_behavior.dart';
+import '../domain/behaviors/move_behavior.dart';
+import '../application/services/component_registry.dart';
+import '../application/services/component_factory.dart';
+import '../domain/entities/component.dart';
+import '../infrastructure/rendering/asset_manager.dart';
 import '../common/theme.dart';
 import '../common/logger.dart';
 
@@ -62,25 +63,30 @@ class TimerDrawingBehavior implements DrawingBehavior {
   }
 }
 
-class TimerLogicBehavior implements LogicBehavior {
-  const TimerLogicBehavior();
+class TimerLogicBehavior extends BaseLogicBehavior {
+  TimerLogicBehavior();
+
   @override
-  void evaluate(Grid grid, ComponentModel component) {
+  void execute(ComponentModel component) {
     Logger.log('TimerLogicBehavior: Evaluating timer \${component.id}');
     // Timer logic is handled by the main engine.
   }
+
+  @override
+  String get behaviorType => 'timer';
 }
 
-void registerTimer() {
+void registerTimer(ComponentFactory factory) {
   Logger.log('registerTimer() called.');
-  registerBehavior<TimerDrawingBehavior>(() => const TimerDrawingBehavior());
-  registerBehavior<TimerLogicBehavior>(() => const TimerLogicBehavior());
-  registerBehavior<MoveBehavior>(() => const MoveBehavior());
+  factory.registerBehavior<TimerDrawingBehavior>(() => const TimerDrawingBehavior());
+  factory.registerBehavior<TimerLogicBehavior>(() => TimerLogicBehavior());
+  // Note: MoveBehavior is abstract and can't be instantiated directly
+  // factory.registerBehavior<MoveBehavior>(() => MoveBehavior());
 
-  ComponentRegistry.register(
+  factory.register(
     type: 'Component.Timer',
     displayName: 'Timer',
-    behaviors: [TimerDrawingBehavior, TimerLogicBehavior, MoveBehavior],
+    behaviors: [TimerDrawingBehavior, TimerLogicBehavior],
     isDraggable: true,
   );
   Logger.log('registerTimer() completed.');

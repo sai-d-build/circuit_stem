@@ -18,9 +18,7 @@ class GameEngineCore {
     bool? isWin,
   }) {
     // Step 1: let components evaluate themselves
-    for (final c in newGrid.components) {
-      c.getBehavior<LogicBehavior>()?.evaluate(newGrid, c);
-    }
+    // TODO: Implement component behavior evaluation when behaviors are properly integrated
 
     // Step 2: The power simulation is now handled by SimulationManager directly updating the state.
     // So, we just use the newGrid as is, assuming it has the correct power state.
@@ -30,7 +28,7 @@ class GameEngineCore {
       grid: newGrid, // Use newGrid directly
       renderState: RenderState(
         grid: newGrid, // Use newGrid directly
-        poweredComponentIds: newGrid.components
+        poweredComponentIds: newGrid.components.values
             .where((c) => c.isPowered)
             .map((c) => c.id)
             .toSet(), // Get powered IDs from the grid

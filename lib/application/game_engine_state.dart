@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'package:circuit_stem/domain/entities/component.dart';
-import 'package:circuit_stem/domain/entities/grid.dart';
-import 'package:circuit_stem/domain/entities/level_definition.dart';
-import 'package:circuit_stem/application/services/component_palette_manager.dart';
+// Domain entities
+import '../domain/entities/component.dart';
+import '../domain/entities/grid.dart';
+import '../domain/entities/level_definition.dart';
+
+// Application services
+import 'services/component_palette_manager.dart';
 import 'render_state.dart';
 
 part 'game_engine_state.freezed.dart';
@@ -35,7 +38,9 @@ class GameEngineState with _$GameEngineState {
         grid: Grid(
           rows: level?.rows ?? 0,
           cols: level?.cols ?? 0,
-          components: level?.initialComponents ?? [], // Add initial components to the grid
+          components: level?.initialComponentsList != null
+              ? {for (final comp in level!.initialComponentsList) comp.id: comp}
+              : {}, // Convert List to Map
         ),
         isPaused: false,
         isWin: false,
@@ -45,8 +50,8 @@ class GameEngineState with _$GameEngineState {
         selectedComponentId: null,
         dragPosition: null,
         paletteComponents:
-            level?.paletteComponents ?? [], // Keep for coexistence
-        paletteManager: ComponentPaletteManager(level?.paletteComponents ?? []),
+            (level?.paletteComponents ?? []).cast<ComponentModel>(), // Keep for coexistence
+        paletteManager: ComponentPaletteManager((level?.paletteComponents ?? []).cast<ComponentModel>()),
         poweredBuzzerIds: const {},
         history: const [],
         lastUpdated: DateTime.now(),
@@ -54,7 +59,7 @@ class GameEngineState with _$GameEngineState {
       );
 
   factory GameEngineState.empty() => GameEngineState(
-        grid: const Grid(rows: 0, cols: 0),
+        grid: Grid(rows: 0, cols: 0),
         isPaused: false,
         isWin: false,
         currentLevel: null,
@@ -79,18 +84,18 @@ class GameEngineState with _$GameEngineState {
       }
 
       // Check all components are within bounds
-      for (final component in grid.components) {
-        if (component.r < 0 ||
-            component.r >= grid.rows ||
-            component.c < 0 ||
-            component.c >= grid.cols) {
+      for (final component in grid.components.values) {
+        if (component.row < 0 ||
+            component.row >= grid.rows ||
+            component.col < 0 ||
+            component.col >= grid.cols) {
           return false;
         }
       }
     }
 
     // Check for duplicate component IDs
-    final ids = grid.components.map((c) => c.id).toList();
+    final ids = grid.components.values.map((c) => c.id).toList();
     final uniqueIds = ids.toSet();
     if (ids.length != uniqueIds.length) {
       return false;
@@ -116,8 +121,10 @@ class GameEngineState with _$GameEngineState {
       return true;
     }
 
-    for (int i = 0; i < grid.components.length; i++) {
-      if (grid.components[i].isPowered != other.grid.components[i].isPowered) {
+    // Compare power states for components with same IDs
+    for (final entry in grid.components.entries) {
+      final otherComponent = other.grid.components[entry.key];
+      if (otherComponent == null || entry.value.isPowered != otherComponent.isPowered) {
         return true;
       }
     }

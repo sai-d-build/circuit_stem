@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/presentation/state/game_state.dart';
+import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart'; // Import CircuitComponent
 
 class ComponentPainter extends CustomPainter {
   final List<CircuitComponent> components;

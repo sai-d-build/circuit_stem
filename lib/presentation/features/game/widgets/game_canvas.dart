@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_grid.dart';
-import 'package:sparkcircuit/presentation/features/game/widgets/circuit_component_display.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_controller.dart';
-import 'package:sparkcircuit/presentation/state/game_state.dart';
+import 'package:sparkcircuit/application/enhanced_game_state.dart';
+import 'package:sparkcircuit/application/providers.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
 import 'package:sparkcircuit/presentation/core/utils/coordinate_translator.dart';
+import 'package:sparkcircuit/domain/entities/component.dart';
+import 'package:sparkcircuit/presentation/features/game/painters/circuit_components_painter.dart';
+import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart';
+import 'package:sparkcircuit/presentation/features/game/widgets/circuit_component_widget.dart';
 
 class GameCanvas extends ConsumerStatefulWidget {
   final String levelId;
@@ -23,6 +27,13 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
   String? _draggedComponentType;
   Offset? _dragPosition;
 
+  // Wire connection state
+  bool _isDrawingWire = false;
+  String? _wireStartComponentId;
+  String? _wireStartPort;
+  Offset? _wireStartPosition;
+  Offset? _wireEndPosition;
+
   @override
   void initState() {
     super.initState();
@@ -38,9 +49,39 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final circuitColors = theme.extension<CircuitColorScheme>()!;
-    final gameState = ref.watch(gameStateProvider(widget.levelId));
+    final circuitColors = theme.extension<CircuitColorScheme>() ?? _getDefaultCircuitColors();
+    final gameState = ref.watch(enhancedGameStateNotifierProvider) as GameState;
     final paletteState = ref.watch(paletteStateProvider(widget.levelId));
+
+    // Convert ComponentModel to CircuitComponent for painter
+    final List<CircuitComponent> circuitComponents = gameState.grid.components.values
+        .map((c) => CircuitComponent.fromComponentModel(c))
+        .toList()
+        .cast<CircuitComponent>();
+
+    // Convert Grid connections to CircuitWire for painter
+    final List<CircuitWire> circuitWires = [];
+    gameState.grid.connections.forEach((sourceId, connectedIds) {
+      final sourceComponent = gameState.grid.getComponentById(sourceId);
+      if (sourceComponent != null) {
+        for (final targetId in connectedIds) {
+          final targetComponent = gameState.grid.getComponentById(targetId);
+          if (targetComponent != null) {
+            // Ensure each wire is added only once (e.g., A-B, not B-A)
+            if (sourceId.hashCode < targetId.hashCode) {
+              circuitWires.add(CircuitWire(
+                id: '\${sourceId}_\${targetId}',
+                startX: sourceComponent.col.toDouble(),
+                startY: sourceComponent.row.toDouble(),
+                endX: targetComponent.col.toDouble(),
+                endY: targetComponent.row.toDouble(),
+                isActive: false, // TODO: Determine active state from simulationResult
+              ));
+            }
+          }
+        }
+      }
+    });
 
     return Container(
       decoration: BoxDecoration(
@@ -64,9 +105,15 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
             
             // Components and connections display
             Positioned.fill(
-              child: CircuitComponentDisplay(
-                controller: _canvasController,
-                levelId: widget.levelId,
+              child: CustomPaint(
+                painter: CircuitComponentsPainter(
+                  components: circuitComponents,
+                  wires: circuitWires,
+                  circuitColors: circuitColors,
+                  selectedComponentId: gameState.interactionState.selectedComponentId,
+                  scale: _canvasController.scale,
+                ),
+                size: Size.infinite,
               ),
             ),
             
@@ -82,6 +129,21 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
                 top: _dragPosition!.dy - 25,
                 child: _buildDragPreview(_draggedComponentType!, circuitColors),
               ),
+
+            // Wire drawing overlay
+            if (_isDrawingWire && _wireStartPosition != null)
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: WireDrawingPainter(
+                    startPosition: _wireStartPosition,
+                    endPosition: _wireEndPosition,
+                    circuitColors: circuitColors,
+                  ),
+                ),
+              ),
+
+            // Render actual component widgets for interaction
+            ...gameState.grid.components.values.map((component) => CircuitComponentWidget(component: component)),
           ],
         ),
       ),
@@ -93,11 +155,20 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     PaletteState paletteState,
     CircuitColorScheme circuitColors,
   ) {
+    // If drawing wire, use wire-specific gesture handling
+    if (_isDrawingWire) {
+      return CustomPaint(
+        painter: WireDrawingPainter(
+          startPosition: _wireStartPosition,
+          endPosition: _wireEndPosition,
+          circuitColors: circuitColors,
+        ),
+      );
+    }
+
     return GestureDetector(
-      onPanStart: (details) => _handlePanStart(details, gameState, paletteState),
-      onPanUpdate: (details) => _handlePanUpdate(details, gameState, paletteState),
-      onPanEnd: (details) => _handlePanEnd(details, gameState, paletteState),
       onTapDown: (details) => _handleTapDown(details, gameState),
+      onLongPressStart: (details) => _handleLongPressStart(details, gameState),
       onScaleStart: (details) => _handleScaleStart(details),
       onScaleUpdate: (details) => _handleScaleUpdate(details),
       onScaleEnd: (details) => _handleScaleEnd(details),
@@ -201,7 +272,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     final component = _getComponentAtPosition(localPosition, gameState);
     if (component != null) {
       setState(() {
-        _draggedComponentType = component.type;
+        _draggedComponentType = component.type.toString();
         _dragPosition = localPosition;
       });
       return;
@@ -246,11 +317,26 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
   }
 
   void _handleTapDown(TapDownDetails details, GameState gameState) {
+    print('🎯 GameCanvas: Tap detected at ${details.localPosition}');
+
+    // Check if we're in placement mode first
+    final paletteState = ref.read(paletteStateProvider(widget.levelId));
+    if (paletteState.isPlacingComponent && paletteState.placingComponentType != null) {
+      print('🎯 GameCanvas: In placement mode for ${paletteState.placingComponentType}');
+      _placeComponent(paletteState.placingComponentType!, details.localPosition, gameState, paletteState);
+      return;
+    }
+
     final component = _getComponentAtPosition(details.localPosition, gameState);
     if (component != null) {
-      ref.read(gameStateProvider(widget.levelId).notifier).selectComponent(component.id);
+      print('🎯 GameCanvas: Tapped on component: ${component.id} (${component.type})');
+      // If shift is pressed or in wire mode, start drawing wire
+      // For now, we'll use double tap to start wire drawing
+      ref.read(enhancedGameStateNotifierProvider.notifier).tapComponent(component.id);
+      print('🎯 GameCanvas: Component selected: ${component.id}');
     } else {
-      ref.read(gameStateProvider(widget.levelId).notifier).selectComponent(null);
+      print('🎯 GameCanvas: Tap on empty space, deselecting component');
+      ref.read(enhancedGameStateNotifierProvider.notifier).selectComponent(null);
     }
   }
 
@@ -260,16 +346,32 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
 
   void _handleScaleUpdate(ScaleUpdateDetails details) {
     _canvasController.updateScale(details.scale);
-    if (details.pointerCount == 1) {
-      _canvasController.updatePan(details.focalPointDelta);
-    }
+    _canvasController.updatePan(details.focalPointDelta);
   }
 
   void _handleScaleEnd(ScaleEndDetails details) {
     _canvasController.endScale();
   }
 
-  CircuitComponent? _getComponentAtPosition(Offset position, GameState gameState) {
+  void _handleLongPressStart(LongPressStartDetails details, GameState gameState) {
+    print('🔗 GameCanvas: Long press detected at ${details.localPosition}');
+    final component = _getComponentAtPosition(details.localPosition, gameState);
+    if (component != null) {
+      print('🔗 GameCanvas: Starting wire from component: ${component.id} (${component.type})');
+      setState(() {
+        _isDrawingWire = true;
+        _wireStartComponentId = component.id;
+        _wireStartPort = 'terminal1'; // Simplified - would need proper port detection
+        _wireStartPosition = details.localPosition;
+        _wireEndPosition = details.localPosition;
+      });
+      print('🔗 GameCanvas: Wire drawing mode activated');
+    } else {
+      print('🔗 GameCanvas: Long press on empty space - no component found');
+    }
+  }
+
+  ComponentModel? _getComponentAtPosition(Offset position, GameState gameState) {
     final translator = CoordinateTranslator(
       gridCellSize: _canvasController.gridCellSize,
       panX: _canvasController.panOffset.dx,
@@ -279,26 +381,32 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     
     final gridPosition = translator.screenToGrid(position);
     
-    return gameState.components.cast<CircuitComponent?>().firstWhere(
-      (component) {
-        if (component == null) return false;
-        final componentGridPos = Offset(component.posX, component.posY);
-        return translator.gridDistance(gridPosition, componentGridPos) < 0.8;
-      },
-      orElse: () => null,
-    );
+    // Find component at this position
+    for (final component in gameState.grid.components.values) {
+      final componentGridPos = Offset(component.col.toDouble(), component.row.toDouble());
+      if (translator.gridDistance(gridPosition, componentGridPos) < 0.8) {
+        return component;
+      }
+    }
+    return null;
   }
 
   void _placeComponent(
-    String componentType,
+    String componentTypeString,
     Offset position,
     GameState gameState,
     PaletteState paletteState,
   ) {
-    if (!paletteState.canUseComponent(componentType)) {
+    print('📦 GameCanvas: Attempting to place component: $componentTypeString at $position');
+    print('📦 GameCanvas: Palette state - isPlacingComponent: ${paletteState.isPlacingComponent}, placingComponentType: ${paletteState.placingComponentType}');
+    print('📦 GameCanvas: Component inventory check for $componentTypeString...');
+
+    if (!paletteState.canUseComponent(componentTypeString)) {
+      print('📦 GameCanvas: Cannot place component - not available in palette');
+      print('📦 GameCanvas: Available inventory: ${paletteState.inventory}');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('No more $componentType components available'),
+          content: Text('No more $componentTypeString components available'),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -319,14 +427,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     );
     
     // Check if position is already occupied
-    final existingComponent = gameState.components.cast<CircuitComponent?>().firstWhere(
-      (component) {
-        if (component == null) return false;
-        final componentPos = Offset(component.posX, component.posY);
-        return translator.gridDistance(snappedPosition, componentPos) < 0.1;
-      },
-      orElse: () => null,
-    );
+    final existingComponent = _getComponentAtPosition(snappedPosition, gameState);
     
     if (existingComponent != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -338,23 +439,29 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
       return;
     }
 
-    // Create new component
-    final newComponent = CircuitComponent(
-      id: '${componentType}_${DateTime.now().millisecondsSinceEpoch}',
-      type: componentType,
-      posX: snappedPosition.dx,
-      posY: snappedPosition.dy,
-      properties: _getDefaultPropertiesForComponent(componentType),
+    // Convert string to ComponentType enum
+    final componentType = ComponentType.values.firstWhere(
+      (e) => e.toString().split('.').last == componentTypeString,
+      orElse: () => ComponentType.wire, // Default or error handling
     );
 
     // Add component to game state
-    ref.read(gameStateProvider(widget.levelId).notifier).addComponent(newComponent);
-    
+    print('📦 GameCanvas: Adding component to game state...');
+    ref.read(enhancedGameStateNotifierProvider.notifier).placeComponent(
+      componentType,
+      snappedPosition.dy.toInt(), // row
+      snappedPosition.dx.toInt(), // col
+    );
+
     // Update palette inventory
-    ref.read(paletteStateProvider(widget.levelId).notifier).useComponent(componentType);
-    
+    print('📦 GameCanvas: Updating palette inventory...');
+    ref.read(paletteStateProvider(widget.levelId).notifier).useComponent(componentTypeString);
+
     // Clear placement mode
+    print('📦 GameCanvas: Clearing placement mode...');
     ref.read(paletteStateProvider(widget.levelId).notifier).stopPlacingComponent();
+
+    print('📦 GameCanvas: Component placement completed successfully');
   }
 
   Map<String, dynamic> _getDefaultPropertiesForComponent(String componentType) {
@@ -374,5 +481,138 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
       default:
         return {};
     }
+  }
+
+  Widget _buildWireDrawingOverlay(GameState gameState, CircuitColorScheme circuitColors) {
+    return GestureDetector(
+      onTapDown: (details) => _handleWireTapDown(details, gameState),
+      onPanUpdate: (details) => _handleWirePanUpdate(details),
+      onPanEnd: (details) => _handleWirePanEnd(details, gameState),
+      child: Container(
+        color: Colors.transparent,
+        child: CustomPaint(
+          painter: WireDrawingPainter(
+            startPosition: _wireStartPosition,
+            endPosition: _wireEndPosition,
+            circuitColors: circuitColors,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleWireTapDown(TapDownDetails details, GameState gameState) {
+    final component = _getComponentAtPosition(details.localPosition, gameState);
+    if (component != null) {
+      setState(() {
+        _isDrawingWire = true;
+        _wireStartComponentId = component.id;
+        _wireStartPort = 'terminal1'; // Simplified - would need proper port detection
+        _wireStartPosition = details.localPosition;
+        _wireEndPosition = details.localPosition;
+      });
+    }
+  }
+
+  void _handleWirePanUpdate(DragUpdateDetails details) {
+    if (_isDrawingWire) {
+      setState(() {
+        _wireEndPosition = details.localPosition;
+      });
+    }
+  }
+
+  void _handleWirePanEnd(DragEndDetails details, GameState gameState) {
+    if (_isDrawingWire && _wireStartComponentId != null && _wireEndPosition != null) {
+      final endComponent = _getComponentAtPosition(_wireEndPosition!, gameState);
+      if (endComponent != null && endComponent.id != _wireStartComponentId) {
+        // Create wire connection
+        _createWireConnection(_wireStartComponentId!, endComponent.id, gameState);
+      }
+    }
+
+    // Reset wire drawing state
+    setState(() {
+      _isDrawingWire = false;
+      _wireStartComponentId = null;
+      _wireStartPort = null;
+      _wireStartPosition = null;
+      _wireEndPosition = null;
+    });
+  }
+
+  void _createWireConnection(String fromComponentId, String toComponentId, GameState gameState) {
+    // Add connection to game state
+    ref.read(enhancedGameStateNotifierProvider.notifier).addConnection(
+      fromComponentId,
+      toComponentId,
+    );
+  }
+
+  CircuitColorScheme _getDefaultCircuitColors() {
+    return const CircuitColorScheme(
+      primary: Color(0xFF1E88E5),
+      onPrimary: Color(0xFFFFFFFF),
+      primaryContainer: Color(0xFFE3F2FD),
+      onPrimaryContainer: Color(0xFF0D47A1),
+      secondary: Color(0xFF43A047),
+      onSecondary: Color(0xFFFFFFFF),
+      tertiary: Color(0xFFFF8F00),
+      onTertiary: Color(0xFFFFFFFF),
+      error: Color(0xFFD32F2F),
+      onError: Color(0xFFFFFFFF),
+      errorContainer: Color(0xFFFFEBEE),
+      onErrorContainer: Color(0xFFB71C1C),
+      surface: Color(0xFFFAFAFA),
+      onSurface: Color(0xFF1C1C1C),
+      surfaceContainer: Color(0xFFEFEFEF),
+      onSurfaceVariant: Color(0xFF424242),
+      shadow: Color(0xFF000000),
+      outline: Color(0xFFBDBDBD),
+      wireActive: Color(0xFF00E676),
+      wireInactive: Color(0xFF616161),
+      componentBase: Color(0xFF2196F3),
+      gridLine: Color(0xFFE0E0E0),
+      glowEffect: Color(0xFF00E5FF),
+    );
+  }
+}
+
+class WireDrawingPainter extends CustomPainter {
+  final Offset? startPosition;
+  final Offset? endPosition;
+  final CircuitColorScheme circuitColors;
+
+  WireDrawingPainter({
+    required this.startPosition,
+    required this.endPosition,
+    required this.circuitColors,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (startPosition == null || endPosition == null) return;
+
+    final paint = Paint()
+      ..color = circuitColors.wireInactive
+      ..strokeWidth = 3.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawLine(startPosition!, endPosition!, paint);
+
+    // Draw connection points
+    final pointPaint = Paint()
+      ..color = circuitColors.primary
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(startPosition!, 6.0, pointPaint);
+    canvas.drawCircle(endPosition!, 6.0, pointPaint);
+  }
+
+  @override
+  bool shouldRepaint(WireDrawingPainter oldDelegate) {
+    return oldDelegate.startPosition != startPosition ||
+           oldDelegate.endPosition != endPosition;
   }
 }

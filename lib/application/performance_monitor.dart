@@ -27,6 +27,13 @@ class PerformanceMonitor {
   final Map<String, SessionMetrics> _sessionMetrics = {};
   final Queue<PerformanceSnapshot> _snapshots = Queue();
 
+  // Educational gaming performance tracking
+  final Map<String, AnimationMetrics> _animationMetrics = {};
+  final Map<String, EducationalMetrics> _educationalMetrics = {};
+  final Map<String, InteractiveMetrics> _interactiveMetrics = {};
+  final Map<String, MemoryMetrics> _memoryMetrics = {};
+  final Queue<FrameRateSample> _frameRateSamples = Queue();
+
   // Configuration
   static const int maxSnapshotsCount = 100;
   static const Duration sessionWindow = Duration(minutes: 5);
@@ -82,18 +89,113 @@ class PerformanceMonitor {
 
     final now = DateTime.now();
     final key = '${_currentSession}_$providerId';
-    
+
     _providerMetrics.putIfAbsent(key, () => ProviderMetrics(
       providerId: providerId,
       sessionId: _currentSession!,
       isHybridMode: _isHybridModeActive(),
-    )).recordWatch(now, widgetName, 
+    )).recordWatch(now, widgetName,
       wasDataChanged: wasDataChanged,
       previousValue: previousValue,
       newValue: newValue,
     );
 
     _updateSessionMetrics();
+  }
+
+  /// Track animation performance
+  void trackAnimationPerformance(String animationId, {
+    required Duration loadTime,
+    required Duration playTime,
+    required int frameCount,
+    String? animationType, // 'rive', 'lottie', 'custom'
+    bool hadFrameDrops = false,
+  }) {
+    if (!_isMonitoringEnabled || _currentSession == null) return;
+
+    final key = '${_currentSession}_$animationId';
+    _animationMetrics.putIfAbsent(key, () => AnimationMetrics(
+      animationId: animationId,
+      sessionId: _currentSession!,
+      animationType: animationType,
+    )).recordPerformance(loadTime, playTime, frameCount, hadFrameDrops);
+
+    _updateSessionMetrics();
+  }
+
+  /// Track educational content loading
+  void trackEducationalContentLoad(String contentId, {
+    required Duration loadTime,
+    required int contentSize,
+    String? contentType, // 'level', 'hint', 'tutorial'
+    bool fromCache = false,
+  }) {
+    if (!_isMonitoringEnabled || _currentSession == null) return;
+
+    final key = '${_currentSession}_$contentId';
+    _educationalMetrics.putIfAbsent(key, () => EducationalMetrics(
+      contentId: contentId,
+      sessionId: _currentSession!,
+      contentType: contentType,
+    )).recordLoad(loadTime, contentSize, fromCache);
+
+    _updateSessionMetrics();
+  }
+
+  /// Track interactive mechanics performance
+  void trackInteractiveAction(String actionType, {
+    required Duration responseTime,
+    required bool success,
+    String? componentId,
+    Map<String, dynamic>? context,
+  }) {
+    if (!_isMonitoringEnabled || _currentSession == null) return;
+
+    final key = '${_currentSession}_$actionType';
+    _interactiveMetrics.putIfAbsent(key, () => InteractiveMetrics(
+      actionType: actionType,
+      sessionId: _currentSession!,
+    )).recordAction(responseTime, success, componentId, context);
+
+    _updateSessionMetrics();
+  }
+
+  /// Track memory usage
+  void trackMemoryUsage({
+    required int heapUsed,
+    required int heapTotal,
+    required int externalSize,
+    String? context,
+  }) {
+    if (!_isMonitoringEnabled || _currentSession == null) return;
+
+    final key = '${_currentSession}_${DateTime.now().millisecondsSinceEpoch}';
+    _memoryMetrics[key] = MemoryMetrics(
+      timestamp: DateTime.now(),
+      sessionId: _currentSession!,
+      heapUsed: heapUsed,
+      heapTotal: heapTotal,
+      externalSize: externalSize,
+      context: context,
+    );
+
+    _updateSessionMetrics();
+  }
+
+  /// Track frame rate
+  void trackFrameRate(double fps, {String? context}) {
+    if (!_isMonitoringEnabled) return;
+
+    _frameRateSamples.addLast(FrameRateSample(
+      timestamp: DateTime.now(),
+      fps: fps,
+      context: context,
+    ));
+
+    // Keep only recent samples
+    if (_frameRateSamples.length > 1000) {
+      _frameRateSamples.removeFirst();
+    }
   }
 
   /// Create a performance snapshot
@@ -177,7 +279,7 @@ class PerformanceMonitor {
 
   // Private helper methods
   bool _isHybridModeActive() {
-    return FeatureFlags.useHybridEngine || FeatureFlagService.useHybridEngine;
+    return FeatureFlagService.isEnabled(FeatureFlag.useUnifiedStateManagement);
   }
 
   void _updateSessionMetrics() {
@@ -326,6 +428,124 @@ class PerformanceMonitor {
     if (totalSamples < 100) return 0.8;
     return 0.95;
   }
+}
+
+// Educational Gaming Performance Data Classes
+class AnimationMetrics {
+  final String animationId;
+  final String sessionId;
+  final String? animationType;
+  final List<Duration> loadTimes = [];
+  final List<Duration> playTimes = [];
+  final List<int> frameCounts = [];
+  final List<bool> frameDropFlags = [];
+
+  AnimationMetrics({
+    required this.animationId,
+    required this.sessionId,
+    this.animationType,
+  });
+
+  void recordPerformance(Duration loadTime, Duration playTime, int frameCount, bool hadFrameDrops) {
+    loadTimes.add(loadTime);
+    playTimes.add(playTime);
+    frameCounts.add(frameCount);
+    frameDropFlags.add(hadFrameDrops);
+  }
+
+  double get averageLoadTime => loadTimes.isEmpty ? 0 : loadTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) / loadTimes.length;
+  double get averagePlayTime => playTimes.isEmpty ? 0 : playTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) / playTimes.length;
+  double get averageFrameRate => frameCounts.isEmpty ? 0 : frameCounts.reduce((a, b) => a + b) / frameCounts.length;
+  int get frameDropCount => frameDropFlags.where((flag) => flag).length;
+}
+
+class EducationalMetrics {
+  final String contentId;
+  final String sessionId;
+  final String? contentType;
+  final List<Duration> loadTimes = [];
+  final List<int> contentSizes = [];
+  final List<bool> cacheHits = [];
+
+  EducationalMetrics({
+    required this.contentId,
+    required this.sessionId,
+    this.contentType,
+  });
+
+  void recordLoad(Duration loadTime, int contentSize, bool fromCache) {
+    loadTimes.add(loadTime);
+    contentSizes.add(contentSize);
+    cacheHits.add(fromCache);
+  }
+
+  double get averageLoadTime => loadTimes.isEmpty ? 0 : loadTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) / loadTimes.length;
+  double get cacheHitRate => cacheHits.isEmpty ? 0 : cacheHits.where((hit) => hit).length / cacheHits.length;
+  int get totalContentLoaded => contentSizes.reduce((a, b) => a + b);
+}
+
+class InteractiveMetrics {
+  final String actionType;
+  final String sessionId;
+  final List<Duration> responseTimes = [];
+  final List<bool> successes = [];
+  final Map<String, int> componentInteractions = {};
+  final List<Map<String, dynamic>> contexts = [];
+
+  InteractiveMetrics({
+    required this.actionType,
+    required this.sessionId,
+  });
+
+  void recordAction(Duration responseTime, bool success, String? componentId, Map<String, dynamic>? context) {
+    responseTimes.add(responseTime);
+    successes.add(success);
+
+    if (componentId != null) {
+      componentInteractions[componentId] = (componentInteractions[componentId] ?? 0) + 1;
+    }
+
+    if (context != null) {
+      contexts.add(context);
+    }
+  }
+
+  double get averageResponseTime => responseTimes.isEmpty ? 0 : responseTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) / responseTimes.length;
+  double get successRate => successes.isEmpty ? 0 : successes.where((s) => s).length / successes.length;
+  int get totalInteractions => responseTimes.length;
+}
+
+class MemoryMetrics {
+  final DateTime timestamp;
+  final String sessionId;
+  final int heapUsed;
+  final int heapTotal;
+  final int externalSize;
+  final String? context;
+
+  MemoryMetrics({
+    required this.timestamp,
+    required this.sessionId,
+    required this.heapUsed,
+    required this.heapTotal,
+    required this.externalSize,
+    this.context,
+  });
+
+  double get heapUsagePercentage => heapTotal > 0 ? (heapUsed / heapTotal) * 100 : 0;
+  int get totalMemory => heapUsed + externalSize;
+}
+
+class FrameRateSample {
+  final DateTime timestamp;
+  final double fps;
+  final String? context;
+
+  FrameRateSample({
+    required this.timestamp,
+    required this.fps,
+    this.context,
+  });
 }
 
 // Data classes for performance monitoring

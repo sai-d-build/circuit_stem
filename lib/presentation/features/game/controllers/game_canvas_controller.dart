@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class GameCanvasController extends ChangeNotifier {
   static const double _defaultCellSize = 60.0;
@@ -130,11 +131,16 @@ class GameCanvasController extends ChangeNotifier {
     final gridPixelSize = this.gridPixelSize;
     
     // Calculate bounds for panning
-    final minPanX = _canvasSize.width - gridPixelSize.width - 50;
-    final maxPanX = 50.0;
-    final minPanY = _canvasSize.height - gridPixelSize.height - 50;
-    final maxPanY = 50.0;
-    
+    final rawMinPanX = _canvasSize.width - gridPixelSize.width - 50;
+    final rawMaxPanX = 50.0;
+    final rawMinPanY = _canvasSize.height - gridPixelSize.height - 50;
+    final rawMaxPanY = 50.0;
+
+    final minPanX = min(rawMinPanX, rawMaxPanX);
+    final maxPanX = max(rawMinPanX, rawMaxPanX);
+    final minPanY = min(rawMinPanY, rawMaxPanY);
+    final maxPanY = max(rawMinPanY, rawMaxPanY);
+
     _panOffset = Offset(
       _panOffset.dx.clamp(minPanX, maxPanX),
       _panOffset.dy.clamp(minPanY, maxPanY),
@@ -213,7 +219,6 @@ class GameCanvasController extends ChangeNotifier {
     notifyListeners();
   }
   
-  // Reset to default state
   void reset() {
     _gridCellSize = _defaultCellSize;
     _scale = 1.0;

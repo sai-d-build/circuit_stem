@@ -314,12 +314,16 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
   }
 
   void _selectComponent(String componentType) {
+    print('🎨 ComponentPalette: Selecting component $componentType');
     final paletteNotifier = ref.read(paletteStateProvider(widget.levelId).notifier);
-    
+
     if (paletteNotifier.canUseComponent(componentType)) {
+      print('🎨 ComponentPalette: Component $componentType is available, starting placement mode');
       paletteNotifier.selectComponent(componentType);
       paletteNotifier.startPlacingComponent(componentType);
+      print('🎨 ComponentPalette: Component $componentType selected and placement mode started');
     } else {
+      print('🎨 ComponentPalette: Component $componentType is not available');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('No more $componentType components available'),

@@ -35,7 +35,7 @@ class UpdateComponentUseCaseV2 extends NotifierIntegratedUseCase<UpdateComponent
       }
 
       // Compute updated component
-      final updatedComponent = component.copyWith(state: action.newState);
+      final updatedComponent = component.copyWith(properties: action.newState);
 
       // Compute newGrid eagerly (pure computation)
       var newGrid = currentGrid.copyWithUpdatedComponent(updatedComponent);

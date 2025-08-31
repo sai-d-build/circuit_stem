@@ -1,16 +1,16 @@
 import '../common/feature_flags.dart';
 
 /// Runtime feature flag service for dynamic control and gradual rollouts.
-/// 
-/// This service complements the compile-time FeatureFlags by providing:
+///
+/// This service complements the compile-time FeatureFlag by providing:
 /// - Runtime flag overrides
 /// - Gradual rollout capabilities
 /// - A/B testing support
 /// - Remote configuration integration
-/// 
+///
 /// The service respects compile-time flags as the base configuration,
 /// then applies runtime overrides for specific users or rollout percentages.
-class FeatureFlagService {
+class RuntimeFeatureFlagService {
   static final Map<String, bool> _runtimeFlags = {};
   static final Map<String, double> _rolloutPercentages = {};
   static String? _userId;
@@ -105,7 +105,6 @@ class FeatureFlagService {
   /// Get all current flag states for debugging and monitoring.
   static Map<String, dynamic> getAllFlags() {
     return {
-      'compile_time_flags': FeatureFlags.currentFlags,
       'runtime_overrides': Map.from(_runtimeFlags),
       'rollout_percentages': Map.from(_rolloutPercentages),
       'user_id': _userId,
@@ -162,15 +161,15 @@ class FeatureFlagService {
   static bool _getCompileTimeFlag(String flagName) {
     switch (flagName) {
       case 'hybrid_engine':
-        return FeatureFlags.useHybridEngine;
+        return FeatureFlagService.isEnabled(FeatureFlag.useUnifiedStateManagement);
       case 'granular_providers':
-        return FeatureFlags.enableGranularProviders;
+        return FeatureFlagService.isEnabled(FeatureFlag.enableInteractiveMechanics);
       case 'performance_monitoring':
-        return FeatureFlags.enablePerformanceMonitoring;
+        return FeatureFlagService.isEnabled(FeatureFlag.enablePerformanceMonitoring);
       case 'hybrid_debug_logs':
-        return FeatureFlags.enableHybridDebugLogs;
+        return FeatureFlagService.isEnabled(FeatureFlag.enableVisualFeedback);
       case 'transaction_debug':
-        return FeatureFlags.enableTransactionDebug;
+        return FeatureFlagService.isEnabled(FeatureFlag.enableEducationalContent);
       default:
         return false;
     }

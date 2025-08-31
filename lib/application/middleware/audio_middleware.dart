@@ -1,6 +1,6 @@
-import 'package:circuit_stem/application/audio_manager.dart';
-import 'package:circuit_stem/application/game_engine_state.dart';
-import 'package:circuit_stem/application/use_cases/component_action.dart';
+import '../audio_manager.dart';
+import '../game_engine_state.dart';
+import '../use_cases/component_action.dart';
 
 import 'middleware.dart';
 

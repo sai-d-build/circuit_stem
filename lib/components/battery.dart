@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import '../domain/behaviors/drawing_behavior.dart';
 import '../domain/behaviors/logic_behavior.dart';
 import '../application/services/component_registry.dart';
+import '../application/services/component_factory.dart';
 import '../domain/entities/component.dart';
 import '../domain/entities/grid.dart';
 import '../infrastructure/rendering/asset_manager.dart';
@@ -122,20 +123,23 @@ class BatteryDrawingBehavior implements DrawingBehavior {
   }
 }
 
-class BatteryLogicBehavior implements LogicBehavior {
+class BatteryLogicBehavior extends BaseLogicBehavior {
   @override
-  void evaluate(Grid grid, ComponentModel component) {
+  void execute(ComponentModel component) {
     Logger.log('BatteryLogicBehavior: Evaluating battery \${component.id}');
     // The battery is the source of power, its logic is handled by the main engine.
   }
+
+  @override
+  String get behaviorType => 'battery';
 }
 
-void registerBattery() {
+void registerBattery(ComponentFactory factory) {
   Logger.log('registerBattery() called.');
-  registerBehavior<BatteryDrawingBehavior>(() => BatteryDrawingBehavior());
-  registerBehavior<BatteryLogicBehavior>(() => BatteryLogicBehavior());
+  factory.registerBehavior<BatteryDrawingBehavior>(() => BatteryDrawingBehavior());
+  factory.registerBehavior<BatteryLogicBehavior>(() => BatteryLogicBehavior());
 
-  ComponentRegistry.register(
+  factory.register(
     type: 'Component.Battery',
     displayName: 'Battery',
     behaviors: [BatteryDrawingBehavior, BatteryLogicBehavior],

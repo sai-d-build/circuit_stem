@@ -15,10 +15,50 @@ dependencies:
   go_router: ^16.0.0
   shared_preferences: ^2.0.0
 
+  uuid: ^4.4.0
+
+  # Enhanced Architecture Dependencies
+  freezed: ^2.3.0
+  freezed_annotation: ^2.2.0
+  json_serializable: ^6.6.0
+  json_annotation: ^4.9.0
+
+  # Mathematical Computing (MNA Solver)
+  vector_math: ^2.1.4
+  ml_linalg: ^13.10.0
+  equations: ^5.0.2
+
+  # Lightweight Animation Framework
+  rive: ^0.13.20
+
+  # Audio Framework
+  flame_audio: ^2.10.0
+
+  # Equatable for value objects
+  equatable: ^2.0.5
+
+  # SVG support for component graphics
+  flutter_svg: ^2.0.10
+
+  # Lottie animations for rich animations
+  lottie: ^3.1.2
+
+  # Flame game engine for advanced animations
+  flame: ^1.16.0
+
+  # Meta package for annotations
+  meta: ^1.12.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   flutter_lints: ^5.0.0
+
+  # Enhanced Testing and Development Tools
+  mockito: ^5.4.0
+  build_runner: ^2.4.0
 
 flutter:
   uses-material-design: true

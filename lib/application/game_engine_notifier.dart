@@ -1,16 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:circuit_stem/domain/entities/level_definition.dart';
-import 'package:circuit_stem/domain/entities/grid.dart';
-import 'package:circuit_stem/domain/entities/component.dart';
+
+// Domain entities
+import '../domain/entities/level_definition.dart';
+import '../domain/entities/grid.dart';
+import '../domain/entities/component.dart';
+
+// Application layer
 import 'game_engine_state.dart';
-import '../../infrastructure/audio/audio_service.dart';
-import '../../common/logger.dart';
+import '../infrastructure/audio/audio_service.dart';
+import '../common/logger.dart';
 import 'services/power_simulation_service.dart';
 import 'services/goal_checking_service.dart';
+import 'services/component_factory.dart';
 import 'audio_manager.dart';
 import 'input_manager.dart';
 import 'animation_scheduler.dart';
-import 'package:circuit_stem/infrastructure/persistence/level_manager.dart';
+import '../infrastructure/persistence/level_manager.dart';
+
+// Use cases
 import 'use_cases/component_action.dart';
 import 'use_cases/create_component_use_case.dart';
 import 'use_cases/move_component_use_case.dart';
@@ -25,11 +32,14 @@ import 'use_cases/toggle_pause_use_case.dart';
 import 'use_cases/undo_use_case.dart';
 import 'use_cases/rotate_component_use_case.dart';
 import 'use_cases/load_level_use_case.dart';
+
+// Middleware
 import 'middleware/middleware.dart';
 import 'middleware/logging_middleware.dart';
 import 'middleware/validation_middleware.dart';
 import 'middleware/performance_middleware.dart';
-import 'package:circuit_stem/application/services/component_factory.dart';
+
+// Core
 import 'core/result.dart';
 
 class GameEngineNotifier extends StateNotifier<GameEngineState> {
@@ -59,28 +69,28 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   })  : input = InputManager(),
         audio = AudioManager(audioService),
         _createUseCase = CreateComponentFromTemplateUseCase(
-          const PowerSimulationService(),
+          PowerSimulationService(),
           const ComponentFactory(),
         ),
-        _moveUseCase = MoveComponentUseCase(const PowerSimulationService()),
-        _tapUseCase = const TapComponentUseCase(
+        _moveUseCase = MoveComponentUseCase(PowerSimulationService()),
+        _tapUseCase = TapComponentUseCase(
           PowerSimulationService(),
           GoalCheckingService(),
         ),
         _restartLevelUseCase = RestartLevelUseCase(levelManager),
-        _updateComponentUseCase = const UpdateComponentUseCase(
+        _updateComponentUseCase = UpdateComponentUseCase(
           PowerSimulationService(),
           GoalCheckingService(),
         ),
-        _selectPaletteComponentUseCase = const SelectPaletteComponentUseCase(),
+        _selectPaletteComponentUseCase = SelectPaletteComponentUseCase(),
         _simulatePowerFlowUseCase =
-            const SimulatePowerFlowUseCase(PowerSimulationService()),
+            SimulatePowerFlowUseCase(PowerSimulationService()),
         _checkWinConditionUseCase =
-            const CheckWinConditionUseCase(GoalCheckingService()),
-        _togglePauseUseCase = const TogglePauseUseCase(),
-        _undoUseCase = const UndoUseCase(),
-        _rotateUseCase = const RotateComponentUseCase(),
-        _loadLevelUseCase = const LoadLevelUseCase(
+            CheckWinConditionUseCase(GoalCheckingService()),
+        _togglePauseUseCase = TogglePauseUseCase(),
+        _undoUseCase = UndoUseCase(),
+        _rotateUseCase = RotateComponentUseCase(),
+        _loadLevelUseCase = LoadLevelUseCase(
           SimulatePowerFlowUseCase(PowerSimulationService()),
           CheckWinConditionUseCase(GoalCheckingService()),
         ),
@@ -171,7 +181,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
         },
       );
     } catch (e, s) {
-      Logger.log('Action execution error', error: e, stackTrace: s);
+      Logger.log('Action execution error: $e');
       return Failure('Action execution error: $e');
     }
   }
@@ -252,7 +262,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   void updateComponent(ComponentModel component) {
     executeAction(UpdateComponentAction(
       componentId: component.id,
-      newState: component.state,
+      newState: {'state': component.state.name},
     ));
   }
 

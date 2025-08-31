@@ -1,129 +1,99 @@
+// Level select screen for SparkCircuit educational gaming platform
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/presentation/core/widgets/responsive_scaffold.dart';
-import 'package:sparkcircuit/presentation/features/hud/widgets/level_card.dart';
+import '../../../core/theme/app_theme.dart';
 
-class LevelSelect extends StatefulWidget {
-  const LevelSelect({super.key});
-
-  @override
-  State<LevelSelect> createState() => _LevelSelectState();
-}
-
-class _LevelSelectState extends State<LevelSelect>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    ));
-    
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
+class LevelSelectScreen extends StatelessWidget {
+  const LevelSelectScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final circuitColors = theme.extension<CircuitColorScheme>()!;
-    
-    return ResponsiveScaffold(
+    return Scaffold(
+      backgroundColor: AppTheme.lightTheme.colorScheme.background,
       appBar: AppBar(
         title: const Text('Select Level'),
-        leading: IconButton(
-          onPressed: () => context.go('/'),
-          icon: const Icon(Icons.arrow_back),
-        ),
+        backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+        foregroundColor: AppTheme.lightTheme.colorScheme.onPrimary,
       ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Basic Circuits',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        color: circuitColors.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Learn the fundamentals of circuit building',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: circuitColors.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Choose Your Challenge',
+              style: AppTheme.lightTheme.textTheme.headlineMedium,
             ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverGrid(
+            const SizedBox(height: 16),
+            Text(
+              'Start with basic circuits and work your way up to advanced challenges!',
+              style: AppTheme.lightTheme.textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 24),
+            Expanded(
+              child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 1.2,
+                  crossAxisCount: 3,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                 ),
-                delegate: SliverChildListDelegate([
-                  LevelCard(
-                    levelId: '1',
-                    title: 'First Light',
-                    description: 'Light up an LED',
-                    difficulty: 1,
-                    isCompleted: false,
-                    stars: 0,
-                    onTap: () => context.go('/game/1'),
-                  ),
-                  LevelCard(
-                    levelId: '2',
-                    title: 'Series Circuit',
-                    description: 'Connect in series',
-                    difficulty: 2,
-                    isCompleted: false,
-                    stars: 0,
-                    onTap: () => context.go('/game/2'),
-                  ),
-                  LevelCard(
-                    levelId: '3',
-                    title: 'Parallel Paths',
-                    description: 'Create parallel branches',
-                    difficulty: 2,
-                    isCompleted: false,
-                    stars: 0,
-                    onTap: () => context.go('/game/3'),
-                  ),
-                ]),
+                itemCount: 15, // 15 levels as per design
+                itemBuilder: (context, index) {
+                  final levelNumber = index + 1;
+                  return _buildLevelCard(context, levelNumber);
+                },
               ),
             ),
-            const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLevelCard(BuildContext context, int levelNumber) {
+    final isLocked = levelNumber > 5; // First 5 levels unlocked by default
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: isLocked ? null : () {
+          context.go('/game/$levelNumber');
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: isLocked
+                ? Colors.grey.shade300
+                : AppTheme.lightTheme.colorScheme.surface,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                levelNumber.toString(),
+                style: AppTheme.lightTheme.textTheme.headlineLarge?.copyWith(
+                  color: isLocked
+                      ? Colors.grey
+                      : AppTheme.lightTheme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                isLocked ? 'Locked' : 'Play',
+                style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                  color: isLocked
+                      ? Colors.grey
+                      : AppTheme.lightTheme.colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

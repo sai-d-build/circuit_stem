@@ -5,6 +5,7 @@ import '../domain/behaviors/drawing_behavior.dart';
 import '../domain/behaviors/interaction_behavior.dart';
 import '../domain/behaviors/logic_behavior.dart';
 import '../application/services/component_registry.dart';
+import '../application/services/component_factory.dart';
 import '../domain/entities/component.dart';
 import '../infrastructure/rendering/asset_manager.dart';
 import '../common/theme.dart';
@@ -63,31 +64,35 @@ class SwitchDrawingBehavior implements DrawingBehavior {
   }
 }
 
-class SwitchLogicBehavior implements LogicBehavior {
-  const SwitchLogicBehavior();
+class SwitchLogicBehavior extends BaseLogicBehavior {
+  SwitchLogicBehavior();
+
   @override
-  void evaluate(Grid grid, ComponentModel component) {
+  void execute(ComponentModel component) {
     Logger.log('SwitchLogicBehavior: Evaluating switch ${component.id}');
     // Logic is handled by the main engine based on the 'closed' state and terminals.
   }
+
+  @override
+  String get behaviorType => 'switch';
 }
 
-void registerSwitch() {
+void registerSwitch(ComponentFactory factory) {
   Logger.log('registerSwitch() called.');
-  registerBehavior<SwitchDrawingBehavior>(() {
+  factory.registerBehavior<SwitchDrawingBehavior>(() {
     return const SwitchDrawingBehavior();
   });
   Logger.log('registerBehavior<SwitchDrawingBehavior> called.');
-  registerBehavior<ToggleBehavior>(() {
-    return const ToggleBehavior();
+  factory.registerBehavior<ToggleBehavior>(() {
+    return ToggleBehavior();
   });
   Logger.log('registerBehavior<ToggleBehavior> called.');
-  registerBehavior<SwitchLogicBehavior>(() {
-    return const SwitchLogicBehavior();
+  factory.registerBehavior<SwitchLogicBehavior>(() {
+    return SwitchLogicBehavior();
   });
   Logger.log('registerBehavior<SwitchLogicBehavior> called.');
 
-  ComponentRegistry.register(
+  factory.register(
     type: 'Component.Switch',
     displayName: 'Switch',
     behaviors: [SwitchDrawingBehavior, ToggleBehavior, SwitchLogicBehavior],

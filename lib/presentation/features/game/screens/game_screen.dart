@@ -1,18 +1,21 @@
+// Game screen for SparkCircuit educational gaming platform
+
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/presentation/core/widgets/responsive_scaffold.dart';
-import 'package:sparkcircuit/presentation/features/game/widgets/game_canvas.dart';
-import 'package:sparkcircuit/presentation/features/palette/widgets/component_palette.dart';
-import 'package:sparkcircuit/presentation/features/hud/widgets/progress_hud.dart';
-import 'package:sparkcircuit/presentation/state/game_state.dart';
-import 'package:sparkcircuit/presentation/state/hud_state.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
-import 'package:sparkcircuit/presentation/features/hud/screens/pause_menu.dart';
-import 'package:sparkcircuit/presentation/features/hud/screens/win_screen.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/responsive_utils.dart';
+import '../../../core/utils/animation_utils.dart';
+import '../../../core/utils/error_utils.dart';
+import '../widgets/game_canvas.dart';
+import 'package:sparkcircuit/application/enhanced_game_state_notifier.dart';
+import 'package:sparkcircuit/application/enhanced_game_state.dart';
+import 'package:sparkcircuit/core/commands/command_stack.dart';
+import 'package:sparkcircuit/application/providers.dart';
+import 'package:sparkcircuit/presentation/features/palette/widgets/horizontal_component_palette.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
-  final String levelId;
+  final int levelId;
 
   const GameScreen({super.key, required this.levelId});
 
@@ -20,319 +23,227 @@ class GameScreen extends ConsumerStatefulWidget {
   ConsumerState<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends ConsumerState<GameScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _slideAnimationController;
-  late Animation<Offset> _canvasSlideAnimation;
-  late Animation<Offset> _paletteSlideAnimation;
-  
-  bool _isPaletteVisible = true;
+class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStateMixin {
+  late Timer _levelTimer;
+  Duration _elapsedTime = Duration.zero;
+  bool _isTimerRunning = false;
 
   @override
   void initState() {
     super.initState();
-    
-    _slideAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    
-    _canvasSlideAnimation = Tween<Offset>(
-      begin: const Offset(0.3, 0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideAnimationController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _paletteSlideAnimation = Tween<Offset>(
-      begin: const Offset(-1, 0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideAnimationController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _slideAnimationController.forward();
+    _startTimer();
   }
 
   @override
   void dispose() {
-    _slideAnimationController.dispose();
+    _stopTimer();
     super.dispose();
+  }
+
+  void _startTimer() {
+    if (!_isTimerRunning) {
+      _isTimerRunning = true;
+      _levelTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (mounted) {
+          setState(() {
+            _elapsedTime += const Duration(seconds: 1);
+          });
+        }
+      });
+    }
+  }
+
+  void _stopTimer() {
+    _isTimerRunning = false;
+    _levelTimer.cancel();
+  }
+
+  void _resetTimer() {
+    _stopTimer();
+    setState(() {
+      _elapsedTime = Duration.zero;
+    });
+    _startTimer();
+  }
+
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final circuitColors = theme.extension<CircuitColorScheme>()!;
-    final gameState = ref.watch(gameStateProvider(widget.levelId));
-    final hudState = ref.watch(hudStateProvider(widget.levelId));
-    
-    // Update HUD with game progress
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateHudFromGameState(gameState);
-    });
-    
-    return ResponsiveScaffold(
-      backgroundColor: circuitColors.surface,
-      body: Stack(
-        children: [
-          // Background gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  circuitColors.surface,
-                  circuitColors.surfaceContainer.withValues(alpha: 0.5),
-                ],
+    final levelIdStr = widget.levelId.toString();
+    final isLandscape = context.isLandscape;
+    final isMobile = context.isMobile;
+
+    print('🎮 GameScreen: Building for level $levelIdStr');
+
+    return Scaffold(
+      backgroundColor: AppTheme.lightTheme.colorScheme.background,
+      appBar: _buildResponsiveAppBar(context),
+      body: _buildResponsiveBody(context, levelIdStr, isLandscape, isMobile),
+    );
+  }
+
+  PreferredSizeWidget _buildResponsiveAppBar(BuildContext context) {
+    final isMobile = context.isMobile;
+    final appBarHeight = isMobile ? kToolbarHeight * 0.9 : kToolbarHeight;
+
+    return PreferredSize(
+      preferredSize: Size.fromHeight(appBarHeight),
+      child: AppBar(
+        title: Text(
+          'Level ${widget.levelId}',
+          style: TextStyle(
+            fontSize: context.responsiveFontSize(20),
+          ),
+        ),
+        backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+        foregroundColor: AppTheme.lightTheme.colorScheme.onPrimary,
+        toolbarHeight: appBarHeight,
+        actions: [
+          if (!context.isMobile) ...[
+            IconButton(
+              icon: Icon(
+                Icons.undo,
+                size: context.responsiveIconSize(24),
               ),
+              onPressed: () {
+                ref.read(enhancedGameStateNotifierProvider.notifier).undo();
+              },
+              tooltip: 'Undo',
             ),
+          ],
+          IconButton(
+            icon: Icon(
+              Icons.refresh,
+              size: context.responsiveIconSize(24),
+            ),
+            onPressed: () {
+              // Restart level functionality
+              _resetTimer();
+              ref.read(enhancedGameStateNotifierProvider.notifier).resetLevel();
+
+              // Show success feedback
+              SuccessUtils.showSuccess(
+                context,
+                'Level has been reset successfully',
+                title: 'Level Reset',
+              );
+            },
+            tooltip: 'Restart Level',
           ),
-          
-          // Main game layout
-          Row(
-            children: [
-              // Component palette (left side)
-              if (_isPaletteVisible)
-                SlideTransition(
-                  position: _paletteSlideAnimation,
-                  child: SizedBox(
-                    width: 280,
-                    child: ComponentPalette(levelId: widget.levelId),
-                  ),
-                ),
-              
-              // Game canvas (center/right)
-              Expanded(
-                child: SlideTransition(
-                  position: _canvasSlideAnimation,
-                  child: Column(
-                    children: [
-                      // Top HUD
-                      Container(
-                        height: 80,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16, 
-                          vertical: 8,
-                        ),
-                        child: ProgressHud(levelId: widget.levelId),
-                      ),
-                      
-                      // Game canvas
-                      Expanded(
-                        child: GameCanvas(levelId: widget.levelId),
-                      ),
-                      
-                      // Bottom controls
-                      Container(
-                        height: 60,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: _buildBottomControls(circuitColors),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          
-          // Floating action buttons
-          Positioned(
-            top: 100,
-            right: 16,
-            child: _buildFloatingControls(circuitColors),
-          ),
-          
-          // Overlay screens
-          if (hudState.hasOverlay) _buildOverlay(hudState),
         ],
       ),
     );
   }
 
-  Widget _buildBottomControls(CircuitColorScheme circuitColors) {
-    return Row(
-      children: [
-        // Palette toggle
-        IconButton(
-          onPressed: _togglePalette,
-          icon: Icon(
-            _isPaletteVisible ? Icons.chevron_left : Icons.chevron_right,
-            color: circuitColors.onSurface,
+  Widget _buildResponsiveBody(BuildContext context, String levelIdStr, bool isLandscape, bool isMobile) {
+    print('🎮 GameScreen: Building responsive body for level $levelIdStr');
+
+    if (isLandscape && isMobile) {
+      // Landscape mobile: horizontal layout
+      print('🎮 GameScreen: Using landscape mobile layout - creating HorizontalComponentPalette');
+      return Row(
+        children: [
+          // Game Canvas takes most space
+          Expanded(
+            flex: 3,
+            child: GameCanvas(levelId: levelIdStr),
           ),
-          tooltip: _isPaletteVisible ? 'Hide palette' : 'Show palette',
-        ),
-        
-        const Spacer(),
-        
-        // Simulation controls
-        Row(
-          children: [
-            IconButton(
-              onPressed: _resetLevel,
-              icon: Icon(
-                Icons.refresh,
-                color: circuitColors.onSurface,
-              ),
-              tooltip: 'Reset level',
+          // HUD and Palette in a column on the side
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.35,
+            child: Column(
+              children: [
+                _buildResponsiveHud(context),
+                Expanded(
+                  child: HorizontalComponentPalette(levelId: levelIdStr),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            ElevatedButton.icon(
-              onPressed: _toggleSimulation,
-              icon: Icon(
-                ref.watch(gameStateProvider(widget.levelId)).isSimulating
-                    ? Icons.pause
-                    : Icons.play_arrow,
+          ),
+        ],
+      );
+    } else {
+      // Portrait or tablet/desktop: vertical layout
+      print('🎮 GameScreen: Using portrait/tablet layout - creating HorizontalComponentPalette');
+      return Column(
+        children: [
+          _buildResponsiveHud(context),
+          // Game Canvas
+          Expanded(
+            child: GameCanvas(levelId: levelIdStr),
+          ),
+          // Component Palette
+          SizedBox(
+            height: context.paletteHeight,
+            child: HorizontalComponentPalette(levelId: levelIdStr),
+          ),
+        ],
+      );
+    }
+  }
+
+  Widget _buildResponsiveHud(BuildContext context) {
+    final isMobile = context.isMobile;
+    final padding = context.responsivePadding;
+    final spacing = context.responsiveSpacing();
+
+    return AnimatedListItem(
+      index: 0,
+      delay: AnimationUtils.fast,
+      slideBegin: const Offset(0.0, -0.2),
+      child: Container(
+        height: context.hudHeight,
+        padding: EdgeInsets.symmetric(
+          horizontal: padding.left,
+          vertical: padding.top * 0.5,
+        ),
+        color: AppTheme.lightTheme.colorScheme.surface,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                'Level ${widget.levelId}',
+                style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
+                  fontSize: context.responsiveFontSize(
+                    isMobile ? 18 : 20,
+                  ),
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-              label: Text(
-                ref.watch(gameStateProvider(widget.levelId)).isSimulating
-                    ? 'Pause'
-                    : 'Simulate',
+            ),
+            AnimatedListItem(
+              index: 1,
+              delay: AnimationUtils.fast,
+              slideBegin: const Offset(0.2, 0.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.timer,
+                    size: context.responsiveIconSize(20),
+                    color: AppTheme.lightTheme.colorScheme.onSurface,
+                  ),
+                  SizedBox(width: spacing),
+                  Text(
+                    _formatDuration(_elapsedTime),
+                    style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
+                      fontSize: context.responsiveFontSize(
+                        isMobile ? 14 : 16,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-        
-        const Spacer(),
-        
-        // Menu button
-        IconButton(
-          onPressed: _showPauseMenu,
-          icon: Icon(
-            Icons.menu,
-            color: circuitColors.onSurface,
-          ),
-          tooltip: 'Menu',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFloatingControls(CircuitColorScheme circuitColors) {
-    return Column(
-      children: [
-        FloatingActionButton.small(
-          heroTag: 'help',
-          onPressed: _showHint,
-          backgroundColor: circuitColors.secondary,
-          foregroundColor: circuitColors.onSecondary,
-          child: const Icon(Icons.lightbulb_outline),
-        ),
-        const SizedBox(height: 8),
-        FloatingActionButton.small(
-          heroTag: 'zoom_in',
-          onPressed: _zoomIn,
-          backgroundColor: circuitColors.surfaceContainer,
-          foregroundColor: circuitColors.onSurface,
-          child: const Icon(Icons.zoom_in),
-        ),
-        const SizedBox(height: 8),
-        FloatingActionButton.small(
-          heroTag: 'zoom_out',
-          onPressed: _zoomOut,
-          backgroundColor: circuitColors.surfaceContainer,
-          foregroundColor: circuitColors.onSurface,
-          child: const Icon(Icons.zoom_out),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOverlay(HudState hudState) {
-    Widget overlayContent;
-    
-    switch (hudState.currentOverlay) {
-      case HudOverlayType.pause:
-        overlayContent = PauseMenu(levelId: widget.levelId);
-        break;
-      case HudOverlayType.win:
-        overlayContent = WinScreen(levelId: widget.levelId);
-        break;
-      default:
-        return const SizedBox.shrink();
-    }
-    
-    return Container(
-      color: Colors.black.withValues(alpha: 0.7),
-      child: Center(child: overlayContent),
-    );
-  }
-
-  void _togglePalette() {
-    setState(() {
-      _isPaletteVisible = !_isPaletteVisible;
-    });
-    
-    if (_isPaletteVisible) {
-      _slideAnimationController.forward();
-    } else {
-      _slideAnimationController.reverse();
-    }
-  }
-
-  void _toggleSimulation() {
-    ref.read(gameStateProvider(widget.levelId).notifier).toggleSimulation();
-  }
-
-  void _resetLevel() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reset Level'),
-        content: const Text('Are you sure you want to reset this level? All progress will be lost.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              ref.read(gameStateProvider(widget.levelId).notifier).resetLevel();
-              ref.read(hudStateProvider(widget.levelId).notifier).reset();
-              ref.read(paletteStateProvider(widget.levelId).notifier).reset();
-            },
-            child: const Text('Reset'),
-          ),
-        ],
       ),
     );
-  }
-
-  void _showPauseMenu() {
-    ref.read(hudStateProvider(widget.levelId).notifier).togglePause();
-  }
-
-  void _showHint() {
-    ref.read(hudStateProvider(widget.levelId).notifier).useHint(0);
-    ref.read(gameStateProvider(widget.levelId).notifier).useHint();
-  }
-
-  void _zoomIn() {
-    // TODO: Implement zoom functionality in game canvas controller
-  }
-
-  void _zoomOut() {
-    // TODO: Implement zoom functionality in game canvas controller
-  }
-
-  void _updateHudFromGameState(GameState gameState) {
-    final hudNotifier = ref.read(hudStateProvider(widget.levelId).notifier);
-    
-    final progress = ProgressData(
-      currentScore: gameState.score,
-      bestScore: 1500, // From persistent storage
-      starsEarned: gameState.starsEarned,
-      totalStars: 3,
-      hintsUsed: gameState.hintsUsed,
-      totalHints: 4,
-      elapsedTime: gameState.elapsedTime,
-      isComplete: gameState.isComplete,
-    );
-    
-    hudNotifier.updateProgress(progress);
   }
 }

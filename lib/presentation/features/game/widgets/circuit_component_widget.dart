@@ -1,117 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sparkcircuit/application/enhanced_game_state.dart';
+import 'package:sparkcircuit/application/providers.dart';
+import 'package:sparkcircuit/domain/entities/component.dart';
+import 'package:sparkcircuit/presentation/features/game/painters/component_painter.dart';
+import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/presentation/state/game_state.dart';
 
-class CircuitComponentWidget extends StatelessWidget {
-  final CircuitComponent component;
-  final bool isSelected;
-  final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
+class CircuitComponentWidget extends ConsumerWidget {
+  final ComponentModel component;
 
-  const CircuitComponentWidget({
-    super.key,
-    required this.component,
-    this.isSelected = false,
-    this.onTap,
-    this.onLongPress,
-  });
+  const CircuitComponentWidget({super.key, required this.component});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final circuitColors = theme.extension<CircuitColorScheme>()!;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedComponentId = ref.watch(enhancedGameStateNotifierProvider.select((state) => (state as GameState).interactionState.selectedComponentId));
+    final isSelected = selectedComponentId == component.id;
 
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: component.isActive
-              ? circuitColors.primary.withValues(alpha: 0.2)
-              : circuitColors.surfaceContainer.withValues(alpha: 0.8),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? circuitColors.primary
-                : circuitColors.outline.withValues(alpha: 0.3),
-            width: isSelected ? 3 : 1,
+    return Positioned(
+      left: component.col * 60.0,
+      top: component.row * 60.0,
+      child: GestureDetector(
+        onTap: () {
+          ref.read(enhancedGameStateNotifierProvider.notifier).tapComponent(component.id);
+        },
+        onPanStart: (details) {
+          ref.read(enhancedGameStateNotifierProvider.notifier).startDragging(component.id, details.localPosition);
+        },
+        onPanUpdate: (details) {
+          ref.read(enhancedGameStateNotifierProvider.notifier).dragUpdate(details.localPosition);
+        },
+        onPanEnd: (details) {
+          ref.read(enhancedGameStateNotifierProvider.notifier).endDragging();
+        },
+        child: CustomPaint(
+          painter: ComponentPainter(
+            components: [CircuitComponent.fromComponentModel(component)],
+            circuitColors: Theme.of(context).extension<CircuitColorScheme>()!,
+            selectedComponentId: selectedComponentId,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: circuitColors.shadow.withValues(alpha: 0.1),
-              offset: const Offset(0, 2),
-              blurRadius: 4,
-            ),
-          ],
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                _getComponentIcon(component.type),
-                color: component.isActive
-                    ? circuitColors.primary
-                    : circuitColors.onSurface,
-                size: 24,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                _getComponentLabel(component.type),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: circuitColors.onSurface,
-                  fontSize: 8,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+          size: const Size(60, 60),
         ),
       ),
     );
-  }
-
-  IconData _getComponentIcon(String componentType) {
-    switch (componentType) {
-      case 'battery':
-        return Icons.battery_full;
-      case 'resistor':
-        return Icons.linear_scale;
-      case 'led':
-        return Icons.lightbulb;
-      case 'wire':
-        return Icons.horizontal_rule;
-      case 'switch':
-        return Icons.power;
-      case 'capacitor':
-        return Icons.battery_charging_full;
-      case 'inductor':
-        return Icons.settings_ethernet;
-      default:
-        return Icons.electrical_services;
-    }
-  }
-
-  String _getComponentLabel(String componentType) {
-    switch (componentType) {
-      case 'battery':
-        return 'BAT';
-      case 'resistor':
-        return 'R';
-      case 'led':
-        return 'LED';
-      case 'wire':
-        return 'W';
-      case 'switch':
-        return 'SW';
-      case 'capacitor':
-        return 'C';
-      case 'inductor':
-        return 'L';
-      default:
-        return componentType.toUpperCase().substring(0, 3);
-    }
   }
 }

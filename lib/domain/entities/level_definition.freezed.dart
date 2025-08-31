@@ -14,23 +14,27 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
+LevelDefinition _$LevelDefinitionFromJson(Map<String, dynamic> json) {
+  return _LevelDefinition.fromJson(json);
+}
+
 /// @nodoc
 mixin _$LevelDefinition {
   String get id => throw _privateConstructorUsedError;
+  int get levelNumber => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
-  int get levelNumber => throw _privateConstructorUsedError;
-  String get author => throw _privateConstructorUsedError;
-  int get version => throw _privateConstructorUsedError;
   int get rows => throw _privateConstructorUsedError;
   int get cols => throw _privateConstructorUsedError;
-  List<Position> get blockedCells => throw _privateConstructorUsedError;
-  List<ComponentModel> get initialComponents =>
+  List<ComponentModel> get initialComponentsList =>
       throw _privateConstructorUsedError;
-  List<ComponentModel> get paletteComponents =>
+  List<ComponentType> get paletteComponents =>
       throw _privateConstructorUsedError;
-  List<Goal> get goals => throw _privateConstructorUsedError;
-  List<Hint> get hints => throw _privateConstructorUsedError;
+  List<Map<String, dynamic>> get validationRules =>
+      throw _privateConstructorUsedError;
+
+  /// Serializes this LevelDefinition to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of LevelDefinition
   /// with the given fields replaced by the non-null parameter values.
@@ -47,18 +51,14 @@ abstract class $LevelDefinitionCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
+      int levelNumber,
       String title,
       String description,
-      int levelNumber,
-      String author,
-      int version,
       int rows,
       int cols,
-      List<Position> blockedCells,
-      List<ComponentModel> initialComponents,
-      List<ComponentModel> paletteComponents,
-      List<Goal> goals,
-      List<Hint> hints});
+      List<ComponentModel> initialComponentsList,
+      List<ComponentType> paletteComponents,
+      List<Map<String, dynamic>> validationRules});
 }
 
 /// @nodoc
@@ -77,24 +77,24 @@ class _$LevelDefinitionCopyWithImpl<$Res, $Val extends LevelDefinition>
   @override
   $Res call({
     Object? id = null,
+    Object? levelNumber = null,
     Object? title = null,
     Object? description = null,
-    Object? levelNumber = null,
-    Object? author = null,
-    Object? version = null,
     Object? rows = null,
     Object? cols = null,
-    Object? blockedCells = null,
-    Object? initialComponents = null,
+    Object? initialComponentsList = null,
     Object? paletteComponents = null,
-    Object? goals = null,
-    Object? hints = null,
+    Object? validationRules = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
+      levelNumber: null == levelNumber
+          ? _value.levelNumber
+          : levelNumber // ignore: cast_nullable_to_non_nullable
+              as int,
       title: null == title
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
@@ -103,18 +103,6 @@ class _$LevelDefinitionCopyWithImpl<$Res, $Val extends LevelDefinition>
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
               as String,
-      levelNumber: null == levelNumber
-          ? _value.levelNumber
-          : levelNumber // ignore: cast_nullable_to_non_nullable
-              as int,
-      author: null == author
-          ? _value.author
-          : author // ignore: cast_nullable_to_non_nullable
-              as String,
-      version: null == version
-          ? _value.version
-          : version // ignore: cast_nullable_to_non_nullable
-              as int,
       rows: null == rows
           ? _value.rows
           : rows // ignore: cast_nullable_to_non_nullable
@@ -123,26 +111,18 @@ class _$LevelDefinitionCopyWithImpl<$Res, $Val extends LevelDefinition>
           ? _value.cols
           : cols // ignore: cast_nullable_to_non_nullable
               as int,
-      blockedCells: null == blockedCells
-          ? _value.blockedCells
-          : blockedCells // ignore: cast_nullable_to_non_nullable
-              as List<Position>,
-      initialComponents: null == initialComponents
-          ? _value.initialComponents
-          : initialComponents // ignore: cast_nullable_to_non_nullable
+      initialComponentsList: null == initialComponentsList
+          ? _value.initialComponentsList
+          : initialComponentsList // ignore: cast_nullable_to_non_nullable
               as List<ComponentModel>,
       paletteComponents: null == paletteComponents
           ? _value.paletteComponents
           : paletteComponents // ignore: cast_nullable_to_non_nullable
-              as List<ComponentModel>,
-      goals: null == goals
-          ? _value.goals
-          : goals // ignore: cast_nullable_to_non_nullable
-              as List<Goal>,
-      hints: null == hints
-          ? _value.hints
-          : hints // ignore: cast_nullable_to_non_nullable
-              as List<Hint>,
+              as List<ComponentType>,
+      validationRules: null == validationRules
+          ? _value.validationRules
+          : validationRules // ignore: cast_nullable_to_non_nullable
+              as List<Map<String, dynamic>>,
     ) as $Val);
   }
 }
@@ -157,18 +137,14 @@ abstract class _$$LevelDefinitionImplCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
+      int levelNumber,
       String title,
       String description,
-      int levelNumber,
-      String author,
-      int version,
       int rows,
       int cols,
-      List<Position> blockedCells,
-      List<ComponentModel> initialComponents,
-      List<ComponentModel> paletteComponents,
-      List<Goal> goals,
-      List<Hint> hints});
+      List<ComponentModel> initialComponentsList,
+      List<ComponentType> paletteComponents,
+      List<Map<String, dynamic>> validationRules});
 }
 
 /// @nodoc
@@ -185,24 +161,24 @@ class __$$LevelDefinitionImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
+    Object? levelNumber = null,
     Object? title = null,
     Object? description = null,
-    Object? levelNumber = null,
-    Object? author = null,
-    Object? version = null,
     Object? rows = null,
     Object? cols = null,
-    Object? blockedCells = null,
-    Object? initialComponents = null,
+    Object? initialComponentsList = null,
     Object? paletteComponents = null,
-    Object? goals = null,
-    Object? hints = null,
+    Object? validationRules = null,
   }) {
     return _then(_$LevelDefinitionImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
+      levelNumber: null == levelNumber
+          ? _value.levelNumber
+          : levelNumber // ignore: cast_nullable_to_non_nullable
+              as int,
       title: null == title
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
@@ -211,18 +187,6 @@ class __$$LevelDefinitionImplCopyWithImpl<$Res>
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
               as String,
-      levelNumber: null == levelNumber
-          ? _value.levelNumber
-          : levelNumber // ignore: cast_nullable_to_non_nullable
-              as int,
-      author: null == author
-          ? _value.author
-          : author // ignore: cast_nullable_to_non_nullable
-              as String,
-      version: null == version
-          ? _value.version
-          : version // ignore: cast_nullable_to_non_nullable
-              as int,
       rows: null == rows
           ? _value.rows
           : rows // ignore: cast_nullable_to_non_nullable
@@ -231,114 +195,83 @@ class __$$LevelDefinitionImplCopyWithImpl<$Res>
           ? _value.cols
           : cols // ignore: cast_nullable_to_non_nullable
               as int,
-      blockedCells: null == blockedCells
-          ? _value._blockedCells
-          : blockedCells // ignore: cast_nullable_to_non_nullable
-              as List<Position>,
-      initialComponents: null == initialComponents
-          ? _value._initialComponents
-          : initialComponents // ignore: cast_nullable_to_non_nullable
+      initialComponentsList: null == initialComponentsList
+          ? _value._initialComponentsList
+          : initialComponentsList // ignore: cast_nullable_to_non_nullable
               as List<ComponentModel>,
       paletteComponents: null == paletteComponents
           ? _value._paletteComponents
           : paletteComponents // ignore: cast_nullable_to_non_nullable
-              as List<ComponentModel>,
-      goals: null == goals
-          ? _value._goals
-          : goals // ignore: cast_nullable_to_non_nullable
-              as List<Goal>,
-      hints: null == hints
-          ? _value._hints
-          : hints // ignore: cast_nullable_to_non_nullable
-              as List<Hint>,
+              as List<ComponentType>,
+      validationRules: null == validationRules
+          ? _value._validationRules
+          : validationRules // ignore: cast_nullable_to_non_nullable
+              as List<Map<String, dynamic>>,
     ));
   }
 }
 
 /// @nodoc
-
+@JsonSerializable()
 class _$LevelDefinitionImpl implements _LevelDefinition {
   const _$LevelDefinitionImpl(
       {required this.id,
+      required this.levelNumber,
       required this.title,
       required this.description,
-      required this.levelNumber,
-      required this.author,
-      required this.version,
       required this.rows,
       required this.cols,
-      required final List<Position> blockedCells,
-      required final List<ComponentModel> initialComponents,
-      required final List<ComponentModel> paletteComponents,
-      required final List<Goal> goals,
-      required final List<Hint> hints})
-      : _blockedCells = blockedCells,
-        _initialComponents = initialComponents,
+      required final List<ComponentModel> initialComponentsList,
+      required final List<ComponentType> paletteComponents,
+      required final List<Map<String, dynamic>> validationRules})
+      : _initialComponentsList = initialComponentsList,
         _paletteComponents = paletteComponents,
-        _goals = goals,
-        _hints = hints;
+        _validationRules = validationRules;
+
+  factory _$LevelDefinitionImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LevelDefinitionImplFromJson(json);
 
   @override
   final String id;
+  @override
+  final int levelNumber;
   @override
   final String title;
   @override
   final String description;
   @override
-  final int levelNumber;
-  @override
-  final String author;
-  @override
-  final int version;
-  @override
   final int rows;
   @override
   final int cols;
-  final List<Position> _blockedCells;
+  final List<ComponentModel> _initialComponentsList;
   @override
-  List<Position> get blockedCells {
-    if (_blockedCells is EqualUnmodifiableListView) return _blockedCells;
+  List<ComponentModel> get initialComponentsList {
+    if (_initialComponentsList is EqualUnmodifiableListView)
+      return _initialComponentsList;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_blockedCells);
+    return EqualUnmodifiableListView(_initialComponentsList);
   }
 
-  final List<ComponentModel> _initialComponents;
+  final List<ComponentType> _paletteComponents;
   @override
-  List<ComponentModel> get initialComponents {
-    if (_initialComponents is EqualUnmodifiableListView)
-      return _initialComponents;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_initialComponents);
-  }
-
-  final List<ComponentModel> _paletteComponents;
-  @override
-  List<ComponentModel> get paletteComponents {
+  List<ComponentType> get paletteComponents {
     if (_paletteComponents is EqualUnmodifiableListView)
       return _paletteComponents;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_paletteComponents);
   }
 
-  final List<Goal> _goals;
+  final List<Map<String, dynamic>> _validationRules;
   @override
-  List<Goal> get goals {
-    if (_goals is EqualUnmodifiableListView) return _goals;
+  List<Map<String, dynamic>> get validationRules {
+    if (_validationRules is EqualUnmodifiableListView) return _validationRules;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_goals);
-  }
-
-  final List<Hint> _hints;
-  @override
-  List<Hint> get hints {
-    if (_hints is EqualUnmodifiableListView) return _hints;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_hints);
+    return EqualUnmodifiableListView(_validationRules);
   }
 
   @override
   String toString() {
-    return 'LevelDefinition(id: $id, title: $title, description: $description, levelNumber: $levelNumber, author: $author, version: $version, rows: $rows, cols: $cols, blockedCells: $blockedCells, initialComponents: $initialComponents, paletteComponents: $paletteComponents, goals: $goals, hints: $hints)';
+    return 'LevelDefinition(id: $id, levelNumber: $levelNumber, title: $title, description: $description, rows: $rows, cols: $cols, initialComponentsList: $initialComponentsList, paletteComponents: $paletteComponents, validationRules: $validationRules)';
   }
 
   @override
@@ -347,41 +280,34 @@ class _$LevelDefinitionImpl implements _LevelDefinition {
         (other.runtimeType == runtimeType &&
             other is _$LevelDefinitionImpl &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.levelNumber, levelNumber) ||
+                other.levelNumber == levelNumber) &&
             (identical(other.title, title) || other.title == title) &&
             (identical(other.description, description) ||
                 other.description == description) &&
-            (identical(other.levelNumber, levelNumber) ||
-                other.levelNumber == levelNumber) &&
-            (identical(other.author, author) || other.author == author) &&
-            (identical(other.version, version) || other.version == version) &&
             (identical(other.rows, rows) || other.rows == rows) &&
             (identical(other.cols, cols) || other.cols == cols) &&
             const DeepCollectionEquality()
-                .equals(other._blockedCells, _blockedCells) &&
-            const DeepCollectionEquality()
-                .equals(other._initialComponents, _initialComponents) &&
+                .equals(other._initialComponentsList, _initialComponentsList) &&
             const DeepCollectionEquality()
                 .equals(other._paletteComponents, _paletteComponents) &&
-            const DeepCollectionEquality().equals(other._goals, _goals) &&
-            const DeepCollectionEquality().equals(other._hints, _hints));
+            const DeepCollectionEquality()
+                .equals(other._validationRules, _validationRules));
   }
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
       id,
+      levelNumber,
       title,
       description,
-      levelNumber,
-      author,
-      version,
       rows,
       cols,
-      const DeepCollectionEquality().hash(_blockedCells),
-      const DeepCollectionEquality().hash(_initialComponents),
+      const DeepCollectionEquality().hash(_initialComponentsList),
       const DeepCollectionEquality().hash(_paletteComponents),
-      const DeepCollectionEquality().hash(_goals),
-      const DeepCollectionEquality().hash(_hints));
+      const DeepCollectionEquality().hash(_validationRules));
 
   /// Create a copy of LevelDefinition
   /// with the given fields replaced by the non-null parameter values.
@@ -391,50 +317,49 @@ class _$LevelDefinitionImpl implements _LevelDefinition {
   _$$LevelDefinitionImplCopyWith<_$LevelDefinitionImpl> get copyWith =>
       __$$LevelDefinitionImplCopyWithImpl<_$LevelDefinitionImpl>(
           this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LevelDefinitionImplToJson(
+      this,
+    );
+  }
 }
 
 abstract class _LevelDefinition implements LevelDefinition {
   const factory _LevelDefinition(
-      {required final String id,
-      required final String title,
-      required final String description,
-      required final int levelNumber,
-      required final String author,
-      required final int version,
-      required final int rows,
-      required final int cols,
-      required final List<Position> blockedCells,
-      required final List<ComponentModel> initialComponents,
-      required final List<ComponentModel> paletteComponents,
-      required final List<Goal> goals,
-      required final List<Hint> hints}) = _$LevelDefinitionImpl;
+          {required final String id,
+          required final int levelNumber,
+          required final String title,
+          required final String description,
+          required final int rows,
+          required final int cols,
+          required final List<ComponentModel> initialComponentsList,
+          required final List<ComponentType> paletteComponents,
+          required final List<Map<String, dynamic>> validationRules}) =
+      _$LevelDefinitionImpl;
+
+  factory _LevelDefinition.fromJson(Map<String, dynamic> json) =
+      _$LevelDefinitionImpl.fromJson;
 
   @override
   String get id;
+  @override
+  int get levelNumber;
   @override
   String get title;
   @override
   String get description;
   @override
-  int get levelNumber;
-  @override
-  String get author;
-  @override
-  int get version;
-  @override
   int get rows;
   @override
   int get cols;
   @override
-  List<Position> get blockedCells;
+  List<ComponentModel> get initialComponentsList;
   @override
-  List<ComponentModel> get initialComponents;
+  List<ComponentType> get paletteComponents;
   @override
-  List<ComponentModel> get paletteComponents;
-  @override
-  List<Goal> get goals;
-  @override
-  List<Hint> get hints;
+  List<Map<String, dynamic>> get validationRules;
 
   /// Create a copy of LevelDefinition
   /// with the given fields replaced by the non-null parameter values.

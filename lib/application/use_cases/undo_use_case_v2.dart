@@ -1,5 +1,5 @@
-import 'package:circuit_stem/application/services/power_simulation_service.dart';
-import 'package:circuit_stem/common/logger.dart';
+import '../services/power_simulation_service.dart';
+import '../../common/logger.dart';
 import '../core/result.dart';
 import '../transaction.dart';
 import 'component_action.dart';

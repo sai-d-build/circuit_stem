@@ -46,11 +46,39 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
         return CustomPaint(
           painter: GridPainter(
             controller: widget.controller,
-            circuitColors: Theme.of(context).extension<CircuitColorScheme>()!,
+            circuitColors: Theme.of(context).extension<CircuitColorScheme>() ?? _getDefaultCircuitColors(),
           ),
           child: Container(),
         );
       },
+    );
+  }
+
+  CircuitColorScheme _getDefaultCircuitColors() {
+    return const CircuitColorScheme(
+      primary: Color(0xFF1E88E5),
+      onPrimary: Color(0xFFFFFFFF),
+      primaryContainer: Color(0xFFE3F2FD),
+      onPrimaryContainer: Color(0xFF0D47A1),
+      secondary: Color(0xFF43A047),
+      onSecondary: Color(0xFFFFFFFF),
+      tertiary: Color(0xFFFF8F00),
+      onTertiary: Color(0xFFFFFFFF),
+      error: Color(0xFFD32F2F),
+      onError: Color(0xFFFFFFFF),
+      errorContainer: Color(0xFFFFEBEE),
+      onErrorContainer: Color(0xFFB71C1C),
+      surface: Color(0xFFFAFAFA),
+      onSurface: Color(0xFF1C1C1C),
+      surfaceContainer: Color(0xFFEFEFEF),
+      onSurfaceVariant: Color(0xFF424242),
+      shadow: Color(0xFF000000),
+      outline: Color(0xFFBDBDBD),
+      wireActive: Color(0xFF00E676),
+      wireInactive: Color(0xFF616161),
+      componentBase: Color(0xFF2196F3),
+      gridLine: Color(0xFFE0E0E0),
+      glowEffect: Color(0xFF00E5FF),
     );
   }
 }

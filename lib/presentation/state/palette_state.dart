@@ -1,4 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sparkcircuit/application/enhanced_game_state.dart';
+import 'package:sparkcircuit/application/providers.dart';
+import 'package:sparkcircuit/domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/level_definition.dart';
 
 class ComponentDefinition {
   final String type;
@@ -163,8 +167,8 @@ class PaletteState {
   }
 
   bool canUseComponent(String componentType) {
-    final inv = getInventory(componentType);
-    return inv?.canUse ?? false;
+    final inventory = getInventory(componentType);
+    return inventory?.canUse ?? false;
   }
 
   bool _componentMatchesFilter(ComponentDefinition component, String filter) {
@@ -187,16 +191,29 @@ class PaletteState {
 
 // Providers
 final paletteStateProvider = StateNotifierProvider.family<PaletteStateNotifier, PaletteState, String>((ref, levelId) {
-  return PaletteStateNotifier(levelId);
+  // Get the level configuration from GameState
+  final gameState = ref.watch(enhancedGameStateNotifierProvider);
+  final levelConfig = gameState.currentLevel;
+
+  print('🎨 PaletteStateProvider: Initializing for level $levelId');
+  print('🎨 PaletteStateProvider: Level config: $levelConfig');
+  print('🎨 PaletteStateProvider: Available components: ${levelConfig?.initialComponentsList}');
+
+  return PaletteStateNotifier(levelId, levelConfig);
 });
 
 class PaletteStateNotifier extends StateNotifier<PaletteState> {
   final String levelId;
+  final LevelDefinition? levelConfig;
 
-  PaletteStateNotifier(this.levelId) : super(PaletteState(
+  PaletteStateNotifier(this.levelId, [this.levelConfig]) : super(PaletteState(
     availableComponents: _getAvailableComponents(),
-    inventory: _getInventoryForLevel(levelId),
-  ));
+    inventory: _getInventoryForLevel(levelId, levelConfig),
+  )) {
+    print('🎨 PaletteStateNotifier: Initialized for level $levelId');
+    print('🎨 PaletteStateNotifier: Level config: $levelConfig');
+    print('🎨 PaletteStateNotifier: Available components from config: ${levelConfig?.initialComponentsList}');
+  }
 
   void selectComponent(String? componentType) {
     state = state.copyWith(selectedComponentType: componentType);
@@ -204,20 +221,31 @@ class PaletteStateNotifier extends StateNotifier<PaletteState> {
 
   bool canUseComponent(String componentType) {
     final inventory = state.inventory[componentType];
-    return inventory?.canUse ?? false;
+    final canUse = inventory?.canUse ?? false;
+    print('🎨 PaletteState: Checking if can use $componentType - inventory: $inventory, canUse: $canUse');
+    return canUse;
   }
 
   void useComponent(String componentType) {
+    print('🎨 PaletteState: Using component $componentType');
     final currentInventory = state.inventory[componentType];
+    print('🎨 PaletteState: Current inventory for $componentType: $currentInventory');
+
     if (currentInventory != null && currentInventory.canUse) {
       final updatedInventory = currentInventory.copyWith(
         available: currentInventory.available - 1,
         used: currentInventory.used + 1,
       );
-      
+
+      print('🎨 PaletteState: Updated inventory for $componentType: $updatedInventory');
+
       state = state.copyWith(
         inventory: {...state.inventory, componentType: updatedInventory},
       );
+
+      print('🎨 PaletteState: Component $componentType used successfully');
+    } else {
+      print('🎨 PaletteState: Cannot use component $componentType - no inventory or not available');
     }
   }
 
@@ -304,17 +332,29 @@ class PaletteStateNotifier extends StateNotifier<PaletteState> {
   }
 
   void startPlacingComponent(String componentType) {
+    print('🎨 PaletteState: Starting placement mode for $componentType');
+    print('🎨 PaletteState: Previous state - isPlacingComponent: ${state.isPlacingComponent}, placingComponentType: ${state.placingComponentType}');
+
     state = state.copyWith(
       isPlacingComponent: true,
       placingComponentType: componentType,
     );
+
+    print('🎨 PaletteState: New state - isPlacingComponent: ${state.isPlacingComponent}, placingComponentType: ${state.placingComponentType}');
+    print('🎨 PaletteState: Placement mode started for $componentType');
   }
 
   void stopPlacingComponent() {
+    print('🎨 PaletteState: Stopping placement mode');
+    print('🎨 PaletteState: Previous state - isPlacingComponent: ${state.isPlacingComponent}, placingComponentType: ${state.placingComponentType}');
+
     state = state.copyWith(
       isPlacingComponent: false,
       placingComponentType: null,
     );
+
+    print('🎨 PaletteState: New state - isPlacingComponent: ${state.isPlacingComponent}, placingComponentType: ${state.placingComponentType}');
+    print('🎨 PaletteState: Placement mode stopped');
   }
 
   void reset() {
@@ -391,19 +431,45 @@ List<ComponentDefinition> _getAvailableComponents() {
   ];
 }
 
-Map<String, ComponentInventory> _getInventoryForLevel(String levelId) {
+Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefinition? levelConfig]) {
+  print('🎨 _getInventoryForLevel: Generating inventory for level $levelId');
+  print('🎨 _getInventoryForLevel: Level config provided: ${levelConfig != null}');
+
+  // If we have a level config, use it as the source of truth
+  if (levelConfig != null && levelConfig.initialComponentsList.isNotEmpty) {
+    print('🎨 _getInventoryForLevel: Using level config components: ${levelConfig.initialComponentsList}');
+
+    final inventory = <String, ComponentInventory>{};
+    for (final componentModel in levelConfig.initialComponentsList) {
+      final componentType = componentModel.type.toString().split('.').last; // Convert enum to string
+      inventory[componentType] = ComponentInventory(
+        componentType: componentType,
+        available: (inventory[componentType]?.available ?? 0) + 1,
+        total: (inventory[componentType]?.total ?? 0) + 1,
+      );
+      print('🎨 _getInventoryForLevel: Added $componentType');
+    }
+
+    print('🎨 _getInventoryForLevel: Generated inventory from config: $inventory');
+    return inventory;
+  }
+
+  // Fallback to hardcoded values (for backward compatibility)
+  print('🎨 _getInventoryForLevel: Using fallback hardcoded inventory');
   final levelInventories = {
     '1': {
       'battery': const ComponentInventory(componentType: 'battery', available: 1, total: 1),
       'resistor': const ComponentInventory(componentType: 'resistor', available: 2, total: 2),
       'led': const ComponentInventory(componentType: 'led', available: 1, total: 1),
       'wire': const ComponentInventory(componentType: 'wire', available: 5, total: 5),
+      'switch': const ComponentInventory(componentType: 'switch', available: 1, total: 1),
     },
     '2': {
       'battery': const ComponentInventory(componentType: 'battery', available: 1, total: 1),
       'resistor': const ComponentInventory(componentType: 'resistor', available: 3, total: 3),
       'led': const ComponentInventory(componentType: 'led', available: 2, total: 2),
       'wire': const ComponentInventory(componentType: 'wire', available: 8, total: 8),
+      'switch': const ComponentInventory(componentType: 'switch', available: 1, total: 1),
     },
     '3': {
       'battery': const ComponentInventory(componentType: 'battery', available: 1, total: 1),

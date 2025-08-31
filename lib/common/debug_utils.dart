@@ -1,8 +1,8 @@
-import 'package:circuit_stem/application/services/component_registry.dart';
-import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
-import 'package:circuit_stem/common/logger.dart';
+import '../application/services/component_registry.dart';
+import '../domain/behaviors/move_behavior.dart';
+import 'logger.dart';
 
-void checkMoveBehaviorAttachment() {
+void checkMoveBehaviorAttachment(ComponentFactory factory) {
   Logger.log('--- MoveBehavior Attachment Check ---');
 
   // Assuming ComponentRegistry has a way to get all registered component types
@@ -23,14 +23,14 @@ void checkMoveBehaviorAttachment() {
     // This assumes create() or createFromJson() can be called with minimal data
     // and will attach behaviors based on registration.
     try {
-      final dummyComponent = ComponentRegistry.create(
+      final dummyComponent = factory.create(
         type: type,
         id: 'dummy_${type.replaceAll('.', '_')}',
         r: 0,
         c: 0,
       );
       final hasMoveBehavior =
-          dummyComponent.getBehavior<MoveBehavior>() != null;
+          dummyComponent.behaviors.contains('MoveBehavior');
 
       if (hasMoveBehavior) {
         Logger.log('✅ $type has MoveBehavior attached');

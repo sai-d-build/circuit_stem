@@ -1,9 +1,10 @@
-import 'package:circuit_stem/application/services/power_simulation_service.dart';
-import 'package:circuit_stem/application/services/goal_checking_service.dart';
-import 'package:circuit_stem/application/services/component_palette_manager.dart';
-import 'package:circuit_stem/domain/entities/level_definition.dart';
-import 'package:circuit_stem/domain/entities/grid.dart';
-import 'package:circuit_stem/common/logger.dart';
+import '../services/power_simulation_service.dart';
+import '../services/goal_checking_service.dart';
+import '../services/component_palette_manager.dart';
+import '../../domain/entities/level_definition.dart';
+import '../../domain/entities/grid.dart';
+import '../../domain/entities/component.dart';
+import '../../common/logger.dart';
 import '../core/result.dart';
 import '../transaction.dart';
 import '../game_engine_orchestrator.dart';
@@ -38,7 +39,7 @@ class LoadLevelUseCaseV2 extends NotifierIntegratedUseCase<LoadLevelAction> {
       final initialGrid = Grid(
         rows: level.rows,
         cols: level.cols,
-        components: [...level.initialComponents], // Copy level components
+        components: {for (final comp in level.initialComponentsList) comp.id: comp}, // Convert List to Map
       );
 
       // Simulate power flow on the initial grid
@@ -79,7 +80,7 @@ class LoadLevelUseCaseV2 extends NotifierIntegratedUseCase<LoadLevelAction> {
 
       // Register post-commit handler to update orchestrator palette manager
       transaction.onPostCommit(() {
-        _orchestrator.updatePaletteManager(ComponentPaletteManager(level.paletteComponents));
+        _orchestrator.updatePaletteManager(ComponentPaletteManager(level.paletteComponents.cast<ComponentModel>()));
         Logger.log('LoadLevel: updated orchestrator palette manager with ${level.paletteComponents.length} components');
       });
 

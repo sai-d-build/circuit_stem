@@ -1,7 +1,7 @@
-import 'package:circuit_stem/application/services/power_simulation_service.dart';
-import 'package:circuit_stem/application/services/component_factory.dart';
-import 'package:circuit_stem/domain/entities/component.dart';
-import 'package:circuit_stem/common/logger.dart';
+import '../services/power_simulation_service.dart';
+import '../services/component_factory.dart';
+import '../../domain/entities/component.dart';
+import '../../common/logger.dart';
 import '../core/result.dart';
 import '../transaction.dart';
 import 'component_action.dart';
@@ -57,7 +57,8 @@ class CreateComponentFromTemplateUseCaseV2
 
       // Register grid update with transaction (commit applies notifier writes)
       transaction.onCommit(() async {
-        final updatedComponents = [...currentGrid.components, newInstance];
+        final updatedComponents = Map<String, ComponentModel>.from(currentGrid.components);
+        updatedComponents[newInstance.id] = newInstance;
         var newGrid = currentGrid.copyWith(components: updatedComponents);
 
         // Run simulation once on the updated grid

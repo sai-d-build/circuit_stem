@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import '../domain/behaviors/drawing_behavior.dart';
-import 'package:circuit_stem/domain/behaviors/logic_behavior.dart';
-import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
+import '../domain/behaviors/logic_behavior.dart';
+import '../domain/behaviors/move_behavior.dart';
 import '../application/services/component_registry.dart';
+import '../application/services/component_factory.dart';
 import '../domain/entities/component.dart';
 import '../infrastructure/rendering/asset_manager.dart';
 import '../common/theme.dart';
@@ -49,27 +50,32 @@ class WireStraightDrawingBehavior implements DrawingBehavior {
   }
 }
 
-class WireLogicBehavior implements LogicBehavior {
-  const WireLogicBehavior();
+class WireLogicBehavior extends BaseLogicBehavior {
+  WireLogicBehavior();
+
   @override
-  void evaluate(Grid grid, ComponentModel component) {
+  void execute(ComponentModel component) {
     Logger.log('WireLogicBehavior: Evaluating wire \${component.id}');
     // Wires are passive conductors. No specific logic needed.
   }
+
+  @override
+  String get behaviorType => 'wire';
 }
 
-void registerWireStraight() {
+void registerWireStraight(ComponentFactory factory) {
   Logger.log('registerWireStraight() called.');
-  registerBehavior<WireStraightDrawingBehavior>(
+  factory.registerBehavior<WireStraightDrawingBehavior>(
       () => const WireStraightDrawingBehavior());
-  registerBehavior<WireLogicBehavior>(
-      () => const WireLogicBehavior()); // Can be shared
-  registerBehavior<MoveBehavior>(() => const MoveBehavior());
+  factory.registerBehavior<WireLogicBehavior>(
+      () => WireLogicBehavior()); // Can be shared
+  // Note: MoveBehavior is abstract and can't be instantiated directly
+  // factory.registerBehavior<MoveBehavior>(() => MoveBehavior());
 
-  ComponentRegistry.register(
+  factory.register(
     type: 'Component.WireStraight',
     displayName: 'Wire',
-    behaviors: [WireStraightDrawingBehavior, WireLogicBehavior, MoveBehavior],
+    behaviors: [WireStraightDrawingBehavior, WireLogicBehavior],
     isDraggable: true,
   );
   Logger.log('registerWireStraight() completed.');
@@ -111,19 +117,19 @@ class WireCornerDrawingBehavior implements DrawingBehavior {
   }
 }
 
-void registerWireCorner() {
+void registerWireCorner(ComponentFactory factory) {
   Logger.log('registerWireCorner() called.');
-  registerBehavior<WireCornerDrawingBehavior>(
+  factory.registerBehavior<WireCornerDrawingBehavior>(
       () => const WireCornerDrawingBehavior());
-  registerBehavior<MoveBehavior>(() => const MoveBehavior());
+  // Note: MoveBehavior is abstract and can't be instantiated directly
+  // factory.registerBehavior<MoveBehavior>(() => MoveBehavior());
 
-  ComponentRegistry.register(
+  factory.register(
     type: 'Component.WireCorner',
     displayName: 'Corner Wire',
     behaviors: [
       WireCornerDrawingBehavior,
       WireLogicBehavior,
-      MoveBehavior
     ], // Re-use same logic behavior
     isDraggable: true,
   );
@@ -167,18 +173,18 @@ class WireTDrawingBehavior implements DrawingBehavior {
   }
 }
 
-void registerWireT() {
+void registerWireT(ComponentFactory factory) {
   Logger.log('registerWireT() called.');
-  registerBehavior<WireTDrawingBehavior>(() => const WireTDrawingBehavior());
-  registerBehavior<MoveBehavior>(() => const MoveBehavior());
+  factory.registerBehavior<WireTDrawingBehavior>(() => const WireTDrawingBehavior());
+  // Note: MoveBehavior is abstract and can't be instantiated directly
+  // factory.registerBehavior<MoveBehavior>(() => MoveBehavior());
 
-  ComponentRegistry.register(
+  factory.register(
     type: 'Component.WireT',
     displayName: 'T-Wire',
     behaviors: [
       WireTDrawingBehavior,
       WireLogicBehavior,
-      MoveBehavior
     ], // Re-use same logic behavior
     isDraggable: true,
   );
@@ -226,19 +232,19 @@ class CrossWireDrawingBehavior implements DrawingBehavior {
   }
 }
 
-void registerCrossWire() {
+void registerCrossWire(ComponentFactory factory) {
   Logger.log('registerCrossWire() called.');
-  registerBehavior<CrossWireDrawingBehavior>(
+  factory.registerBehavior<CrossWireDrawingBehavior>(
       () => const CrossWireDrawingBehavior());
-  registerBehavior<MoveBehavior>(() => const MoveBehavior());
+  // Note: MoveBehavior is abstract and can't be instantiated directly
+  // factory.registerBehavior<MoveBehavior>(() => MoveBehavior());
 
-  ComponentRegistry.register(
+  factory.register(
     type: 'Component.CrossWire',
     displayName: 'Cross Wire',
     behaviors: [
       CrossWireDrawingBehavior,
       WireLogicBehavior,
-      MoveBehavior
     ], // Re-use same logic behavior
     isDraggable: true,
   );

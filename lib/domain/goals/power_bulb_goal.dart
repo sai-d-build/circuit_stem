@@ -2,6 +2,7 @@ import '../behaviors/goal_checking_behavior.dart';
 import '../entities/goal.dart';
 import '../entities/grid.dart';
 import '../../application/services/component_registry.dart';
+import '../../application/services/component_factory.dart';
 import '../../common/logger.dart';
 
 class PowerBulbGoalBehavior implements GoalCheckingBehavior {
@@ -27,11 +28,11 @@ class PowerBulbGoalBehavior implements GoalCheckingBehavior {
   }
 }
 
-void registerPowerBulbGoal() {
+void registerPowerBulbGoal(ComponentFactory factory) {
   Logger.log('registerPowerBulbGoal() called.');
-  registerBehavior<PowerBulbGoalBehavior>(() => PowerBulbGoalBehavior());
+  factory.registerBehavior<PowerBulbGoalBehavior>(() => PowerBulbGoalBehavior());
 
-  ComponentRegistry.register(
+  factory.register(
     type: 'Goal.PowerBulb',
     displayName: 'Power the Bulb',
     behaviors: [PowerBulbGoalBehavior],

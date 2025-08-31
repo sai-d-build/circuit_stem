@@ -1,5 +1,5 @@
-import 'package:circuit_stem/domain/entities/grid.dart';
-import 'package:circuit_stem/application/game_engine_state.dart';
+import '../domain/entities/grid.dart';
+import 'game_engine_state.dart';
 
 class GameContext {
   final Grid grid;

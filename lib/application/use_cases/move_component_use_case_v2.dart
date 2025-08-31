@@ -1,7 +1,7 @@
-import 'package:circuit_stem/application/game_context.dart';
-import 'package:circuit_stem/domain/behaviors/move_behavior.dart';
-import 'package:circuit_stem/application/services/power_simulation_service.dart';
-import 'package:circuit_stem/common/logger.dart';
+import '../game_context.dart' as game_context;
+import '../../domain/behaviors/move_behavior.dart' as move_behavior;
+import '../services/power_simulation_service.dart';
+import '../../common/logger.dart';
 import '../core/result.dart';
 import '../transaction.dart';
 import 'component_action.dart';
@@ -48,13 +48,13 @@ class MoveComponentUseCaseV2 extends NotifierIntegratedUseCase<MoveComponentActi
 
       Logger.log('[MoveComponentUseCaseV2] Found component: ${component.id}');
 
-      final moveBehavior = component.behaviors.whereType<MoveBehavior>().firstOrNull;
+      final moveBehavior = component.behaviors.whereType<move_behavior.MoveBehavior>().firstOrNull;
       if (moveBehavior == null) {
         Logger.log('❌ MoveComponentUseCaseV2: MoveBehavior not found for ${component.id}');
         return const Failure('MoveBehavior not found');
       }
 
-      final context = GameContext(
+      final context = game_context.GameContext(
         grid: currentGrid,
         toRow: action.newRow,
         toCol: action.newCol,

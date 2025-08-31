@@ -64,7 +64,6 @@ abstract class $GameEngineStateCopyWith<$Res> {
       DateTime lastUpdated,
       bool isDebugOverlayVisible});
 
-  $GridCopyWith<$Res> get grid;
   $LevelDefinitionCopyWith<$Res>? get currentLevel;
 }
 
@@ -167,16 +166,6 @@ class _$GameEngineStateCopyWithImpl<$Res, $Val extends GameEngineState>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $GridCopyWith<$Res> get grid {
-    return $GridCopyWith<$Res>(_value.grid, (value) {
-      return _then(_value.copyWith(grid: value) as $Val);
-    });
-  }
-
-  /// Create a copy of GameEngineState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
   $LevelDefinitionCopyWith<$Res>? get currentLevel {
     if (_value.currentLevel == null) {
       return null;
@@ -213,8 +202,6 @@ abstract class _$$GameEngineStateImplCopyWith<$Res>
       DateTime lastUpdated,
       bool isDebugOverlayVisible});
 
-  @override
-  $GridCopyWith<$Res> get grid;
   @override
   $LevelDefinitionCopyWith<$Res>? get currentLevel;
 }
