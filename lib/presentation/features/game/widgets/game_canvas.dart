@@ -1,16 +1,25 @@
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/debug/debug_overlay.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+import '../../../../application/game_engine_v3/providers_v3.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_grid.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_controller.dart';
 import 'package:sparkcircuit/application/enhanced_game_state.dart';
-import 'package:sparkcircuit/application/providers.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
-import 'package:sparkcircuit/presentation/core/utils/coordinate_translator.dart';
+
 import 'package:sparkcircuit/domain/entities/component.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/circuit_components_painter.dart';
-import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart';
+import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart' as drawing_models;
+import 'package:sparkcircuit/domain/entities/circuit_component.dart';
+import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_component_widget.dart';
+import 'package:sparkcircuit/presentation/features/game/widgets/component_context_menu.dart';
+import 'package:sparkcircuit/presentation/core/utils/feedback_utils.dart';
+import 'package:sparkcircuit/application/game_engine_v3/providers_v3.dart';
+import 'package:sparkcircuit/domain/entities/level_definition.dart';
 
 class GameCanvas extends ConsumerStatefulWidget {
   final String levelId;
@@ -26,6 +35,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
   late GameCanvasController _canvasController;
   String? _draggedComponentType;
   Offset? _dragPosition;
+  LevelDefinition? _levelDefinition;
 
   // Wire connection state
   bool _isDrawingWire = false;
@@ -34,10 +44,57 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
   Offset? _wireStartPosition;
   Offset? _wireEndPosition;
 
+  // Pan state management
+  bool _isDraggingComponent = false;
+  bool _isPanningCanvas = false;
+
+  // Context menu state
+  bool _isContextMenuVisible = false;
+  Offset? _contextMenuPosition;
+  String? _contextMenuComponentId;
+
   @override
   void initState() {
     super.initState();
     _canvasController = GameCanvasController();
+    _loadLevel();
+  }
+
+  Future<void> _loadLevel() async {
+    try {
+      final levelService = ref.read(levelServiceProvider);
+      final level = await levelService.loadLevel(widget.levelId);
+
+      if (level != null) {
+        setState(() {
+          _levelDefinition = level;
+        });
+
+        // Update canvas controller with level's grid dimensions
+        _canvasController.updateGridSize(level.grid.width, level.grid.height);
+
+        // Center the grid after the next frame when canvas size is available
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // Wait for another frame to ensure canvas size is updated
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _canvasController.centerGrid();
+          });
+        });
+
+        // Initialize game state with the loaded level
+        ref.read(enhancedGameStateNotifierProvider.notifier).resetLevel();
+        // Note: We can't directly set the level in the notifier from here
+        // The level will be used in the build method to initialize the state properly
+      } else {
+        StructuredLogger.warning('Level not found, using default grid', context: {
+          'levelId': widget.levelId,
+        });
+      }
+    } catch (e) {
+      StructuredLogger.error('Error loading level', context: {
+        'levelId': widget.levelId,
+      }, error: e);
+    }
   }
 
   @override
@@ -50,8 +107,17 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>() ?? _getDefaultCircuitColors();
-    final gameState = ref.watch(enhancedGameStateNotifierProvider) as GameState;
+        final gameState = ref.watch(enhancedGameStateNotifierProvider);
     final paletteState = ref.watch(paletteStateProvider(widget.levelId));
+
+    // If we have a loaded level but the game state doesn't have it, initialize with level
+    if (_levelDefinition != null && gameState.currentLevel == null) {
+      // Initialize game state with the loaded level
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(enhancedGameStateNotifierProvider.notifier).setState(
+          GameState.initial(_levelDefinition));
+      });
+    }
 
     // Convert ComponentModel to CircuitComponent for painter
     final List<CircuitComponent> circuitComponents = gameState.grid.components.values
@@ -60,7 +126,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
         .cast<CircuitComponent>();
 
     // Convert Grid connections to CircuitWire for painter
-    final List<CircuitWire> circuitWires = [];
+    final List<drawing_models.CircuitWire> circuitWires = [];
     gameState.grid.connections.forEach((sourceId, connectedIds) {
       final sourceComponent = gameState.grid.getComponentById(sourceId);
       if (sourceComponent != null) {
@@ -69,7 +135,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
           if (targetComponent != null) {
             // Ensure each wire is added only once (e.g., A-B, not B-A)
             if (sourceId.hashCode < targetId.hashCode) {
-              circuitWires.add(CircuitWire(
+              circuitWires.add(drawing_models.CircuitWire(
                 id: '\${sourceId}_\${targetId}',
                 startX: sourceComponent.col.toDouble(),
                 startY: sourceComponent.row.toDouble(),
@@ -93,58 +159,95 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: Stack(
-          children: [
-            // Grid background
-            Positioned.fill(
-              child: CircuitGrid(
-                controller: _canvasController,
-                levelId: widget.levelId,
-              ),
-            ),
-            
-            // Components and connections display
-            Positioned.fill(
-              child: CustomPaint(
-                painter: CircuitComponentsPainter(
-                  components: circuitComponents,
-                  wires: circuitWires,
-                  circuitColors: circuitColors,
-                  selectedComponentId: gameState.interactionState.selectedComponentId,
-                  scale: _canvasController.scale,
-                ),
-                size: Size.infinite,
-              ),
-            ),
-            
-            // Interaction layer
-            Positioned.fill(
-              child: _buildInteractionLayer(gameState, paletteState, circuitColors),
-            ),
-            
-            // Drag preview
-            if (_draggedComponentType != null && _dragPosition != null)
-              Positioned(
-                left: _dragPosition!.dx - 25,
-                top: _dragPosition!.dy - 25,
-                child: _buildDragPreview(_draggedComponentType!, circuitColors),
-              ),
-
-            // Wire drawing overlay
-            if (_isDrawingWire && _wireStartPosition != null)
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: WireDrawingPainter(
-                    startPosition: _wireStartPosition,
-                    endPosition: _wireEndPosition,
-                    circuitColors: circuitColors,
+        child: DragTarget<ComponentDragData>(
+          onAcceptWithDetails: (details) => _handleComponentDrop(details, gameState, paletteState),
+          onWillAcceptWithDetails: (details) => _canAcceptComponentDrop(details, gameState),
+          onMove: (details) {
+            StructuredLogger.trace('Drag move detected', context: {
+              'position': details.offset.toString(),
+              'componentName': details.data.componentName,
+              'componentType': details.data.componentType.toString(),
+            });
+          },
+          onLeave: (details) {
+            StructuredLogger.debug('Drag leave detected');
+          },
+          builder: (context, candidateData, rejectedData) {
+            if (candidateData.isNotEmpty) {
+              StructuredLogger.debug('Candidate drag data available', context: {
+                'componentName': candidateData.first!.componentName,
+                'componentType': candidateData.first!.componentType.toString(),
+                'dataCount': candidateData.length,
+              });
+            }
+            return Stack(
+              children: [
+                // Grid background
+                Positioned.fill(
+                  child: CircuitGrid(
+                    controller: _canvasController,
+                    levelId: widget.levelId,
                   ),
                 ),
-              ),
 
-            // Render actual component widgets for interaction
-            ...gameState.grid.components.values.map((component) => CircuitComponentWidget(component: component)),
-          ],
+                // Drop zone highlight
+                if (candidateData.isNotEmpty)
+                  Positioned.fill(
+                    child: _buildDropZoneHighlight(circuitColors, candidateData.first!, gameState),
+                  ),
+
+                // Components and connections display
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: CircuitComponentsPainter(
+                      components: circuitComponents,
+                      wires: circuitWires,
+                      circuitColors: circuitColors,
+                      selectedComponentId: gameState.interactionState.selectedComponentId,
+                      scale: _canvasController.scale,
+                    ),
+                    size: Size.infinite,
+                  ),
+                ),
+
+                // Interaction layer
+                Positioned.fill(
+                  child: _buildInteractionLayer(gameState, paletteState, circuitColors),
+                ),
+
+                // Drag preview
+                if (_draggedComponentType != null && _dragPosition != null)
+                  Positioned(
+                    left: _dragPosition!.dx - 25,
+                    top: _dragPosition!.dy - 25,
+                    child: _buildDragPreview(_draggedComponentType!, circuitColors),
+                  ),
+
+                // Wire drawing overlay
+                if (_isDrawingWire && _wireStartPosition != null)
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: WireDrawingPainter(
+                        startPosition: _wireStartPosition,
+                        endPosition: _wireEndPosition,
+                        circuitColors: circuitColors,
+                      ),
+                    ),
+                  ),
+
+                // Render actual component widgets for interaction
+                ...gameState.grid.components.values.map((component) => CircuitComponentWidget(component: component)),
+
+                // Context menu overlay
+                if (_isContextMenuVisible && _contextMenuPosition != null && _contextMenuComponentId != null)
+                  ComponentContextMenu(
+                    componentId: _contextMenuComponentId!,
+                    position: _contextMenuPosition!,
+                    onDismiss: _hideComponentContextMenu,
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -166,17 +269,33 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
       );
     }
 
-    return GestureDetector(
-      onTapDown: (details) => _handleTapDown(details, gameState),
-      onLongPressStart: (details) => _handleLongPressStart(details, gameState),
-      onScaleStart: (details) => _handleScaleStart(details),
-      onScaleUpdate: (details) => _handleScaleUpdate(details),
-      onScaleEnd: (details) => _handleScaleEnd(details),
-      child: Container(
-        color: Colors.transparent,
-        child: paletteState.isPlacingComponent
-            ? _buildPlacementOverlay(paletteState, circuitColors)
-            : null,
+    // Check if a palette drag is active
+    final isPaletteDragActive = ref.watch(paletteDragActiveProvider);
+
+    return IgnorePointer(
+      ignoring: isPaletteDragActive,
+      child: GestureDetector(
+        onTapDown: (details) {
+          // Dismiss context menu if visible
+          if (_isContextMenuVisible) {
+            _hideComponentContextMenu();
+            return;
+          }
+          _handleTapDown(details, gameState);
+        },
+        onLongPressStart: (details) => _handleLongPressStart(details, gameState),
+        onPanStart: (details) => _handlePanStart(details, gameState, paletteState),
+        onPanUpdate: (details) => _handlePanUpdate(details, gameState, paletteState),
+        onPanEnd: (details) => _handlePanEnd(details, gameState, paletteState),
+        onScaleStart: (details) => _handleScaleStart(details),
+        onScaleUpdate: (details) => _handleScaleUpdate(details, gameState, paletteState),
+        onScaleEnd: (details) => _handleScaleEnd(details, gameState, paletteState),
+        child: Container(
+          color: Colors.transparent,
+          child: paletteState.isPlacingComponent
+              ? _buildPlacementOverlay(paletteState, circuitColors)
+              : null,
+        ),
       ),
     );
   }
@@ -211,6 +330,27 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDropZoneHighlight(CircuitColorScheme circuitColors, ComponentDragData dragData, GameState gameState) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: circuitColors.primary.withValues(alpha: 0.5),
+          width: 3,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: CustomPaint(
+        painter: DropZoneHighlightPainter(
+          circuitColors: circuitColors,
+          dragData: dragData,
+          gameState: gameState,
+          canvasController: _canvasController,
+        ),
+        size: Size.infinite,
       ),
     );
   }
@@ -267,17 +407,25 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     PaletteState paletteState,
   ) {
     final localPosition = details.localPosition;
-    
+
     // Check if starting drag from an existing component
     final component = _getComponentAtPosition(localPosition, gameState);
     if (component != null) {
+      // Start dragging existing component
+      _isDraggingComponent = true;
+      _isPanningCanvas = false;
+      ref.read(enhancedGameStateNotifierProvider.notifier).startDragging(component.id, localPosition);
       setState(() {
         _draggedComponentType = component.type.toString();
         _dragPosition = localPosition;
       });
       return;
     }
-    
+
+    // Starting pan on empty canvas
+    _isDraggingComponent = false;
+    _isPanningCanvas = true;
+
     // Check if placing a new component
     if (paletteState.selectedComponentType != null) {
       setState(() {
@@ -292,11 +440,28 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     GameState gameState,
     PaletteState paletteState,
   ) {
-    if (_draggedComponentType != null) {
+    if (_isDraggingComponent && _draggedComponentType != null) {
+      // Update drag preview position
       setState(() {
         _dragPosition = details.localPosition;
       });
-    } else {
+
+      // If dragging an existing component, update its position in real-time
+      if (gameState.interactionState.draggedComponentId != null) {
+        final gridPosition = _canvasController.screenToGrid(details.localPosition);
+        final snappedPosition = Offset(
+          gridPosition.dx.round().toDouble(),
+          gridPosition.dy.round().toDouble(),
+        );
+
+        // Move component to new position
+        ref.read(enhancedGameStateNotifierProvider.notifier).moveComponent(
+          gameState.interactionState.draggedComponentId!,
+          snappedPosition.dy.toInt(),
+          snappedPosition.dx.toInt(),
+        );
+      }
+    } else if (_isPanningCanvas) {
       // Handle canvas panning
       _canvasController.updatePan(details.delta);
     }
@@ -307,36 +472,75 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     GameState gameState,
     PaletteState paletteState,
   ) {
-    if (_draggedComponentType != null && _dragPosition != null) {
-      _placeComponent(_draggedComponentType!, _dragPosition!, gameState, paletteState);
-      setState(() {
-        _draggedComponentType = null;
-        _dragPosition = null;
-      });
+    if (_isDraggingComponent && _draggedComponentType != null && _dragPosition != null) {
+      // If we were dragging an existing component, end the drag
+      if (gameState.interactionState.draggedComponentId != null) {
+        ref.read(enhancedGameStateNotifierProvider.notifier).endDragging();
+      } else {
+        // Otherwise, place a new component
+        _placeComponent(_draggedComponentType!, _dragPosition!, gameState, paletteState);
+      }
     }
+
+    // Reset pan state
+    setState(() {
+      _isDraggingComponent = false;
+      _isPanningCanvas = false;
+      _draggedComponentType = null;
+      _dragPosition = null;
+    });
   }
 
   void _handleTapDown(TapDownDetails details, GameState gameState) {
-    print('🎯 GameCanvas: Tap detected at ${details.localPosition}');
+    StructuredLogger.debug('Tap detected on canvas', context: {
+      'position': details.localPosition.toString(),
+    });
 
     // Check if we're in placement mode first
     final paletteState = ref.read(paletteStateProvider(widget.levelId));
     if (paletteState.isPlacingComponent && paletteState.placingComponentType != null) {
-      print('🎯 GameCanvas: In placement mode for ${paletteState.placingComponentType}');
+      StructuredLogger.info('Component placement mode active', context: {
+        'componentType': paletteState.placingComponentType,
+      });
       _placeComponent(paletteState.placingComponentType!, details.localPosition, gameState, paletteState);
       return;
     }
 
     final component = _getComponentAtPosition(details.localPosition, gameState);
     if (component != null) {
-      print('🎯 GameCanvas: Tapped on component: ${component.id} (${component.type})');
-      // If shift is pressed or in wire mode, start drawing wire
-      // For now, we'll use double tap to start wire drawing
-      ref.read(enhancedGameStateNotifierProvider.notifier).tapComponent(component.id);
-      print('🎯 GameCanvas: Component selected: ${component.id}');
+      StructuredLogger.info('Component tapped', context: {
+        'componentId': component.id,
+        'componentType': component.type.toString(),
+        'gridPosition': '${component.row}, ${component.col}',
+      });
+
+      // Check if this component is already selected
+      final isCurrentlySelected = gameState.interactionState.selectedComponentId == component.id;
+
+      if (isCurrentlySelected) {
+        StructuredLogger.debug('Component already selected, keeping selection', context: {
+          'componentId': component.id,
+        });
+        // Component is already selected, keep it selected for context menu
+      } else {
+        // Select the new component
+        ref.read(enhancedGameStateNotifierProvider.notifier).selectComponent(component.id);
+        StructuredLogger.debug('Component selected', context: {
+          'componentId': component.id,
+        });
+      }
+
+      // Provide haptic feedback for component selection
+      FeedbackUtils.provideHapticFeedback(FeedbackType.selection);
     } else {
-      print('🎯 GameCanvas: Tap on empty space, deselecting component');
-      ref.read(enhancedGameStateNotifierProvider.notifier).selectComponent(null);
+      StructuredLogger.debug('Tap on empty space', context: {
+        'hadSelection': gameState.interactionState.selectedComponentId != null,
+      });
+      // Only deselect if there was a selection
+      if (gameState.interactionState.selectedComponentId != null) {
+        ref.read(enhancedGameStateNotifierProvider.notifier).selectComponent(null);
+        FeedbackUtils.provideHapticFeedback(FeedbackType.light);
+      }
     }
   }
 
@@ -344,47 +548,88 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     _canvasController.startScale();
   }
 
-  void _handleScaleUpdate(ScaleUpdateDetails details) {
-    _canvasController.updateScale(details.scale);
-    _canvasController.updatePan(details.focalPointDelta);
+  void _handleScaleUpdate(ScaleUpdateDetails details, GameState gameState, PaletteState paletteState) {
+    // Only handle scaling and panning for multi-touch gestures
+    // Single-touch gestures should be handled by pan handlers
+
+    if (details.pointerCount > 1) {
+      // Multi-touch: handle scaling and panning
+      _canvasController.updateScale(details.scale);
+      _canvasController.updatePan(details.focalPointDelta);
+    }
+    // Single-touch gestures are now handled by the separate pan handlers
   }
 
-  void _handleScaleEnd(ScaleEndDetails details) {
+  void _handleScaleEnd(ScaleEndDetails details, GameState gameState, PaletteState paletteState) {
+    // Only handle scale ending - component dragging is now handled by pan handlers
     _canvasController.endScale();
   }
 
   void _handleLongPressStart(LongPressStartDetails details, GameState gameState) {
-    print('🔗 GameCanvas: Long press detected at ${details.localPosition}');
+    StructuredLogger.info('Long press gesture initiated', context: {
+      'position': details.localPosition.toString(),
+    });
+
     final component = _getComponentAtPosition(details.localPosition, gameState);
+
     if (component != null) {
-      print('🔗 GameCanvas: Starting wire from component: ${component.id} (${component.type})');
-      setState(() {
-        _isDrawingWire = true;
-        _wireStartComponentId = component.id;
-        _wireStartPort = 'terminal1'; // Simplified - would need proper port detection
-        _wireStartPosition = details.localPosition;
-        _wireEndPosition = details.localPosition;
+      StructuredLogger.debug('Long press on component', context: {
+        'componentId': component.id,
+        'componentType': component.type.toString(),
+        'gridPosition': '${component.row}, ${component.col}',
       });
-      print('🔗 GameCanvas: Wire drawing mode activated');
+
+      // Check if this component is already selected
+      final isCurrentlySelected = gameState.interactionState.selectedComponentId == component.id;
+
+      if (!isCurrentlySelected) {
+        // Select the component first
+        ref.read(enhancedGameStateNotifierProvider.notifier).selectComponent(component.id);
+        StructuredLogger.debug('Component auto-selected for context menu', context: {
+          'componentId': component.id,
+        });
+      }
+
+      // Show context menu for the component
+      _showComponentContextMenu(component.id, details.localPosition);
+
+      // Provide haptic feedback
+      FeedbackUtils.provideHapticFeedback(FeedbackType.medium);
     } else {
-      print('🔗 GameCanvas: Long press on empty space - no component found');
+      StructuredLogger.debug('Long press on empty canvas area');
+      // Could potentially show canvas context menu here in the future
     }
   }
 
+  void _showComponentContextMenu(String componentId, Offset position) {
+    setState(() {
+      _isContextMenuVisible = true;
+      _contextMenuPosition = position;
+      _contextMenuComponentId = componentId;
+    });
+    StructuredLogger.info('Context menu displayed', context: {
+      'componentId': componentId,
+      'position': position.toString(),
+    });
+  }
+
+  void _hideComponentContextMenu() {
+    setState(() {
+      _isContextMenuVisible = false;
+      _contextMenuPosition = null;
+      _contextMenuComponentId = null;
+    });
+    StructuredLogger.debug('Context menu hidden');
+  }
+
   ComponentModel? _getComponentAtPosition(Offset position, GameState gameState) {
-    final translator = CoordinateTranslator(
-      gridCellSize: _canvasController.gridCellSize,
-      panX: _canvasController.panOffset.dx,
-      panY: _canvasController.panOffset.dy,
-      scale: _canvasController.scale,
-    );
-    
-    final gridPosition = translator.screenToGrid(position);
-    
+    final gridPosition = _canvasController.screenToGrid(position);
+
     // Find component at this position
     for (final component in gameState.grid.components.values) {
       final componentGridPos = Offset(component.col.toDouble(), component.row.toDouble());
-      if (translator.gridDistance(gridPosition, componentGridPos) < 0.8) {
+      final distance = (gridPosition - componentGridPos).distance;
+      if (distance < 0.8) {
         return component;
       }
     }
@@ -397,13 +642,20 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     GameState gameState,
     PaletteState paletteState,
   ) {
-    print('📦 GameCanvas: Attempting to place component: $componentTypeString at $position');
-    print('📦 GameCanvas: Palette state - isPlacingComponent: ${paletteState.isPlacingComponent}, placingComponentType: ${paletteState.placingComponentType}');
-    print('📦 GameCanvas: Component inventory check for $componentTypeString...');
+    StructuredLogger.info('Component placement initiated', context: {
+      'componentType': componentTypeString,
+      'position': position.toString(),
+      'paletteState': {
+        'isPlacingComponent': paletteState.isPlacingComponent,
+        'placingComponentType': paletteState.placingComponentType,
+      },
+    });
 
     if (!paletteState.canUseComponent(componentTypeString)) {
-      print('📦 GameCanvas: Cannot place component - not available in palette');
-      print('📦 GameCanvas: Available inventory: ${paletteState.inventory}');
+      StructuredLogger.warning('Component placement denied - insufficient inventory', context: {
+        'componentType': componentTypeString,
+        'availableInventory': paletteState.inventory,
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('No more $componentTypeString components available'),
@@ -413,14 +665,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
       return;
     }
 
-    final translator = CoordinateTranslator(
-      gridCellSize: _canvasController.gridCellSize,
-      panX: _canvasController.panOffset.dx,
-      panY: _canvasController.panOffset.dy,
-      scale: _canvasController.scale,
-    );
-    
-    final gridPosition = translator.screenToGrid(position);
+    final gridPosition = _canvasController.screenToGrid(position);
     final snappedPosition = Offset(
       gridPosition.dx.round().toDouble(),
       gridPosition.dy.round().toDouble(),
@@ -446,7 +691,10 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     );
 
     // Add component to game state
-    print('📦 GameCanvas: Adding component to game state...');
+    StructuredLogger.debug('Placing component in game state', context: {
+      'componentType': componentType.toString(),
+      'gridPosition': '${snappedPosition.dy.toInt()}, ${snappedPosition.dx.toInt()}',
+    });
     ref.read(enhancedGameStateNotifierProvider.notifier).placeComponent(
       componentType,
       snappedPosition.dy.toInt(), // row
@@ -454,14 +702,26 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     );
 
     // Update palette inventory
-    print('📦 GameCanvas: Updating palette inventory...');
     ref.read(paletteStateProvider(widget.levelId).notifier).useComponent(componentTypeString);
+    StructuredLogger.debug('Palette inventory updated', context: {
+      'componentType': componentTypeString,
+      'remainingCount': paletteState.inventory[componentTypeString] ?? 0,
+    });
 
     // Clear placement mode
-    print('📦 GameCanvas: Clearing placement mode...');
     ref.read(paletteStateProvider(widget.levelId).notifier).stopPlacingComponent();
 
-    print('📦 GameCanvas: Component placement completed successfully');
+    StructuredLogger.info('Component placement successful', context: {
+      'componentType': componentTypeString,
+      'gridPosition': '${snappedPosition.dy.toInt()}, ${snappedPosition.dx.toInt()}',
+    });
+
+    // Play component placement sound
+    _playComponentPlacementSound();
+  }
+
+  void _playComponentPlacementSound() {
+    FeedbackUtils.provideSoundFeedback(ref, SoundType.componentPlaced);
   }
 
   Map<String, dynamic> _getDefaultPropertiesForComponent(String componentType) {
@@ -549,6 +809,197 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     );
   }
 
+  void _handleComponentDrop(DragTargetDetails<ComponentDragData> details, GameState gameState, PaletteState paletteState) {
+    StructuredLogger.info('Component drop initiated', context: {
+      'position': details.offset.toString(),
+      'componentName': details.data.componentName,
+      'componentType': details.data.componentType.toString(),
+      'gridBounds': '${gameState.grid.rows} x ${gameState.grid.cols}',
+    });
+
+    // Convert screen coordinates to grid coordinates
+    final gridPosition = _canvasController.screenToGrid(details.offset);
+    final snappedPosition = Offset(
+      gridPosition.dx.round().toDouble(),
+      gridPosition.dy.round().toDouble(),
+    );
+
+    StructuredLogger.debug('Grid position calculated', context: {
+      'gridPosition': '${snappedPosition.dx}, ${snappedPosition.dy}',
+    });
+
+    // Check if position is valid and available
+    final existingComponent = _getComponentAtPosition(snappedPosition, gameState);
+    if (existingComponent != null) {
+      StructuredLogger.warning('Component drop rejected - position occupied', context: {
+        'obstacleComponent': {
+          'id': existingComponent.id,
+          'type': existingComponent.type.toString(),
+          'position': '${existingComponent.row}, ${existingComponent.col}',
+        },
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Position already occupied'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Check if position is within grid bounds
+    if (snappedPosition.dx < 0 || snappedPosition.dy < 0 ||
+        snappedPosition.dx >= gameState.grid.cols || snappedPosition.dy >= gameState.grid.rows) {
+      StructuredLogger.warning('Component drop rejected - out of bounds', context: {
+        'gridPosition': '${snappedPosition.dx}, ${snappedPosition.dy}',
+        'gridBounds': '${gameState.grid.rows} x ${gameState.grid.cols}',
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot place component outside grid'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Check if component is available in inventory
+    final componentTypeString = details.data.componentType.toString().split('.').last;
+    final canUse = paletteState.canUseComponent(componentTypeString);
+
+    if (!canUse) {
+      StructuredLogger.warning('Component drop rejected - insufficient inventory', context: {
+        'componentName': details.data.componentName,
+        'componentTypeString': componentTypeString,
+        'availableInventory': paletteState.inventory,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No more ${details.data.componentName} components available'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Place the component
+    StructuredLogger.debug('Placing component after validation', context: {
+      'componentName': details.data.componentName,
+      'gridPosition': '${snappedPosition.dx.toInt()}, ${snappedPosition.dy.toInt()}',
+    });
+
+    try {
+      ref.read(enhancedGameStateNotifierProvider.notifier).placeComponent(
+        details.data.componentType,
+        snappedPosition.dy.toInt(), // row
+        snappedPosition.dx.toInt(), // col
+      );
+
+      // Update palette inventory
+      ref.read(paletteStateProvider(widget.levelId).notifier).useComponent(componentTypeString);
+      StructuredLogger.debug('Palette inventory decremented', context: {
+        'componentTypeString': componentTypeString,
+        'newCount': paletteState.inventory[componentTypeString],
+      });
+
+      // Clear any placement mode
+      ref.read(paletteStateProvider(widget.levelId).notifier).stopPlacingComponent();
+
+      // Play placement sound
+      _playComponentPlacementSound();
+
+      StructuredLogger.info('Component successfully placed', context: {
+        'componentName': details.data.componentName,
+        'componentType': details.data.componentType.toString(),
+        'gridPosition': '${snappedPosition.dx.toInt()}, ${snappedPosition.dy.toInt()}',
+        'remainingInventory': paletteState.inventory,
+      });
+
+    } catch (e) {
+      StructuredLogger.error('Component placement failed', context: {
+        'componentName': details.data.componentName,
+        'componentType': details.data.componentType.toString(),
+        'gridPosition': '${snappedPosition.dx.toInt()}, ${snappedPosition.dy.toInt()}',
+        'error': e.toString(),
+      }, error: e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error placing component: $e'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  bool _canAcceptComponentDrop(DragTargetDetails<ComponentDragData> details, GameState gameState) {
+    StructuredLogger.debug('Component drop validation', context: {
+      'position': details.offset.toString(),
+      'componentName': details.data.componentName,
+      'componentType': details.data.componentType.toString(),
+      'canvasState': {
+        'cellSize': _canvasController.gridCellSize,
+        'pan': _canvasController.panOffset.toString(),
+        'scale': _canvasController.scale,
+      },
+    });
+
+    // Convert screen coordinates to grid coordinates
+    final gridPosition = _canvasController.screenToGrid(details.offset);
+    final snappedPosition = Offset(
+      gridPosition.dx.round().toDouble(),
+      gridPosition.dy.round().toDouble(),
+    );
+
+    StructuredLogger.trace('Calculated grid coordinates', context: {
+      'gridPosition': '${snappedPosition.dx}, ${snappedPosition.dy}',
+      'gridBounds': '${gameState.grid.rows}x${gameState.grid.cols}',
+    });
+
+    // Check if position is within grid bounds
+    final withinBounds = snappedPosition.dx >= 0 && snappedPosition.dy >= 0 &&
+                        snappedPosition.dx < gameState.grid.cols && snappedPosition.dy < gameState.grid.rows;
+
+    if (!withinBounds) {
+      StructuredLogger.debug('Drop validation failed - out of bounds', context: {
+        'attemptedPosition': '${snappedPosition.dx}, ${snappedPosition.dy}',
+        'gridBounds': '${gameState.grid.rows}x${gameState.grid.cols}',
+      });
+      return false;
+    }
+
+    // Check if position is available (no existing component)
+    final existingComponent = _getComponentAtPosition(snappedPosition, gameState);
+    final positionAvailable = existingComponent == null;
+
+    if (!positionAvailable) {
+      StructuredLogger.debug('Drop validation failed - position occupied', context: {
+        'obstacleComponent': existingComponent?.id,
+        'position': '${snappedPosition.dx}, ${snappedPosition.dy}',
+      });
+      return false;
+    }
+
+    // Check if component is available in inventory
+    final componentTypeString = details.data.componentType.toString().split('.').last;
+    final paletteState = ref.read(paletteStateProvider(widget.levelId));
+    final canUse = paletteState.canUseComponent(componentTypeString);
+
+    if (!canUse) {
+      StructuredLogger.debug('Drop validation failed - insufficient inventory', context: {
+        'componentTypeString': componentTypeString,
+        'availableInventory': paletteState.inventory,
+      });
+      return false;
+    }
+
+    StructuredLogger.debug('Drop validation passed - component accepted', context: {
+      'componentName': details.data.componentName,
+      'componentType': details.data.componentType.toString(),
+      'gridPosition': '${snappedPosition.dx}, ${snappedPosition.dy}',
+    });
+    return true;
+  }
+
   CircuitColorScheme _getDefaultCircuitColors() {
     return const CircuitColorScheme(
       primary: Color(0xFF1E88E5),
@@ -613,6 +1064,88 @@ class WireDrawingPainter extends CustomPainter {
   @override
   bool shouldRepaint(WireDrawingPainter oldDelegate) {
     return oldDelegate.startPosition != startPosition ||
-           oldDelegate.endPosition != endPosition;
+            oldDelegate.endPosition != endPosition;
+  }
+}
+
+class DropZoneHighlightPainter extends CustomPainter {
+  final CircuitColorScheme circuitColors;
+  final ComponentDragData dragData;
+  final GameState gameState;
+  final GameCanvasController canvasController;
+
+  DropZoneHighlightPainter({
+    required this.circuitColors,
+    required this.dragData,
+    required this.gameState,
+    required this.canvasController,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final gridCellSize = canvasController.gridCellSize;
+    final panOffset = canvasController.panOffset;
+    final scale = canvasController.scale;
+
+    // Draw highlights for valid drop positions
+    for (int row = 0; row < gameState.grid.rows; row++) {
+      for (int col = 0; col < gameState.grid.cols; col++) {
+        final screenX = col * gridCellSize * scale + panOffset.dx;
+        final screenY = row * gridCellSize * scale + panOffset.dy;
+
+        // Check if this position is valid for dropping
+        final isValid = _isValidDropPosition(row, col);
+
+        if (isValid) {
+          // Draw valid drop highlight
+          final validPaint = Paint()
+            ..color = circuitColors.primary.withValues(alpha: 0.3)
+            ..style = PaintingStyle.fill;
+
+          canvas.drawRect(
+            Rect.fromLTWH(screenX, screenY, gridCellSize * scale, gridCellSize * scale),
+            validPaint,
+          );
+
+          // Draw border
+          final borderPaint = Paint()
+            ..color = circuitColors.primary.withValues(alpha: 0.6)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2.0;
+
+          canvas.drawRect(
+            Rect.fromLTWH(screenX, screenY, gridCellSize * scale, gridCellSize * scale),
+            borderPaint,
+          );
+        }
+      }
+    }
+  }
+
+  bool _isValidDropPosition(int row, int col) {
+    // Check if position is within bounds
+    if (row < 0 || row >= gameState.grid.rows || col < 0 || col >= gameState.grid.cols) {
+      return false;
+    }
+
+    // Check if position is occupied
+    final existingComponent = gameState.grid.components.values
+        .where((component) => component.row == row && component.col == col)
+        .isNotEmpty;
+
+    if (existingComponent) {
+      return false;
+    }
+
+    // Check if component is available in inventory (simplified check)
+    // In a real implementation, this would check the palette state
+    return true;
+  }
+
+  @override
+  bool shouldRepaint(DropZoneHighlightPainter oldDelegate) {
+    return oldDelegate.dragData != dragData ||
+           oldDelegate.gameState != gameState ||
+           oldDelegate.canvasController != canvasController;
   }
 }

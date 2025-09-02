@@ -14,17 +14,10 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-Hint _$HintFromJson(Map<String, dynamic> json) {
-  return _Hint.fromJson(json);
-}
-
 /// @nodoc
 mixin _$Hint {
   String get type => throw _privateConstructorUsedError;
   List<Position>? get path => throw _privateConstructorUsedError;
-
-  /// Serializes this Hint to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of Hint
   /// with the given fields replaced by the non-null parameter values.
@@ -110,13 +103,10 @@ class __$$HintImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$HintImpl implements _Hint {
   const _$HintImpl({required this.type, final List<Position>? path})
       : _path = path;
-
-  factory _$HintImpl.fromJson(Map<String, dynamic> json) =>
-      _$$HintImplFromJson(json);
 
   @override
   final String type;
@@ -144,7 +134,6 @@ class _$HintImpl implements _Hint {
             const DeepCollectionEquality().equals(other._path, _path));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType, type, const DeepCollectionEquality().hash(_path));
@@ -156,20 +145,11 @@ class _$HintImpl implements _Hint {
   @pragma('vm:prefer-inline')
   _$$HintImplCopyWith<_$HintImpl> get copyWith =>
       __$$HintImplCopyWithImpl<_$HintImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$HintImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _Hint implements Hint {
   const factory _Hint(
       {required final String type, final List<Position>? path}) = _$HintImpl;
-
-  factory _Hint.fromJson(Map<String, dynamic> json) = _$HintImpl.fromJson;
 
   @override
   String get type;

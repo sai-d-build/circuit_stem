@@ -1,12 +1,16 @@
 // Simple logger implementation for the SparkCircuit app
 // This replaces the missing logger.dart file
 
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
+
 class Logger {
   static const String _tag = 'SparkCircuit';
 
   static void d(String message, [dynamic error, StackTrace? stackTrace]) {
-    // Debug level logging
-    print('[$_tag DEBUG] $message');
+    // Debug level logging - use direct print to avoid circular dependency
+    // These will be replaced systematically in future PR with structured logging
+    final debugMsg = '[$_tag DEBUG] $message';
+    print(debugMsg);
     if (error != null) {
       print('[$_tag DEBUG] Error: $error');
     }
@@ -17,12 +21,14 @@ class Logger {
 
   static void i(String message) {
     // Info level logging
-    print('[$_tag INFO] $message');
+    final infoMsg = '[$_tag INFO] $message';
+    print(infoMsg);
   }
 
   static void w(String message, [dynamic error, StackTrace? stackTrace]) {
     // Warning level logging
-    print('[$_tag WARNING] $message');
+    final warnMsg = '[$_tag WARNING] $message';
+    print(warnMsg);
     if (error != null) {
       print('[$_tag WARNING] Error: $error');
     }
@@ -33,7 +39,8 @@ class Logger {
 
   static void e(String message, [dynamic error, StackTrace? stackTrace]) {
     // Error level logging
-    print('[$_tag ERROR] $message');
+    final errorMsg = '[$_tag ERROR] $message';
+    print(errorMsg);
     if (error != null) {
       print('[$_tag ERROR] Error: $error');
     }
@@ -44,7 +51,8 @@ class Logger {
 
   static void log(String message, {String level = 'INFO'}) {
     // Generic logging method
-    print('[$_tag $level] $message');
+    final logMsg = '[$_tag $level] $message';
+    print(logMsg);
   }
 
   static void logComponentEvent(String componentId, String event, [Map<String, dynamic>? data]) {

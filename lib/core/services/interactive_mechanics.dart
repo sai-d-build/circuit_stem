@@ -1,10 +1,7 @@
 // Interactive Gameplay Mechanics System
 // Simplified version without Freezed for compilation
 
-import 'dart:math';
 import 'package:flutter/material.dart';
-import '../../domain/entities/component.dart';
-import '../../domain/entities/grid.dart';
 import '../../common/feature_flags.dart';
 
 // Simplified classes without Freezed

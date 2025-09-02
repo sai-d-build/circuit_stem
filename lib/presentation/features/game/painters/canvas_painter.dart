@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_controller.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 class CanvasPainter extends CustomPainter {
   final GameCanvasController controller;
@@ -27,13 +28,13 @@ class CanvasPainter extends CustomPainter {
 
   void _drawGrid(Canvas canvas, Size size) {
     final gridPaint = Paint()
-      ..color = circuitColors.gridLine.withValues(alpha: 0.3)
-      ..strokeWidth = 0.5
+      ..color = circuitColors.gridLine.withValues(alpha: GameConstants.lowOpacity)
+      ..strokeWidth = GameConstants.gridLineStroke
       ..style = PaintingStyle.stroke;
 
     final majorGridPaint = Paint()
-      ..color = circuitColors.gridLine.withValues(alpha: 0.6)
-      ..strokeWidth = 1.0
+      ..color = circuitColors.gridLine.withValues(alpha: GameConstants.mediumOpacity)
+      ..strokeWidth = GameConstants.majorGridStroke
       ..style = PaintingStyle.stroke;
 
     final cellSize = controller.scaledCellSize;
@@ -48,8 +49,8 @@ class CanvasPainter extends CustomPainter {
     // Draw vertical lines
     for (int i = startX; i <= endX; i++) {
       final x = i * cellSize + panOffset.dx;
-      if (x >= -1 && x <= size.width + 1) {
-        final paint = (i % 5 == 0) ? majorGridPaint : gridPaint;
+      if (x >= -GameConstants.gridBoundsOffset && x <= size.width + GameConstants.gridBoundsOffset) {
+        final paint = (i % GameConstants.majorGridInterval == 0) ? majorGridPaint : gridPaint;
         canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
       }
     }
@@ -57,8 +58,8 @@ class CanvasPainter extends CustomPainter {
     // Draw horizontal lines
     for (int i = startY; i <= endY; i++) {
       final y = i * cellSize + panOffset.dy;
-      if (y >= -1 && y <= size.height + 1) {
-        final paint = (i % 5 == 0) ? majorGridPaint : gridPaint;
+      if (y >= -GameConstants.gridBoundsOffset && y <= size.height + GameConstants.gridBoundsOffset) {
+        final paint = (i % GameConstants.majorGridInterval == 0) ? majorGridPaint : gridPaint;
         canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
       }
     }

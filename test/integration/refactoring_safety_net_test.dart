@@ -8,6 +8,7 @@ import 'package:sparkcircuit/application/enhanced_game_state_notifier.dart';
 import 'package:sparkcircuit/application/services/component_factory.dart';
 import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
 import 'package:sparkcircuit/core/persistence/storage_service.dart';
+import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
 import 'package:sparkcircuit/core/simulation/basic_simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
 import 'package:sparkcircuit/domain/entities/component.dart';
@@ -20,12 +21,15 @@ void main() {
   group('Refactoring Safety Net Tests', () {
     late ProviderContainer container;
 
-    setUp(() {
+    setUp(() async {
+      final storageService = SharedPreferencesStorageService();
+      await storageService.init();
+
       container = ProviderContainer(overrides: [
         commandStackProvider.overrideWithValue(InMemoryCommandStack()),
         simulationEngineProvider.overrideWithValue(BasicSimulationEngine()),
         netlistBuilderProvider.overrideWithValue(NetlistBuilder()),
-        storageServiceProvider.overrideWithValue(StorageService()),
+        storageServiceProvider.overrideWithValue(storageService),
         componentFactoryProvider.overrideWithValue(ComponentFactory()),
         enhancedGameStateNotifierProvider.overrideWith(
           (ref) => EnhancedGameStateNotifier(

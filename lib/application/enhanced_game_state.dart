@@ -4,16 +4,10 @@ import 'package:sparkcircuit/domain/entities/grid.dart';
 import 'package:sparkcircuit/domain/entities/level_definition.dart';
 import 'package:sparkcircuit/core/simulation/simulation_result.dart';
 import 'package:flutter/material.dart'; // For Offset
+import '../common/converters.dart';
 
 part 'enhanced_game_state.freezed.dart';
 part 'enhanced_game_state.g.dart';
-
-// Helper functions for Offset serialization
-Map<String, dynamic>? _offsetToJson(Offset? offset) =>
-    offset == null ? null : {'dx': offset.dx, 'dy': offset.dy};
-
-Offset? _offsetFromJson(Map<String, dynamic>? json) =>
-    json == null ? null : Offset(json['dx'] as double, json['dy'] as double);
 
 @freezed
 class GameState with _$GameState {
@@ -47,8 +41,7 @@ class GameState with _$GameState {
         history: HistoryState.initial(),
       );
 
-  factory GameState.fromJson(Map<String, dynamic> json) =>
-      _$GameStateFromJson(json);
+  
 }
 
 @freezed
@@ -56,15 +49,14 @@ class InteractionState with _$InteractionState {
   const factory InteractionState({
     String? selectedComponentId,
     String? draggedComponentId,
-    @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson) Offset? dragStartLocalPosition,
-    @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson) Offset? dragUpdateLocalPosition,
+    @OffsetConverter() Offset? dragStartLocalPosition,
+    @OffsetConverter() Offset? dragUpdateLocalPosition,
     @Default(false) bool isDragging,
   }) = _InteractionState;
 
   factory InteractionState.initial() => const InteractionState();
 
-  factory InteractionState.fromJson(Map<String, dynamic> json) =>
-      _$InteractionStateFromJson(json);
+  
 }
 
 @freezed
@@ -75,6 +67,5 @@ class HistoryState with _$HistoryState {
 
   factory HistoryState.initial() => const HistoryState();
 
-  factory HistoryState.fromJson(Map<String, dynamic> json) =>
-      _$HistoryStateFromJson(json);
+  
 }

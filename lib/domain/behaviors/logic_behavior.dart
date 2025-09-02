@@ -42,7 +42,7 @@ class SwitchLogicBehavior extends BaseLogicBehavior {
   @override
   void execute(ComponentModel component) {
     // Switch logic - control power flow based on switch state
-    final isOn = component.properties['isOn'] ?? false;
+        // final isOn = component.properties['isOn'] ?? false;
     // Implementation would handle switch on/off logic
   }
 
@@ -55,7 +55,7 @@ class BatteryLogicBehavior extends BaseLogicBehavior {
   @override
   void execute(ComponentModel component) {
     // Battery logic - provide constant power source
-    final voltage = component.properties['voltage'] ?? 9.0;
+        // final voltage = component.properties['voltage'] ?? 9.0;
     // Implementation would handle battery power output
   }
 
@@ -68,7 +68,7 @@ class BulbLogicBehavior extends BaseLogicBehavior {
   @override
   void execute(ComponentModel component) {
     // Bulb logic - consume power and light up
-    final resistance = component.properties['resistance'] ?? 100.0;
+        // final resistance = component.properties['resistance'] ?? 100.0;
     // Implementation would handle bulb illumination logic
   }
 

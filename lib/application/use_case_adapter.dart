@@ -3,17 +3,12 @@ import 'game_engine_state.dart';
 import 'use_cases/base_use_case.dart';
 import 'use_cases/component_action.dart';
 import 'game_engine_orchestrator.dart';
-import 'providers.dart';
+
 import 'core/result.dart';
 
 // Export legacy use cases (for compatibility)
 export 'use_cases/check_win_condition_use_case.dart';
 export 'use_cases/create_component_use_case.dart';
-export 'use_cases/load_level_use_case.dart';
-export 'use_cases/restart_level_use_case.dart';
-export 'use_cases/simulate_power_flow_use_case.dart';
-export 'use_cases/undo_use_case.dart';
-export 'use_cases/update_component_use_case.dart';
 
 // Export optimized notifier-integrated use cases (v2) - these replace legacy versions
 export 'use_cases/tap_component_use_case_v2.dart';

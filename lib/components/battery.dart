@@ -3,10 +3,10 @@ import 'dart:math' as math;
 
 import '../domain/behaviors/drawing_behavior.dart';
 import '../domain/behaviors/logic_behavior.dart';
-import '../application/services/component_registry.dart';
+
 import '../application/services/component_factory.dart';
 import '../domain/entities/component.dart';
-import '../domain/entities/grid.dart';
+
 import '../infrastructure/rendering/asset_manager.dart';
 import '../common/theme.dart';
 import '../common/logger.dart';

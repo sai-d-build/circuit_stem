@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../domain/entities/level_definition.dart';
+
 import '../../common/logger.dart';
 
 /// Simple level info for the system
@@ -81,8 +81,8 @@ class LevelSystem {
   }
 
   /// Save level progress
-  Future<void> saveLevelProgress(String levelId, Map<String, dynamic> progress) async {
-    final progressKey = 'progress_$levelId';
+    Future<void> saveLevelProgress(String levelId, Map<String, dynamic> progress) async {
+    // final progressKey = 'progress_$levelId';
     // Save progress as JSON string in real implementation
     Logger.log('LevelSystem: Saved progress for level $levelId');
   }

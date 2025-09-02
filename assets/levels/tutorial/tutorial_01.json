@@ -1,0 +1,141 @@
+{
+  "levelId": "tutorial_01",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "tutorial_01",
+    "title": "First Steps",
+    "description": "Connect a battery to an LED bulb to light it up",
+    "difficulty": "tutorial",
+    "estimatedTime": 120,
+    "learningObjectives": [
+      "Understand basic circuit components",
+      "Learn series circuit connections",
+      "Observe current flow and voltage"
+    ],
+    "tags": ["tutorial", "basic", "series"],
+    "unlocksComponents": ["battery", "led", "wire"],
+    "prerequisites": []
+  },
+  "grid": {
+    "width": 8,
+    "height": 6,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 9.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "led",
+        "quantity": 1,
+        "properties": {
+          "forwardVoltage": 2.0,
+          "color": "red",
+          "maxCurrent": 0.02
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 3,
+        "properties": {
+          "resistance": 0.01
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "light_led",
+      "type": "component_state",
+      "description": "Light up the LED bulb",
+      "conditions": {
+        "targetComponent": "led_1",
+        "targetState": "on"
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Connect the battery positive (+) terminal to the LED anode (longer leg)",
+          "trigger": "time_elapsed",
+          "triggerValue": 30
+        },
+        {
+          "id": "hint_2",
+          "text": "Connect the LED cathode (shorter leg) back to the battery negative (-) terminal",
+          "trigger": "time_elapsed",
+          "triggerValue": 60
+        }
+      ]
+    },
+    {
+      "id": "complete_circuit",
+      "type": "circuit_analysis",
+      "description": "Create a complete circuit path",
+      "conditions": {
+        "current_flow": {"minValue": 0.01},
+        "voltage_drop": {"maxValue": 8.0}
+      }
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": true,
+    "steps": [
+      {
+        "id": "step_1",
+        "title": "Place Components",
+        "description": "Drag and drop components onto the circuit board",
+        "highlight": "component_palette",
+        "requiredAction": "place_component"
+      },
+      {
+        "id": "step_2",
+        "title": "Connect with Wires",
+        "description": "Connect components using wires to complete the circuit",
+        "highlight": "wire_tool",
+        "requiredAction": "create_connection"
+      },
+      {
+        "id": "step_3",
+        "title": "Test Your Circuit",
+        "description": "Check if the LED lights up when the circuit is complete",
+        "highlight": "simulation_button",
+        "requiredAction": "run_simulation"
+      }
+    ]
+  },
+  "scoring": {
+    "maxScore": 1000,
+    "timeBonus": {
+      "maxTime": 300,
+      "bonusPerSecond": 2
+    },
+    "efficiencyBonus": {
+      "maxComponents": 5,
+      "bonusPerUnusedComponent": 50
+    },
+    "starThresholds": {
+      "threeStars": 800,
+      "twoStars": 600,
+      "oneStar": 400
+    }
+  }
+}

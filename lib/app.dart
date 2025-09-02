@@ -11,7 +11,7 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  bool _showOnboarding = false; // TODO: Check from preferences
+  final bool _showOnboarding = false; // TODO: Check from preferences
 
   @override
   Widget build(BuildContext context) {

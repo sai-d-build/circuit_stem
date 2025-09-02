@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sparkcircuit/application/enhanced_game_state.dart';
 import 'package:sparkcircuit/domain/entities/component.dart';
-import 'package:sparkcircuit/domain/entities/grid.dart';
+
 
 part 'circuit_netlist.freezed.dart';
 part 'circuit_netlist.g.dart';

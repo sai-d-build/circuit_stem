@@ -3,80 +3,62 @@ import '../services/component_factory.dart';
 import '../../domain/entities/component.dart';
 import '../../common/logger.dart';
 import '../core/result.dart';
-import '../transaction.dart';
 import 'component_action.dart';
 import 'notifier_integrated_use_case.dart';
+import '../transaction.dart';
 
-/// Notifier-integrated implementation of CreateComponentFromTemplateAction
-/// - Uses the ComponentPaletteManager available in NotifierContext to resolve a template
-/// - Uses ComponentFactory to create a new instance (centralized id generation)
-/// - Registers a single transaction.onCommit handler that updates GridNotifier and runs simulation
-class CreateComponentFromTemplateUseCaseV2
-    extends NotifierIntegratedUseCase<CreateComponentFromTemplateAction> {
-  final PowerSimulationService _simulation;
+/// Use case for creating a component from a template
+class CreateComponentUseCaseV2 extends NotifierIntegratedUseCase<CreateComponentFromTemplateAction> {
   final ComponentFactory _factory;
+  final PowerSimulationService _simulation;
 
-  const CreateComponentFromTemplateUseCaseV2(this._simulation, this._factory);
-
-  @override
-  Result<void> validate(CreateComponentFromTemplateAction action, NotifierContext notifiers) {
-    final currentGrid = notifiers.grid.current;
-
-    if (action.row < 0 || action.col < 0) {
-      return const Failure('Invalid position: coordinates must be non-negative');
-    }
-
-    // Check if cell is already occupied
-    final existingComponent = currentGrid.componentAt(action.row, action.col);
-    if (existingComponent != null) {
-      return const Failure('Cell already occupied');
-    }
-
-    return const Success(null);
-  }
+  const CreateComponentUseCaseV2(this._factory, this._simulation);
 
   @override
-  Future<Result<void>> executeWithNotifiers(
+    Future<Result<void>> executeWithNotifiers(
     CreateComponentFromTemplateAction action,
     NotifierContext notifiers,
     GameTransaction transaction,
   ) async {
     try {
-      final currentGrid = notifiers.grid.current;
-
-      // Resolve template via palette manager
-      final template = notifiers.paletteManager.getTemplateById(action.templateId);
-      if (template == null) {
-        Logger.log('CreateComponentV2: template ${action.templateId} not found');
-        // Fail fast so callers know the template is missing (prefer explicit failure over silent no-op)
-        return const Failure('Template not found');
+      // Validate position
+      if (action.row < 0 || action.col < 0) {
+        return const Failure('Invalid position: coordinates must be non-negative');
       }
 
-      // Create instance via factory (centralized ID + instantiation)
-      final newInstance = _factory.createInstanceFromTemplate(template, action.row, action.col);
+      // Check if cell is already occupied
+            final existingComponent = notifiers.grid.current.componentAt(action.row, action.col);
+      if (existingComponent != null) {
+        return const Failure('Cell already occupied');
+      }
 
-      // Register grid update with transaction (commit applies notifier writes)
-      transaction.onCommit(() async {
-        final updatedComponents = Map<String, ComponentModel>.from(currentGrid.components);
-        updatedComponents[newInstance.id] = newInstance;
-        var newGrid = currentGrid.copyWith(components: updatedComponents);
+      // Create component using factory (now returns CircuitComponent)
+      final newCircuitComponent = _factory.create(
+        type: 'wire', // Default to wire for now
+        id: 'component_${DateTime.now().millisecondsSinceEpoch}',
+        r: action.row,
+        c: action.col,
+      );
 
-        // Run simulation once on the updated grid
-        newGrid = _simulation.simulatePowerFlow(newGrid);
-        notifiers.grid.setState(newGrid);
+      // Convert to ComponentModel for Grid operations
+      final newComponent = newCircuitComponent.toComponentModel();
 
-        Logger.log(
-            'CreateComponent: added component ${newInstance.id} at (${action.row}, ${action.col}) from template ${action.templateId}');
-      });
+      // Update grid with new component
+            final updatedComponents = Map<String, ComponentModel>.from(notifiers.grid.current.components);
+      updatedComponents[newComponent.id] = newComponent;
 
-      // Register rollback handler for diagnostics/tracing
-      transaction.onRollback(() {
-        Logger.log('CreateComponent: rollback - component creation reverted');
-      });
+            final newGrid = notifiers.grid.current.copyWith(components: updatedComponents);
 
+      // Run simulation
+      final simulatedGrid = _simulation.simulatePowerFlow(newGrid);
+
+            // Update the grid notifier
+      notifiers.grid.setState(simulatedGrid);
+
+      Logger.log('CreateComponent: added component at (${action.row}, ${action.col})');
       return const Success(null);
-    } catch (e, st) {
-      Logger.log('❌ CreateComponentUseCaseV2 error: $e\n$st');
+    } catch (e) {
+      Logger.log('❌ CreateComponent error: $e');
       return Failure('CreateComponent error: $e');
     }
   }

@@ -14,10 +14,6 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-GameState _$GameStateFromJson(Map<String, dynamic> json) {
-  return _GameState.fromJson(json);
-}
-
 /// @nodoc
 mixin _$GameState {
   Grid get grid => throw _privateConstructorUsedError;
@@ -29,9 +25,6 @@ mixin _$GameState {
   bool get isDebugOverlayVisible => throw _privateConstructorUsedError;
   InteractionState get interactionState => throw _privateConstructorUsedError;
   HistoryState get history => throw _privateConstructorUsedError;
-
-  /// Serializes this GameState to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of GameState
   /// with the given fields replaced by the non-null parameter values.
@@ -270,7 +263,7 @@ class __$$GameStateImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$GameStateImpl implements _GameState {
   const _$GameStateImpl(
       {required this.grid,
@@ -282,9 +275,6 @@ class _$GameStateImpl implements _GameState {
       this.isDebugOverlayVisible = false,
       required this.interactionState,
       required this.history});
-
-  factory _$GameStateImpl.fromJson(Map<String, dynamic> json) =>
-      _$$GameStateImplFromJson(json);
 
   @override
   final Grid grid;
@@ -333,7 +323,6 @@ class _$GameStateImpl implements _GameState {
             (identical(other.history, history) || other.history == history));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -354,13 +343,6 @@ class _$GameStateImpl implements _GameState {
   @pragma('vm:prefer-inline')
   _$$GameStateImplCopyWith<_$GameStateImpl> get copyWith =>
       __$$GameStateImplCopyWithImpl<_$GameStateImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$GameStateImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _GameState implements GameState {
@@ -374,9 +356,6 @@ abstract class _GameState implements GameState {
       final bool isDebugOverlayVisible,
       required final InteractionState interactionState,
       required final HistoryState history}) = _$GameStateImpl;
-
-  factory _GameState.fromJson(Map<String, dynamic> json) =
-      _$GameStateImpl.fromJson;
 
   @override
   Grid get grid;
@@ -405,22 +384,15 @@ abstract class _GameState implements GameState {
       throw _privateConstructorUsedError;
 }
 
-InteractionState _$InteractionStateFromJson(Map<String, dynamic> json) {
-  return _InteractionState.fromJson(json);
-}
-
 /// @nodoc
 mixin _$InteractionState {
   String? get selectedComponentId => throw _privateConstructorUsedError;
   String? get draggedComponentId => throw _privateConstructorUsedError;
-  @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
+  @OffsetConverter()
   Offset? get dragStartLocalPosition => throw _privateConstructorUsedError;
-  @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
+  @OffsetConverter()
   Offset? get dragUpdateLocalPosition => throw _privateConstructorUsedError;
   bool get isDragging => throw _privateConstructorUsedError;
-
-  /// Serializes this InteractionState to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of InteractionState
   /// with the given fields replaced by the non-null parameter values.
@@ -438,10 +410,8 @@ abstract class $InteractionStateCopyWith<$Res> {
   $Res call(
       {String? selectedComponentId,
       String? draggedComponentId,
-      @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
-      Offset? dragStartLocalPosition,
-      @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
-      Offset? dragUpdateLocalPosition,
+      @OffsetConverter() Offset? dragStartLocalPosition,
+      @OffsetConverter() Offset? dragUpdateLocalPosition,
       bool isDragging});
 }
 
@@ -502,10 +472,8 @@ abstract class _$$InteractionStateImplCopyWith<$Res>
   $Res call(
       {String? selectedComponentId,
       String? draggedComponentId,
-      @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
-      Offset? dragStartLocalPosition,
-      @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
-      Offset? dragUpdateLocalPosition,
+      @OffsetConverter() Offset? dragStartLocalPosition,
+      @OffsetConverter() Offset? dragUpdateLocalPosition,
       bool isDragging});
 }
 
@@ -554,29 +522,24 @@ class __$$InteractionStateImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$InteractionStateImpl implements _InteractionState {
   const _$InteractionStateImpl(
       {this.selectedComponentId,
       this.draggedComponentId,
-      @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
-      this.dragStartLocalPosition,
-      @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
-      this.dragUpdateLocalPosition,
+      @OffsetConverter() this.dragStartLocalPosition,
+      @OffsetConverter() this.dragUpdateLocalPosition,
       this.isDragging = false});
-
-  factory _$InteractionStateImpl.fromJson(Map<String, dynamic> json) =>
-      _$$InteractionStateImplFromJson(json);
 
   @override
   final String? selectedComponentId;
   @override
   final String? draggedComponentId;
   @override
-  @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
+  @OffsetConverter()
   final Offset? dragStartLocalPosition;
   @override
-  @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
+  @OffsetConverter()
   final Offset? dragUpdateLocalPosition;
   @override
   @JsonKey()
@@ -605,7 +568,6 @@ class _$InteractionStateImpl implements _InteractionState {
                 other.isDragging == isDragging));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -623,37 +585,25 @@ class _$InteractionStateImpl implements _InteractionState {
   _$$InteractionStateImplCopyWith<_$InteractionStateImpl> get copyWith =>
       __$$InteractionStateImplCopyWithImpl<_$InteractionStateImpl>(
           this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$InteractionStateImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _InteractionState implements InteractionState {
   const factory _InteractionState(
       {final String? selectedComponentId,
       final String? draggedComponentId,
-      @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
-      final Offset? dragStartLocalPosition,
-      @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
-      final Offset? dragUpdateLocalPosition,
+      @OffsetConverter() final Offset? dragStartLocalPosition,
+      @OffsetConverter() final Offset? dragUpdateLocalPosition,
       final bool isDragging}) = _$InteractionStateImpl;
-
-  factory _InteractionState.fromJson(Map<String, dynamic> json) =
-      _$InteractionStateImpl.fromJson;
 
   @override
   String? get selectedComponentId;
   @override
   String? get draggedComponentId;
   @override
-  @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
+  @OffsetConverter()
   Offset? get dragStartLocalPosition;
   @override
-  @JsonKey(toJson: _offsetToJson, fromJson: _offsetFromJson)
+  @OffsetConverter()
   Offset? get dragUpdateLocalPosition;
   @override
   bool get isDragging;
@@ -666,16 +616,9 @@ abstract class _InteractionState implements InteractionState {
       throw _privateConstructorUsedError;
 }
 
-HistoryState _$HistoryStateFromJson(Map<String, dynamic> json) {
-  return _HistoryState.fromJson(json);
-}
-
 /// @nodoc
 mixin _$HistoryState {
   List<String> get commands => throw _privateConstructorUsedError;
-
-  /// Serializes this HistoryState to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of HistoryState
   /// with the given fields replaced by the non-null parameter values.
@@ -755,13 +698,10 @@ class __$$HistoryStateImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$HistoryStateImpl implements _HistoryState {
   const _$HistoryStateImpl({final List<String> commands = const []})
       : _commands = commands;
-
-  factory _$HistoryStateImpl.fromJson(Map<String, dynamic> json) =>
-      _$$HistoryStateImplFromJson(json);
 
   final List<String> _commands;
   @override
@@ -785,7 +725,6 @@ class _$HistoryStateImpl implements _HistoryState {
             const DeepCollectionEquality().equals(other._commands, _commands));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
       Object.hash(runtimeType, const DeepCollectionEquality().hash(_commands));
@@ -797,21 +736,11 @@ class _$HistoryStateImpl implements _HistoryState {
   @pragma('vm:prefer-inline')
   _$$HistoryStateImplCopyWith<_$HistoryStateImpl> get copyWith =>
       __$$HistoryStateImplCopyWithImpl<_$HistoryStateImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$HistoryStateImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _HistoryState implements HistoryState {
   const factory _HistoryState({final List<String> commands}) =
       _$HistoryStateImpl;
-
-  factory _HistoryState.fromJson(Map<String, dynamic> json) =
-      _$HistoryStateImpl.fromJson;
 
   @override
   List<String> get commands;

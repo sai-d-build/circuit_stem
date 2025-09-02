@@ -191,24 +191,7 @@ class AppTheme {
 
       // Custom properties for educational gaming
       extensions: [
-        EducationalThemeExtension(
-          successColor: successColor,
-          warningColor: warningColor,
-          infoColor: infoColor,
-          batteryColor: batteryColor,
-          resistorColor: resistorColor,
-          capacitorColor: capacitorColor,
-          inductorColor: inductorColor,
-          diodeColor: diodeColor,
-          transistorColor: transistorColor,
-          switchColor: switchColor,
-          bulbColor: bulbColor,
-          wireColor: wireColor,
-          gridLineColor: gridLineColor,
-          gridHighlightColor: gridHighlightColor,
-          selectionColor: selectionColor,
-          canvasBackground: canvasBackground,
-        ),
+        CircuitColorScheme.light(),
       ],
     );
   }
@@ -216,159 +199,186 @@ class AppTheme {
   // Dark theme (for future implementation)
   static ThemeData get darkTheme {
     return ThemeData.dark().copyWith(
+      extensions: [
+        CircuitColorScheme.dark(),
+      ],
       colorScheme: const ColorScheme.dark(
         primary: primaryColor,
         secondary: secondaryColor,
-        surface: Color(0xFF1E1E1E),
-        background: Color(0xFF121212),
+        surface: Color(0xFF121212),
+        background: Color(0xFF0A0A0A),
       ),
     );
   }
-
-  // Utility methods
-  static Color getComponentColor(ComponentType type) {
-    switch (type) {
-      case ComponentType.battery:
-        return batteryColor;
-      case ComponentType.resistor:
-        return resistorColor;
-      case ComponentType.capacitor:
-        return capacitorColor;
-      case ComponentType.inductor:
-        return inductorColor;
-      case ComponentType.diode:
-        return diodeColor;
-      case ComponentType.transistor:
-        return transistorColor;
-      case ComponentType.switch_:
-        return switchColor;
-      case ComponentType.bulb:
-        return bulbColor;
-      case ComponentType.wire:
-        return wireColor;
-      default:
-        return wireColor;
-    }
-  }
-
-  static Color getDifficultyColor(LevelDifficulty difficulty) {
-    switch (difficulty) {
-      case LevelDifficulty.tutorial:
-        return successColor;
-      case LevelDifficulty.beginner:
-        return infoColor;
-      case LevelDifficulty.intermediate:
-        return warningColor;
-      case LevelDifficulty.advanced:
-        return errorColor;
-      case LevelDifficulty.expert:
-        return secondaryColor;
-    }
-  }
 }
 
-// Educational theme extension for custom properties
-class EducationalThemeExtension extends ThemeExtension<EducationalThemeExtension> {
-  final Color successColor;
-  final Color warningColor;
-  final Color infoColor;
-  final Color batteryColor;
-  final Color resistorColor;
-  final Color capacitorColor;
-  final Color inductorColor;
-  final Color diodeColor;
-  final Color transistorColor;
-  final Color switchColor;
-  final Color bulbColor;
-  final Color wireColor;
-  final Color gridLineColor;
-  final Color gridHighlightColor;
-  final Color selectionColor;
-  final Color canvasBackground;
+@immutable
+class CircuitColorScheme extends ThemeExtension<CircuitColorScheme> {
+  // Standard Palette
+  final Color primary;
+  final Color onPrimary;
+  final Color secondary;
+  final Color onSecondary;
+  final Color error;
+  final Color onError;
+  final Color surface;
+  final Color onSurface;
+  final Color outline;
+  
+  // Neon Palette
+  final Color neonPrimary;
+  final Color neonAccent;
+  final Color errorGlow;
+  final Color energyPulse;
+  final Color highlightAccent;
 
-  const EducationalThemeExtension({
-    required this.successColor,
-    required this.warningColor,
-    required this.infoColor,
-    required this.batteryColor,
-    required this.resistorColor,
-    required this.capacitorColor,
-    required this.inductorColor,
-    required this.diodeColor,
-    required this.transistorColor,
-    required this.switchColor,
-    required this.bulbColor,
-    required this.wireColor,
-    required this.gridLineColor,
-    required this.gridHighlightColor,
-    required this.selectionColor,
-    required this.canvasBackground,
+  // Functional Colors
+  final Color wireActive;
+  final Color wireInactive;
+  final Color componentBase;
+  final Color gridLine;
+  final Color glowEffect;
+
+  const CircuitColorScheme({
+    required this.primary,
+    required this.onPrimary,
+    required this.secondary,
+    required this.onSecondary,
+    required this.error,
+    required this.onError,
+    required this.surface,
+    required this.onSurface,
+    required this.outline,
+    required this.neonPrimary,
+    required this.neonAccent,
+    required this.errorGlow,
+    required this.energyPulse,
+    required this.highlightAccent,
+    required this.wireActive,
+    required this.wireInactive,
+    required this.componentBase,
+    required this.gridLine,
+    required this.glowEffect,
   });
 
-  @override
-  EducationalThemeExtension copyWith({
-    Color? successColor,
-    Color? warningColor,
-    Color? infoColor,
-    Color? batteryColor,
-    Color? resistorColor,
-    Color? capacitorColor,
-    Color? inductorColor,
-    Color? diodeColor,
-    Color? transistorColor,
-    Color? switchColor,
-    Color? bulbColor,
-    Color? wireColor,
-    Color? gridLineColor,
-    Color? gridHighlightColor,
-    Color? selectionColor,
-    Color? canvasBackground,
-  }) {
-    return EducationalThemeExtension(
-      successColor: successColor ?? this.successColor,
-      warningColor: warningColor ?? this.warningColor,
-      infoColor: infoColor ?? this.infoColor,
-      batteryColor: batteryColor ?? this.batteryColor,
-      resistorColor: resistorColor ?? this.resistorColor,
-      capacitorColor: capacitorColor ?? this.capacitorColor,
-      inductorColor: inductorColor ?? this.inductorColor,
-      diodeColor: diodeColor ?? this.diodeColor,
-      transistorColor: transistorColor ?? this.transistorColor,
-      switchColor: switchColor ?? this.switchColor,
-      bulbColor: bulbColor ?? this.bulbColor,
-      wireColor: wireColor ?? this.wireColor,
-      gridLineColor: gridLineColor ?? this.gridLineColor,
-      gridHighlightColor: gridHighlightColor ?? this.gridHighlightColor,
-      selectionColor: selectionColor ?? this.selectionColor,
-      canvasBackground: canvasBackground ?? this.canvasBackground,
+  factory CircuitColorScheme.light() {
+    return const CircuitColorScheme(
+      primary: Color(0xFF2196F3),
+      onPrimary: Colors.white,
+      secondary: Color(0xFFFFC107),
+      onSecondary: Colors.black,
+      error: Color(0xFFF44336),
+      onError: Colors.white,
+      surface: Color(0xFFFAFAFA),
+      onSurface: Color(0xFF212121),
+      outline: Color(0xFFBDBDBD),
+      neonPrimary: Color(0xFF00FFFF), // Electric Cyan
+      neonAccent: Color(0xFFFF00FF), // Neon Magenta
+      errorGlow: Color(0xFFFF0040), // Neon Red
+      energyPulse: Color(0xFF39FF14), // Bright Green
+      highlightAccent: Color(0xFFFFFF00), // Yellow
+      wireActive: Color(0xFF00E676),
+      wireInactive: Color(0xFF616161),
+      componentBase: Color(0xFF2196F3),
+      gridLine: Color(0xFFE0E0E0),
+      glowEffect: Color(0xFF00E5FF),
+    );
+  }
+
+  factory CircuitColorScheme.dark() {
+    return const CircuitColorScheme(
+      primary: Color(0xFF2196F3),
+      onPrimary: Colors.white,
+      secondary: Color(0xFFFFC107),
+      onSecondary: Colors.black,
+      error: Color(0xFFCF6679),
+      onError: Colors.black,
+      surface: Color(0xFF1E1E1E),
+      onSurface: Color(0xFFE0E0E0),
+      outline: Color(0xFF424242),
+      neonPrimary: Color(0xFF00FFFF), // Electric Cyan
+      neonAccent: Color(0xFFFF00FF), // Neon Magenta
+      errorGlow: Color(0xFFFF0040), // Neon Red
+      energyPulse: Color(0xFF39FF14), // Bright Green
+      highlightAccent: Color(0xFFFFFF00), // Yellow
+      wireActive: Color(0xFF39FF14),
+      wireInactive: Color(0xFF757575),
+      componentBase: Color(0xFF0D47A1),
+      gridLine: Color(0xFF303030),
+      glowEffect: Color(0xFF00E5FF),
     );
   }
 
   @override
-  EducationalThemeExtension lerp(
-    EducationalThemeExtension? other,
-    double t,
-  ) {
-    if (other is! EducationalThemeExtension) {
+  CircuitColorScheme copyWith({
+    Color? primary,
+    Color? onPrimary,
+    Color? secondary,
+    Color? onSecondary,
+    Color? error,
+    Color? onError,
+    Color? surface,
+    Color? onSurface,
+    Color? outline,
+    Color? neonPrimary,
+    Color? neonAccent,
+    Color? errorGlow,
+    Color? energyPulse,
+    Color? highlightAccent,
+    Color? wireActive,
+    Color? wireInactive,
+    Color? componentBase,
+    Color? gridLine,
+    Color? glowEffect,
+  }) {
+    return CircuitColorScheme(
+      primary: primary ?? this.primary,
+      onPrimary: onPrimary ?? this.onPrimary,
+      secondary: secondary ?? this.secondary,
+      onSecondary: onSecondary ?? this.onSecondary,
+      error: error ?? this.error,
+      onError: onError ?? this.onError,
+      surface: surface ?? this.surface,
+      onSurface: onSurface ?? this.onSurface,
+      outline: outline ?? this.outline,
+      neonPrimary: neonPrimary ?? this.neonPrimary,
+      neonAccent: neonAccent ?? this.neonAccent,
+      errorGlow: errorGlow ?? this.errorGlow,
+      energyPulse: energyPulse ?? this.energyPulse,
+      highlightAccent: highlightAccent ?? this.highlightAccent,
+      wireActive: wireActive ?? this.wireActive,
+      wireInactive: wireInactive ?? this.wireInactive,
+      componentBase: componentBase ?? this.componentBase,
+      gridLine: gridLine ?? this.gridLine,
+      glowEffect: glowEffect ?? this.glowEffect,
+    );
+  }
+
+  @override
+  CircuitColorScheme lerp(ThemeExtension<CircuitColorScheme>? other, double t) {
+    if (other is! CircuitColorScheme) {
       return this;
     }
-    return EducationalThemeExtension(
-      successColor: Color.lerp(successColor, other.successColor, t)!,
-      warningColor: Color.lerp(warningColor, other.warningColor, t)!,
-      infoColor: Color.lerp(infoColor, other.infoColor, t)!,
-      batteryColor: Color.lerp(batteryColor, other.batteryColor, t)!,
-      resistorColor: Color.lerp(resistorColor, other.resistorColor, t)!,
-      capacitorColor: Color.lerp(capacitorColor, other.capacitorColor, t)!,
-      inductorColor: Color.lerp(inductorColor, other.inductorColor, t)!,
-      diodeColor: Color.lerp(diodeColor, other.diodeColor, t)!,
-      transistorColor: Color.lerp(transistorColor, other.transistorColor, t)!,
-      switchColor: Color.lerp(switchColor, other.switchColor, t)!,
-      bulbColor: Color.lerp(bulbColor, other.bulbColor, t)!,
-      wireColor: Color.lerp(wireColor, other.wireColor, t)!,
-      gridLineColor: Color.lerp(gridLineColor, other.gridLineColor, t)!,
-      gridHighlightColor: Color.lerp(gridHighlightColor, other.gridHighlightColor, t)!,
-      selectionColor: Color.lerp(selectionColor, other.selectionColor, t)!,
-      canvasBackground: Color.lerp(canvasBackground, other.canvasBackground, t)!,
+    return CircuitColorScheme(
+      primary: Color.lerp(primary, other.primary, t)!,
+      onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
+      secondary: Color.lerp(secondary, other.secondary, t)!,
+      onSecondary: Color.lerp(onSecondary, other.onSecondary, t)!,
+      error: Color.lerp(error, other.error, t)!,
+      onError: Color.lerp(onError, other.onError, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      onSurface: Color.lerp(onSurface, other.onSurface, t)!,
+      outline: Color.lerp(outline, other.outline, t)!,
+      neonPrimary: Color.lerp(neonPrimary, other.neonPrimary, t)!,
+      neonAccent: Color.lerp(neonAccent, other.neonAccent, t)!,
+      errorGlow: Color.lerp(errorGlow, other.errorGlow, t)!,
+      energyPulse: Color.lerp(energyPulse, other.energyPulse, t)!,
+      highlightAccent: Color.lerp(highlightAccent, other.highlightAccent, t)!,
+      wireActive: Color.lerp(wireActive, other.wireActive, t)!,
+      wireInactive: Color.lerp(wireInactive, other.wireInactive, t)!,
+      componentBase: Color.lerp(componentBase, other.componentBase, t)!,
+      gridLine: Color.lerp(gridLine, other.gridLine, t)!,
+      glowEffect: Color.lerp(glowEffect, other.glowEffect, t)!,
     );
   }
 }

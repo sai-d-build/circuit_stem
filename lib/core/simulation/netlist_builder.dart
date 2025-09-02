@@ -1,6 +1,6 @@
 import 'package:sparkcircuit/application/enhanced_game_state.dart';
 import 'package:sparkcircuit/core/simulation/circuit_netlist.dart';
-import 'package:sparkcircuit/domain/entities/component.dart';
+
 
 class NetlistBuilder {
   CircuitNetlist buildNetlist(GameState gameState) {

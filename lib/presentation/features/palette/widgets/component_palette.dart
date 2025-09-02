@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
 import 'package:sparkcircuit/presentation/features/palette/widgets/component_widget.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 class ComponentPalette extends ConsumerStatefulWidget {
   final String levelId;
@@ -314,16 +315,32 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
   }
 
   void _selectComponent(String componentType) {
-    print('🎨 ComponentPalette: Selecting component $componentType');
+    StructuredLogger.info('Component selection initiated', context: {
+      'componentType': componentType,
+      'levelId': widget.levelId,
+    });
+
     final paletteNotifier = ref.read(paletteStateProvider(widget.levelId).notifier);
 
     if (paletteNotifier.canUseComponent(componentType)) {
-      print('🎨 ComponentPalette: Component $componentType is available, starting placement mode');
+      StructuredLogger.info('Component selection approved - starting placement mode', context: {
+        'componentType': componentType,
+        'action': 'selection_and_placement',
+      });
+
       paletteNotifier.selectComponent(componentType);
       paletteNotifier.startPlacingComponent(componentType);
-      print('🎨 ComponentPalette: Component $componentType selected and placement mode started');
+
+      StructuredLogger.debug('Component selection complete', context: {
+        'componentType': componentType,
+        'result': 'placement_mode_active',
+      });
     } else {
-      print('🎨 ComponentPalette: Component $componentType is not available');
+      StructuredLogger.warning('Component selection denied - insufficient inventory', context: {
+        'componentType': componentType,
+        'reason': 'not_available_in_inventory',
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('No more $componentType components available'),

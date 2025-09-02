@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/component_painter.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/wire_painter.dart';
-import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart';
+import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart' as drawing_models;
+import 'package:sparkcircuit/domain/entities/circuit_component.dart';
 
 class CircuitComponentsPainter extends CustomPainter {
   final List<CircuitComponent> components;
-  final List<CircuitWire> wires;
+  final List<drawing_models.CircuitWire> wires;
   final CircuitColorScheme circuitColors;
   final String? selectedComponentId;
   final double scale;

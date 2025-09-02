@@ -14,10 +14,6 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-Goal _$GoalFromJson(Map<String, dynamic> json) {
-  return _Goal.fromJson(json);
-}
-
 /// @nodoc
 mixin _$Goal {
   String get type => throw _privateConstructorUsedError;
@@ -27,10 +23,9 @@ mixin _$Goal {
   String? get from => throw _privateConstructorUsedError;
   String? get to => throw _privateConstructorUsedError;
   Map<String, dynamic>? get parameters => throw _privateConstructorUsedError;
+  List<String>? get conditions =>
+      throw _privateConstructorUsedError; // Added this line
   List<dynamic> get behaviors => throw _privateConstructorUsedError;
-
-  /// Serializes this Goal to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of Goal
   /// with the given fields replaced by the non-null parameter values.
@@ -51,6 +46,7 @@ abstract class $GoalCopyWith<$Res> {
       String? from,
       String? to,
       Map<String, dynamic>? parameters,
+      List<String>? conditions,
       List<dynamic> behaviors});
 }
 
@@ -76,6 +72,7 @@ class _$GoalCopyWithImpl<$Res, $Val extends Goal>
     Object? from = freezed,
     Object? to = freezed,
     Object? parameters = freezed,
+    Object? conditions = freezed,
     Object? behaviors = null,
   }) {
     return _then(_value.copyWith(
@@ -107,6 +104,10 @@ class _$GoalCopyWithImpl<$Res, $Val extends Goal>
           ? _value.parameters
           : parameters // ignore: cast_nullable_to_non_nullable
               as Map<String, dynamic>?,
+      conditions: freezed == conditions
+          ? _value.conditions
+          : conditions // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
       behaviors: null == behaviors
           ? _value.behaviors
           : behaviors // ignore: cast_nullable_to_non_nullable
@@ -130,6 +131,7 @@ abstract class _$$GoalImplCopyWith<$Res> implements $GoalCopyWith<$Res> {
       String? from,
       String? to,
       Map<String, dynamic>? parameters,
+      List<String>? conditions,
       List<dynamic> behaviors});
 }
 
@@ -152,6 +154,7 @@ class __$$GoalImplCopyWithImpl<$Res>
     Object? from = freezed,
     Object? to = freezed,
     Object? parameters = freezed,
+    Object? conditions = freezed,
     Object? behaviors = null,
   }) {
     return _then(_$GoalImpl(
@@ -183,6 +186,10 @@ class __$$GoalImplCopyWithImpl<$Res>
           ? _value._parameters
           : parameters // ignore: cast_nullable_to_non_nullable
               as Map<String, dynamic>?,
+      conditions: freezed == conditions
+          ? _value._conditions
+          : conditions // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
       behaviors: null == behaviors
           ? _value._behaviors
           : behaviors // ignore: cast_nullable_to_non_nullable
@@ -192,7 +199,7 @@ class __$$GoalImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$GoalImpl extends _Goal {
   const _$GoalImpl(
       {required this.type,
@@ -202,13 +209,12 @@ class _$GoalImpl extends _Goal {
       this.from,
       this.to,
       final Map<String, dynamic>? parameters,
+      final List<String>? conditions,
       final List<dynamic> behaviors = const []})
       : _parameters = parameters,
+        _conditions = conditions,
         _behaviors = behaviors,
         super._();
-
-  factory _$GoalImpl.fromJson(Map<String, dynamic> json) =>
-      _$$GoalImplFromJson(json);
 
   @override
   final String type;
@@ -232,7 +238,19 @@ class _$GoalImpl extends _Goal {
     return EqualUnmodifiableMapView(value);
   }
 
+  final List<String>? _conditions;
+  @override
+  List<String>? get conditions {
+    final value = _conditions;
+    if (value == null) return null;
+    if (_conditions is EqualUnmodifiableListView) return _conditions;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+// Added this line
   final List<dynamic> _behaviors;
+// Added this line
   @override
   @JsonKey()
   List<dynamic> get behaviors {
@@ -243,7 +261,7 @@ class _$GoalImpl extends _Goal {
 
   @override
   String toString() {
-    return 'Goal(type: $type, targetId: $targetId, r: $r, c: $c, from: $from, to: $to, parameters: $parameters, behaviors: $behaviors)';
+    return 'Goal(type: $type, targetId: $targetId, r: $r, c: $c, from: $from, to: $to, parameters: $parameters, conditions: $conditions, behaviors: $behaviors)';
   }
 
   @override
@@ -261,10 +279,11 @@ class _$GoalImpl extends _Goal {
             const DeepCollectionEquality()
                 .equals(other._parameters, _parameters) &&
             const DeepCollectionEquality()
+                .equals(other._conditions, _conditions) &&
+            const DeepCollectionEquality()
                 .equals(other._behaviors, _behaviors));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -275,6 +294,7 @@ class _$GoalImpl extends _Goal {
       from,
       to,
       const DeepCollectionEquality().hash(_parameters),
+      const DeepCollectionEquality().hash(_conditions),
       const DeepCollectionEquality().hash(_behaviors));
 
   /// Create a copy of Goal
@@ -284,13 +304,6 @@ class _$GoalImpl extends _Goal {
   @pragma('vm:prefer-inline')
   _$$GoalImplCopyWith<_$GoalImpl> get copyWith =>
       __$$GoalImplCopyWithImpl<_$GoalImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$GoalImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _Goal extends Goal {
@@ -302,10 +315,9 @@ abstract class _Goal extends Goal {
       final String? from,
       final String? to,
       final Map<String, dynamic>? parameters,
+      final List<String>? conditions,
       final List<dynamic> behaviors}) = _$GoalImpl;
   const _Goal._() : super._();
-
-  factory _Goal.fromJson(Map<String, dynamic> json) = _$GoalImpl.fromJson;
 
   @override
   String get type;
@@ -321,6 +333,8 @@ abstract class _Goal extends Goal {
   String? get to;
   @override
   Map<String, dynamic>? get parameters;
+  @override
+  List<String>? get conditions; // Added this line
   @override
   List<dynamic> get behaviors;
 

@@ -1,29 +1,31 @@
-import '../game_engine_state.dart';
+import '../core/result.dart';
+import '../transaction.dart';
 import '../services/goal_checking_service.dart';
-import 'base_use_case.dart';
 import 'component_action.dart';
+import 'notifier_integrated_use_case.dart';
 
-class CheckWinConditionAction extends ComponentAction {
-  const CheckWinConditionAction();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class CheckWinConditionUseCase extends UseCase<CheckWinConditionAction> {
-  // Removed bool TResult
+class CheckWinConditionUseCase extends NotifierIntegratedUseCase<ComponentAction> {
   final GoalCheckingService _goalCheckingService;
 
   const CheckWinConditionUseCase(this._goalCheckingService);
 
   @override
-  Future<GameEngineState> executeInternal(
-      GameEngineState state, CheckWinConditionAction action) async {
-    if (state.currentLevel == null) {
-      return state.copyWith(isWin: false); // Return state with isWin: false
+  Future<Result<void>> executeWithNotifiers(
+    ComponentAction action,
+    NotifierContext notifiers,
+    GameTransaction transaction,
+  ) async {
+    final level = notifiers.progress.state.level;
+    if (level == null) {
+      return const Success(null); // No level loaded, can't check win condition
     }
-    final isWin =
-        _goalCheckingService.isLevelComplete(state.grid, state.currentLevel!);
-    return state.copyWith(isWin: isWin); // Return state with updated isWin
+
+    // Use the goal checking service to determine if level is complete
+    final isWin = _goalCheckingService.isLevelComplete(notifiers.grid.state, level);
+
+    if (isWin) {
+      notifiers.progress.setWinState(true);
+    }
+    return const Success(null);
   }
 }

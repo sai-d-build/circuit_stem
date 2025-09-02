@@ -8,9 +8,8 @@ import 'notifier_integrated_use_case.dart';
 /// V2 use-case: update a component's internal state and apply changes directly to notifiers
 class UpdateComponentUseCaseV2 extends NotifierIntegratedUseCase<UpdateComponentAction> {
   final PowerSimulationService _simulation;
-  final GoalCheckingService _goalChecker;
 
-  const UpdateComponentUseCaseV2(this._simulation, this._goalChecker);
+  const UpdateComponentUseCaseV2(this._simulation);
 
   @override
   Result<void> validate(UpdateComponentAction action, NotifierContext notifiers) {

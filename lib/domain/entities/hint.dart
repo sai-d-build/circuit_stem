@@ -11,5 +11,5 @@ class Hint with _$Hint {
     List<Position>? path,
   }) = _Hint;
 
-  factory Hint.fromJson(Map<String, dynamic> json) => _$HintFromJson(json);
+  
 }

@@ -1,9 +1,17 @@
 import '../../domain/entities/goal.dart';
-import 'component_registry.dart'; // For getBehavior
+
 import '../../common/logger.dart';
 
 class GoalRegistry {
   static final Map<String, List<Type>> _behaviors = {};
+
+  static dynamic _getBehaviorByType(Type type) {
+    final factory = _behaviors[type];
+    if (factory == null) {
+      return null;
+    }
+    return factory();
+  }
 
   static void register({
     required String type,
@@ -25,7 +33,7 @@ class GoalRegistry {
     }
 
     final behaviorInstances =
-        behaviorTypes.map((t) => getBehaviorByType(t)).toList();
+        behaviorTypes.map((t) => _getBehaviorByType(t)).toList();
     Logger.log(
         'GoalRegistry: Instantiated behaviors for \'$type\': $behaviorInstances');
 

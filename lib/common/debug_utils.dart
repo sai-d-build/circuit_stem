@@ -1,6 +1,7 @@
 import '../application/services/component_registry.dart';
 import '../domain/behaviors/move_behavior.dart';
 import 'logger.dart';
+import '../application/services/component_factory.dart';
 
 void checkMoveBehaviorAttachment(ComponentFactory factory) {
   Logger.log('--- MoveBehavior Attachment Check ---');
@@ -29,8 +30,9 @@ void checkMoveBehaviorAttachment(ComponentFactory factory) {
         r: 0,
         c: 0,
       );
+      final componentModel = dummyComponent.toComponentModel();
       final hasMoveBehavior =
-          dummyComponent.behaviors.contains('MoveBehavior');
+          componentModel.behaviors.contains('MoveBehavior');
 
       if (hasMoveBehavior) {
         Logger.log('✅ $type has MoveBehavior attached');
@@ -40,7 +42,7 @@ void checkMoveBehaviorAttachment(ComponentFactory factory) {
 
       // Optional: List all attached behaviors
       Logger.log(
-          '   Attached behaviors for $type: ${dummyComponent.behaviors.map((b) => b.runtimeType).join(', ')}');
+          '   Attached behaviors for $type: ${componentModel.behaviors.map((b) => b.runtimeType).join(', ')}');
     } catch (e) {
       Logger.log('Error checking $type: $e');
     }

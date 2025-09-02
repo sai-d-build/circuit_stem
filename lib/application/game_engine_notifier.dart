@@ -9,29 +9,14 @@ import '../domain/entities/component.dart';
 import 'game_engine_state.dart';
 import '../infrastructure/audio/audio_service.dart';
 import '../common/logger.dart';
-import 'services/power_simulation_service.dart';
-import 'services/goal_checking_service.dart';
-import 'services/component_factory.dart';
 import 'audio_manager.dart';
 import 'input_manager.dart';
 import 'animation_scheduler.dart';
-import '../infrastructure/persistence/level_manager.dart';
+import 'transaction.dart';
 
-// Use cases
+// V2 Use Cases
 import 'use_cases/component_action.dart';
-import 'use_cases/create_component_use_case.dart';
-import 'use_cases/move_component_use_case.dart';
-import 'use_cases/restart_level_use_case.dart';
-import 'use_cases/tap_component_use_case.dart';
-import 'use_cases/update_component_use_case.dart';
-import 'use_cases/select_palette_component_use_case.dart';
-import 'use_cases/simulate_power_flow_use_case.dart';
-import 'use_cases/simulate_power_flow_action.dart';
-import 'use_cases/check_win_condition_use_case.dart';
-import 'use_cases/toggle_pause_use_case.dart';
-import 'use_cases/undo_use_case.dart';
-import 'use_cases/rotate_component_use_case.dart';
-import 'use_cases/load_level_use_case.dart';
+import 'use_cases/providers.dart';
 
 // Middleware
 import 'middleware/middleware.dart';
@@ -41,65 +26,42 @@ import 'middleware/performance_middleware.dart';
 
 // Core
 import 'core/result.dart';
+import 'grid_notifier.dart';
+import 'history_notifier.dart';
+import 'game_progress_notifier.dart';
+import 'component_selection_notifier.dart';
+import 'interaction_state_notifier.dart';
+
+import 'use_cases/notifier_integrated_use_case.dart';
 
 class GameEngineNotifier extends StateNotifier<GameEngineState> {
   final InputManager input;
   final AudioManager audio;
   final AnimationScheduler animationScheduler;
-
-  final CreateComponentFromTemplateUseCase _createUseCase;
-  final MoveComponentUseCase _moveUseCase;
-  final TapComponentUseCase _tapUseCase;
-  final RestartLevelUseCase _restartLevelUseCase;
-  final UpdateComponentUseCase _updateComponentUseCase;
-  final SelectPaletteComponentUseCase _selectPaletteComponentUseCase;
-  final SimulatePowerFlowUseCase _simulatePowerFlowUseCase;
-  final CheckWinConditionUseCase _checkWinConditionUseCase;
-  final TogglePauseUseCase _togglePauseUseCase;
-  final UndoUseCase _undoUseCase;
-  final RotateComponentUseCase _rotateUseCase;
-  final LoadLevelUseCase _loadLevelUseCase;
+  final Ref ref;
 
   final List<GameEngineMiddleware> _middleware;
 
   GameEngineNotifier({
     required AudioService audioService,
     required this.animationScheduler,
-    required LevelManagerNotifier levelManager,
+    required this.ref,
   })  : input = InputManager(),
         audio = AudioManager(audioService),
-        _createUseCase = CreateComponentFromTemplateUseCase(
-          PowerSimulationService(),
-          const ComponentFactory(),
-        ),
-        _moveUseCase = MoveComponentUseCase(PowerSimulationService()),
-        _tapUseCase = TapComponentUseCase(
-          PowerSimulationService(),
-          GoalCheckingService(),
-        ),
-        _restartLevelUseCase = RestartLevelUseCase(levelManager),
-        _updateComponentUseCase = UpdateComponentUseCase(
-          PowerSimulationService(),
-          GoalCheckingService(),
-        ),
-        _selectPaletteComponentUseCase = SelectPaletteComponentUseCase(),
-        _simulatePowerFlowUseCase =
-            SimulatePowerFlowUseCase(PowerSimulationService()),
-        _checkWinConditionUseCase =
-            CheckWinConditionUseCase(GoalCheckingService()),
-        _togglePauseUseCase = TogglePauseUseCase(),
-        _undoUseCase = UndoUseCase(),
-        _rotateUseCase = RotateComponentUseCase(),
-        _loadLevelUseCase = LoadLevelUseCase(
-          SimulatePowerFlowUseCase(PowerSimulationService()),
-          CheckWinConditionUseCase(GoalCheckingService()),
-        ),
         _middleware = [
           ValidationMiddleware(),
           const LoggingMiddleware(),
           const PerformanceMiddleware(),
         ],
-        super(GameEngineState.empty()) {
+        super(GameEngineState(
+          grid: Grid(rows: 0, cols: 0, components: {}),
+          isPaused: false,
+          isWin: false,
+          lastUpdated: DateTime.now(),
+          isDebugOverlayVisible: false,
+          interactionState: InteractionState.initial(),
+          history: HistoryState.initial(),
+        )) {
     _init();
   }
 
@@ -113,11 +75,21 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   bool get canUndo => state.history.isNotEmpty;
   bool get isGamePaused => state.isPaused;
 
-  Future<Result<GameEngineState>> loadLevel(LevelDefinition level) async {
+  Future<Result<void>> loadLevel(LevelDefinition level) async {
     return await executeAction(LoadLevelAction(level));
   }
 
-  Future<Result<GameEngineState>> executeAction(ComponentAction action) async {
+  Future<Result<void>> executeAction(ComponentAction action) async {
+    final transaction = GameTransaction();
+    final notifierContext = NotifierContext(
+      grid: ref.read(gridNotifierProvider.notifier),
+      history: ref.read(historyNotifierProvider.notifier),
+      progress: ref.read(gameProgressNotifierProvider.notifier),
+      selection: ref.read(componentSelectionNotifierProvider.notifier),
+      interaction: ref.read(interactionStateNotifierProvider.notifier),
+      paletteManager: ref.read(componentPaletteManagerProvider),
+    );
+
     try {
       ComponentAction processedAction = action;
 
@@ -126,117 +98,56 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
         processedAction = await middleware.beforeAction(state, processedAction);
       }
 
-      final oldState = state;
-      final history = [...state.history, oldState];
-
-      final result = await _executeUseCase(processedAction);
+      final result = await _executeUseCase(processedAction, notifierContext, transaction);
 
       return result.fold(
-        (newState) async {
-          // Run simulation + win check if applicable
-          if (_shouldRunSimulation(processedAction)) {
-            final simResult = await _simulatePowerFlowUseCase.execute(
-              newState,
-              const SimulatePowerFlowAction(),
-            );
-
-            if (simResult.isSuccess) {
-              newState = newState.copyWith(grid: simResult.data!.grid);
-            }
-
-            final winResult = await _checkWinConditionUseCase.execute(
-              newState,
-              const CheckWinConditionAction(),
-            );
-
-            if (winResult.isSuccess &&
-                winResult.data!.isWin != newState.isWin) {
-              newState = newState.copyWith(isWin: winResult.data!.isWin);
-              if (winResult.data!.isWin) {
-                audio.playSuccess();
-              }
-            }
-          }
-
-          // Add history (skip for Undo)
-          if (processedAction is! UndoAction) {
-            newState = newState.copyWith(history: history);
-          }
-
-          _playAudioForAction(processedAction, oldState, newState);
-
-          // Commit state
-          state = newState;
-
+        (_) async {
+          await transaction.commit();
           // Middleware afterAction
           for (final middleware in _middleware) {
-            state =
-                await middleware.afterAction(oldState, state, processedAction);
+            state = await middleware.afterAction(state, state, processedAction);
           }
-          return Success(state);
+          return const Success(null);
         },
-        (error) {
+        (error) async {
+          await transaction.rollback();
           Logger.log('Action execution failed: $error');
           return Failure(error);
         },
       );
     } catch (e, s) {
-      Logger.log('Action execution error: $e');
+      await transaction.rollback();
+      Logger.log('Action execution error: $e\n$s');
       return Failure('Action execution error: $e');
     }
   }
 
-  Future<Result<GameEngineState>> _executeUseCase(
-      ComponentAction action) async {
+  Future<Result<void>> _executeUseCase(
+      ComponentAction action, NotifierContext context, GameTransaction transaction) async {
     switch (action.runtimeType) {
-      case LoadLevelAction:
-        return _loadLevelUseCase.execute(state, action as LoadLevelAction);
-      case CreateComponentFromTemplateAction:
-        return _createUseCase.execute(
-            state, action as CreateComponentFromTemplateAction);
-      case RotateComponentAction:
-        return _rotateUseCase.execute(state, action as RotateComponentAction);
-      case MoveComponentAction:
-        return _moveUseCase.execute(state, action as MoveComponentAction);
-      case TapComponentAction:
-        return _tapUseCase.execute(state, action as TapComponentAction);
-      case UpdateComponentAction:
-        return _updateComponentUseCase.execute(
-            state, action as UpdateComponentAction);
-      case RestartLevelAction:
-        return _restartLevelUseCase.execute(
-            state, action as RestartLevelAction);
-      case SelectPaletteComponentAction:
-        return _selectPaletteComponentUseCase.execute(
-            state, action as SelectPaletteComponentAction);
-      case TogglePauseAction:
-        return _togglePauseUseCase.execute(state, action as TogglePauseAction);
-      case UndoAction:
-        return _undoUseCase.execute(state, action as UndoAction);
+      case LoadLevelAction _:
+        return ref.read(loadLevelUseCaseV2Provider).executeWithNotifiers(action as LoadLevelAction, context, transaction);
+      case CreateComponentFromTemplateAction _:
+        return ref.read(createComponentUseCaseV2Provider).executeWithNotifiers(action as CreateComponentFromTemplateAction, context, transaction);
+      case RotateComponentAction _:
+        return ref.read(rotateComponentUseCaseV2Provider).executeWithNotifiers(action as RotateComponentAction, context, transaction);
+      case MoveComponentAction _:
+        return ref.read(moveComponentUseCaseV2Provider).executeWithNotifiers(action as MoveComponentAction, context, transaction);
+      case TapComponentAction _:
+        return ref.read(tapComponentUseCaseV2Provider).executeWithNotifiers(action as TapComponentAction, context, transaction);
+      case UpdateComponentAction _:
+        return ref.read(updateComponentUseCaseV2Provider).executeWithNotifiers(action as UpdateComponentAction, context, transaction);
+      case RestartLevelAction _:
+        return ref.read(restartLevelUseCaseV2Provider).executeWithNotifiers(action as RestartLevelAction, context, transaction);
+      case SelectPaletteComponentAction _:
+        return ref.read(selectPaletteComponentUseCaseV2Provider).executeWithNotifiers(action as SelectPaletteComponentAction, context, transaction);
+      case TogglePauseAction _:
+        return ref.read(togglePauseUseCaseV2Provider).executeWithNotifiers(action as TogglePauseAction, context, transaction);
+      case UndoAction _:
+        return ref.read(undoUseCaseV2Provider).executeWithNotifiers(action as UndoAction, context, transaction);
       default:
         return const Failure('Unknown action type');
     }
-  }
-
-  void _playAudioForAction(ComponentAction action, GameEngineState oldState,
-      GameEngineState newState) {
-    if (action is CreateComponentFromTemplateAction ||
-        action is MoveComponentAction) {
-      audio.playPlacement();
-    } else if (action is TapComponentAction ||
-        action is RotateComponentAction) {
-      if (oldState != newState) {
-        audio.playToggle();
-      }
-    } else if (action is SelectPaletteComponentAction) {
-      audio.playSelection();
-    }
-  }
-
-  bool _shouldRunSimulation(ComponentAction action) {
-    return action is! SelectPaletteComponentAction &&
-        action is! TogglePauseAction &&
-        action is! UndoAction;
   }
 
   void _handleTap(ComponentModel comp) {

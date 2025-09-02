@@ -57,17 +57,19 @@ class EnhancedGameStateNotifier extends StateNotifier<GameState> {
     );
 
     // Auto-save
-    await _storageService.saveState(state);
+    await _storageService.saveState('game_state', state);
   }
 
   Future<void> placeComponent(ComponentType type, int row, int col) async {
     const uuid = Uuid();
-    final newComponent = _componentFactory.create(
+    final newCircuitComponent = _componentFactory.create(
       type: type.name,
       id: uuid.v4(),
       r: row,
       c: col,
     );
+    // Convert CircuitComponent to ComponentModel for Grid operations
+    final newComponent = newCircuitComponent.toComponentModel();
     final command = CreateComponentCommand(newComponent);
     await _executeCommand(command);
   }
@@ -105,7 +107,7 @@ class EnhancedGameStateNotifier extends StateNotifier<GameState> {
   void resetLevel() {
     state = GameState.initial(state.currentLevel);
     _commandStack.clear(); // Clear command history on reset
-    _storageService.saveState(state); // Save the reset state
+    _storageService.saveState('game_state', state); // Save the reset state
   }
 
   Future<void> undo() async {
@@ -121,7 +123,7 @@ class EnhancedGameStateNotifier extends StateNotifier<GameState> {
         simulationResult: simulationResult,
         lastUpdated: DateTime.now(),
       );
-      await _storageService.saveState(state);
+      await _storageService.saveState('game_state', state);
     }
   }
 
@@ -138,7 +140,7 @@ class EnhancedGameStateNotifier extends StateNotifier<GameState> {
         simulationResult: simulationResult,
         lastUpdated: DateTime.now(),
       );
-      await _storageService.saveState(state);
+      await _storageService.saveState('game_state', state);
     }
   }
 

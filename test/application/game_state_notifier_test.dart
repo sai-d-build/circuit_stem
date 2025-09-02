@@ -10,7 +10,7 @@ import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
 import 'package:sparkcircuit/core/simulation/simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/simulation_result.dart';
 import 'package:sparkcircuit/domain/entities/component.dart';
-import 'package:sparkcircuit/domain/entities/grid.dart';
+
 import 'package:sparkcircuit/domain/entities/level_definition.dart';
 import 'package:sparkcircuit/application/services/component_factory.dart';
 import 'package:sparkcircuit/core/simulation/circuit_netlist.dart'; // Import CircuitNetlist
@@ -40,16 +40,28 @@ void main() {
       mockCommandStack = MockCommandStack();
       mockComponentFactory = MockComponentFactory(); // Initialize mock
 
-      final level = LevelDefinition(
-        id: 'test_level',
-        levelNumber: 1,
-        title: 'Test Level',
-        description: 'A test level',
-        rows: 10,
-        cols: 10,
-        initialComponentsList: [],
-        paletteComponents: [],
-        validationRules: [],
+            final level = LevelDefinition(
+        levelId: 'test_level',
+        version: '1.0.0',
+        metadata: const LevelMetadata(
+          id: 'test_level',
+          title: 'Test Level',
+          description: 'A test level',
+          difficulty: 'easy',
+        ),
+        grid: const GridConfig(
+          width: 10,
+          height: 10,
+        ),
+        components: const ComponentConfig(
+          available: [],
+          preplaced: [],
+        ),
+        goals: const [],
+        validation: const ValidationRules(
+          circuitRules: [],
+          successConditions: [],
+        ),
       );
       initialState = GameState.initial(level);
 
@@ -62,8 +74,8 @@ void main() {
       )..state = initialState; // Set initial state for tests
 
       // Mock default behaviors
-      when(mockNetlistBuilder.buildNetlist(any)).thenReturn(CircuitNetlist(nodes: {}, components: {}));
-      when(mockSimulationEngine.solveDC(any)).thenAnswer((_) async => SimulationResult(voltages: {}, currents: {}));
+            when(mockNetlistBuilder.buildNetlist(any)).thenReturn(CircuitNetlist(components: const [], connections: const [], nodes: const {}, timestamp: DateTime.now()));
+            when(mockSimulationEngine.solveDC(any)).thenAnswer((_) async => SimulationResult(nodeVoltages: {}, branchCurrents: {}, componentStates: {}, diagnostics: [], timestamp: DateTime.now(), isValid: true));
       when(mockStorageService.saveState(any)).thenAnswer((_) async {});
     });
 
@@ -84,7 +96,7 @@ void main() {
 
       // Verify simulation and save were called
       verify(mockSimulationEngine.solveDC(any)).called(1);
-      verify(mockStorageService.saveState(any)).called(1);
+            verify(mockStorageService.saveState(any, any)).called(1);
     });
 
     test('undo executes the undo method of a command from the stack', () async {
@@ -92,7 +104,7 @@ void main() {
       final stateAfterUndo = initialState.copyWith(isPaused: true); // Some distinct state
 
       when(mockCommandStack.undo()).thenReturn(mockCommand);
-      when(mockCommand.undo(any)).thenReturn(stateAfterUndo);
+            when(mockCommand.undo(any as GameState)).thenReturn(stateAfterUndo);
 
       await notifier.undo();
 
@@ -101,7 +113,7 @@ void main() {
 
       // Verify simulation and save were called
       verify(mockSimulationEngine.solveDC(any)).called(1);
-      verify(mockStorageService.saveState(any)).called(1);
+            verify(mockStorageService.saveState(any, any)).called(1);
     });
 
     test('redo executes the execute method of a command from the stack', () async {
@@ -109,7 +121,7 @@ void main() {
       final stateAfterRedo = initialState.copyWith(isPaused: true); // Some distinct state
 
       when(mockCommandStack.redo()).thenReturn(mockCommand);
-      when(mockCommand.execute(any)).thenReturn(stateAfterRedo);
+            when(mockCommand.execute(any as GameState)).thenReturn(stateAfterRedo);
 
       await notifier.redo();
 
@@ -118,7 +130,7 @@ void main() {
 
       // Verify simulation and save were called
       verify(mockSimulationEngine.solveDC(any)).called(1);
-      verify(mockStorageService.saveState(any)).called(1);
+            verify(mockStorageService.saveState(any, any)).called(1);
     });
   });
 }

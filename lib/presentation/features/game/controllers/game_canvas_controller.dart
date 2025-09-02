@@ -5,17 +5,17 @@ class GameCanvasController extends ChangeNotifier {
   static const double _defaultCellSize = 60.0;
   static const double _minScale = 0.5;
   static const double _maxScale = 3.0;
-  
+
   double _gridCellSize = _defaultCellSize;
   double _scale = 1.0;
   Offset _panOffset = Offset.zero;
   bool _isScaling = false;
   double _lastScale = 1.0;
-  
+
   // Grid properties
   Size _canvasSize = Size.zero;
-  final int _gridWidth = 30;
-  final int _gridHeight = 20;
+  int _gridWidth = 8;  // Default to level size, will be updated
+  int _gridHeight = 6; // Default to level size, will be updated
   
   // Getters
   double get gridCellSize => _gridCellSize;
@@ -36,6 +36,15 @@ class GameCanvasController extends ChangeNotifier {
   void updateCanvasSize(Size size) {
     if (_canvasSize != size) {
       _canvasSize = size;
+      _constrainPan();
+      notifyListeners();
+    }
+  }
+
+  void updateGridSize(int width, int height) {
+    if (_gridWidth != width || _gridHeight != height) {
+      _gridWidth = width;
+      _gridHeight = height;
       _constrainPan();
       notifyListeners();
     }

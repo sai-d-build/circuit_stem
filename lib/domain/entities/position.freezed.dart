@@ -14,17 +14,10 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-Position _$PositionFromJson(Map<String, dynamic> json) {
-  return _Position.fromJson(json);
-}
-
 /// @nodoc
 mixin _$Position {
   int get r => throw _privateConstructorUsedError;
   int get c => throw _privateConstructorUsedError;
-
-  /// Serializes this Position to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of Position
   /// with the given fields replaced by the non-null parameter values.
@@ -113,12 +106,9 @@ class __$$PositionImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$PositionImpl implements _Position {
   const _$PositionImpl({required this.r, required this.c});
-
-  factory _$PositionImpl.fromJson(Map<String, dynamic> json) =>
-      _$$PositionImplFromJson(json);
 
   @override
   final int r;
@@ -139,7 +129,6 @@ class _$PositionImpl implements _Position {
             (identical(other.c, c) || other.c == c));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, r, c);
 
@@ -150,21 +139,11 @@ class _$PositionImpl implements _Position {
   @pragma('vm:prefer-inline')
   _$$PositionImplCopyWith<_$PositionImpl> get copyWith =>
       __$$PositionImplCopyWithImpl<_$PositionImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$PositionImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _Position implements Position {
   const factory _Position({required final int r, required final int c}) =
       _$PositionImpl;
-
-  factory _Position.fromJson(Map<String, dynamic> json) =
-      _$PositionImpl.fromJson;
 
   @override
   int get r;

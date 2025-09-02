@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../common/feature_flags.dart';
-import 'feature_flag_service.dart';
+
 
 /// Performance monitoring system for tracking UI rebuild reduction
 /// and validating the 60%+ improvement target from hybrid architecture.

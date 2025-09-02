@@ -1,6 +1,6 @@
 import '../../domain/entities/component.dart' as component_domain;
-import '../../domain/entities/refactored_domain.dart';
-import '../../common/logger.dart';
+import '../../domain/entities/circuit_component.dart';
+
 import './component_registry.dart';
 
 class ComponentFactory {
@@ -44,7 +44,7 @@ class ComponentFactory {
     return _displayNames[type] ?? 'Unknown';
   }
 
-  component_domain.ComponentModel create({
+  CircuitComponent create({
     required String type,
     required String id,
     required int r,
@@ -63,7 +63,7 @@ class ComponentFactory {
     );
   }
 
-  component_domain.ComponentModel createFromJson(Map<String, dynamic> json) {
+  CircuitComponent createFromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
     final r = (json['position']?['r'] ?? json['r']) as int;
     final c = (json['position']?['c'] ?? json['c']) as int;
@@ -83,7 +83,26 @@ class ComponentFactory {
     );
   }
 
-  component_domain.ComponentModel _createWithBehaviors({
+  /// Create instance from template (V2 API compatibility)
+  CircuitComponent createInstanceFromTemplate(
+    component_domain.ComponentModel template,
+    int row,
+    int col,
+  ) {
+    // Generate new unique ID
+    final newId = '${template.type.toString().split('.').last}_${DateTime.now().millisecondsSinceEpoch}';
+
+    // Convert ComponentModel to CircuitComponent using factory method
+    final circuitComponent = CircuitComponent.fromComponentModel(template.copyWith(
+      id: newId,
+      row: row,
+      col: col,
+    ));
+
+    return circuitComponent;
+  }
+
+  CircuitComponent _createWithBehaviors({
     required String type,
     required String id,
     required int r,
@@ -92,39 +111,23 @@ class ComponentFactory {
     bool isPowered = false,
     Map<String, dynamic>? state,
   }) {
-    final behaviorTypes = _behaviors[type];
-    if (behaviorTypes == null) {
-      return component_domain.ComponentModel(
-        id: id,
-        type: component_domain.ComponentType.values.firstWhere(
-          (e) => e.toString() == 'ComponentType.$type',
-          orElse: () => component_domain.ComponentType.wire,
-        ),
-        row: r,
-        col: c,
-        rotation: rotation,
-        properties: state ?? {},
-      );
-    }
+    final componentType = component_domain.ComponentType.values.firstWhere(
+      (e) => e.toString() == 'ComponentType.$type',
+      orElse: () => component_domain.ComponentType.wire,
+    );
 
-    final behaviorInstances = <dynamic>[];
-    for (final behaviorType in behaviorTypes) {
-      final instance = _getBehaviorByType(behaviorType);
-      if (instance != null) {
-        behaviorInstances.add(instance);
-      }
-    }
-
-    return component_domain.ComponentModel(
+    // Create ComponentModel first, then convert to CircuitComponent
+    final componentModel = component_domain.ComponentModel(
       id: id,
-      type: component_domain.ComponentType.values.firstWhere(
-        (e) => e.toString() == 'ComponentType.$type',
-        orElse: () => component_domain.ComponentType.wire,
-      ),
+      type: componentType,
       row: r,
       col: c,
       rotation: rotation,
       properties: state ?? {},
+      state: isPowered ? component_domain.ComponentState.powered : component_domain.ComponentState.normal,
     );
+
+    // Use factory method to create appropriate CircuitComponent subclass
+    return CircuitComponent.fromComponentModel(componentModel);
   }
 }

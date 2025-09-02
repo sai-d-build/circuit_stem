@@ -1,34 +1,25 @@
+// lib/core/persistence/storage_service.dart
+// Abstract interface for local data storage operations
 
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sparkcircuit/application/enhanced_game_state.dart';
-import 'package:sparkcircuit/domain/entities/level_definition.dart';
-import 'package:sparkcircuit/core/simulation/simulation_result.dart';
-import 'package:sparkcircuit/domain/entities/grid.dart';
-import 'package:sparkcircuit/domain/entities/component.dart';
+abstract class StorageService {
+  /// Initialize the storage service (e.g., open database connections)
+  Future<void> init();
 
+  /// Save data with the given key
+  Future<void> saveData<T>(String key, T value);
 
-class StorageService {
-  static const String _gameStateKey = 'gameState';
+  /// Read data for the given key, returns null if not found
+  T? readData<T>(String key);
 
-  Future<void> saveState(GameState state) async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = jsonEncode(state.toJson());
-    await prefs.setString(_gameStateKey, jsonString);
-  }
+  /// Delete data for the given key
+  Future<void> deleteData(String key);
 
-  Future<GameState?> loadState() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString(_gameStateKey);
-    if (jsonString == null) {
-      return null;
-    }
-    try {
-      final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
-      return GameState.fromJson(jsonMap);
-    } catch (e) {
-      print('Error loading game state: \$e');
-      return null;
-    }
-  }
+  /// Check if a key exists in storage
+  Future<bool> containsKey(String key);
+
+  /// Clear all data (use with caution)
+  Future<void> clearAll();
+
+  /// Save state (for V2 compatibility - delegates to saveData)
+  Future<void> saveState(String key, dynamic state) => saveData(key, state);
 }

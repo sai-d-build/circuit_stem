@@ -1,8 +1,8 @@
 import '../../domain/entities/grid.dart';
 import '../../domain/entities/level_definition.dart';
 import '../../domain/entities/goal.dart';
+import '../../domain/entities/level_goal.dart';
 import '../../domain/entities/component.dart' as component_domain;
-import '../../domain/entities/refactored_domain.dart';
 
 // Abstract base class for goal validation
 abstract class GoalValidator {
@@ -13,7 +13,7 @@ abstract class GoalValidator {
 class PowerGoalValidator extends GoalValidator {
   @override
   bool validate(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.targetId];
+    final targetComponent = grid.componentsById[goal.parameters?['targetId']];
     if (targetComponent == null) return false;
 
     final requiredPower = goal.parameters?['minPower'] ?? 0;
@@ -25,7 +25,7 @@ class PowerGoalValidator extends GoalValidator {
 class UnpowerGoalValidator extends GoalValidator {
   @override
   bool validate(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.targetId];
+    final targetComponent = grid.componentsById[goal.parameters?['targetId']];
     if (targetComponent == null) return false;
 
     return !targetComponent.isPowered;
@@ -35,25 +35,12 @@ class UnpowerGoalValidator extends GoalValidator {
 class ConnectGoalValidator extends GoalValidator {
   @override
   bool validate(Goal goal, Grid grid) {
-    // Validate sourceId from parameters
-    final params = goal.parameters ?? {};
-    final sourceParam = params['sourceId'];
+    final sourceId = goal.parameters?['sourceId'];
+    final targetId = goal.parameters?['targetId'];
 
-    // Multiple validation layers for sourceId
-    if (sourceParam == null) return false;
-    if (sourceParam is! String) return false;
-    if (sourceParam.isEmpty) return false;
+    if (sourceId == null || targetId == null) return false;
 
-    // Validate targetId from goal
-    if (goal.targetId == null) return false;
-    if (goal.targetId!.isEmpty) return false;
-
-    // Both sourceId and targetId are now confirmed to be non-null, non-empty strings
-    final String confirmedSourceId = sourceParam;
-    final String confirmedTargetId = goal.targetId!;
-
-    return _performConnectivityCheck(
-        confirmedSourceId, confirmedTargetId, grid);
+    return _performConnectivityCheck(sourceId, targetId, grid);
   }
 
   bool _performConnectivityCheck(String sourceId, String targetId, Grid grid) {
@@ -117,7 +104,7 @@ class ConnectGoalValidator extends GoalValidator {
 class VoltageGoalValidator extends GoalValidator {
   @override
   bool validate(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.targetId];
+    final targetComponent = grid.componentsById[goal.parameters?['targetId']];
     if (targetComponent == null) return false;
 
     final requiredVoltage = goal.parameters?['voltage'] ?? 0;
@@ -130,7 +117,7 @@ class VoltageGoalValidator extends GoalValidator {
 class CurrentGoalValidator extends GoalValidator {
   @override
   bool validate(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.targetId];
+    final targetComponent = grid.componentsById[goal.parameters?['targetId']];
     if (targetComponent == null) return false;
 
     final requiredCurrent = goal.parameters?['current'] ?? 0;
@@ -154,43 +141,23 @@ class GoalCheckingService {
   };
 
   bool isLevelComplete(Grid grid, LevelDefinition level) {
-    // For now, use a simplified goal checking based on validation rules
-    // In a full implementation, this would parse level.validationRules
-    final goals = _extractGoalsFromValidationRules(level.validationRules);
-
-    if (goals.isEmpty) {
+    if (level.goals.isEmpty) {
       return true; // No goals, level is complete
     }
 
     try {
-      return goals.every((goal) => _validateGoal(goal, grid));
+      return level.goals.every((levelGoal) => _validateGoal(levelGoal, grid));
     } catch (e) {
       return false; // If goal checking fails, level is not complete
     }
   }
 
-  bool _validateGoal(Goal goal, Grid grid) {
-    final validator = _validators[goal.type];
+  bool _validateGoal(LevelGoal levelGoal, Grid grid) {
+    final validator = _validators[levelGoal.goal.type];
     if (validator == null) {
       return false; // Unknown goal type
     }
 
-    return validator.validate(goal, grid);
-  }
-
-  // Extract goals from validation rules (simplified implementation)
-  List<Goal> _extractGoalsFromValidationRules(Map<String, dynamic> validationRules) {
-    final goals = <Goal>[];
-
-    // Simple goal extraction - in a real implementation this would be more sophisticated
-    if (validationRules.containsKey('powerBulb')) {
-      goals.add(Goal(
-        type: 'power',
-        targetId: validationRules['powerBulb']['targetId'] ?? '',
-        parameters: validationRules['powerBulb'],
-      ));
-    }
-
-    return goals;
+    return validator.validate(levelGoal.goal, grid);
   }
 }

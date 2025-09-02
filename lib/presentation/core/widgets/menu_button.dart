@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 
-class MenuButton extends StatefulWidget {
+import '../../core/utils/feedback_utils.dart';
+
+class MenuButton extends ConsumerStatefulWidget {
   final String text;
   final IconData? icon;
   final VoidCallback onPressed;
@@ -22,10 +25,10 @@ class MenuButton extends StatefulWidget {
   });
 
   @override
-  State<MenuButton> createState() => _MenuButtonState();
+  ConsumerState<MenuButton> createState() => _MenuButtonState();
 }
 
-class _MenuButtonState extends State<MenuButton>
+class _MenuButtonState extends ConsumerState<MenuButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -80,6 +83,10 @@ class _MenuButtonState extends State<MenuButton>
     }
   }
 
+  void _playButtonSound() {
+    FeedbackUtils.provideSoundFeedback(ref, SoundType.tap);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -109,7 +116,10 @@ class _MenuButtonState extends State<MenuButton>
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: widget.isEnabled ? widget.onPressed : null,
+                onTap: widget.isEnabled ? () {
+                  _playButtonSound();
+                  widget.onPressed();
+                } : null,
                 onTapDown: _onTapDown,
                 onTapUp: _onTapUp,
                 onTapCancel: _onTapCancel,

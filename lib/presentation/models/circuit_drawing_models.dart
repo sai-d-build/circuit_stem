@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+
 import 'package:sparkcircuit/domain/entities/component.dart';
 
 // Dummy CircuitComponent for the painter, will be replaced by a proper model

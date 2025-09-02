@@ -1,4 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:convert';
+import '../../core/persistence/storage_service.dart';
+import '../../application/game_engine_v3/providers_v3.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 enum HudOverlayType {
   none,
@@ -9,6 +13,7 @@ enum HudOverlayType {
 }
 
 class ProgressData {
+  final String levelId;
   final int currentScore;
   final int bestScore;
   final int starsEarned;
@@ -17,8 +22,10 @@ class ProgressData {
   final int totalHints;
   final Duration elapsedTime;
   final bool isComplete;
+  final DateTime? completionTime;
 
   const ProgressData({
+    required this.levelId,
     required this.currentScore,
     required this.bestScore,
     required this.starsEarned,
@@ -27,9 +34,11 @@ class ProgressData {
     required this.totalHints,
     required this.elapsedTime,
     required this.isComplete,
+    this.completionTime,
   });
 
   ProgressData copyWith({
+    String? levelId,
     int? currentScore,
     int? bestScore,
     int? starsEarned,
@@ -38,8 +47,10 @@ class ProgressData {
     int? totalHints,
     Duration? elapsedTime,
     bool? isComplete,
+    DateTime? completionTime,
   }) {
     return ProgressData(
+      levelId: levelId ?? this.levelId,
       currentScore: currentScore ?? this.currentScore,
       bestScore: bestScore ?? this.bestScore,
       starsEarned: starsEarned ?? this.starsEarned,
@@ -48,6 +59,7 @@ class ProgressData {
       totalHints: totalHints ?? this.totalHints,
       elapsedTime: elapsedTime ?? this.elapsedTime,
       isComplete: isComplete ?? this.isComplete,
+      completionTime: completionTime ?? this.completionTime,
     );
   }
 
@@ -60,6 +72,39 @@ class ProgressData {
   double get progressPercentage {
     if (totalStars == 0) return 0.0;
     return starsEarned / totalStars;
+  }
+
+  // JSON serialization methods
+  Map<String, dynamic> toJson() {
+    return {
+      'levelId': levelId,
+      'currentScore': currentScore,
+      'bestScore': bestScore,
+      'starsEarned': starsEarned,
+      'totalStars': totalStars,
+      'hintsUsed': hintsUsed,
+      'totalHints': totalHints,
+      'elapsedTimeInSeconds': elapsedTime.inSeconds,
+      'isComplete': isComplete,
+      'completionTime': completionTime?.toIso8601String(),
+    };
+  }
+
+  factory ProgressData.fromJson(Map<String, dynamic> json) {
+    return ProgressData(
+      levelId: json['levelId'] ?? '',
+      currentScore: json['currentScore'] ?? 0,
+      bestScore: json['bestScore'] ?? 0,
+      starsEarned: json['starsEarned'] ?? 0,
+      totalStars: json['totalStars'] ?? 3,
+      hintsUsed: json['hintsUsed'] ?? 0,
+      totalHints: json['totalHints'] ?? 0,
+      elapsedTime: Duration(seconds: json['elapsedTimeInSeconds'] ?? 0),
+      isComplete: json['isComplete'] ?? false,
+      completionTime: json['completionTime'] != null
+          ? DateTime.parse(json['completionTime'])
+          : null,
+    );
   }
 }
 
@@ -114,14 +159,17 @@ class HudState {
 
 // Providers
 final hudStateProvider = StateNotifierProvider.family<HudStateNotifier, HudState, String>((ref, levelId) {
-  return HudStateNotifier(levelId);
+  final storageService = ref.watch(storageServiceProvider);
+  return HudStateNotifier(levelId, storageService);
 });
 
 class HudStateNotifier extends StateNotifier<HudState> {
   final String levelId;
+  final StorageService _storageService;
 
-  HudStateNotifier(this.levelId) : super(HudState(
+  HudStateNotifier(this.levelId, this._storageService) : super(HudState(
     progress: ProgressData(
+      levelId: levelId,
       currentScore: 0,
       bestScore: _getBestScore(levelId),
       starsEarned: 0,
@@ -132,7 +180,43 @@ class HudStateNotifier extends StateNotifier<HudState> {
       isComplete: false,
     ),
     availableHints: _getAvailableHints(levelId),
-  ));
+  )) {
+    _loadProgress();
+  }
+
+  Future<void> _loadProgress() async {
+    final savedData = _storageService.readData<String>('progress_$levelId');
+    if (savedData != null) {
+      try {
+        final progressJson = jsonDecode(savedData) as Map<String, dynamic>;
+        final savedProgress = ProgressData.fromJson(progressJson);
+        state = state.copyWith(progress: savedProgress);
+      } catch (e) {
+        // If loading fails, keep default progress
+        StructuredLogger.warning('Failed to load HUD progress data', context: {
+          'levelId': levelId,
+          'dataKey': 'progress_$levelId',
+          'error': e.toString(),
+        }, error: e);
+      }
+    }
+  }
+
+  Future<void> _saveProgress() async {
+    try {
+      final progressJson = state.progress.toJson();
+      final progressString = jsonEncode(progressJson);
+      await _storageService.saveData<String>('progress_$levelId', progressString);
+    } catch (e) {
+      StructuredLogger.error('Failed to save HUD progress data', context: {
+        'levelId': levelId,
+        'dataKey': 'progress_$levelId',
+        'currentScore': state.progress.currentScore,
+        'isComplete': state.progress.isComplete,
+        'error': e.toString(),
+      }, error: e);
+    }
+  }
 
   void showOverlay(HudOverlayType overlayType) {
     state = state.copyWith(
@@ -187,7 +271,8 @@ class HudStateNotifier extends StateNotifier<HudState> {
 
   void updateProgress(ProgressData newProgress) {
     state = state.copyWith(progress: newProgress);
-    
+    _saveProgress();
+
     // Auto-show win screen when level is completed
     if (newProgress.isComplete && !state.isWinScreenShown) {
       Future.delayed(const Duration(milliseconds: 500), () {
@@ -202,12 +287,14 @@ class HudStateNotifier extends StateNotifier<HudState> {
       final updatedProgress = state.progress.copyWith(
         hintsUsed: state.progress.hintsUsed + 1,
       );
-      
+
       state = state.copyWith(
         currentHint: hint,
         progress: updatedProgress,
       );
-      
+
+      _saveProgress();
+
       // Clear hint after some time
       Future.delayed(const Duration(seconds: 5), () {
         if (mounted) {
@@ -237,13 +324,18 @@ class HudStateNotifier extends StateNotifier<HudState> {
   }
 
   void markComplete() {
-    final updatedProgress = state.progress.copyWith(isComplete: true);
+    final updatedProgress = state.progress.copyWith(
+      isComplete: true,
+      completionTime: DateTime.now(),
+    );
     state = state.copyWith(progress: updatedProgress);
+    _saveProgress();
   }
 
   void reset() {
     state = HudState(
       progress: ProgressData(
+        levelId: levelId,
         currentScore: 0,
         bestScore: _getBestScore(levelId),
         starsEarned: 0,

@@ -1,7 +1,7 @@
 // Grid entity for SparkCircuit
 // Represents the circuit grid and manages component placement
 
-import 'package:flutter/material.dart';
+
 import 'component.dart';
 import '../../common/logger.dart';
 
@@ -257,6 +257,10 @@ class Grid {
 
   bool isEmpty() {
     return components.isEmpty;
+  }
+
+  static Grid empty() {
+    return GridFactory.createStandard();
   }
 
   int getComponentCount() {

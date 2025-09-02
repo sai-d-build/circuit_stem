@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sparkcircuit/core/commands/create_component_command.dart';
 import 'package:sparkcircuit/domain/entities/component.dart';
 import 'package:sparkcircuit/application/enhanced_game_state.dart';
-import 'package:sparkcircuit/domain/entities/grid.dart';
+
 import 'package:sparkcircuit/domain/entities/level_definition.dart';
 import 'package:sparkcircuit/domain/goals/power_bulb_goal.dart';
 
@@ -13,15 +13,26 @@ void main() {
 
     setUp(() {
       final level = LevelDefinition(
-        id: 'test_level',
-        levelNumber: 1,
-        title: 'Test Level',
-        description: 'A test level',
-        rows: 10,
-        cols: 10,
-        initialComponentsList: [],
-        paletteComponents: [],
-        validationRules: [],
+        levelId: 'test_level',
+        version: '1.0.0',
+        metadata: LevelMetadata(
+          id: 'test_level',
+          title: 'Test Level',
+          description: 'A test level',
+          difficulty: 'easy',
+        ),
+        grid: GridConfig(
+          width: 10,
+          height: 10,
+        ),
+        components: ComponentConfig(
+          available: [],
+        ),
+        goals: [],
+        validation: ValidationRules(
+          circuitRules: [],
+          successConditions: [],
+        ),
       );
       initialState = GameState.initial(level);
       testComponent = ComponentModel(

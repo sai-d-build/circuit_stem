@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart'; // Import CircuitComponent
+import 'package:sparkcircuit/domain/entities/component.dart'; // Import ComponentType and ComponentState
+import 'package:sparkcircuit/domain/entities/circuit_component.dart'; // Import proper CircuitComponent
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 class ComponentPainter extends CustomPainter {
   final List<CircuitComponent> components;
@@ -24,68 +26,109 @@ class ComponentPainter extends CustomPainter {
 
   void _drawComponent(Canvas canvas, CircuitComponent component) {
     final isSelected = component.id == selectedComponentId;
-    final componentSize = 40.0 * scale;
-    
+    final componentSize = GameConstants.componentWidth * scale;
+
     final center = Offset(
-      component.posX * 60.0 * scale,
-      component.posY * 60.0 * scale,
+      component.col * GameConstants.gridCellSize * scale,
+      component.row * GameConstants.gridCellSize * scale,
     );
-    
+
     final rect = Rect.fromCenter(
       center: center,
       width: componentSize,
       height: componentSize,
     );
 
+    // Save canvas state before rotation
+    canvas.save();
+
+    // Apply rotation transformation if needed
+    if (component.rotation != 0) {
+      canvas.translate(center.dx, center.dy);
+      canvas.rotate(component.rotation * (GameConstants.piRadians / 180.0)); // Convert degrees to radians
+      canvas.translate(-center.dx, -center.dy);
+    }
+
+    // Determine glow color based on component state
+    Color glowColor = Colors.transparent;
+    if (component.state == ComponentState.powered) {
+      glowColor = circuitColors.energyPulse; // Green glow for powered
+    }
+    else if (component.state == ComponentState.error) {
+      glowColor = circuitColors.errorGlow; // Red glow for overloaded/error
+    }
+
     // Draw component background
     final backgroundPaint = Paint()
-      ..color = component.isActive
-          ? circuitColors.componentBase.withValues(alpha: 0.8)
-          : circuitColors.componentBase.withValues(alpha: 0.5)
+      ..color = circuitColors.componentBase.withOpacity(GameConstants.mediumOpacity)
       ..style = PaintingStyle.fill;
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, Radius.circular(8 * scale)),
+      RRect.fromRectAndRadius(rect, Radius.circular(GameConstants.componentBorderRadius * scale)),
       backgroundPaint,
     );
 
+    // Draw glow effect
+    if (glowColor != Colors.transparent) {
+      final glowPaint = Paint()
+        ..color = glowColor.withOpacity(GameConstants.highOpacity)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, GameConstants.glowRadius * scale);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(rect, Radius.circular(GameConstants.componentBorderRadius * scale)),
+        glowPaint,
+      );
+    }
+
     // Draw component border
     final borderPaint = Paint()
-      ..color = isSelected ? circuitColors.primary : circuitColors.outline
-      ..strokeWidth = isSelected ? 3.0 * scale : 1.5 * scale
+      ..color = isSelected ? circuitColors.neonPrimary : circuitColors.outline
+      ..strokeWidth = isSelected ? GameConstants.extraThickStroke * scale : GameConstants.normalStroke * scale
       ..style = PaintingStyle.stroke;
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, Radius.circular(8 * scale)),
+      RRect.fromRectAndRadius(rect, Radius.circular(GameConstants.componentBorderRadius * scale)),
       borderPaint,
     );
 
     // Draw component-specific details
     _drawComponentDetails(canvas, component, rect);
+
+    // Restore canvas state after rotation
+    canvas.restore();
   }
 
   void _drawComponentDetails(Canvas canvas, CircuitComponent component, Rect rect) {
     final detailPaint = Paint()
       ..color = circuitColors.onSurface
-      ..strokeWidth = 2.0 * scale
+      ..strokeWidth = GameConstants.thickStroke * scale
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
     switch (component.type) {
-      case 'battery':
+      case ComponentType.battery:
         _drawBatterySymbol(canvas, rect, detailPaint);
         break;
-      case 'resistor':
+      case ComponentType.resistor:
         _drawResistorSymbol(canvas, rect, detailPaint);
         break;
-      case 'led':
-        _drawLEDSymbol(canvas, rect, detailPaint, component.isActive);
+      case ComponentType.bulb:
+        _drawLEDSymbol(canvas, rect, detailPaint, component.state == ComponentState.powered);
         break;
-      case 'switch':
-        _drawSwitchSymbol(canvas, rect, detailPaint, component.properties['state'] == 'closed');
+      case ComponentType.switch_:
+        _drawSwitchSymbol(canvas, rect, detailPaint, component.properties['isOn'] == true);
         break;
-      case 'capacitor':
+      case ComponentType.capacitor:
         _drawCapacitorSymbol(canvas, rect, detailPaint);
+        break;
+      case ComponentType.wire:
+        _drawWireSymbol(canvas, rect, detailPaint);
+        break;
+      case ComponentType.buzzer:
+        _drawBuzzerSymbol(canvas, rect, detailPaint);
+        break;
+      default:
+        // Draw generic component symbol
+        _drawGenericSymbol(canvas, rect, detailPaint);
         break;
     }
   }
@@ -150,7 +193,7 @@ class ComponentPainter extends CustomPainter {
     // Light rays if active
     if (isActive) {
       final glowPaint = Paint()
-        ..color = circuitColors.wireActive.withValues(alpha: 0.6)
+        ..color = circuitColors.energyPulse.withOpacity(0.6) // Use energyPulse for LED glow
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5 * scale;
       
@@ -215,10 +258,105 @@ class ComponentPainter extends CustomPainter {
     );
   }
 
+  void _drawWireSymbol(Canvas canvas, Rect rect, Paint paint) {
+    final center = rect.center;
+    final size = rect.width * 0.4;
+
+    // Simple wire connection points
+    canvas.drawCircle(
+      Offset(center.dx - size/2, center.dy),
+      3.0 * scale,
+      paint..style = PaintingStyle.fill,
+    );
+    canvas.drawCircle(
+      Offset(center.dx + size/2, center.dy),
+      3.0 * scale,
+      paint..style = PaintingStyle.fill,
+    );
+
+    // Wire line
+    canvas.drawLine(
+      Offset(center.dx - size/2, center.dy),
+      Offset(center.dx + size/2, center.dy),
+      paint..strokeWidth = 2.0 * scale,
+    );
+  }
+
+  void _drawBuzzerSymbol(Canvas canvas, Rect rect, Paint paint) {
+    final center = rect.center;
+    final size = rect.width * 0.3;
+
+    // Buzzer coil (spiral)
+    final path = Path();
+    path.moveTo(center.dx - size/2, center.dy);
+    for (int i = 0; i < 3; i++) {
+      final radius = (size/6) * (i + 1);
+      path.arcToPoint(
+        Offset(center.dx - size/2 + radius * 2, center.dy),
+        radius: Radius.circular(radius),
+        clockwise: i % 2 == 0,
+      );
+    }
+
+    canvas.drawPath(path, paint);
+
+    // Sound waves
+    for (int i = 0; i < 2; i++) {
+      final waveX = center.dx + size/2 + (i + 1) * size/4;
+      canvas.drawArc(
+        Rect.fromCenter(
+          center: Offset(waveX, center.dy),
+          width: size/2,
+          height: size/3,
+        ),
+        -1.57, // -π/2
+        3.14, // π
+        false,
+        paint..strokeWidth = 1.5 * scale,
+      );
+    }
+  }
+
+  void _drawGenericSymbol(Canvas canvas, Rect rect, Paint paint) {
+    final center = rect.center;
+    final size = rect.width * 0.3;
+
+    // Simple square for unknown components
+    canvas.drawRect(
+      Rect.fromCenter(
+        center: center,
+        width: size,
+        height: size,
+      ),
+      paint..strokeWidth = 2.0 * scale,
+    );
+
+    // Question mark inside
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '?',
+        style: TextStyle(
+          color: circuitColors.onSurface,
+          fontSize: size * 0.6,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(
+        center.dx - textPainter.width / 2,
+        center.dy - textPainter.height / 2,
+      ),
+    );
+  }
+
   @override
   bool shouldRepaint(ComponentPainter oldDelegate) {
     return oldDelegate.components != components ||
-           oldDelegate.selectedComponentId != selectedComponentId ||
-           oldDelegate.scale != scale;
+            oldDelegate.selectedComponentId != selectedComponentId ||
+            oldDelegate.scale != scale;
   }
 }

@@ -10,6 +10,5 @@ class Position with _$Position {
     required int c,
   }) = _Position;
 
-  factory Position.fromJson(Map<String, dynamic> json) =>
-      _$PositionFromJson(json);
+  
 }

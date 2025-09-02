@@ -27,6 +27,12 @@ class AppTheme {
     componentBase: Color(0xFF2196F3),
     gridLine: Color(0xFFE0E0E0),
     glowEffect: Color(0xFF00E5FF),
+    // Neon colors
+    neonPrimary: Color(0xFF00FFFF), // Electric Cyan
+    neonAccent: Color(0xFFFF00FF), // Neon Magenta
+    errorGlow: Color(0xFFFF0040), // Neon Red
+    energyPulse: Color(0xFF39FF14), // Bright Green
+    highlightAccent: Color(0xFFFFFF00), // Yellow
   );
 
   static const _darkCircuitColors = CircuitColorScheme(
@@ -54,6 +60,12 @@ class AppTheme {
     componentBase: Color(0xFF42A5F5),
     gridLine: Color(0xFF424242),
     glowEffect: Color(0xFF00E5FF),
+    // Neon colors
+    neonPrimary: Color(0xFF00FFFF), // Electric Cyan
+    neonAccent: Color(0xFFFF00FF), // Neon Magenta
+    errorGlow: Color(0xFFFF0040), // Neon Red
+    energyPulse: Color(0xFF39FF14), // Bright Green
+    highlightAccent: Color(0xFFFFFF00), // Yellow
   );
 
   static const _highContrastColors = CircuitColorScheme(
@@ -81,6 +93,12 @@ class AppTheme {
     componentBase: Color(0xFF0000FF),
     gridLine: Color(0xFF000000),
     glowEffect: Color(0xFF00FFFF),
+    // Neon colors
+    neonPrimary: Color(0xFF00FFFF), // Electric Cyan
+    neonAccent: Color(0xFFFF00FF), // Neon Magenta
+    errorGlow: Color(0xFFFF0040), // Neon Red
+    energyPulse: Color(0xFF39FF14), // Bright Green
+    highlightAccent: Color(0xFFFFFF00), // Yellow
   );
 
   static ThemeData get lightTheme => _buildTheme(_lightCircuitColors, Brightness.light);
@@ -253,6 +271,11 @@ class CircuitColorScheme extends ThemeExtension<CircuitColorScheme> {
     required this.componentBase,
     required this.gridLine,
     required this.glowEffect,
+    required this.neonPrimary,
+    required this.neonAccent,
+    required this.errorGlow,
+    required this.energyPulse,
+    required this.highlightAccent,
   });
 
   final Color primary;
@@ -281,6 +304,13 @@ class CircuitColorScheme extends ThemeExtension<CircuitColorScheme> {
   final Color gridLine;
   final Color glowEffect;
 
+  // Neon colors
+  final Color neonPrimary;
+  final Color neonAccent;
+  final Color errorGlow;
+  final Color energyPulse;
+  final Color highlightAccent;
+
   @override
   CircuitColorScheme copyWith({
     Color? primary,
@@ -306,6 +336,11 @@ class CircuitColorScheme extends ThemeExtension<CircuitColorScheme> {
     Color? componentBase,
     Color? gridLine,
     Color? glowEffect,
+    Color? neonPrimary,
+    Color? neonAccent,
+    Color? errorGlow,
+    Color? energyPulse,
+    Color? highlightAccent,
   }) {
     return CircuitColorScheme(
       primary: primary ?? this.primary,
@@ -331,6 +366,11 @@ class CircuitColorScheme extends ThemeExtension<CircuitColorScheme> {
       componentBase: componentBase ?? this.componentBase,
       gridLine: gridLine ?? this.gridLine,
       glowEffect: glowEffect ?? this.glowEffect,
+      neonPrimary: neonPrimary ?? this.neonPrimary,
+      neonAccent: neonAccent ?? this.neonAccent,
+      errorGlow: errorGlow ?? this.errorGlow,
+      energyPulse: energyPulse ?? this.energyPulse,
+      highlightAccent: highlightAccent ?? this.highlightAccent,
     );
   }
 
@@ -363,6 +403,11 @@ class CircuitColorScheme extends ThemeExtension<CircuitColorScheme> {
       componentBase: Color.lerp(componentBase, other.componentBase, t)!,
       gridLine: Color.lerp(gridLine, other.gridLine, t)!,
       glowEffect: Color.lerp(glowEffect, other.glowEffect, t)!,
+      neonPrimary: Color.lerp(neonPrimary, other.neonPrimary, t)!,
+      neonAccent: Color.lerp(neonAccent, other.neonAccent, t)!,
+      errorGlow: Color.lerp(errorGlow, other.errorGlow, t)!,
+      energyPulse: Color.lerp(energyPulse, other.energyPulse, t)!,
+      highlightAccent: Color.lerp(highlightAccent, other.highlightAccent, t)!,
     );
   }
 }

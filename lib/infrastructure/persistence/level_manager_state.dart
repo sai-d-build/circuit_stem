@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/level_definition.dart';
-import '../../domain/entities/level_metadata.dart';
 
 part 'level_manager_state.freezed.dart';
 

@@ -14,12 +14,14 @@ dependencies:
   flutter_riverpod: ^2.6.1
   go_router: ^16.0.0
   shared_preferences: ^2.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
   uuid: ^4.4.0
 
   # Enhanced Architecture Dependencies
-  freezed: ^2.3.0
-  freezed_annotation: ^2.2.0
+  freezed: ^3.0.0-0.0.dev
+  freezed_annotation: ^3.1.0
   json_serializable: ^6.6.0
   json_annotation: ^4.9.0
 
@@ -33,6 +35,7 @@ dependencies:
 
   # Audio Framework
   flame_audio: ^2.10.0
+  audioplayers: ^6.5.0
 
   # Equatable for value objects
   equatable: ^2.0.5
@@ -46,19 +49,38 @@ dependencies:
   # Flame game engine for advanced animations
   flame: ^1.16.0
 
+  # State Notifier for Riverpod
+  state_notifier: ^1.0.0
+
   # Meta package for annotations
   meta: ^1.12.0
+
+  # Firebase dependencies
+  firebase_core: ^4.1.0
+  cloud_firestore: ^6.0.1
+  firebase_auth: ^6.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
   # Enhanced Testing and Development Tools
   mockito: ^5.4.0
   build_runner: ^2.4.0
 
+  # Hive code generation
+  hive_generator: ^2.0.1
+
 flutter:
   uses-material-design: true
+  assets:
+    - assets/audio/
+    - assets/levels/
+    - assets/levels/tutorial/
+    - assets/levels/beginner/
+    - assets/levels/intermediate/
+    - assets/levels/advanced/
+    - assets/levels/expert/

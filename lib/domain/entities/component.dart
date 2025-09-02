@@ -17,6 +17,8 @@ enum ComponentType {
   timer,
   wire,
   ground,
+  voltageSource,
+  currentSource,
 }
 
 enum ComponentState {

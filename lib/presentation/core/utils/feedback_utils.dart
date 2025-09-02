@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../application/audio_manager.dart';
 
 /// Visual feedback utilities for SparkCircuit UI/UX
 class FeedbackUtils {
@@ -30,10 +33,40 @@ class FeedbackUtils {
     }
   }
 
-  /// Sound feedback (placeholder for future audio implementation)
-  static void provideSoundFeedback(SoundType type) {
-    // TODO: Implement sound feedback when audio system is ready
-    // This could integrate with the existing audio_manager.dart
+  /// Sound feedback using audio manager with error handling
+  static void provideSoundFeedback(WidgetRef ref, SoundType type) {
+    try {
+      final audioManager = ref.read(audioManagerProvider);
+      String audioPath;
+      switch (type) {
+        case SoundType.tap:
+          audioPath = 'audio/tap.mp3';
+          break;
+        case SoundType.success:
+          audioPath = 'audio/success.mp3';
+          break;
+        case SoundType.error:
+          audioPath = 'audio/error.mp3';
+          break;
+        case SoundType.componentPlaced:
+          audioPath = 'audio/place.mp3';
+          break;
+        case SoundType.componentSelected:
+          audioPath = 'audio/select.mp3';
+          break;
+      }
+
+      // For web environments, wrap audio playback in try-catch
+      try {
+        audioManager.playSfx(audioPath);
+      } catch (e) {
+        // Silently handle audio errors in web environment
+        debugPrint('Audio playback failed for $audioPath: $e');
+      }
+    } catch (e) {
+      // Handle any other audio-related errors
+      debugPrint('Sound feedback error: $e');
+    }
   }
 }
 

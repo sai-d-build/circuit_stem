@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/state/hud_state.dart';
+import 'package:sparkcircuit/presentation/ui_components/glass_panel.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 class ProgressHud extends ConsumerWidget {
   final String levelId;
@@ -15,25 +17,23 @@ class ProgressHud extends ConsumerWidget {
     final hudState = ref.watch(hudStateProvider(levelId));
     final progress = hudState.progress;
     
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: circuitColors.surfaceContainer.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: circuitColors.outline.withValues(alpha: 0.3),
+    return GlassPanel(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: UIConstants.progressHudHorizontalPadding,
+          vertical: UIConstants.progressHudVerticalPadding,
         ),
-      ),
-      child: Row(
-        children: [
-          _buildStarsIndicator(theme, circuitColors, progress),
-          const SizedBox(width: 16),
-          _buildScoreDisplay(theme, circuitColors, progress),
-          const Spacer(),
-          _buildTimeDisplay(theme, circuitColors, progress),
-          const SizedBox(width: 16),
-          _buildHintsDisplay(theme, circuitColors, progress),
-        ],
+        child: Row(
+          children: [
+            _buildStarsIndicator(theme, circuitColors, progress),
+            SizedBox(width: UIConstants.progressHudSpacing),
+            _buildScoreDisplay(theme, circuitColors, progress),
+            const Spacer(),
+            _buildTimeDisplay(theme, circuitColors, progress),
+            SizedBox(width: UIConstants.progressHudSpacing),
+            _buildHintsDisplay(theme, circuitColors, progress),
+          ],
+        ),
       ),
     );
   }
@@ -51,8 +51,8 @@ class ProgressHud extends ConsumerWidget {
           child: Icon(
             isEarned ? Icons.star : Icons.star_outline,
             color: isEarned
-                ? Colors.amber
-                : circuitColors.onSurface.withValues(alpha: 0.3),
+                ? circuitColors.highlightAccent // Use neon highlight for earned stars
+                : circuitColors.onSurface.withOpacity(0.3),
             size: 20,
           ),
         );
@@ -71,7 +71,7 @@ class ProgressHud extends ConsumerWidget {
         Text(
           'Score',
           style: theme.textTheme.bodySmall?.copyWith(
-            color: circuitColors.onSurfaceVariant,
+            color: circuitColors.onSurface.withOpacity(0.7),
           ),
         ),
         Text(
@@ -79,6 +79,12 @@ class ProgressHud extends ConsumerWidget {
           style: theme.textTheme.titleSmall?.copyWith(
             color: circuitColors.onSurface,
             fontWeight: FontWeight.w600,
+            shadows: [
+              BoxShadow(
+                color: circuitColors.neonPrimary.withOpacity(0.3),
+                blurRadius: 5.0,
+              ),
+            ],
           ),
         ),
       ],
@@ -95,7 +101,7 @@ class ProgressHud extends ConsumerWidget {
         Icon(
           Icons.timer_outlined,
           size: 16,
-          color: circuitColors.onSurfaceVariant,
+          color: circuitColors.onSurface.withOpacity(0.7),
         ),
         const SizedBox(width: 4),
         Text(
@@ -104,6 +110,12 @@ class ProgressHud extends ConsumerWidget {
             color: circuitColors.onSurface,
             fontWeight: FontWeight.w500,
             fontFeatures: const [FontFeature.tabularFigures()],
+            shadows: [
+              BoxShadow(
+                color: circuitColors.neonPrimary.withOpacity(0.3),
+                blurRadius: 5.0,
+              ),
+            ],
           ),
         ),
       ],
@@ -116,10 +128,10 @@ class ProgressHud extends ConsumerWidget {
     ProgressData progress,
   ) {
     final hintsColor = progress.hintsUsed == 0
-        ? circuitColors.secondary
+        ? circuitColors.energyPulse // Green for full hints
         : progress.hintsUsed < progress.totalHints
-            ? circuitColors.tertiary
-            : circuitColors.error;
+            ? circuitColors.neonAccent // Magenta for some hints used
+            : circuitColors.errorGlow; // Red for no hints left
 
     return Row(
       children: [
@@ -134,6 +146,12 @@ class ProgressHud extends ConsumerWidget {
           style: theme.textTheme.titleSmall?.copyWith(
             color: hintsColor,
             fontWeight: FontWeight.w600,
+            shadows: [
+              BoxShadow(
+                color: hintsColor.withOpacity(0.5),
+                blurRadius: 5.0,
+              ),
+            ],
           ),
         ),
       ],

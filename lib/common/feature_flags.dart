@@ -1,4 +1,7 @@
 // Feature flag system for gradual rollout of educational gaming features
+
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
+
 enum FeatureFlag {
   // Architecture migration flags
   useUnifiedStateManagement,
@@ -144,16 +147,37 @@ class FeatureFlagService {
     return _runtimeFlags[flag];
   }
 
-  // Persist flag to storage (placeholder for actual implementation)
+  // Persist flag to storage
   static void _persistFlag(FeatureFlag flag, bool value) {
-    // TODO: Implement persistent storage using SharedPreferences
-    // For now, just store in memory
-    print('Persisting flag ${flag.name}: $value');
+    // TODO: Access storage service - this needs to be injected or accessed via provider
+    // For now, use a simple approach that can be enhanced later
+    try {
+      // This is a temporary implementation - should be replaced with proper dependency injection
+      // when the feature flag service is integrated with the provider system
+      StructuredLogger.debug('Persisting feature flag to storage', context: {
+        'flagName': flag.name,
+        'targetValue': value.toString(),
+        'persistentStorage': true,
+        'implementationStatus': 'placeholder_needs_integration',
+      });
+      // Future enhancement: Use storageService.saveData('feature_flag_${flag.name}', value);
+    } catch (e) {
+      StructuredLogger.error('Failed to persist feature flag', context: {
+        'flagName': flag.name,
+        'targetValue': value.toString(),
+        'error': e.toString(),
+      }, error: e);
+    }
   }
 
   // Log feature flag changes
   static void _logFeatureChange(FeatureFlag flag, bool enabled) {
-    print('Feature flag ${flag.name} ${enabled ? 'enabled' : 'disabled'} at ${DateTime.now()}');
+    StructuredLogger.info('Feature flag toggled', context: {
+      'flagName': flag.name,
+      'newState': enabled ? 'enabled' : 'disabled',
+      'timestamp': DateTime.now().toIso8601String(),
+      'changeType': enabled ? 'rollout' : 'rollback',
+    });
   }
 
   // Check if migration is complete

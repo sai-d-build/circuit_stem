@@ -50,8 +50,20 @@ class GameEngineState with _$GameEngineState {
         selectedComponentId: null,
         dragPosition: null,
         paletteComponents:
-            (level?.paletteComponents ?? []).cast<ComponentModel>(), // Keep for coexistence
-        paletteManager: ComponentPaletteManager((level?.paletteComponents ?? []).cast<ComponentModel>()),
+            (level?.components.available ?? []).map((template) => ComponentModel(
+              id: template.type, // Using type as ID for palette components
+              type: ComponentType.values.firstWhere((e) => e.toString().split('.').last == template.type),
+              row: -1, // Placeholder for palette components
+              col: -1, // Placeholder for palette components
+              properties: template.properties ?? {},
+            )).toList(),
+        paletteManager: ComponentPaletteManager((level?.components.available ?? []).map((template) => ComponentModel(
+              id: template.type, // Using type as ID for palette components
+              type: ComponentType.values.firstWhere((e) => e.toString().split('.').last == template.type),
+              row: -1, // Placeholder for palette components
+              col: -1, // Placeholder for palette components
+              properties: template.properties ?? {},
+            )).toList()),
         poweredBuzzerIds: const {},
         history: const [],
         lastUpdated: DateTime.now(),

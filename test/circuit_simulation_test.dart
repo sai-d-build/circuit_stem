@@ -7,6 +7,8 @@ import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
 import 'package:sparkcircuit/core/simulation/basic_simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
 import 'package:sparkcircuit/core/persistence/storage_service.dart';
+import 'package:sparkcircuit/application/game_engine_v3/providers_v3.dart';
+import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
 
 void main() {
   group('Circuit Simulation Tests', () {

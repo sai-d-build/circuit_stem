@@ -1,17 +1,67 @@
-import '../../infrastructure/audio/audio_service.dart';
+// lib/application/audio_manager.dart
+// Comprehensive audio management for SparkCircuit
 
-/// Thin wrapper to centralize audio logic, so core + input remain pure.
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 class AudioManager {
-  final AudioService _audio;
+  final AudioPlayer _bgmPlayer = AudioPlayer();
+  final List<AudioPlayer> _sfxPlayers = [];
+  final int _sfxPoolSize = 5;
 
-  AudioManager(this._audio);
+  double _sfxVolume = 1.0;
+  double _bgmVolume = 0.5;
 
-  void playSelection() => _audio.play('toggle.wav');
-  void playPlacement() => _audio.play('place.wav');
-  void playToggle() => _audio.play('toggle.wav');
-  void playWin() => _audio.play('success.wav');
-  void playLose() => _audio.play('warning.wav');
-  void playSuccess() {
-    _audio.play('audio/success.wav');
+  AudioManager() {
+    _bgmPlayer.setReleaseMode(ReleaseMode.loop);
+    for (int i = 0; i < _sfxPoolSize; i++) {
+      _sfxPlayers.add(AudioPlayer());
+    }
+  }
+
+  Future<void> playSfx(String assetPath) async {
+    final availablePlayer = _sfxPlayers.firstWhere(
+      (player) => player.state == PlayerState.stopped || player.state == PlayerState.completed,
+      orElse: () => _sfxPlayers.first,
+    );
+    await availablePlayer.setVolume(_sfxVolume);
+    await availablePlayer.play(AssetSource(assetPath));
+  }
+
+  Future<void> playBgm(String assetPath) async {
+    await _bgmPlayer.setVolume(_bgmVolume);
+    await _bgmPlayer.play(AssetSource(assetPath));
+  }
+
+  Future<void> stopBgm() async {
+    await _bgmPlayer.stop();
+  }
+
+  void setSfxVolume(double volume) {
+    _sfxVolume = volume.clamp(0.0, 1.0);
+    for (var player in _sfxPlayers) {
+      player.setVolume(_sfxVolume);
+    }
+  }
+
+  void setBgmVolume(double volume) {
+    _bgmVolume = volume.clamp(0.0, 1.0);
+    _bgmPlayer.setVolume(_bgmVolume);
+  }
+
+  double get sfxVolume => _sfxVolume;
+  double get bgmVolume => _bgmVolume;
+
+  void dispose() {
+    _bgmPlayer.dispose();
+    for (var player in _sfxPlayers) {
+      player.dispose();
+    }
   }
 }
+
+final audioManagerProvider = Provider<AudioManager>((ref) {
+  final manager = AudioManager();
+  ref.onDispose(() => manager.dispose());
+  return manager;
+});

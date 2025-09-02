@@ -1,11 +1,11 @@
 import '../../domain/entities/grid.dart';
 import '../../domain/entities/component.dart';
+
 import '../../common/logger.dart';
 
 /// Basic implementation of power simulation service
 class PowerSimulationService {
-  @override
-  Grid simulatePowerFlow(Grid grid) {
+    Grid simulatePowerFlow(Grid grid) {
     Logger.log('PowerSimulationService: Simulating power flow on ${grid.getComponentCount()} components');
 
     // Create a copy of the grid to modify

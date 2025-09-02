@@ -1,16 +1,19 @@
 // Onboarding screen for SparkCircuit educational gaming platform
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../../application/game_engine_v3/providers_v3.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -171,9 +174,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  void _completeOnboarding() {
-    // TODO: Mark onboarding as completed in preferences
-    Navigator.of(context).pushReplacementNamed('/');
+  void _completeOnboarding() async {
+    final storageService = ref.read(storageServiceProvider);
+    await storageService.saveData<bool>('onboarding_completed', true);
+    // Navigate to main menu using GoRouter
+    GoRouter.of(context).go('/');
   }
 
   @override

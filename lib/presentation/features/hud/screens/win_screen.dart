@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+
 import 'package:sparkcircuit/presentation/core/widgets/menu_button.dart';
+import 'package:sparkcircuit/presentation/core/utils/feedback_utils.dart';
 import 'package:sparkcircuit/presentation/state/hud_state.dart';
 import 'package:sparkcircuit/presentation/core/animations/glow_effect.dart';
 
@@ -57,6 +59,13 @@ class _WinScreenState extends ConsumerState<WinScreen>
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) _starsController.forward();
     });
+
+    // Play success sound
+    _playSuccessSound();
+  }
+
+  void _playSuccessSound() {
+    FeedbackUtils.provideSoundFeedback(ref, SoundType.success);
   }
 
   @override

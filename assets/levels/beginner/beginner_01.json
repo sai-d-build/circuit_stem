@@ -1,0 +1,128 @@
+{
+  "levelId": "beginner_01",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "beginner_01",
+    "title": "Series Circuit",
+    "description": "Build a series circuit with multiple LEDs",
+    "difficulty": "beginner",
+    "estimatedTime": 180,
+    "learningObjectives": [
+      "Understand series circuit behavior",
+      "Learn voltage division across components",
+      "Observe brightness changes with multiple LEDs"
+    ],
+    "tags": ["beginner", "series", "multiple_components"],
+    "unlocksComponents": ["resistor"],
+    "prerequisites": ["tutorial_01"]
+  },
+  "grid": {
+    "width": 10,
+    "height": 8,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 9.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "led",
+        "quantity": 2,
+        "properties": {
+          "forwardVoltage": 2.0,
+          "color": "red",
+          "maxCurrent": 0.02
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 1,
+        "properties": {
+          "resistance": 100.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 6,
+        "properties": {
+          "resistance": 0.01
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "light_both_leds",
+      "type": "component_state",
+      "description": "Light up both LED bulbs",
+      "conditions": {
+        "targetComponent": "led_1",
+        "targetState": "on"
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Connect components in series: Battery → LED → Resistor → LED → Battery",
+          "trigger": "time_elapsed",
+          "triggerValue": 45
+        },
+        {
+          "id": "hint_2",
+          "text": "The resistor helps protect the LEDs from too much current",
+          "trigger": "time_elapsed",
+          "triggerValue": 90
+        }
+      ]
+    },
+    {
+      "id": "balanced_voltage",
+      "type": "circuit_analysis",
+      "description": "Ensure proper voltage distribution",
+      "conditions": {
+        "current_flow": {"minValue": 0.015},
+        "voltage_drop": {"maxValue": 8.5}
+      }
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits",
+      "series_configuration"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable",
+      "balanced_led_brightness"
+    ]
+  },
+  "tutorial": {
+    "enabled": false
+  },
+  "scoring": {
+    "maxScore": 1200,
+    "timeBonus": {
+      "maxTime": 300,
+      "bonusPerSecond": 2
+    },
+    "efficiencyBonus": {
+      "maxComponents": 10,
+      "bonusPerUnusedComponent": 40
+    },
+    "starThresholds": {
+      "threeStars": 900,
+      "twoStars": 700,
+      "oneStar": 500
+    }
+  }
+}

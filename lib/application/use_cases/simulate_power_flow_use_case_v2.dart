@@ -2,7 +2,7 @@ import '../core/result.dart';
 import '../transaction.dart';
 import '../services/power_simulation_service.dart';
 import 'simulate_power_flow_action.dart';
-import 'component_action.dart';
+
 import 'notifier_integrated_use_case.dart';
 
 /// V2 use-case: simulate power flow and apply result directly to GridNotifier

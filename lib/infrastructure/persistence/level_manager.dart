@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meta/meta.dart';
 import '../../common/logger.dart';
 import '../../domain/entities/level_definition.dart';
-import '../../domain/entities/level_metadata.dart';
 import 'level_manager_state.dart';
 import '../rendering/asset_manager.dart';
 
@@ -94,7 +93,7 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
     }
 
     final levelMeta = state.levels[index];
-    if (!levelMeta.unlocked) {
+    if (!(levelMeta.unlocked ?? false)) {
       Logger.log('Attempted to load locked level ${levelMeta.id}');
       return null;
     }
@@ -142,7 +141,7 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
     final newLevels = state.levels.asMap().entries.map((entry) {
       final i = entry.key;
       final level = entry.value;
-      final unlocked = level.unlocked ||
+      final unlocked = (level.unlocked ?? false) ||
           (i > 0 && newCompletedIds.contains(state.levels[i - 1].id));
       return level.copyWith(unlocked: unlocked);
     }).toList();

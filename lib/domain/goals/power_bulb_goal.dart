@@ -1,7 +1,7 @@
 import '../behaviors/goal_checking_behavior.dart';
 import '../entities/goal.dart';
 import '../entities/grid.dart';
-import '../../application/services/component_registry.dart';
+
 import '../../application/services/component_factory.dart';
 import '../../common/logger.dart';
 

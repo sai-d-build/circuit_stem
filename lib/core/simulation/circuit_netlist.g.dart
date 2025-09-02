@@ -6,14 +6,21 @@ part of 'circuit_netlist.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$SimComponentImpl _$$SimComponentImplFromJson(Map<String, dynamic> json) =>
-    _$SimComponentImpl(
-      id: json['id'] as String,
-      type: $enumDecode(_$ComponentTypeEnumMap, json['type']),
-      properties: json['properties'] as Map<String, dynamic>,
-      connectedNodes: (json['connectedNodes'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+_$SimComponentImpl _$$SimComponentImplFromJson(Map json) => $checkedCreate(
+      r'_$SimComponentImpl',
+      json,
+      ($checkedConvert) {
+        final val = _$SimComponentImpl(
+          id: $checkedConvert('id', (v) => v as String),
+          type: $checkedConvert(
+              'type', (v) => $enumDecode(_$ComponentTypeEnumMap, v)),
+          properties: $checkedConvert(
+              'properties', (v) => Map<String, dynamic>.from(v as Map)),
+          connectedNodes: $checkedConvert('connectedNodes',
+              (v) => (v as List<dynamic>).map((e) => e as String).toList()),
+        );
+        return val;
+      },
     );
 
 Map<String, dynamic> _$$SimComponentImplToJson(_$SimComponentImpl instance) =>
@@ -37,13 +44,21 @@ const _$ComponentTypeEnumMap = {
   ComponentType.timer: 'timer',
   ComponentType.wire: 'wire',
   ComponentType.ground: 'ground',
+  ComponentType.voltageSource: 'voltageSource',
+  ComponentType.currentSource: 'currentSource',
 };
 
-_$SimConnectionImpl _$$SimConnectionImplFromJson(Map<String, dynamic> json) =>
-    _$SimConnectionImpl(
-      id: json['id'] as String,
-      node1Id: json['node1Id'] as String,
-      node2Id: json['node2Id'] as String,
+_$SimConnectionImpl _$$SimConnectionImplFromJson(Map json) => $checkedCreate(
+      r'_$SimConnectionImpl',
+      json,
+      ($checkedConvert) {
+        final val = _$SimConnectionImpl(
+          id: $checkedConvert('id', (v) => v as String),
+          node1Id: $checkedConvert('node1Id', (v) => v as String),
+          node2Id: $checkedConvert('node2Id', (v) => v as String),
+        );
+        return val;
+      },
     );
 
 Map<String, dynamic> _$$SimConnectionImplToJson(_$SimConnectionImpl instance) =>
@@ -53,11 +68,17 @@ Map<String, dynamic> _$$SimConnectionImplToJson(_$SimConnectionImpl instance) =>
       'node2Id': instance.node2Id,
     };
 
-_$SimNodeImpl _$$SimNodeImplFromJson(Map<String, dynamic> json) =>
-    _$SimNodeImpl(
-      id: json['id'] as String,
-      x: (json['x'] as num).toDouble(),
-      y: (json['y'] as num).toDouble(),
+_$SimNodeImpl _$$SimNodeImplFromJson(Map json) => $checkedCreate(
+      r'_$SimNodeImpl',
+      json,
+      ($checkedConvert) {
+        final val = _$SimNodeImpl(
+          id: $checkedConvert('id', (v) => v as String),
+          x: $checkedConvert('x', (v) => (v as num).toDouble()),
+          y: $checkedConvert('y', (v) => (v as num).toDouble()),
+        );
+        return val;
+      },
     );
 
 Map<String, dynamic> _$$SimNodeImplToJson(_$SimNodeImpl instance) =>
@@ -67,25 +88,41 @@ Map<String, dynamic> _$$SimNodeImplToJson(_$SimNodeImpl instance) =>
       'y': instance.y,
     };
 
-_$CircuitNetlistImpl _$$CircuitNetlistImplFromJson(Map<String, dynamic> json) =>
-    _$CircuitNetlistImpl(
-      components: (json['components'] as List<dynamic>)
-          .map((e) => SimComponent.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      connections: (json['connections'] as List<dynamic>)
-          .map((e) => SimConnection.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      nodes: (json['nodes'] as Map<String, dynamic>).map(
-        (k, e) => MapEntry(k, SimNode.fromJson(e as Map<String, dynamic>)),
-      ),
-      timestamp: DateTime.parse(json['timestamp'] as String),
+_$CircuitNetlistImpl _$$CircuitNetlistImplFromJson(Map json) => $checkedCreate(
+      r'_$CircuitNetlistImpl',
+      json,
+      ($checkedConvert) {
+        final val = _$CircuitNetlistImpl(
+          components: $checkedConvert(
+              'components',
+              (v) => (v as List<dynamic>)
+                  .map((e) => SimComponent.fromJson(
+                      Map<String, dynamic>.from(e as Map)))
+                  .toList()),
+          connections: $checkedConvert(
+              'connections',
+              (v) => (v as List<dynamic>)
+                  .map((e) => SimConnection.fromJson(
+                      Map<String, dynamic>.from(e as Map)))
+                  .toList()),
+          nodes: $checkedConvert(
+              'nodes',
+              (v) => (v as Map).map(
+                    (k, e) => MapEntry(k as String,
+                        SimNode.fromJson(Map<String, dynamic>.from(e as Map))),
+                  )),
+          timestamp:
+              $checkedConvert('timestamp', (v) => DateTime.parse(v as String)),
+        );
+        return val;
+      },
     );
 
 Map<String, dynamic> _$$CircuitNetlistImplToJson(
         _$CircuitNetlistImpl instance) =>
     <String, dynamic>{
-      'components': instance.components,
-      'connections': instance.connections,
-      'nodes': instance.nodes,
+      'components': instance.components.map((e) => e.toJson()).toList(),
+      'connections': instance.connections.map((e) => e.toJson()).toList(),
+      'nodes': instance.nodes.map((k, e) => MapEntry(k, e.toJson())),
       'timestamp': instance.timestamp.toIso8601String(),
     };

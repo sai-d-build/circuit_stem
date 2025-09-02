@@ -8,7 +8,7 @@ class RotateComponentUseCaseV2 extends NotifierIntegratedUseCase<RotateComponent
 
   @override
   Result<void> validate(RotateComponentAction action, NotifierContext notifiers) {
-    final component = notifiers.grid.state.componentsById[action.componentId];
+    final component = notifiers.grid.current.componentsById[action.componentId];
     if (component == null) {
       return const Failure('Component not found');
     }
@@ -27,7 +27,7 @@ class RotateComponentUseCaseV2 extends NotifierIntegratedUseCase<RotateComponent
     GameTransaction transaction,
   ) async {
     try {
-      final currentGrid = notifiers.grid.state;
+            final currentGrid = notifiers.grid.current;
       final component = currentGrid.componentsById[action.componentId];
 
       if (component == null) {
@@ -38,7 +38,7 @@ class RotateComponentUseCaseV2 extends NotifierIntegratedUseCase<RotateComponent
       transaction.onCommit(() async {
         final updatedComponent = component.copyWith(rotation: action.rotation);
         final newGrid = currentGrid.copyWithUpdatedComponent(updatedComponent);
-        notifiers.grid.state = newGrid;
+        notifiers.grid.setState(newGrid);
       });
 
       // Register rollback handler

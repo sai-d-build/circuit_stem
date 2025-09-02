@@ -4,6 +4,7 @@
 // educational gaming features.
 
 import '../common/feature_flags.dart';
+import '../common/logger.dart';
 
 // Export this file's public API
 export 'backward_compatibility_layer.dart';
@@ -18,7 +19,7 @@ class FallbackLevelSystem {
 
   Future<void> loadLevel(int levelId) async {
     // No-op when level system is disabled
-    print('Level system disabled - using basic circuit mode');
+        Logger.log('Level system disabled - using basic circuit mode');
   }
 
   List<String> getAvailableLevels() => [];
@@ -36,7 +37,7 @@ class FallbackAchievementSystem {
 
   Future<void> checkAchievements(String event, Map<String, dynamic> data) async {
     // No-op when achievement system is disabled
-    print('Achievement system disabled');
+            Logger.log('Achievement system disabled');
   }
 
   List<String> getUnlockedAchievements() => [];
@@ -52,19 +53,19 @@ class FallbackInteractiveMechanics {
 
   Future<bool> handleDragDrop(String componentId, double x, double y) async {
     // Basic drag-drop without advanced validation
-    print('Using basic drag-drop mechanics');
+        Logger.log('Using basic drag-drop mechanics');
     return true;
   }
 
   Future<bool> handleRotation(String componentId, double angle) async {
     // Basic rotation without animation
-    print('Using basic rotation mechanics');
+            Logger.log('Using basic rotation mechanics');
     return true;
   }
 
   Future<bool> handleToggle(String componentId) async {
     // Basic toggle without feedback
-    print('Using basic toggle mechanics');
+            Logger.log('Using basic toggle mechanics');
     return true;
   }
 }
@@ -91,7 +92,7 @@ class FallbackAnimationSystem {
 
   Future<void> playAnimation(String animationId) async {
     // No animations - just complete immediately
-    print('Animation system disabled - skipping $animationId');
+            Logger.log('Animation system disabled - skipping $animationId');
   }
 
   Future<void> stopAnimation(String animationId) async {
@@ -109,17 +110,17 @@ class FallbackVisualFeedbackSystem {
 
   Future<void> showSuccessFeedback() async {
     // Basic success indication
-    print('✓ Success!');
+            Logger.log('✓ Success!');
   }
 
   Future<void> showErrorFeedback(String message) async {
     // Basic error indication
-    print('✗ Error: $message');
+            Logger.log('✗ Error: $message');
   }
 
   Future<void> showPlacementFeedback(bool valid) async {
     // Basic placement feedback
-    print(valid ? '✓ Valid placement' : '✗ Invalid placement');
+            Logger.log(valid ? '✓ Valid placement' : '✗ Invalid placement');
   }
 }
 
@@ -148,7 +149,7 @@ class FallbackLearningAnalytics {
 
   Future<void> trackEvent(String event, Map<String, dynamic> data) async {
     // Basic logging only
-    print('Learning event: $event with data: $data');
+            Logger.log('Learning event: $event with data: $data');
   }
 
   Future<Map<String, dynamic>> getAnalytics() async {
@@ -202,7 +203,7 @@ class BackwardCompatibilityHelper {
       try {
         return enabledFactory();
       } catch (e) {
-        print('Failed to create enabled service, using fallback: $e');
+                Logger.log('Failed to create enabled service, using fallback: $e');
         return fallbackFactory();
       }
     } else {
@@ -218,7 +219,7 @@ class BackwardCompatibilityHelper {
     try {
       return await operation();
     } catch (e) {
-      print('Safe execution failed, using fallback: $e');
+              Logger.log('Safe execution failed, using fallback: $e');
       return fallbackValue;
     }
   }
@@ -316,9 +317,9 @@ class MigrationUtilities {
       return;
     }
 
-    print('Starting user data migration...');
+        Logger.log('Starting user data migration...');
     // Implement data migration logic here
-    print('User data migration completed');
+            Logger.log('User data migration completed');
   }
 
   // Feature rollout helper
@@ -334,7 +335,7 @@ class MigrationUtilities {
 
     for (final feature in features) {
       if (!FeatureFlagService.isEnabled(feature)) {
-        print('Rolling out feature: ${feature.name}');
+                Logger.log('Rolling out feature: ${feature.name}');
         FeatureFlagService.enableFeature(feature);
 
         // Allow time for feature to stabilize

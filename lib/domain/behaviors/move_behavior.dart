@@ -35,7 +35,7 @@ class StandardMoveBehavior extends BaseMoveBehavior {
       return component;
     }
 
-    final gameContext = context as GameContext;
+    final gameContext = context;
     final newRow = gameContext.toRow;
     final newCol = gameContext.toCol;
 

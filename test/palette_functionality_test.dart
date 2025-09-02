@@ -5,6 +5,7 @@ import 'package:sparkcircuit/application/enhanced_game_state_notifier.dart'; // 
 import 'package:sparkcircuit/application/services/component_factory.dart';
 import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
 import 'package:sparkcircuit/core/persistence/storage_service.dart';
+import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
 import 'package:sparkcircuit/core/simulation/basic_simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart'; // Keep this for PaletteStateNotifier
@@ -13,13 +14,16 @@ void main() {
   group('Palette Functionality Tests', () {
     late ProviderContainer container;
 
-    setUp(() {
+    setUp(() async {
       // Setup a ProviderContainer with necessary overrides for testing
+      final storageService = SharedPreferencesStorageService();
+      await storageService.init();
+
       container = ProviderContainer(overrides: [
         commandStackProvider.overrideWithValue(InMemoryCommandStack()),
         simulationEngineProvider.overrideWithValue(BasicSimulationEngine()),
         netlistBuilderProvider.overrideWithValue(NetlistBuilder()),
-        storageServiceProvider.overrideWithValue(StorageService()),
+        storageServiceProvider.overrideWithValue(storageService),
         componentFactoryProvider.overrideWithValue(ComponentFactory()),
         // Override enhancedGameStateNotifierProvider to ensure it's initialized
         enhancedGameStateNotifierProvider.overrideWith(

@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class ComponentPaletteManager {
-  const ComponentPaletteManager(this.availableTemplates);
+  const ComponentPaletteManager({required this.availableTemplates});
 
   final List<ComponentModel> availableTemplates;
 

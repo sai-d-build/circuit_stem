@@ -1,6 +1,7 @@
-import 'dart:math' as math;
+
 import 'circuit_netlist.dart';
-import '../validation/circuit_validator.dart';
+
+import '../../domain/entities/component.dart';
 
 // Missing classes for simulation results
 class SimulationResult {
@@ -152,12 +153,12 @@ class BasicMNASolver {
   }
 
   void _addResistorToMatrix(SimComponent resistor, List<List<double>> a) {
-    final resistance = resistor.parameters['resistance'] ?? 1000.0;
+    final resistance = resistor.properties['resistance'] ?? 1000.0;
     final conductance = 1.0 / resistance;
 
     // Get node indices (simplified - would need proper node mapping)
-    final node1 = _getNodeIndex(resistor.terminals[0]);
-    final node2 = _getNodeIndex(resistor.terminals[1]);
+    final node1 = _getNodeIndex(resistor.connectedNodes[0]);
+    final node2 = _getNodeIndex(resistor.connectedNodes[1]);
 
     if (node1 >= 0 && node2 >= 0) {
       // Add conductance to diagonal elements
@@ -172,8 +173,8 @@ class BasicMNASolver {
 
   void _addShortCircuit(SimComponent component, List<List<double>> a) {
     // For short circuit (ideal inductor in DC), connect nodes directly
-    final node1 = _getNodeIndex(component.terminals[0]);
-    final node2 = _getNodeIndex(component.terminals[1]);
+    final node1 = _getNodeIndex(component.connectedNodes[0]);
+    final node2 = _getNodeIndex(component.connectedNodes[1]);
 
     if (node1 >= 0 && node2 >= 0) {
       // This is a simplified representation
@@ -185,8 +186,8 @@ class BasicMNASolver {
 
   void _addDiodeToMatrix(SimComponent diode, List<List<double>> a) {
     // Simplified diode model using piecewise linear approximation
-    final node1 = _getNodeIndex(diode.terminals[0]);
-    final node2 = _getNodeIndex(diode.terminals[1]);
+    final node1 = _getNodeIndex(diode.connectedNodes[0]);
+    final node2 = _getNodeIndex(diode.connectedNodes[1]);
 
     if (node1 >= 0 && node2 >= 0) {
       // Simplified forward conductance
@@ -204,8 +205,8 @@ class BasicMNASolver {
 
     for (final component in netlist.components) {
       if (component.type == ComponentType.voltageSource) {
-        final node1 = _getNodeIndex(component.terminals[0]);
-        final node2 = _getNodeIndex(component.terminals[1]);
+        final node1 = _getNodeIndex(component.connectedNodes[0]);
+        final node2 = _getNodeIndex(component.connectedNodes[1]);
 
         if (node1 >= 0 && node2 >= 0) {
           // B matrix: connect voltage source to nodes
@@ -226,9 +227,9 @@ class BasicMNASolver {
     // Add current sources to b vector
     for (final component in netlist.components) {
       if (component.type == ComponentType.currentSource) {
-        final current = component.parameters['current'] ?? 0.0;
-        final node1 = _getNodeIndex(component.terminals[0]);
-        final node2 = _getNodeIndex(component.terminals[1]);
+        final current = component.properties['current'] ?? 0.0;
+        final node1 = _getNodeIndex(component.connectedNodes[0]);
+        final node2 = _getNodeIndex(component.connectedNodes[1]);
 
         if (node1 >= 0) b[node1] += current;
         if (node2 >= 0) b[node2] -= current;
@@ -239,7 +240,7 @@ class BasicMNASolver {
     int voltageSourceIndex = netlist.nodes.length;
     for (final component in netlist.components) {
       if (component.type == ComponentType.voltageSource) {
-        final voltage = component.parameters['voltage'] ?? 0.0;
+        final voltage = component.properties['voltage'] ?? 0.0;
         b[voltageSourceIndex] = voltage;
         voltageSourceIndex++;
       }
@@ -317,11 +318,11 @@ class BasicMNASolver {
     final branchCurrents = <String, double>{};
     for (final component in netlist.components) {
       if (component.type == ComponentType.resistor) {
-        final node1 = component.terminals[0];
-        final node2 = component.terminals[1];
+        final node1 = component.connectedNodes[0];
+        final node2 = component.connectedNodes[1];
         final v1 = nodeVoltages[node1] ?? 0.0;
         final v2 = nodeVoltages[node2] ?? 0.0;
-        final resistance = component.parameters['resistance'] ?? 1000.0;
+        final resistance = component.properties['resistance'] ?? 1000.0;
         final current = (v1 - v2) / resistance;
 
         branchCurrents[component.id] = current;
@@ -358,7 +359,7 @@ class BasicMNASolver {
 
   bool _isComponentPowered(SimComponent component, Map<String, double> nodeVoltages) {
     // Simplified power check
-    for (final terminal in component.terminals) {
+    for (final terminal in component.connectedNodes) {
       final voltage = nodeVoltages[terminal] ?? 0.0;
       if (voltage.abs() > 0.1) return true; // Threshold for "powered"
     }
@@ -367,9 +368,9 @@ class BasicMNASolver {
 
   double _getComponentVoltage(SimComponent component, Map<String, double> nodeVoltages) {
     // Simplified voltage calculation
-    if (component.terminals.length >= 2) {
-      final v1 = nodeVoltages[component.terminals[0]] ?? 0.0;
-      final v2 = nodeVoltages[component.terminals[1]] ?? 0.0;
+    if (component.connectedNodes.length >= 2) {
+      final v1 = nodeVoltages[component.connectedNodes[0]] ?? 0.0;
+      final v2 = nodeVoltages[component.connectedNodes[1]] ?? 0.0;
       return (v1 - v2).abs();
     }
     return 0.0;

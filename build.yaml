@@ -1,0 +1,11 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # Options for the json_serializable builder
+          explicit_to_json: true
+          any_map: true
+          checked: true
+          # Do not generate fromJson/toJson methods, as freezed will handle them
+          

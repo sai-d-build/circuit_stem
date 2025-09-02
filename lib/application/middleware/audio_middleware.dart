@@ -3,6 +3,7 @@ import '../game_engine_state.dart';
 import '../use_cases/component_action.dart';
 
 import 'middleware.dart';
+import '../../common/assets.dart';
 
 class AudioMiddleware extends GameEngineMiddleware {
   final AudioManager _audioManager;
@@ -20,14 +21,14 @@ class AudioMiddleware extends GameEngineMiddleware {
       GameEngineState newState, ComponentAction action) async {
     if (action is CreateComponentFromTemplateAction ||
         action is MoveComponentAction) {
-      _audioManager.playPlacement();
+            _audioManager.playSfx(AppAssets.audioPlacement);
     } else if (action is TapComponentAction ||
         action is RotateComponentAction) {
       if (oldState != newState) {
-        _audioManager.playToggle();
+                _audioManager.playSfx(AppAssets.audioSwitch);
       }
     } else if (action is SelectPaletteComponentAction) {
-      _audioManager.playSelection();
+            _audioManager.playSfx(AppAssets.audioSwitch);
     }
     return newState;
   }

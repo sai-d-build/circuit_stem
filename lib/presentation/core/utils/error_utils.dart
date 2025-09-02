@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'feedback_utils.dart';
 
 /// Error types for SparkCircuit
@@ -103,7 +104,8 @@ class ErrorUtils {
   /// Show error using SnackBar
   static void showSnackBarError(
     BuildContext context,
-    SparkError error, {
+    SparkError error,
+    WidgetRef ref, {
     Duration duration = const Duration(seconds: 4),
   }) {
     final theme = Theme.of(context);
@@ -180,12 +182,14 @@ class ErrorUtils {
           ? FeedbackType.error
           : FeedbackType.medium,
     );
+    FeedbackUtils.provideSoundFeedback(ref, SoundType.error);
   }
 
   /// Show error using Dialog
   static void showDialogError(
     BuildContext context,
-    SparkError error, {
+    SparkError error,
+    WidgetRef ref, {
     bool barrierDismissible = true,
   }) {
     final theme = Theme.of(context);
@@ -265,12 +269,14 @@ class ErrorUtils {
 
     // Provide haptic feedback
     FeedbackUtils.provideHapticFeedback(FeedbackType.medium);
+    FeedbackUtils.provideSoundFeedback(ref, SoundType.error);
   }
 
   /// Show error using Bottom Sheet (for mobile)
   static void showBottomSheetError(
     BuildContext context,
     SparkError error,
+    WidgetRef ref,
   ) {
     final theme = Theme.of(context);
 
@@ -342,25 +348,27 @@ class ErrorUtils {
 
     // Provide haptic feedback
     FeedbackUtils.provideHapticFeedback(FeedbackType.medium);
+    FeedbackUtils.provideSoundFeedback(ref, SoundType.error);
   }
 
   /// Automatically choose the best error display method based on screen size
   static void showError(
     BuildContext context,
-    SparkError error, {
+    SparkError error,
+    WidgetRef ref, {
     ErrorDisplayMethod? method,
   }) {
     final methodToUse = method ?? _getBestDisplayMethod(context, error);
 
     switch (methodToUse) {
       case ErrorDisplayMethod.snackBar:
-        showSnackBarError(context, error);
+        showSnackBarError(context, error, ref);
         break;
       case ErrorDisplayMethod.dialog:
-        showDialogError(context, error);
+        showDialogError(context, error, ref);
         break;
       case ErrorDisplayMethod.bottomSheet:
-        showBottomSheetError(context, error);
+        showBottomSheetError(context, error, ref);
         break;
     }
   }

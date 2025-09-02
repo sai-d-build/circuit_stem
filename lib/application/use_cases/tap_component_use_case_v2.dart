@@ -11,9 +11,8 @@ import 'notifier_integrated_use_case.dart';
 
 class TapComponentUseCaseV2 extends NotifierIntegratedUseCase<TapComponentAction> {
   final PowerSimulationService _simulation;
-  final GoalCheckingService _goalChecker;
 
-  const TapComponentUseCaseV2(this._simulation, this._goalChecker);
+  const TapComponentUseCaseV2(this._simulation);
 
   @override
   Result<void> validate(TapComponentAction action, NotifierContext notifiers) {

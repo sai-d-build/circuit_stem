@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/grid.dart';
 import 'game_engine_state.dart'; // Corrected import
 import 'render_state.dart'; // Corrected import
-import '../../domain/behaviors/logic_behavior.dart';
+
 
 /// The pure engine core that applies updates and produces new GameEngineState.
 class GameEngineCore {

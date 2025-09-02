@@ -8,14 +8,12 @@ import '../../../core/utils/responsive_utils.dart';
 import '../../../core/utils/animation_utils.dart';
 import '../../../core/utils/error_utils.dart';
 import '../widgets/game_canvas.dart';
-import 'package:sparkcircuit/application/enhanced_game_state_notifier.dart';
-import 'package:sparkcircuit/application/enhanced_game_state.dart';
-import 'package:sparkcircuit/core/commands/command_stack.dart';
-import 'package:sparkcircuit/application/providers.dart';
+import 'package:sparkcircuit/application/game_engine_v3/providers_v3.dart';
 import 'package:sparkcircuit/presentation/features/palette/widgets/horizontal_component_palette.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
-  final int levelId;
+  final String levelId;
 
   const GameScreen({super.key, required this.levelId});
 
@@ -78,7 +76,14 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
     final isLandscape = context.isLandscape;
     final isMobile = context.isMobile;
 
-    print('🎮 GameScreen: Building for level $levelIdStr');
+    StructuredLogger.info('Game screen building', context: {
+      'levelId': levelIdStr,
+      'device': {
+        'isLandscape': isLandscape,
+        'isMobile': isMobile,
+        'screenSize': MediaQuery.of(context).size.toString(),
+      },
+    });
 
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.colorScheme.background,
@@ -141,11 +146,18 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
   }
 
   Widget _buildResponsiveBody(BuildContext context, String levelIdStr, bool isLandscape, bool isMobile) {
-    print('🎮 GameScreen: Building responsive body for level $levelIdStr');
+    StructuredLogger.info('Building responsive game screen layout', context: {
+      'levelId': levelIdStr,
+      'device': {
+        'isLandscape': isLandscape,
+        'isMobile': isMobile,
+      },
+      'layoutStrategy': isLandscape && isMobile ? 'horizontal_mobile' : 'vertical_default',
+    });
 
     if (isLandscape && isMobile) {
       // Landscape mobile: horizontal layout
-      print('🎮 GameScreen: Using landscape mobile layout - creating HorizontalComponentPalette');
+      StructuredLogger.debug('Using horizontal mobile layout for optimal screen usage');
       return Row(
         children: [
           // Game Canvas takes most space
@@ -169,7 +181,10 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
       );
     } else {
       // Portrait or tablet/desktop: vertical layout
-      print('🎮 GameScreen: Using portrait/tablet layout - creating HorizontalComponentPalette');
+      StructuredLogger.debug('Using vertical layout for portrait/tablet/desktop', context: {
+        'orientation': isLandscape ? 'landscape' : 'portrait',
+        'palettePlacement': 'bottom_sized',
+      });
       return Column(
         children: [
           _buildResponsiveHud(context),
