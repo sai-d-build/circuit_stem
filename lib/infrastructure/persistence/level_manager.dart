@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meta/meta.dart';
 import '../../common/logger.dart';
-import '../../domain/entities/level_definition.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'level_manager_state.dart';
 import '../rendering/asset_manager.dart';
 
@@ -119,12 +119,12 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
   /// This method should be added to the LevelManagerNotifier class.
   void setCurrentLevel(LevelDefinition level) {
     state = state.copyWith(currentLevelDefinition: level);
-    Logger.log('LevelManagerNotifier: Current level set to ${level.id}');
+    Logger.log('LevelManagerNotifier: Current level set to ${level.levelId}');
   }
 
   /// Marks the current level as complete and unlocks the next one.
   Future<void> markCurrentLevelComplete() async {
-    final currentLevelId = state.currentLevelDefinition?.id;
+    final currentLevelId = state.currentLevelDefinition?.levelId;
     if (currentLevelId == null ||
         state.completedLevelIds.contains(currentLevelId)) {
       return;

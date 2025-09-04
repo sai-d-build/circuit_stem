@@ -3,12 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/game_canvas.dart';
 import 'package:sparkcircuit/application/providers.dart';
-import 'package:sparkcircuit/domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/application/services/component_factory.dart';
 import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
 import 'package:sparkcircuit/core/simulation/basic_simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
-import 'package:sparkcircuit/core/persistence/storage_service.dart';
 import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
 
 void main() {
@@ -35,7 +34,13 @@ void main() {
     testWidgets('GameCanvas should render without errors', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          parent: container,
+          overrides: [
+            commandStackProvider.overrideWithValue(InMemoryCommandStack()),
+            simulationEngineProvider.overrideWithValue(BasicSimulationEngine()),
+            netlistBuilderProvider.overrideWithValue(NetlistBuilder()),
+            storageServiceProvider.overrideWithValue(SharedPreferencesStorageService()),
+            componentFactoryProvider.overrideWithValue(ComponentFactory()),
+          ],
           child: const MaterialApp(
             home: Scaffold(
               body: GameCanvas(levelId: '1'),
@@ -50,7 +55,13 @@ void main() {
     testWidgets('GameCanvas should handle tap gestures', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          parent: container,
+          overrides: [
+            commandStackProvider.overrideWithValue(InMemoryCommandStack()),
+            simulationEngineProvider.overrideWithValue(BasicSimulationEngine()),
+            netlistBuilderProvider.overrideWithValue(NetlistBuilder()),
+            storageServiceProvider.overrideWithValue(SharedPreferencesStorageService()),
+            componentFactoryProvider.overrideWithValue(ComponentFactory()),
+          ],
           child: const MaterialApp(
             home: SizedBox(
               width: 400,
@@ -70,7 +81,13 @@ void main() {
     testWidgets('GameCanvas should handle long press gestures', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          parent: container,
+          overrides: [
+            commandStackProvider.overrideWithValue(InMemoryCommandStack()),
+            simulationEngineProvider.overrideWithValue(BasicSimulationEngine()),
+            netlistBuilderProvider.overrideWithValue(NetlistBuilder()),
+            storageServiceProvider.overrideWithValue(SharedPreferencesStorageService()),
+            componentFactoryProvider.overrideWithValue(ComponentFactory()),
+          ],
           child: const MaterialApp(
             home: SizedBox(
               width: 400,

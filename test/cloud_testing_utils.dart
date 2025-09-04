@@ -2,8 +2,9 @@
 // Testing utilities for cloud functionality
 
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/common/cloud_config.dart' as cloud_config;
-import '../lib/application/services/cloud_service_manager.dart';
+import 'package:sparkcircuit/common/cloud_config.dart';
+import 'package:sparkcircuit/application/services/cloud_service_manager.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 /// Test utilities for cloud functionality
 class CloudTestingUtils {
@@ -15,16 +16,16 @@ class CloudTestingUtils {
     // Set cloud mode
     switch (mode) {
       case CloudServiceMode.localOnly:
-                disableCloudSync();
+        disableCloudSync();
         break;
       case CloudServiceMode.mocked:
-                useMockedCloud();
+        useMockedCloud();
         break;
       case CloudServiceMode.emulator:
-                useEmulator();
+        _useEmulator();
         break;
       case CloudServiceMode.real:
-                enableCloudSync();
+        _enableCloudSync();
         break;
     }
 
@@ -36,7 +37,7 @@ class CloudTestingUtils {
 
   /// Reset cloud configuration to defaults
   static void resetCloudConfiguration() {
-        resetToDefault();
+    resetToDefault();
   }
 
   /// Test helper for verifying cloud service behavior
@@ -48,10 +49,10 @@ class CloudTestingUtils {
 
     switch (expectedMode) {
       case CloudServiceMode.localOnly:
-        expect(service, isA<LocalAuthService>() || isA<LocalCloudStorageService>());
+        expect(service, anyOf(isA<LocalAuthService>(), isA<LocalCloudStorageService>()));
         break;
       case CloudServiceMode.mocked:
-        expect(service, isA<MockAuthService>() || isA<MockCloudStorageService>());
+        expect(service, anyOf(isA<MockAuthService>(), isA<MockCloudStorageService>()));
         break;
       case CloudServiceMode.emulator:
       case CloudServiceMode.real:
@@ -90,7 +91,8 @@ class CloudTestingUtils {
         }
       } else {
         // Other modes might throw expected errors
-        print('Expected error in $operationName: $e');
+        StructuredLogger.debug('Expected error in cloud operation: $operationName',
+          error: e, context: {'operation': operationName, 'mode': mode.toString()});
       }
     }
   }
@@ -114,8 +116,56 @@ class CloudTestingUtils {
   /// Enable detailed cloud logging for tests
   static void _enableCloudLogging() {
     // This would enable detailed logging in a real implementation
-    print('Cloud logging enabled for testing');
+    StructuredLogger.info('Cloud logging enabled for testing',
+      context: {'test_mode': true, 'timestamp': DateTime.now().toIso8601String()});
   }
+
+  /// Enable cloud sync for testing
+  static void _enableCloudSync() {
+    _currentCloudMode = CloudServiceMode.real;
+  }
+
+  /// Disable cloud sync (local only)
+  static void disableCloudSync() {
+    _currentCloudMode = CloudServiceMode.localOnly;
+  }
+
+  /// Use mocked cloud services
+  static void useMockedCloud() {
+    _currentCloudMode = CloudServiceMode.mocked;
+  }
+
+  /// Use Firebase emulator
+  static void _useEmulator() {
+    _currentCloudMode = CloudServiceMode.emulator;
+  }
+
+  /// Reset to default mode based on configuration
+  static void resetToDefault() {
+    _currentCloudMode = CloudServiceMode.mocked; // default for testing
+  }
+
+  /// Check if cloud sync is currently enabled
+  static bool get isCloudEnabled => _currentCloudMode != CloudServiceMode.localOnly;
+
+  /// Check if using mocked services
+  static bool get isUsingMock => _currentCloudMode == CloudServiceMode.mocked;
+
+  /// Get current mode description
+  static String get currentModeDescription {
+    switch (_currentCloudMode) {
+      case CloudServiceMode.real:
+        return 'Real Cloud Services';
+      case CloudServiceMode.localOnly:
+        return 'Local Storage Only';
+      case CloudServiceMode.mocked:
+        return 'Mocked Cloud Services';
+      case CloudServiceMode.emulator:
+        return 'Firebase Emulator';
+    }
+  }
+
+  static CloudServiceMode _currentCloudMode = CloudServiceMode.mocked;
 }
 
 /// Test group for cloud functionality
@@ -180,13 +230,13 @@ class CloudTestExamples {
     });
 
     testCloudFunctionality('should switch modes correctly', () {
-              disableCloudSync();
+      CloudTestingUtils.disableCloudSync();
       expect(CloudTestingUtils.isCloudEnabled, false);
 
-              useMockedCloud();
+      CloudTestingUtils.useMockedCloud();
       expect(CloudTestingUtils.isUsingMock, true);
 
-          resetToDefault();
+      CloudTestingUtils.resetToDefault();
       expect(CloudTestingUtils.currentModeDescription, isNotEmpty);
     });
   }

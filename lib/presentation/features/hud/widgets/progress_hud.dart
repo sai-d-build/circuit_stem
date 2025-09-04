@@ -52,7 +52,7 @@ class ProgressHud extends ConsumerWidget {
             isEarned ? Icons.star : Icons.star_outline,
             color: isEarned
                 ? circuitColors.highlightAccent // Use neon highlight for earned stars
-                : circuitColors.onSurface.withOpacity(0.3),
+                : circuitColors.onSurface.withValues(alpha: 0.3),
             size: 20,
           ),
         );
@@ -71,7 +71,7 @@ class ProgressHud extends ConsumerWidget {
         Text(
           'Score',
           style: theme.textTheme.bodySmall?.copyWith(
-            color: circuitColors.onSurface.withOpacity(0.7),
+            color: circuitColors.onSurface.withValues(alpha: 0.7),
           ),
         ),
         Text(
@@ -81,7 +81,7 @@ class ProgressHud extends ConsumerWidget {
             fontWeight: FontWeight.w600,
             shadows: [
               BoxShadow(
-                color: circuitColors.neonPrimary.withOpacity(0.3),
+                color: circuitColors.neonPrimary.withValues(alpha: 0.3),
                 blurRadius: 5.0,
               ),
             ],
@@ -101,7 +101,7 @@ class ProgressHud extends ConsumerWidget {
         Icon(
           Icons.timer_outlined,
           size: 16,
-          color: circuitColors.onSurface.withOpacity(0.7),
+          color: circuitColors.onSurface.withValues(alpha: 0.7),
         ),
         const SizedBox(width: 4),
         Text(
@@ -112,7 +112,7 @@ class ProgressHud extends ConsumerWidget {
             fontFeatures: const [FontFeature.tabularFigures()],
             shadows: [
               BoxShadow(
-                color: circuitColors.neonPrimary.withOpacity(0.3),
+                color: circuitColors.neonPrimary.withValues(alpha: 0.3),
                 blurRadius: 5.0,
               ),
             ],
@@ -148,7 +148,7 @@ class ProgressHud extends ConsumerWidget {
             fontWeight: FontWeight.w600,
             shadows: [
               BoxShadow(
-                color: hintsColor.withOpacity(0.5),
+                color: hintsColor.withValues(alpha: 0.5),
                 blurRadius: 5.0,
               ),
             ],

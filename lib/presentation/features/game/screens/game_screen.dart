@@ -8,7 +8,7 @@ import '../../../core/utils/responsive_utils.dart';
 import '../../../core/utils/animation_utils.dart';
 import '../../../core/utils/error_utils.dart';
 import '../widgets/game_canvas.dart';
-import 'package:sparkcircuit/application/game_engine_v3/providers_v3.dart';
+import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart';
 import 'package:sparkcircuit/presentation/features/palette/widgets/horizontal_component_palette.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
@@ -86,7 +86,7 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
     });
 
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.colorScheme.background,
+      backgroundColor: AppTheme.lightTheme.colorScheme.surface,
       appBar: _buildResponsiveAppBar(context),
       body: _buildResponsiveBody(context, levelIdStr, isLandscape, isMobile),
     );
@@ -154,6 +154,11 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
       },
       'layoutStrategy': isLandscape && isMobile ? 'horizontal_mobile' : 'vertical_default',
     });
+
+    // Add debug logging for component initialization
+    debugPrint('🎮 GameScreen: Building body for level $levelIdStr');
+    debugPrint('🎮 GameScreen: Passing levelId to GameCanvas: $levelIdStr');
+    debugPrint('🎮 GameScreen: Passing levelId to HorizontalComponentPalette: $levelIdStr');
 
     if (isLandscape && isMobile) {
       // Landscape mobile: horizontal layout

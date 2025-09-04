@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sparkcircuit/presentation/theme/app_theme.dart';
+import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 
 class NeonDropdown<T> extends StatefulWidget {
   final T value;
@@ -24,7 +24,7 @@ class NeonDropdown<T> extends StatefulWidget {
 class _NeonDropdownState<T> extends State<NeonDropdown<T>> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _glowAnimation;
-  bool _isOpen = false;
+  final bool _isOpen = false;
 
   @override
   void initState() {
@@ -47,7 +47,36 @@ class _NeonDropdownState<T> extends State<NeonDropdown<T>> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<CircuitColorScheme>()!;
+    final colors = Theme.of(context).extension<CircuitColorScheme>() ?? const CircuitColorScheme(
+      primary: Color(0xFF1E88E5),
+      onPrimary: Color(0xFFFFFFFF),
+      primaryContainer: Color(0xFFE3F2FD),
+      onPrimaryContainer: Color(0xFF0D47A1),
+      secondary: Color(0xFF43A047),
+      onSecondary: Color(0xFFFFFFFF),
+      tertiary: Color(0xFFFF8F00),
+      onTertiary: Color(0xFFFFFFFF),
+      error: Color(0xFFD32F2F),
+      onError: Color(0xFFFFFFFF),
+      errorContainer: Color(0xFFFFEBEE),
+      onErrorContainer: Color(0xFFB71C1C),
+      surface: Color(0xFFFAFAFA),
+      onSurface: Color(0xFF1C1C1C),
+      surfaceContainer: Color(0xFFEFEFEF),
+      onSurfaceVariant: Color(0xFF424242),
+      shadow: Color(0xFF000000),
+      outline: Color(0xFFBDBDBD),
+      wireActive: Color(0xFF00E676),
+      wireInactive: Color(0xFF616161),
+      componentBase: Color(0xFF2196F3),
+      gridLine: Color(0xFFE0E0E0),
+      glowEffect: Color(0xFF00E5FF),
+      neonPrimary: Color(0xFF00FFFF),
+      neonAccent: Color(0xFFFF00FF),
+      errorGlow: Color(0xFFFF0040),
+      energyPulse: Color(0xFF39FF14),
+      highlightAccent: Color(0xFFFFFF00),
+    );
     final textTheme = Theme.of(context).textTheme;
 
     return AnimatedBuilder(
@@ -63,7 +92,7 @@ class _NeonDropdownState<T> extends State<NeonDropdown<T>> with SingleTickerProv
                   color: colors.onSurface,
                   shadows: [
                     BoxShadow(
-                      color: colors.neonPrimary.withOpacity(0.3),
+                      color: colors.neonPrimary.withValues(alpha: 0.3),
                       blurRadius: 4.0,
                     ),
                   ],
@@ -75,17 +104,17 @@ class _NeonDropdownState<T> extends State<NeonDropdown<T>> with SingleTickerProv
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8.0),
                 border: Border.all(
-                  color: colors.neonPrimary.withOpacity(0.6),
+                  color: colors.neonPrimary.withValues(alpha: 0.6),
                   width: 2.0,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: colors.neonPrimary.withOpacity(_glowAnimation.value * 0.4),
+                    color: colors.neonPrimary.withValues(alpha: _glowAnimation.value * 0.4),
                     blurRadius: 12.0,
                     spreadRadius: 1.0,
                   ),
                 ],
-                color: colors.surface.withOpacity(0.1),
+                color: colors.surface.withValues(alpha: 0.1),
               ),
               child: Theme(
                 data: Theme.of(context).copyWith(
@@ -100,7 +129,7 @@ class _NeonDropdownState<T> extends State<NeonDropdown<T>> with SingleTickerProv
                         ? Text(
                             widget.hint!,
                             style: textTheme.bodyMedium?.copyWith(
-                              color: colors.onSurface.withOpacity(0.6),
+                              color: colors.onSurface.withValues(alpha: 0.6),
                             ),
                           )
                         : null,

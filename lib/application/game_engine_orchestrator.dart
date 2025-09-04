@@ -1,13 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../common/logger.dart';
-import '../domain/entities/component.dart';
-import '../domain/entities/grid.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
+
+import 'core/result.dart';
 
 import 'grid_notifier.dart';
 import 'history_notifier.dart';
 import 'game_progress_notifier.dart';
 import 'component_selection_notifier.dart';
 import 'interaction_state_notifier.dart';
+import 'game_engine_state.dart';
 
 /// Central orchestrator for the V2 game engine architecture
 /// Coordinates all notifiers and manages cross-cutting concerns
@@ -53,7 +55,7 @@ class GameEngineOrchestrator {
 
     // Selection changes should update interaction state
     selection.addListener((state) {
-      if (selection.state.hasSelection) {
+      if (selection.current.hasSelection) {
         interaction.setInteractionMode('component_selected');
       } else {
         interaction.setInteractionMode('normal');
@@ -97,8 +99,31 @@ class GameEngineOrchestrator {
     // Clear history for new level
     history.clearHistory();
 
-    // Update progress
-    progress.setCurrentLevel(int.tryParse(levelId) ?? 1, null);
+    // Update progress - create a basic LevelDefinition for now
+    final levelNumber = int.tryParse(levelId) ?? 1;
+    final basicLevel = LevelDefinition(
+      levelId: levelId,
+      version: '1.0.0',
+      metadata: LevelMetadata(
+        id: levelId,
+        title: 'Level $levelId',
+        description: 'Auto-generated level',
+        difficulty: 'medium',
+      ),
+      grid: GridConfig(width: levelGrid.cols, height: levelGrid.rows),
+      components: ComponentConfig(
+        available: [],
+        preplaced: [],
+        // layout and other complex parameters would need to be defined
+        // based on the actual ComponentConfig class definition
+      ),
+      goals: [],
+      validation: ValidationRules(
+        circuitRules: [],
+        successConditions: [],
+      ),
+    );
+    progress.setCurrentLevel(levelNumber, basicLevel);
   }
 
   /// Handle component placement coordination
@@ -173,6 +198,14 @@ class GameEngineOrchestrator {
     interaction.setInteractionMode('normal');
   }
 
+  /// Execute a use case (for backward compatibility with legacy code)
+  Future<Result<GameEngineState>> executeUseCase<TAction>(
+      dynamic useCase, TAction action) async {
+    // For now, return a success result with empty state
+    // This maintains compatibility with legacy use case adapter
+    return const Failure('UseCase execution not implemented in orchestrator');
+  }
+
   /// Get current system state for debugging
   Map<String, dynamic> getSystemState() {
     return {
@@ -186,12 +219,12 @@ class GameEngineOrchestrator {
         'canUndo': history.canUndo,
       },
       'progress': {
-        'currentLevel': progress.state.currentLevel,
-        'completedLevels': progress.state.completedLevels.length,
-        'totalScore': progress.state.totalScore,
+        'currentLevel': progress.current.currentLevel,
+        'completedLevels': progress.current.completedLevels.length,
+        'totalScore': progress.current.totalScore,
       },
       'selection': {
-        'hasSelection': selection.state.hasSelection,
+        'hasSelection': selection.current.hasSelection,
         'selectedId': selection.selectedComponentId,
         'isDragging': selection.isDragging,
       },

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_controller.dart';
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart' show GameConstants;
 
 class CanvasPainter extends CustomPainter {
   final GameCanvasController controller;

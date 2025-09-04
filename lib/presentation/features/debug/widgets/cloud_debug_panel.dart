@@ -4,14 +4,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../common/cloud_config.dart';
-import '../../../../application/services/cloud_service_manager.dart';
 
 class CloudDebugPanel extends ConsumerWidget {
   const CloudDebugPanel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cloudStatus = ref.watch(cloudStatusProvider);
+    // final cloudStatus = ref.watch(cloudStatusProvider); // Temporarily commented out
+    final cloudStatus = "disabled"; // Placeholder
 
     // Only show in debug mode
     if (!CloudConfig.enableCloudLogging) {
@@ -152,7 +152,7 @@ class CloudDebugPanel extends ConsumerWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: isActive ? Colors.green : Colors.grey[800],
+        backgroundColor: isActive ? Colors.green : Colors.green.shade800,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         minimumSize: const Size(0, 32),

@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'game_engine_state.dart';
-import 'use_cases/base_use_case.dart';
 import 'use_cases/component_action.dart';
 import 'game_engine_orchestrator.dart';
 
@@ -10,17 +9,26 @@ import 'core/result.dart';
 export 'use_cases/check_win_condition_use_case.dart';
 export 'use_cases/create_component_use_case.dart';
 
-// Export optimized notifier-integrated use cases (v2) - these replace legacy versions
-export 'use_cases/tap_component_use_case_v2.dart';
-export 'use_cases/move_component_use_case_v2.dart';
-export 'use_cases/toggle_pause_use_case_v2.dart';
-export 'use_cases/select_palette_component_use_case_v2.dart';
-export 'use_cases/rotate_component_use_case_v2.dart';
-export 'use_cases/simulate_power_flow_use_case_v2.dart';
-export 'use_cases/update_component_use_case_v2.dart';
-export 'use_cases/create_component_use_case_v2.dart';
-export 'use_cases/load_level_use_case_v2.dart';
+// Export optimized notifier-integrated use cases - these replace legacy versions
+export 'use_cases/tap_component_use_case.dart';
+export 'use_cases/move_component_use_case.dart';
+export 'use_cases/toggle_pause_use_case.dart';
+export 'use_cases/select_palette_component_use_case.dart';
+export 'use_cases/rotate_component_use_case.dart';
+export 'use_cases/simulate_power_flow_use_case.dart';
+export 'use_cases/update_component_use_case.dart';
+export 'use_cases/load_level_use_case.dart';
+export 'use_cases/restart_level_use_case.dart';
+export 'use_cases/undo_use_case.dart';
 export 'use_cases/notifier_integrated_use_case.dart';
+
+/// Base UseCase interface for use case adapter
+abstract class UseCase<TAction extends ComponentAction> {
+  const UseCase();
+
+  /// Execute the use case against a game engine state
+  Future<Result<GameEngineState>> execute(GameEngineState state, TAction action);
+}
 
 /// Adapter that allows existing use cases to work with the hybrid notifier system
 /// by executing them against the current composite state and applying diffs
@@ -50,6 +58,6 @@ class UseCaseAdapter {
 
 /// Provider for the use case adapter
 final useCaseAdapterProvider = Provider<UseCaseAdapter>((ref) {
-  final orchestrator = ref.watch(gameEngineOrchestratorProvider.notifier);
+  final orchestrator = ref.watch(gameEngineOrchestratorProvider);
   return UseCaseAdapter(orchestrator);
 });

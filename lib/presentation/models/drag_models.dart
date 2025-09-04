@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 /// Data structure for component drag operations
 class ComponentDragData {
@@ -145,7 +145,7 @@ class ComponentDragFeedback extends StatelessWidget {
         width: 80,
         height: 80,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.9),
+          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: Theme.of(context).colorScheme.primary,

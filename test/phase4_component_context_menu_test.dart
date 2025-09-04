@@ -1,10 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/presentation/features/game/widgets/game_canvas.dart';
-import 'package:sparkcircuit/application/game_engine_v3/providers_v3.dart';
-import 'package:sparkcircuit/domain/entities/component.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
 
 void main() {
   group('Phase 4.2: Component Context Menu Integration Tests', () {

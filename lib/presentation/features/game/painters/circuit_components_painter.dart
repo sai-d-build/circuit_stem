@@ -3,7 +3,7 @@ import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/component_painter.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/wire_painter.dart';
 import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart' as drawing_models;
-import 'package:sparkcircuit/domain/entities/circuit_component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 class CircuitComponentsPainter extends CustomPainter {
   final List<CircuitComponent> components;

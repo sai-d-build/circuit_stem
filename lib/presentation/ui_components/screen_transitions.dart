@@ -144,7 +144,7 @@ class _ScreenTransitionState extends State<ScreenTransition> with SingleTickerPr
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: colors.neonPrimary.withOpacity(_animation.value * 0.5),
+                    color: colors.neonPrimary.withValues(alpha: _animation.value * 0.5),
                     blurRadius: 20.0 * _animation.value,
                     spreadRadius: 5.0 * _animation.value,
                   ),
@@ -176,8 +176,8 @@ class FadeTransition extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenTransition(
       type: TransitionType.fade,
-      child: child,
       reverse: reverse,
+      child: child,
     );
   }
 }
@@ -196,8 +196,8 @@ class ScaleTransition extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenTransition(
       type: TransitionType.scale,
-      child: child,
       reverse: reverse,
+      child: child,
     );
   }
 }
@@ -216,8 +216,8 @@ class NeonPulseTransition extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenTransition(
       type: TransitionType.neonPulse,
-      child: child,
       reverse: reverse,
+      child: child,
     );
   }
 }

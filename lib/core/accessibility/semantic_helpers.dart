@@ -40,8 +40,8 @@ class SemanticHelpers {
       value: valueLabel,
       slider: true,
       enabled: enabled,
-      increasedValue: '${(value + (max - min) * 0.1).clamp(min, max).toStringAsFixed(1)}',
-      decreasedValue: '${(value - (max - min) * 0.1).clamp(min, max).toStringAsFixed(1)}',
+      increasedValue: (value + (max - min) * 0.1).clamp(min, max).toStringAsFixed(1),
+      decreasedValue: (value - (max - min) * 0.1).clamp(min, max).toStringAsFixed(1),
       onIncrease: enabled ? () => onChanged((value + (max - min) * 0.1).clamp(min, max)) : null,
       onDecrease: enabled ? () => onChanged((value - (max - min) * 0.1).clamp(min, max)) : null,
       child: ExcludeSemantics(

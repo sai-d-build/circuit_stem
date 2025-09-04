@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../domain/entities/grid.dart';
-import '../domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../common/logger.dart';
 
 /// Notifier for managing the game grid state

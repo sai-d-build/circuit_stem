@@ -1,6 +1,6 @@
 import '../services/power_simulation_service.dart';
 import '../services/component_factory.dart';
-import '../../domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../../common/logger.dart';
 import '../core/result.dart';
 import '../transaction.dart';

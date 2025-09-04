@@ -27,7 +27,7 @@ class WirePainter extends CustomPainter {
       // Draw glow effect for active wires
       if (wire.isActive) {
         final glowPaint = Paint()
-          ..color = circuitColors.glowEffect.withOpacity(GameConstants.highOpacity) // Use glowEffect color
+          ..color = circuitColors.glowEffect.withValues(alpha: GameConstants.highOpacity) // Use glowEffect color
           ..strokeCap = StrokeCap.round
           ..strokeWidth = GameConstants.wireGlowRadius * scale // Wider for glow
           ..maskFilter = MaskFilter.blur(BlurStyle.normal, GameConstants.selectionGlowRadius * scale);

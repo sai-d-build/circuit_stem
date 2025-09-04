@@ -12,8 +12,8 @@ class PlatformUtils {
   static bool get isHighEndDevice {
     // This would be expanded with actual device detection
     // For now, use screen size and pixel ratio as proxy
-    final pixelRatio = WidgetsBinding.instance.window.devicePixelRatio;
-    final screenSize = WidgetsBinding.instance.window.physicalSize;
+    final pixelRatio = WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+    final screenSize = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
     final width = screenSize.width / pixelRatio;
         // final height = screenSize.height / pixelRatio;
 
@@ -34,10 +34,10 @@ class PlatformUtils {
     if (isIOS) {
       // iOS color adjustments for Metal rendering
       return Color.fromRGBO(
-        (color.red * 0.95).round().clamp(0, 255),
-        (color.green * 0.95).round().clamp(0, 255),
-        (color.blue * 0.95).round().clamp(0, 255),
-        color.opacity,
+        (color.r * 0.95).round().clamp(0, 255),
+        (color.g * 0.95).round().clamp(0, 255),
+        (color.b * 0.95).round().clamp(0, 255),
+        color.a,
       );
     }
     return color;

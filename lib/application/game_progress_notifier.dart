@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../common/logger.dart';
-import '../domain/entities/level_definition.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 /// Represents game progress data
 class GameProgress {

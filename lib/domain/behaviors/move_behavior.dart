@@ -1,8 +1,8 @@
 // Move behavior interface for circuit components
 // Defines the behavior for components that can be moved on the grid
 
-import '../entities/component.dart';
-import '../entities/grid.dart';
+import '../entities/core/component.dart';
+import '../entities/core/grid.dart';
 
 abstract class MoveBehavior {
   ComponentModel? handle(ComponentModel component, String action, dynamic context);

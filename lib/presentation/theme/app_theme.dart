@@ -75,7 +75,6 @@ class AppTheme {
         secondary: secondaryColor,
         secondaryContainer: secondaryVariant,
         surface: surfaceColor,
-        background: backgroundColor,
         error: errorColor,
         onPrimary: Colors.white,
         onSecondary: Colors.black,
@@ -206,7 +205,6 @@ class AppTheme {
         primary: primaryColor,
         secondary: secondaryColor,
         surface: Color(0xFF121212),
-        background: Color(0xFF0A0A0A),
       ),
     );
   }

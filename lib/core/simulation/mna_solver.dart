@@ -1,7 +1,7 @@
 
 import 'circuit_netlist.dart';
 
-import '../../domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 // Missing classes for simulation results
 class SimulationResult {

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/enhanced_game_state.dart';
-import 'package:sparkcircuit/application/game_engine_v3/providers_v3.dart';
-import 'package:sparkcircuit/domain/entities/component.dart';
+import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/component_painter.dart';
 
-import 'package:sparkcircuit/domain/entities/circuit_component.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 
 class CircuitComponentWidget extends ConsumerWidget {

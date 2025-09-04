@@ -59,7 +59,7 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
     final clampedValue = progressValue.clamp(0.0, 1.0);
 
     final progressColor = widget.progressColor ?? colors.energyPulse;
-    final bgColor = widget.backgroundColor ?? colors.outline.withOpacity(0.3);
+    final bgColor = widget.backgroundColor ?? colors.outline.withValues(alpha: 0.3);
 
     return AnimatedBuilder(
       animation: _glowAnimation,
@@ -78,7 +78,7 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
                         color: colors.onSurface,
                         shadows: [
                           BoxShadow(
-                            color: colors.neonPrimary.withOpacity(0.3),
+                            color: colors.neonPrimary.withValues(alpha: 0.3),
                             blurRadius: 4.0,
                           ),
                         ],
@@ -92,7 +92,7 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
                         fontWeight: FontWeight.bold,
                         shadows: [
                           BoxShadow(
-                            color: progressColor.withOpacity(0.5),
+                            color: progressColor.withValues(alpha: 0.5),
                             blurRadius: 6.0,
                           ),
                         ],
@@ -108,7 +108,7 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
                 borderRadius: BorderRadius.circular(widget.height / 2),
                 color: bgColor,
                 border: Border.all(
-                  color: colors.neonPrimary.withOpacity(0.4),
+                  color: colors.neonPrimary.withValues(alpha: 0.4),
                   width: 1.0,
                 ),
               ),
@@ -124,7 +124,7 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              progressColor.withOpacity(0.8),
+                              progressColor.withValues(alpha: 0.8),
                               progressColor,
                             ],
                             begin: Alignment.centerLeft,
@@ -132,7 +132,7 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: progressColor.withOpacity(_glowAnimation.value * 0.8),
+                              color: progressColor.withValues(alpha: _glowAnimation.value * 0.8),
                               blurRadius: 8.0,
                               spreadRadius: 2.0,
                             ),
@@ -149,7 +149,7 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
                           gradient: LinearGradient(
                             colors: [
                               Colors.transparent,
-                              progressColor.withOpacity(_glowAnimation.value * 0.4),
+                              progressColor.withValues(alpha: _glowAnimation.value * 0.4),
                               Colors.transparent,
                             ],
                             stops: const [0.0, 0.5, 1.0],

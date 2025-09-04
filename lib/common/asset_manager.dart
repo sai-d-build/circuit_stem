@@ -216,7 +216,7 @@ class AssetManager {
 
   void _drawWireStraight(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.blueGrey.shade700
+      ..color = Colors.grey.shade700
       ..strokeWidth = 6
       ..strokeCap = StrokeCap.round;
 
@@ -229,7 +229,7 @@ class AssetManager {
 
   void _drawWireCorner(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.blueGrey.shade700
+      ..color = Colors.grey.shade700
       ..strokeWidth = 6
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
@@ -244,7 +244,7 @@ class AssetManager {
 
   void _drawWireT(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.blueGrey.shade700
+      ..color = Colors.grey.shade700
       ..strokeWidth = 6
       ..strokeCap = StrokeCap.round;
 

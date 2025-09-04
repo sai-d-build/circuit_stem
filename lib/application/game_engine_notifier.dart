@@ -1,9 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Domain entities
-import '../domain/entities/level_definition.dart';
-import '../domain/entities/grid.dart';
-import '../domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 // Application layer
 import 'game_engine_state.dart';
@@ -13,6 +10,7 @@ import 'audio_manager.dart';
 import 'input_manager.dart';
 import 'animation_scheduler.dart';
 import 'transaction.dart';
+import 'services/component_palette_manager.dart';
 
 // V2 Use Cases
 import 'use_cases/component_action.dart';
@@ -47,7 +45,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     required this.animationScheduler,
     required this.ref,
   })  : input = InputManager(),
-        audio = AudioManager(audioService),
+        audio = AudioManager(),
         _middleware = [
           ValidationMiddleware(),
           const LoggingMiddleware(),
@@ -59,8 +57,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
           isWin: false,
           lastUpdated: DateTime.now(),
           isDebugOverlayVisible: false,
-          interactionState: InteractionState.initial(),
-          history: HistoryState.initial(),
+          paletteManager: const ComponentPaletteManager(availableTemplates: []),
         )) {
     _init();
   }
@@ -81,14 +78,7 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
 
   Future<Result<void>> executeAction(ComponentAction action) async {
     final transaction = GameTransaction();
-    final notifierContext = NotifierContext(
-      grid: ref.read(gridNotifierProvider.notifier),
-      history: ref.read(historyNotifierProvider.notifier),
-      progress: ref.read(gameProgressNotifierProvider.notifier),
-      selection: ref.read(componentSelectionNotifierProvider.notifier),
-      interaction: ref.read(interactionStateNotifierProvider.notifier),
-      paletteManager: ref.read(componentPaletteManagerProvider),
-    );
+    final notifierContext = _createNotifierContext();
 
     try {
       ComponentAction processedAction = action;
@@ -110,13 +100,13 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
           return const Success(null);
         },
         (error) async {
-          await transaction.rollback();
+          transaction.rollback();
           Logger.log('Action execution failed: $error');
           return Failure(error);
         },
       );
     } catch (e, s) {
-      await transaction.rollback();
+      transaction.rollback();
       Logger.log('Action execution error: $e\n$s');
       return Failure('Action execution error: $e');
     }
@@ -126,25 +116,25 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
       ComponentAction action, NotifierContext context, GameTransaction transaction) async {
     switch (action.runtimeType) {
       case LoadLevelAction _:
-        return ref.read(loadLevelUseCaseV2Provider).executeWithNotifiers(action as LoadLevelAction, context, transaction);
+        return ref.read(loadLevelUseCaseProvider).executeWithNotifiers(action as LoadLevelAction, context, transaction);
       case CreateComponentFromTemplateAction _:
-        return ref.read(createComponentUseCaseV2Provider).executeWithNotifiers(action as CreateComponentFromTemplateAction, context, transaction);
+        return ref.read(createComponentUseCaseProvider).executeWithNotifiers(action as CreateComponentFromTemplateAction, context, transaction);
       case RotateComponentAction _:
-        return ref.read(rotateComponentUseCaseV2Provider).executeWithNotifiers(action as RotateComponentAction, context, transaction);
+        return ref.read(rotateComponentUseCaseProvider).executeWithNotifiers(action as RotateComponentAction, context, transaction);
       case MoveComponentAction _:
-        return ref.read(moveComponentUseCaseV2Provider).executeWithNotifiers(action as MoveComponentAction, context, transaction);
+        return ref.read(moveComponentUseCaseProvider).executeWithNotifiers(action as MoveComponentAction, context, transaction);
       case TapComponentAction _:
-        return ref.read(tapComponentUseCaseV2Provider).executeWithNotifiers(action as TapComponentAction, context, transaction);
+        return ref.read(tapComponentUseCaseProvider).executeWithNotifiers(action as TapComponentAction, context, transaction);
       case UpdateComponentAction _:
-        return ref.read(updateComponentUseCaseV2Provider).executeWithNotifiers(action as UpdateComponentAction, context, transaction);
+        return ref.read(updateComponentUseCaseProvider).executeWithNotifiers(action as UpdateComponentAction, context, transaction);
       case RestartLevelAction _:
-        return ref.read(restartLevelUseCaseV2Provider).executeWithNotifiers(action as RestartLevelAction, context, transaction);
+        return ref.read(restartLevelUseCaseProvider).executeWithNotifiers(action as RestartLevelAction, context, transaction);
       case SelectPaletteComponentAction _:
-        return ref.read(selectPaletteComponentUseCaseV2Provider).executeWithNotifiers(action as SelectPaletteComponentAction, context, transaction);
+        return ref.read(selectPaletteComponentUseCaseProvider).executeWithNotifiers(action as SelectPaletteComponentAction, context, transaction);
       case TogglePauseAction _:
-        return ref.read(togglePauseUseCaseV2Provider).executeWithNotifiers(action as TogglePauseAction, context, transaction);
+        return ref.read(togglePauseUseCaseProvider).executeWithNotifiers(action as TogglePauseAction, context, transaction);
       case UndoAction _:
-        return ref.read(undoUseCaseV2Provider).executeWithNotifiers(action as UndoAction, context, transaction);
+        return ref.read(undoUseCaseProvider).executeWithNotifiers(action as UndoAction, context, transaction);
       default:
         return const Failure('Unknown action type');
     }
@@ -204,5 +194,16 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
 
   void toggleDebugOverlay() {
     state = state.copyWith(isDebugOverlayVisible: !state.isDebugOverlayVisible);
+  }
+
+  NotifierContext _createNotifierContext() {
+    return NotifierContext(
+      grid: ref.read(gridNotifierProvider.notifier),
+      history: ref.read(historyNotifierProvider.notifier),
+      progress: ref.read(gameProgressNotifierProvider.notifier),
+      selection: ref.read(componentSelectionNotifierProvider.notifier),
+      interaction: ref.read(interactionStateNotifierProvider.notifier),
+      paletteManager: ref.read(componentPaletteManagerProvider),
+    );
   }
 }

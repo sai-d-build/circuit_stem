@@ -116,7 +116,7 @@ class _EnergyFlowPainter extends CustomPainter {
 
     // Draw base wire
     final basePaint = Paint()
-      ..color = flowColor.withOpacity(0.3)
+      ..color = flowColor.withValues(alpha: 0.3)
       ..strokeWidth = thickness
       ..strokeCap = StrokeCap.round;
 
@@ -132,7 +132,7 @@ class _EnergyFlowPainter extends CustomPainter {
 
       // Particle glow
       final glowPaint = Paint()
-        ..color = flowColor.withOpacity(0.8 * (1 - particleProgress.abs()))
+        ..color = flowColor.withValues(alpha: 0.8 * (1 - particleProgress.abs()))
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, thickness * 2);
 
       canvas.drawCircle(particlePosition, thickness * 1.5, glowPaint);
@@ -147,7 +147,7 @@ class _EnergyFlowPainter extends CustomPainter {
 
     // Draw energy wave effect
     final wavePaint = Paint()
-      ..color = flowColor.withOpacity(0.4)
+      ..color = flowColor.withValues(alpha: 0.4)
       ..strokeWidth = thickness * 0.5
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
@@ -275,7 +275,7 @@ class _WireGlowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final glowPaint = Paint()
-      ..color = glowColor.withOpacity(0.4)
+      ..color = glowColor.withValues(alpha: 0.4)
       ..strokeWidth = 8.0
       ..strokeCap = StrokeCap.round
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4.0);

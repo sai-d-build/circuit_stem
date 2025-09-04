@@ -3,7 +3,7 @@
 
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import '../../domain/entities/level_definition.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 class LevelService {
@@ -18,13 +18,12 @@ class LevelService {
   /// Load all available levels from assets
   Future<List<LevelDefinition>> loadAllLevels() async {
     try {
-      // Get all level asset paths
-      final manifestContent = await _assetBundle.loadString('AssetManifest.json');
-      final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-
-      final levelPaths = manifestMap.keys
-          .where((String key) => key.startsWith('assets/levels/') && key.endsWith('.json'))
-          .toList();
+      // Known level paths (hardcoded to avoid manifest issues in web)
+      final levelPaths = [
+        'assets/levels/tutorial/tutorial_01.json',
+        'assets/levels/beginner/beginner_01.json',
+        // Add more as needed
+      ];
 
       final List<LevelDefinition> levels = [];
 

@@ -1,34 +1,60 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// ============================================================================
+// LEGACY COMPATIBILITY BACKWARD EXPORTS
+// ============================================================================
+// These providers have been moved to organized categories in core_providers.dart
+// This file maintains backward compatibility for existing imports.
+// DO NOT ADD NEW PROVIDERS HERE - add them to the appropriate category file instead.
+
+// Re-export core providers from categorized files for backward compatibility
+export '../providers/core_providers.dart' show
+  // Simulation providers
+  mnaSolverProvider,
+  powerSimulationServiceProvider,
+  netlistBuilderProvider,
+  simulationEngineProvider,
+
+  // Component providers
+  componentFactoryProvider,
+  componentPaletteManagerProvider,
+
+  // Storage providers
+  storageServiceProvider,
+
+  // Goal checking
+  goalCheckingServiceProvider;
+
+// Legacy file-wide exports (for tests and legacy code)
+// These exports allow existing files to continue working
+export '../providers/core_providers.dart';
+
 import './check_win_condition_use_case.dart';
 import './create_component_use_case.dart';
-import './load_level_use_case_v2.dart';
-import './move_component_use_case_v2.dart';
-import './restart_level_use_case_v2.dart';
-import './rotate_component_use_case_v2.dart';
-import './select_palette_component_use_case_v2.dart';
-import './simulate_power_flow_use_case_v2.dart';
-import './tap_component_use_case_v2.dart';
-import './toggle_pause_use_case_v2.dart';
-import './undo_use_case_v2.dart';
-import './update_component_use_case_v2.dart';
+import './load_level_use_case.dart';
+import './move_component_use_case.dart';
+import './restart_level_use_case.dart';
+import './rotate_component_use_case.dart';
+import './select_palette_component_use_case.dart';
+import './simulate_power_flow_use_case.dart';
+import './tap_component_use_case.dart';
+import './toggle_pause_use_case.dart';
+import './undo_use_case.dart';
+import './update_component_use_case.dart';
 import '../services/power_simulation_service.dart';
 import '../services/goal_checking_service.dart';
 import '../services/component_palette_manager.dart';
 import '../services/component_factory.dart';
 import '../../core/simulation/mna_solver.dart';
-import '../../core/commands/command_stack.dart';
 import '../../core/commands/in_memory_command_stack.dart';
 import '../../infrastructure/persistence/shared_preferences_storage_service.dart';
-import '../../core/simulation/simulation_engine.dart';
 import '../../core/simulation/basic_simulation_engine.dart';
 import '../../core/simulation/netlist_builder.dart';
 
 final mnaSolverProvider = Provider((ref) => BasicMNASolver());
 
 final powerSimulationServiceProvider = Provider((ref) {
-  final solver = ref.watch(mnaSolverProvider);
-  return PowerSimulationService(); // Fix: Remove solver parameter if not needed
+  return PowerSimulationService();
 });
 
 final goalCheckingServiceProvider = Provider((ref) => GoalCheckingService());
@@ -43,63 +69,64 @@ final checkWinConditionUseCaseProvider = Provider((ref) {
 });
 
 final createComponentUseCaseProvider = Provider((ref) {
-  final factory = ref.watch(componentFactoryProvider);
   final simulation = ref.watch(powerSimulationServiceProvider);
-  return CreateComponentUseCase(factory, simulation);
+  final factory = ref.watch(componentFactoryProvider);
+  return CreateComponentUseCase(simulation, factory);
 });
 
-final createComponentUseCaseV2Provider = Provider((ref) {
-  final factory = ref.watch(componentFactoryProvider);
-  final simulation = ref.watch(powerSimulationServiceProvider);
-  return CreateComponentUseCaseV2(factory, simulation);
-});
-
-final loadLevelUseCaseV2Provider = Provider((ref) {
+final loadLevelUseCaseProvider = Provider((ref) {
   final powerSimulationService = ref.watch(powerSimulationServiceProvider);
   final goalCheckingService = ref.watch(goalCheckingServiceProvider);
-  return LoadLevelUseCaseV2(powerSimulationService, goalCheckingService);
+  return LoadLevelUseCase(powerSimulationService, goalCheckingService);
 });
 
-final moveComponentUseCaseV2Provider = Provider((ref) {
+final moveComponentUseCaseProvider = Provider((ref) {
   final simulationService = ref.watch(powerSimulationServiceProvider);
-  return MoveComponentUseCaseV2(simulationService);
+  return MoveComponentUseCase(simulationService);
 });
 
-final restartLevelUseCaseV2Provider = Provider((ref) {
+final restartLevelUseCaseProvider = Provider((ref) {
   final powerSimulationService = ref.watch(powerSimulationServiceProvider);
-  return RestartLevelUseCaseV2(powerSimulationService);
+  return RestartLevelUseCase(powerSimulationService);
 });
 
-final rotateComponentUseCaseV2Provider = Provider((ref) {
-  return const RotateComponentUseCaseV2();
+final rotateComponentUseCaseProvider = Provider((ref) {
+  return const RotateComponentUseCase();
 });
 
-final selectPaletteComponentUseCaseV2Provider = Provider((ref) {
-  return const SelectPaletteComponentUseCaseV2();
+final selectPaletteComponentUseCaseProvider = Provider((ref) {
+  return const SelectPaletteComponentUseCase();
 });
 
-final simulatePowerFlowUseCaseV2Provider = Provider((ref) {
+final simulatePowerFlowUseCaseProvider = Provider((ref) {
   final simulationService = ref.watch(powerSimulationServiceProvider);
-  return SimulatePowerFlowUseCaseV2(simulationService);
+  return SimulatePowerFlowUseCase(simulationService);
 });
 
-final tapComponentUseCaseV2Provider = Provider((ref) {
+final tapComponentUseCaseProvider = Provider((ref) {
   final simulationService = ref.watch(powerSimulationServiceProvider);
-  return TapComponentUseCaseV2(simulationService);
+  return TapComponentUseCase(simulationService);
 });
 
-final togglePauseUseCaseV2Provider = Provider((ref) {
-  return const TogglePauseUseCaseV2();
+final togglePauseUseCaseProvider = Provider((ref) {
+  return const TogglePauseUseCase();
 });
 
-final undoUseCaseV2Provider = Provider((ref) {
-  return UndoUseCaseV2();
+final undoUseCaseProvider = Provider((ref) {
+  return UndoUseCase();
 });
 
-final updateComponentUseCaseV2Provider = Provider((ref) {
+final updateComponentUseCaseProvider = Provider((ref) {
   final simulationService = ref.watch(powerSimulationServiceProvider);
-  return UpdateComponentUseCaseV2(simulationService);
+  return UpdateComponentUseCase(simulationService);
 });
+
+
+// WARNING: If you're adding new providers, please add them to:
+// - lib/application/providers/core_providers.dart (for core business logic)
+// - lib/application/providers/game_providers.dart (for game engines)
+// - lib/application/providers/test_providers.dart (for test mocks)
+// And then add the export here for backward compatibility.
 
 // Missing service providers
 final componentFactoryProvider = Provider((ref) => ComponentFactory());

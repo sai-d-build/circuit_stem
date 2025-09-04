@@ -8,7 +8,6 @@ part 'animation_system.freezed.dart';
 /// Animation system for Circuit STEM educational gaming platform
 class AnimationSystem {
   final Map<String, rive.RiveAnimationController> _controllers = {};
-  final Map<String, rive.Artboard> _artboards = {};
   final Map<String, AnimationMetrics> _metrics = {};
 
   // Animation assets

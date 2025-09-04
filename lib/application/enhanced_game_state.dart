@@ -1,13 +1,11 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:sparkcircuit/domain/entities/grid.dart';
-import 'package:sparkcircuit/domain/entities/level_definition.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/simulation/simulation_result.dart';
 import 'package:flutter/material.dart'; // For Offset
 import '../common/converters.dart';
 
 part 'enhanced_game_state.freezed.dart';
-part 'enhanced_game_state.g.dart';
 
 @freezed
 class GameState with _$GameState {
@@ -25,10 +23,19 @@ class GameState with _$GameState {
 
   factory GameState.initial(LevelDefinition? level) => GameState(
         grid: Grid(
-          rows: level?.rows ?? 0,
-          cols: level?.cols ?? 0,
-          components: level?.initialComponentsList != null
-              ? {for (final comp in level!.initialComponentsList) comp.id: comp}
+          rows: level?.grid.height ?? 0,
+          cols: level?.grid.width ?? 0,
+          components: level?.components.preplaced != null
+              ? {
+                  for (final pos in level!.components.preplaced)
+                    '${pos.row}_${pos.col}_${DateTime.now().millisecondsSinceEpoch}':
+                        ComponentModel(
+                      id: '${pos.row}_${pos.col}_${DateTime.now().millisecondsSinceEpoch}',
+                      type: ComponentType.wire, // Default to wire
+                      row: pos.row,
+                      col: pos.col,
+                    )
+                }
               : {},
         ),
         isPaused: false,

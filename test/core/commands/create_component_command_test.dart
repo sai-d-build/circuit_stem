@@ -1,10 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sparkcircuit/core/commands/create_component_command.dart';
-import 'package:sparkcircuit/domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/application/enhanced_game_state.dart';
 
-import 'package:sparkcircuit/domain/entities/level_definition.dart';
-import 'package:sparkcircuit/domain/goals/power_bulb_goal.dart';
+
 
 void main() {
   group('CreateComponentCommand', () {
@@ -27,6 +26,7 @@ void main() {
         ),
         components: ComponentConfig(
           available: [],
+          preplaced: [],
         ),
         goals: [],
         validation: ValidationRules(

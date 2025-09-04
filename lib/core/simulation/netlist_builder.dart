@@ -9,7 +9,7 @@ class NetlistBuilder {
     final nodes = <String, SimNode>{};
 
     // Helper to generate unique node IDs based on grid position
-    String getNodeKey(int row, int col) => 'node_${row}_${col}';
+    String getNodeKey(int row, int col) => 'node_${row}_$col';
 
     // Process components and create SimComponents and SimNodes
     for (final componentModel in gameState.grid.components.values) {

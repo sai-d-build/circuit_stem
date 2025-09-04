@@ -1,7 +1,6 @@
 // lib/infrastructure/persistence/hive_storage_service.dart
 // Hive implementation of StorageService
 
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../core/persistence/storage_service.dart';
 

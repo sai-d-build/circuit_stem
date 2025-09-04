@@ -18,7 +18,7 @@ class GridWidget extends StatelessWidget {
     super.key,
     required this.cellSize,
     required this.gridColor,
-    this.majorGridColor = Colors.grey,
+    this.majorGridColor = Colors.green,
     this.strokeWidth = 0.5,
     this.majorStrokeWidth = 1.0,
     this.majorGridInterval = 5,

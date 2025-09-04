@@ -14,18 +14,18 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
+Goal _$GoalFromJson(Map<String, dynamic> json) {
+  return _Goal.fromJson(json);
+}
+
 /// @nodoc
 mixin _$Goal {
   String get type => throw _privateConstructorUsedError;
+  Map<String, dynamic> get parameters => throw _privateConstructorUsedError;
   String? get targetId => throw _privateConstructorUsedError;
-  int? get r => throw _privateConstructorUsedError;
-  int? get c => throw _privateConstructorUsedError;
-  String? get from => throw _privateConstructorUsedError;
-  String? get to => throw _privateConstructorUsedError;
-  Map<String, dynamic>? get parameters => throw _privateConstructorUsedError;
-  List<String>? get conditions =>
-      throw _privateConstructorUsedError; // Added this line
-  List<dynamic> get behaviors => throw _privateConstructorUsedError;
+
+  /// Serializes this Goal to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of Goal
   /// with the given fields replaced by the non-null parameter values.
@@ -38,16 +38,7 @@ abstract class $GoalCopyWith<$Res> {
   factory $GoalCopyWith(Goal value, $Res Function(Goal) then) =
       _$GoalCopyWithImpl<$Res, Goal>;
   @useResult
-  $Res call(
-      {String type,
-      String? targetId,
-      int? r,
-      int? c,
-      String? from,
-      String? to,
-      Map<String, dynamic>? parameters,
-      List<String>? conditions,
-      List<dynamic> behaviors});
+  $Res call({String type, Map<String, dynamic> parameters, String? targetId});
 }
 
 /// @nodoc
@@ -66,52 +57,22 @@ class _$GoalCopyWithImpl<$Res, $Val extends Goal>
   @override
   $Res call({
     Object? type = null,
+    Object? parameters = null,
     Object? targetId = freezed,
-    Object? r = freezed,
-    Object? c = freezed,
-    Object? from = freezed,
-    Object? to = freezed,
-    Object? parameters = freezed,
-    Object? conditions = freezed,
-    Object? behaviors = null,
   }) {
     return _then(_value.copyWith(
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
               as String,
+      parameters: null == parameters
+          ? _value.parameters
+          : parameters // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
       targetId: freezed == targetId
           ? _value.targetId
           : targetId // ignore: cast_nullable_to_non_nullable
               as String?,
-      r: freezed == r
-          ? _value.r
-          : r // ignore: cast_nullable_to_non_nullable
-              as int?,
-      c: freezed == c
-          ? _value.c
-          : c // ignore: cast_nullable_to_non_nullable
-              as int?,
-      from: freezed == from
-          ? _value.from
-          : from // ignore: cast_nullable_to_non_nullable
-              as String?,
-      to: freezed == to
-          ? _value.to
-          : to // ignore: cast_nullable_to_non_nullable
-              as String?,
-      parameters: freezed == parameters
-          ? _value.parameters
-          : parameters // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
-      conditions: freezed == conditions
-          ? _value.conditions
-          : conditions // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-      behaviors: null == behaviors
-          ? _value.behaviors
-          : behaviors // ignore: cast_nullable_to_non_nullable
-              as List<dynamic>,
     ) as $Val);
   }
 }
@@ -123,16 +84,7 @@ abstract class _$$GoalImplCopyWith<$Res> implements $GoalCopyWith<$Res> {
       __$$GoalImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String type,
-      String? targetId,
-      int? r,
-      int? c,
-      String? from,
-      String? to,
-      Map<String, dynamic>? parameters,
-      List<String>? conditions,
-      List<dynamic> behaviors});
+  $Res call({String type, Map<String, dynamic> parameters, String? targetId});
 }
 
 /// @nodoc
@@ -148,120 +100,54 @@ class __$$GoalImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? type = null,
+    Object? parameters = null,
     Object? targetId = freezed,
-    Object? r = freezed,
-    Object? c = freezed,
-    Object? from = freezed,
-    Object? to = freezed,
-    Object? parameters = freezed,
-    Object? conditions = freezed,
-    Object? behaviors = null,
   }) {
     return _then(_$GoalImpl(
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
               as String,
+      parameters: null == parameters
+          ? _value._parameters
+          : parameters // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
       targetId: freezed == targetId
           ? _value.targetId
           : targetId // ignore: cast_nullable_to_non_nullable
               as String?,
-      r: freezed == r
-          ? _value.r
-          : r // ignore: cast_nullable_to_non_nullable
-              as int?,
-      c: freezed == c
-          ? _value.c
-          : c // ignore: cast_nullable_to_non_nullable
-              as int?,
-      from: freezed == from
-          ? _value.from
-          : from // ignore: cast_nullable_to_non_nullable
-              as String?,
-      to: freezed == to
-          ? _value.to
-          : to // ignore: cast_nullable_to_non_nullable
-              as String?,
-      parameters: freezed == parameters
-          ? _value._parameters
-          : parameters // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
-      conditions: freezed == conditions
-          ? _value._conditions
-          : conditions // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-      behaviors: null == behaviors
-          ? _value._behaviors
-          : behaviors // ignore: cast_nullable_to_non_nullable
-              as List<dynamic>,
     ));
   }
 }
 
 /// @nodoc
-
-class _$GoalImpl extends _Goal {
+@JsonSerializable()
+class _$GoalImpl implements _Goal {
   const _$GoalImpl(
       {required this.type,
-      this.targetId,
-      this.r,
-      this.c,
-      this.from,
-      this.to,
-      final Map<String, dynamic>? parameters,
-      final List<String>? conditions,
-      final List<dynamic> behaviors = const []})
-      : _parameters = parameters,
-        _conditions = conditions,
-        _behaviors = behaviors,
-        super._();
+      required final Map<String, dynamic> parameters,
+      this.targetId})
+      : _parameters = parameters;
+
+  factory _$GoalImpl.fromJson(Map<String, dynamic> json) =>
+      _$$GoalImplFromJson(json);
 
   @override
   final String type;
+  final Map<String, dynamic> _parameters;
   @override
-  final String? targetId;
-  @override
-  final int? r;
-  @override
-  final int? c;
-  @override
-  final String? from;
-  @override
-  final String? to;
-  final Map<String, dynamic>? _parameters;
-  @override
-  Map<String, dynamic>? get parameters {
-    final value = _parameters;
-    if (value == null) return null;
+  Map<String, dynamic> get parameters {
     if (_parameters is EqualUnmodifiableMapView) return _parameters;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(value);
+    return EqualUnmodifiableMapView(_parameters);
   }
 
-  final List<String>? _conditions;
   @override
-  List<String>? get conditions {
-    final value = _conditions;
-    if (value == null) return null;
-    if (_conditions is EqualUnmodifiableListView) return _conditions;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(value);
-  }
-
-// Added this line
-  final List<dynamic> _behaviors;
-// Added this line
-  @override
-  @JsonKey()
-  List<dynamic> get behaviors {
-    if (_behaviors is EqualUnmodifiableListView) return _behaviors;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_behaviors);
-  }
+  final String? targetId;
 
   @override
   String toString() {
-    return 'Goal(type: $type, targetId: $targetId, r: $r, c: $c, from: $from, to: $to, parameters: $parameters, conditions: $conditions, behaviors: $behaviors)';
+    return 'Goal(type: $type, parameters: $parameters, targetId: $targetId)';
   }
 
   @override
@@ -270,32 +156,16 @@ class _$GoalImpl extends _Goal {
         (other.runtimeType == runtimeType &&
             other is _$GoalImpl &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.targetId, targetId) ||
-                other.targetId == targetId) &&
-            (identical(other.r, r) || other.r == r) &&
-            (identical(other.c, c) || other.c == c) &&
-            (identical(other.from, from) || other.from == from) &&
-            (identical(other.to, to) || other.to == to) &&
             const DeepCollectionEquality()
                 .equals(other._parameters, _parameters) &&
-            const DeepCollectionEquality()
-                .equals(other._conditions, _conditions) &&
-            const DeepCollectionEquality()
-                .equals(other._behaviors, _behaviors));
+            (identical(other.targetId, targetId) ||
+                other.targetId == targetId));
   }
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      type,
-      targetId,
-      r,
-      c,
-      from,
-      to,
-      const DeepCollectionEquality().hash(_parameters),
-      const DeepCollectionEquality().hash(_conditions),
-      const DeepCollectionEquality().hash(_behaviors));
+  int get hashCode => Object.hash(runtimeType, type,
+      const DeepCollectionEquality().hash(_parameters), targetId);
 
   /// Create a copy of Goal
   /// with the given fields replaced by the non-null parameter values.
@@ -304,39 +174,29 @@ class _$GoalImpl extends _Goal {
   @pragma('vm:prefer-inline')
   _$$GoalImplCopyWith<_$GoalImpl> get copyWith =>
       __$$GoalImplCopyWithImpl<_$GoalImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$GoalImplToJson(
+      this,
+    );
+  }
 }
 
-abstract class _Goal extends Goal {
+abstract class _Goal implements Goal {
   const factory _Goal(
       {required final String type,
-      final String? targetId,
-      final int? r,
-      final int? c,
-      final String? from,
-      final String? to,
-      final Map<String, dynamic>? parameters,
-      final List<String>? conditions,
-      final List<dynamic> behaviors}) = _$GoalImpl;
-  const _Goal._() : super._();
+      required final Map<String, dynamic> parameters,
+      final String? targetId}) = _$GoalImpl;
+
+  factory _Goal.fromJson(Map<String, dynamic> json) = _$GoalImpl.fromJson;
 
   @override
   String get type;
   @override
+  Map<String, dynamic> get parameters;
+  @override
   String? get targetId;
-  @override
-  int? get r;
-  @override
-  int? get c;
-  @override
-  String? get from;
-  @override
-  String? get to;
-  @override
-  Map<String, dynamic>? get parameters;
-  @override
-  List<String>? get conditions; // Added this line
-  @override
-  List<dynamic> get behaviors;
 
   /// Create a copy of Goal
   /// with the given fields replaced by the non-null parameter values.

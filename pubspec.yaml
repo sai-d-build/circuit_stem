@@ -20,10 +20,10 @@ dependencies:
   uuid: ^4.4.0
 
   # Enhanced Architecture Dependencies
-  freezed: ^3.0.0-0.0.dev
-  freezed_annotation: ^3.1.0
-  json_serializable: ^6.6.0
-  json_annotation: ^4.9.0
+  freezed: ^2.4.4
+  freezed_annotation: ^2.4.4
+  json_serializable: ^6.7.1
+  json_annotation: ^4.8.1
 
   # Mathematical Computing (MNA Solver)
   vector_math: ^2.1.4

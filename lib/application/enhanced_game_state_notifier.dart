@@ -14,7 +14,7 @@ import 'package:sparkcircuit/core/commands/select_component_command.dart';
 import 'package:sparkcircuit/core/persistence/storage_service.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
 import 'package:sparkcircuit/core/simulation/simulation_engine.dart';
-import 'package:sparkcircuit/domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart'; // Import for Offset
 

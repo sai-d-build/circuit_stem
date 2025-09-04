@@ -34,11 +34,11 @@ class ServiceManager {
       _instance._serviceStatus['adaptive_quality'] = true;
 
       // Initialize Accessibility Manager (requires context)
-      if (context != null) {
+      if (context != null && context.mounted) {
         await _instance._initializeAccessibilityManager(context);
         _instance._serviceStatus['accessibility'] = true;
       } else {
-        _instance._log('Warning: AccessibilityManager not initialized - no context provided');
+        _instance._log('Warning: AccessibilityManager not initialized - no context provided or context not mounted');
         _instance._serviceStatus['accessibility'] = false;
       }
 

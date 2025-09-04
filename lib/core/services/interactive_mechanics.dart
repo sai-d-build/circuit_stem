@@ -750,7 +750,6 @@ enum InteractionType { drag, rotate, toggle, connect, disconnect, delete, create
 // Simplified service class
 class InteractiveMechanicsService {
   InteractiveMechanics? _mechanics;
-  final Map<String, ComponentInteractionHandler> _componentHandlers = {};
 
   Future<void> initialize() async {
     if (!FeatureFlagService.isEnabled(FeatureFlag.enableInteractiveMechanics)) {

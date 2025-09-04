@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import '../../domain/entities/grid.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 @immutable
 class RenderState {

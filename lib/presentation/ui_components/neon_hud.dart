@@ -53,19 +53,19 @@ class _NeonHUDState extends State<NeonHUD> with SingleTickerProviderStateMixin {
           margin: widget.padding,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.0),
-            color: colors.surface.withOpacity(widget.opacity),
+            color: colors.surface.withValues(alpha: widget.opacity),
             border: Border.all(
-              color: colors.neonPrimary.withOpacity(0.6),
+              color: colors.neonPrimary.withValues(alpha: 0.6),
               width: 1.5,
             ),
             boxShadow: widget.showGlow ? [
               BoxShadow(
-                color: colors.neonPrimary.withOpacity(_glowAnimation.value * 0.4),
+                color: colors.neonPrimary.withValues(alpha: _glowAnimation.value * 0.4),
                 blurRadius: 15.0,
                 spreadRadius: 2.0,
               ),
               BoxShadow(
-                color: colors.neonAccent.withOpacity(_glowAnimation.value * 0.2),
+                color: colors.neonAccent.withValues(alpha: _glowAnimation.value * 0.2),
                 blurRadius: 25.0,
                 spreadRadius: 1.0,
               ),

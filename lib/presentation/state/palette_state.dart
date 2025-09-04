@@ -1,8 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:sparkcircuit/application/game_engine_v3/providers_v3.dart';
+import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart';
 
-import 'package:sparkcircuit/domain/entities/level_definition.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'dart:convert';
 import '../../core/persistence/storage_service.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
@@ -16,6 +17,7 @@ class ComponentDefinition {
   final int cost;
   final bool isUnlocked;
   final List<String> requiredLevels;
+  final bool isDraggable;
 
   const ComponentDefinition({
     required this.type,
@@ -26,6 +28,7 @@ class ComponentDefinition {
     this.cost = 1,
     this.isUnlocked = true,
     this.requiredLevels = const [],
+    this.isDraggable = true, // Default to draggable for backward compatibility
   });
 
   ComponentDefinition copyWith({
@@ -181,25 +184,69 @@ class PaletteState {
   }
 
   List<ComponentDefinition> get filteredComponents {
+    StructuredLogger.debug('Component filtering analysis', context: {
+      'totalAvailableComponents': availableComponents.length,
+      'unlockedComponents': availableComponents.where((c) => c.isUnlocked).length,
+      'inventoryItems': inventory.length,
+      'inventoryKeys': inventory.keys.toList(),
+      'searchQuery': searchQuery,
+      'activeFilters': activeFilters,
+    });
+
     var filtered = availableComponents.where((component) => component.isUnlocked);
+
+    StructuredLogger.trace('After unlock filter', context: {
+      'count': filtered.length,
+      'components': filtered.map((c) => '${c.type}:${c.isUnlocked}').toList(),
+    });
+
+    // Filter by inventory availability - only show components that exist in inventory
+    filtered = filtered.where((component) => inventory.containsKey(component.type));
+
+    StructuredLogger.trace('After inventory filter', context: {
+      'count': filtered.length,
+      'components': filtered.map((c) => c.type).toList(),
+      'missingFromInventory': availableComponents
+          .where((c) => c.isUnlocked && !inventory.containsKey(c.type))
+          .map((c) => c.type)
+          .toList(),
+    });
 
     // Apply search filter
     if (searchQuery.isNotEmpty) {
-      filtered = filtered.where((component) => 
+      final beforeSearch = filtered.length;
+      filtered = filtered.where((component) =>
         component.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
         component.description.toLowerCase().contains(searchQuery.toLowerCase()) ||
         component.type.toLowerCase().contains(searchQuery.toLowerCase())
       );
+      StructuredLogger.trace('After search filter', context: {
+        'before': beforeSearch,
+        'after': filtered.length,
+        'query': searchQuery,
+      });
     }
 
     // Apply category filters
     if (activeFilters.isNotEmpty) {
-      filtered = filtered.where((component) => 
+      final beforeCategory = filtered.length;
+      filtered = filtered.where((component) =>
         activeFilters.any((filter) => _componentMatchesFilter(component, filter))
       );
+      StructuredLogger.trace('After category filter', context: {
+        'before': beforeCategory,
+        'after': filtered.length,
+        'filters': activeFilters,
+      });
     }
 
-    return filtered.toList();
+    final result = filtered.toList();
+    StructuredLogger.info('Component filtering complete', context: {
+      'finalCount': result.length,
+      'filteredComponents': result.map((c) => '${c.type}:${inventory[c.type]?.available ?? 0}').toList(),
+    });
+
+    return result;
   }
 
   bool get hasSelection => selectedComponentType != null;
@@ -247,9 +294,17 @@ final paletteStateProvider = StateNotifierProvider.family<PaletteStateNotifier, 
 
   StructuredLogger.info('Palette state provider initialized', context: {
     'levelId': levelId,
-    'levelConfig': levelConfig?.id ?? 'null',
-    'availableComponents': levelConfig?.initialComponentsList?.map((c) => c.toString()).toList() ?? [],
+    'levelConfig': levelConfig?.levelId ?? 'null',
+    'levelConfigNull': levelConfig == null,
+    'gameStateLevel': gameState.currentLevel,
+    'availableComponents': levelConfig?.components.available.length ?? 0,
+    'availableComponentsList': levelConfig?.components.available.map((c) => c.type).toList() ?? [],
   });
+
+  debugPrint('🎨 PaletteStateProvider: Initializing for level $levelId');
+  debugPrint('🎨 PaletteStateProvider: Game state level: ${gameState.currentLevel}');
+  debugPrint('🎨 PaletteStateProvider: Level config: ${levelConfig?.levelId ?? "NULL"}');
+  debugPrint('🎨 PaletteStateProvider: Available components: ${levelConfig?.components.available.length ?? 0}');
 
   return PaletteStateNotifier(levelId, storageService, levelConfig);
 });
@@ -265,8 +320,8 @@ class PaletteStateNotifier extends StateNotifier<PaletteState> {
   )) {
     StructuredLogger.info('Palette state notifier initialized', context: {
       'levelId': levelId,
-      'levelConfigId': levelConfig?.id,
-      'availableComponentsCount': levelConfig?.initialComponentsList?.length ?? 0,
+      'levelConfigId': levelConfig?.levelId,
+      'availableComponentsCount': levelConfig?.components.available.length ?? 0,
     });
     _loadPaletteState();
   }
@@ -286,10 +341,12 @@ class PaletteStateNotifier extends StateNotifier<PaletteState> {
 
       // Load unlocked components (global, not per level)
       final unlockedTypes = _storageService.readData<List<String>>('unlocked_components') ?? [];
-      final updatedComponents = state.availableComponents.map((component) {
-        return component.copyWith(isUnlocked: unlockedTypes.contains(component.type));
-      }).toList();
-      state = state.copyWith(availableComponents: updatedComponents);
+      if (unlockedTypes.isNotEmpty) {
+        final updatedComponents = state.availableComponents.map((component) {
+          return component.copyWith(isUnlocked: unlockedTypes.contains(component.type));
+        }).toList();
+        state = state.copyWith(availableComponents: updatedComponents);
+      }
     } catch (e) {
       StructuredLogger.error('Failed to load palette state', context: {
         'levelId': levelId,
@@ -580,8 +637,8 @@ List<ComponentDefinition> _getAvailableComponents() {
       iconPath: 'assets/components/inductor.svg',
       defaultProperties: {'inductance': 0.1},
       cost: 3,
-      isUnlocked: false,
-      requiredLevels: ['5'],
+      isUnlocked: true,
+      requiredLevels: [],
     ),
   ];
 }
@@ -590,32 +647,31 @@ Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefi
   StructuredLogger.info('Generating component inventory for level', context: {
     'levelId': levelId,
     'levelConfigProvided': levelConfig != null,
-    'configComponentsCount': levelConfig?.initialComponentsList?.length ?? 0,
+    'configComponentsCount': levelConfig?.components.preplaced.length ?? 0,
   });
 
   // If we have a level config, use it as the source of truth
-  if (levelConfig != null && levelConfig.initialComponentsList.isNotEmpty) {
+  if (levelConfig != null && levelConfig.components.available.isNotEmpty) {
     StructuredLogger.debug('Using level configuration for inventory', context: {
-      'levelId': levelConfig.id,
-      'components': levelConfig.initialComponentsList.map((c) => c.toString()).toList(),
+      'levelId': levelConfig.levelId,
+      'components': levelConfig.components.available.map((c) => '${c.type}:${c.quantity}').toList(),
     });
 
     final inventory = <String, ComponentInventory>{};
-    for (final componentModel in levelConfig.initialComponentsList) {
-      final componentType = componentModel.type.toString().split('.').last; // Convert enum to string
-      final previousAvailable = inventory[componentType]?.available ?? 0;
-      final previousTotal = inventory[componentType]?.total ?? 0;
-
+    // Create inventory based on available components with their specified quantities
+    for (final componentAvailability in levelConfig.components.available) {
+      final componentType = componentAvailability.type;
+      final quantity = componentAvailability.quantity;
       inventory[componentType] = ComponentInventory(
         componentType: componentType,
-        available: previousAvailable + 1,
-        total: previousTotal + 1,
+        available: quantity,
+        total: quantity,
       );
 
       StructuredLogger.trace('Component inventory populated', context: {
         'componentType': componentType,
-        'incrementAvailable': previousAvailable + 1,
-        'incrementTotal': previousTotal + 1,
+        'available': quantity,
+        'total': quantity,
       });
     }
 

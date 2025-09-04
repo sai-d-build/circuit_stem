@@ -4,14 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../common/cloud_config.dart';
 import 'auth_service.dart';
 import 'cloud_storage_service.dart';
-import '../../domain/entities/user.dart' as domain_user;
+import 'package:sparkcircuit/domain/entities/entities.dart' as domain_user;
 import '../../presentation/state/hud_state.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 // Mock implementations for testing
 class MockAuthService implements AuthService {
-  @override
-  Stream<domain_user.User?> authStateChanges() => Stream.value(null);
+   @override
+   Stream<domain_user.User?> authStateChanges() => Stream.value(null);
 
   @override
   Future<domain_user.User?> getCurrentUser() async => null;
@@ -248,14 +248,20 @@ class LocalCloudStorageService implements CloudStorageService {
   @override
   Future<void> uploadPreferences(String userId, domain_user.UserPreferences preferences) async {
     if (CloudConfig.enableCloudLogging) {
-      print('Local: Preferences upload ignored (local-only mode)');
+      StructuredLogger.debug('Local cloud service - preferences upload ignored', context: {
+        'userId': userId,
+        'serviceType': 'local_only_mode',
+      });
     }
   }
 
   @override
   Future<domain_user.UserPreferences?> downloadPreferences(String userId) async {
     if (CloudConfig.enableCloudLogging) {
-      print('Local: Preferences download ignored (local-only mode)');
+      StructuredLogger.debug('Local cloud service - preferences download ignored', context: {
+        'userId': userId,
+        'serviceType': 'local_only_mode',
+      });
     }
     return null;
   }
@@ -263,14 +269,20 @@ class LocalCloudStorageService implements CloudStorageService {
   @override
   Future<void> uploadStats(String userId, domain_user.UserStats stats) async {
     if (CloudConfig.enableCloudLogging) {
-      print('Local: Stats upload ignored (local-only mode)');
+      StructuredLogger.debug('Local cloud service - stats upload ignored', context: {
+        'userId': userId,
+        'serviceType': 'local_only_mode',
+      });
     }
   }
 
   @override
   Future<domain_user.UserStats?> downloadStats(String userId) async {
     if (CloudConfig.enableCloudLogging) {
-      print('Local: Stats download ignored (local-only mode)');
+      StructuredLogger.debug('Local cloud service - stats download ignored', context: {
+        'userId': userId,
+        'serviceType': 'local_only_mode',
+      });
     }
     return null;
   }
@@ -281,7 +293,10 @@ class LocalCloudStorageService implements CloudStorageService {
   @override
   Future<void> deleteUserData(String userId) async {
     if (CloudConfig.enableCloudLogging) {
-      print('Local: User data deletion ignored (local-only mode)');
+      StructuredLogger.debug('Local cloud service - user data deletion ignored', context: {
+        'userId': userId,
+        'serviceType': 'local_only_mode',
+      });
     }
   }
 

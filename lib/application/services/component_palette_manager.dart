@@ -1,4 +1,4 @@
-import 'package:sparkcircuit/domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:flutter/foundation.dart';
 
 @immutable

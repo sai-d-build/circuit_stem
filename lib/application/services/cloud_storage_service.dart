@@ -2,7 +2,7 @@
 // Cloud Storage Service for Firebase Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../domain/entities/user.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../../presentation/state/hud_state.dart';
 
 abstract class CloudStorageService {
@@ -94,6 +94,7 @@ class FirebaseCloudStorageService implements CloudStorageService {
 
       final data = doc.data()!;
       return ProgressData(
+        levelId: levelId,  // Add required levelId parameter
         currentScore: data['currentScore'] ?? 0,
         bestScore: data['bestScore'] ?? 0,
         starsEarned: data['starsEarned'] ?? 0,

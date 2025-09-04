@@ -65,8 +65,8 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> with SingleTick
         gradient: LinearGradient(
           colors: [
             colors.surface,
-            colors.surface.withOpacity(0.8),
-            colors.surface.withOpacity(0.6),
+            colors.surface.withValues(alpha: 0.8),
+            colors.surface.withValues(alpha: 0.6),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -116,7 +116,7 @@ class CircuitPatternLayer extends StatelessWidget {
 
     return CustomPaint(
       painter: CircuitPatternPainter(
-        color: patternColor.withOpacity(opacity),
+        color: patternColor.withValues(alpha: opacity),
       ),
     );
   }

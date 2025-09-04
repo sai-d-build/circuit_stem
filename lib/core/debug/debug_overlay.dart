@@ -27,7 +27,7 @@ class DebugOverlay extends StatelessWidget {
       right: 20,
       child: Material(
         elevation: 8,
-        color: Colors.black.withOpacity(0.85),
+        color: Colors.black.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -83,7 +83,7 @@ class DebugOverlay extends StatelessWidget {
         const SizedBox(height: 4),
         _buildMetricItem(
           'FPS',
-          '${performanceData.fps.toStringAsFixed(1)}',
+          performanceData.fps.toStringAsFixed(1),
           performanceData.fps < 50 ? Colors.red : Colors.green,
         ),
         _buildMetricItem(
@@ -193,9 +193,9 @@ class DebugOverlay extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.3),
+          color: Colors.blue.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: Colors.blue.withOpacity(0.5)),
+          border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
         ),
         child: Text(
           label,
@@ -323,7 +323,7 @@ class DebugConsole extends InheritedWidget {
   }
 
   void _cmdHelp(List<String> args) {
-    StructuredLogger.info('Available commands:', context: _commands.keys.toList());
+    StructuredLogger.info('Available commands:', context: {'commands': _commands.keys.toList()});
   }
 
   void _cmdClear(List<String> args) {
@@ -344,7 +344,7 @@ class DebugConsole extends InheritedWidget {
 
   void _cmdPerformance(List<String> args) {
     // TODO: Show performance stats via overlay
-    StructuredLogger.info('Performance command executed', context: args);
+    StructuredLogger.info('Performance command executed', context: {'args': args});
   }
 
   @override

@@ -160,11 +160,9 @@ class GameCanvasController extends ChangeNotifier {
   Offset screenToGrid(Offset screenPosition) {
     final adjustedX = (screenPosition.dx - _panOffset.dx) / scaledCellSize;
     final adjustedY = (screenPosition.dy - _panOffset.dy) / scaledCellSize;
-    
-    return Offset(
-      adjustedX.clamp(0, _gridWidth.toDouble() - 1),
-      adjustedY.clamp(0, _gridHeight.toDouble() - 1),
-    );
+
+    // Return unclamped coordinates - let the caller handle bounds checking
+    return Offset(adjustedX, adjustedY);
   }
   
   // Convert grid coordinates to screen coordinates
@@ -175,14 +173,45 @@ class GameCanvasController extends ChangeNotifier {
     );
   }
   
-  // Snap screen coordinates to grid
+  // Snap screen coordinates to grid with bounds checking
   Offset snapToGrid(Offset screenPosition) {
     final gridPos = screenToGrid(screenPosition);
     final snappedGridPos = Offset(
       gridPos.dx.round().toDouble(),
       gridPos.dy.round().toDouble(),
     );
-    return gridToScreen(snappedGridPos);
+
+    // Ensure snapped position is within grid bounds
+    final clampedGridPos = Offset(
+      snappedGridPos.dx.clamp(0, _gridWidth.toDouble() - 1),
+      snappedGridPos.dy.clamp(0, _gridHeight.toDouble() - 1),
+    );
+
+    return gridToScreen(clampedGridPos);
+  }
+
+  // Check if screen coordinates are within grid bounds
+  bool isWithinGridBounds(Offset screenPosition) {
+    final gridPos = screenToGrid(screenPosition);
+    return gridPos.dx >= 0 && gridPos.dx < _gridWidth &&
+           gridPos.dy >= 0 && gridPos.dy < _gridHeight;
+  }
+
+  // Get valid grid position from screen coordinates (returns null if out of bounds)
+  Offset? getValidGridPosition(Offset screenPosition) {
+    final gridPos = screenToGrid(screenPosition);
+    final snappedPos = Offset(
+      gridPos.dx.round().toDouble(),
+      gridPos.dy.round().toDouble(),
+    );
+
+    // Check if snapped position is within bounds
+    if (snappedPos.dx >= 0 && snappedPos.dx < _gridWidth &&
+        snappedPos.dy >= 0 && snappedPos.dy < _gridHeight) {
+      return snappedPos;
+    }
+
+    return null; // Out of bounds
   }
   
   // Get the grid bounds visible on screen
@@ -255,10 +284,5 @@ class GameCanvasController extends ChangeNotifier {
       'isScaling': _isScaling,
       'visibleBounds': getVisibleGridBounds(),
     };
-  }
-  
-  @override
-  void dispose() {
-    super.dispose();
   }
 }

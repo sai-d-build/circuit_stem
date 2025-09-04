@@ -1,14 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/providers.dart'; // Import the main providers file
-import 'package:sparkcircuit/application/enhanced_game_state_notifier.dart'; // For EnhancedGameStateNotifier
+import 'package:sparkcircuit/application/providers.dart';
 import 'package:sparkcircuit/application/services/component_factory.dart';
 import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
-import 'package:sparkcircuit/core/persistence/storage_service.dart';
 import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
 import 'package:sparkcircuit/core/simulation/basic_simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart'; // Keep this for PaletteStateNotifier
+import 'package:sparkcircuit/presentation/state/palette_state.dart';
+import 'package:sparkcircuit/application/game_engine/v3/game_engine_notifier_v3.dart';
 
 void main() {
   group('Palette Functionality Tests', () {
@@ -27,13 +26,7 @@ void main() {
         componentFactoryProvider.overrideWithValue(ComponentFactory()),
         // Override enhancedGameStateNotifierProvider to ensure it's initialized
         enhancedGameStateNotifierProvider.overrideWith(
-          (ref) => EnhancedGameStateNotifier(
-            storageService: ref.read(storageServiceProvider),
-            commandStack: ref.read(commandStackProvider),
-            simulationEngine: ref.read(simulationEngineProvider),
-            netlistBuilder: ref.read(netlistBuilderProvider),
-            componentFactory: ref.read(componentFactoryProvider),
-          ),
+          (ref) => GameEngineNotifierV3(),
         ),
       ]);
     });

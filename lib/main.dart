@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:sparkcircuit/presentation/app.dart';
 import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
-import 'package:sparkcircuit/application/game_engine_v3/providers_v3.dart';
+import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 void main() async {

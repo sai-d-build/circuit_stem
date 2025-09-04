@@ -46,6 +46,13 @@
         "properties": {
           "resistance": 0.01
         }
+      },
+      {
+        "type": "inductor",
+        "quantity": 1,
+        "properties": {
+          "inductance": 0.1
+        }
       }
     ],
     "preplaced": []

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../../application/game_engine_v3/providers_v3.dart';
+import '../../../../application/game_engine/v3/providers_v3.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -43,7 +43,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.colorScheme.background,
+      backgroundColor: AppTheme.lightTheme.colorScheme.surface,
       body: Column(
         children: [
           Expanded(
@@ -169,7 +169,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         shape: BoxShape.circle,
         color: _currentPage == index
             ? AppTheme.lightTheme.colorScheme.primary
-            : Colors.grey.shade300,
+            : Colors.green.shade300,
       ),
     );
   }
@@ -178,7 +178,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final storageService = ref.read(storageServiceProvider);
     await storageService.saveData<bool>('onboarding_completed', true);
     // Navigate to main menu using GoRouter
-    GoRouter.of(context).go('/');
+    if (mounted) {
+      GoRouter.of(context).go('/');
+    }
   }
 
   @override

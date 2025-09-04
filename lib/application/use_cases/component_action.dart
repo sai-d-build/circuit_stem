@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 // Domain entities
-import '../../domain/entities/level_definition.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 // Application core
 import '../core/result.dart';
@@ -55,7 +55,7 @@ class CreateComponentFromTemplateAction extends ComponentAction {
     }
 
     if (state.currentLevel != null) {
-      if (row >= state.currentLevel!.rows || col >= state.currentLevel!.cols) {
+      if (row >= state.currentLevel!.grid.height || col >= state.currentLevel!.grid.width) {
         return const Failure('Position out of bounds');
       }
     }
@@ -102,8 +102,8 @@ class MoveComponentAction extends ComponentAction {
     }
 
     if (state.currentLevel != null) {
-      if (newRow >= state.currentLevel!.rows ||
-          newCol >= state.currentLevel!.cols) {
+      if (newRow >= state.currentLevel!.grid.height ||
+          newCol >= state.currentLevel!.grid.width) {
         return const Failure('Position out of bounds');
       }
     }

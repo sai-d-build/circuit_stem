@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class ColorContrast {
@@ -23,9 +22,9 @@ class ColorContrast {
           : pow((channel + 0.055) / 1.055, 2.4).toDouble();
     }
 
-    final r = toLinear(color.red.toDouble());
-    final g = toLinear(color.green.toDouble());
-    final b = toLinear(color.blue.toDouble());
+    final r = toLinear(((color.toARGB32() >> 16) & 0xFF).toDouble());
+    final g = toLinear(((color.toARGB32() >> 8) & 0xFF).toDouble());
+    final b = toLinear((color.toARGB32() & 0xFF).toDouble());
 
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
@@ -46,21 +45,26 @@ class ColorContrast {
   // Get accessible color alternatives
   static List<Color> getAccessibleAlternatives(Color original, Color background) {
     final alternatives = <Color>[];
+    final originalRed = (original.toARGB32() >> 16) & 0xFF;
+    final originalGreen = (original.toARGB32() >> 8) & 0xFF;
+    final originalBlue = original.toARGB32() & 0xFF;
+    final originalOpacity = ((original.toARGB32() >> 24) & 0xFF) / 255.0;
+
 
     // Try different shades
     for (double factor = 0.1; factor <= 0.9; factor += 0.1) {
       final lighter = Color.fromRGBO(
-        (original.red + (255 - original.red) * factor).round().clamp(0, 255),
-        (original.green + (255 - original.green) * factor).round().clamp(0, 255),
-        (original.blue + (255 - original.blue) * factor).round().clamp(0, 255),
-        original.opacity,
+        (originalRed + (255 - originalRed) * factor).round().clamp(0, 255),
+        (originalGreen + (255 - originalGreen) * factor).round().clamp(0, 255),
+        (originalBlue + (255 - originalBlue) * factor).round().clamp(0, 255),
+        originalOpacity,
       );
 
       final darker = Color.fromRGBO(
-        (original.red * (1 - factor)).round().clamp(0, 255),
-        (original.green * (1 - factor)).round().clamp(0, 255),
-        (original.blue * (1 - factor)).round().clamp(0, 255),
-        original.opacity,
+        (originalRed * (1 - factor)).round().clamp(0, 255),
+        (originalGreen * (1 - factor)).round().clamp(0, 255),
+        (originalBlue * (1 - factor)).round().clamp(0, 255),
+        originalOpacity,
       );
 
       if (meetsWCAGStandard(lighter, background)) {

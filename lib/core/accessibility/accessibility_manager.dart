@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'color_contrast.dart';
 
@@ -49,7 +48,7 @@ class AccessibilityManager {
 
   static bool _isBrightColor(Color color) {
     // Calculate perceived brightness
-    final double brightness = (color.red * 0.299 + color.green * 0.587 + color.blue * 0.114) / 255;
+    final double brightness = (color.r * 0.299 + color.g * 0.587 + color.b * 0.114) / 255;
     return brightness > 0.5;
   }
 

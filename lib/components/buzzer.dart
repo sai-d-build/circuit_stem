@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import '../domain/behaviors/drawing_behavior.dart';
 import '../domain/behaviors/logic_behavior.dart';
 import '../application/services/component_factory.dart';
-import '../domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../infrastructure/rendering/asset_manager.dart';
 import '../common/theme.dart';
 import '../infrastructure/audio/audio_service.dart';

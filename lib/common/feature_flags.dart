@@ -80,9 +80,6 @@ class FeatureFlagService {
         return true; // Enable memory optimization
       case FeatureFlag.migrationComplete:
         return false; // Migration completion flag
-
-      default:
-        return false;
     }
   }
 
@@ -142,10 +139,6 @@ class FeatureFlagService {
     }
   }
 
-  // Get runtime flag value
-  static bool? _getRuntimeFlagValue(FeatureFlag flag) {
-    return _runtimeFlags[flag];
-  }
 
   // Persist flag to storage
   static void _persistFlag(FeatureFlag flag, bool value) {

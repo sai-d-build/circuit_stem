@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../application/game_engine_v3/providers_v3.dart';
+import '../../application/game_engine/v3/providers_v3.dart';
 import 'core/theme/app_theme.dart';
 import 'features/menus/screens/main_menu.dart';
 import 'features/game/screens/game_screen.dart';

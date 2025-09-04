@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../../application/game_engine_v3/providers_v3.dart';
+import '../../../../application/game_engine/v3/providers_v3.dart';
 import '../../../../application/audio_manager.dart';
 import 'package:sparkcircuit/presentation/ui_components/glass_panel.dart';
 import 'package:sparkcircuit/presentation/ui_components/neon_switch.dart';
@@ -93,7 +93,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<CircuitColorScheme>()!;
+    final colors = Theme.of(context).extension<CircuitColorScheme>() ?? const CircuitColorScheme(
+      primary: Color(0xFF1E88E5),
+      onPrimary: Color(0xFFFFFFFF),
+      primaryContainer: Color(0xFFE3F2FD),
+      onPrimaryContainer: Color(0xFF0D47A1),
+      secondary: Color(0xFF43A047),
+      onSecondary: Color(0xFFFFFFFF),
+      tertiary: Color(0xFFFF8F00),
+      onTertiary: Color(0xFFFFFFFF),
+      error: Color(0xFFD32F2F),
+      onError: Color(0xFFFFFFFF),
+      errorContainer: Color(0xFFFFEBEE),
+      onErrorContainer: Color(0xFFB71C1C),
+      surface: Color(0xFFFAFAFA),
+      onSurface: Color(0xFF1C1C1C),
+      surfaceContainer: Color(0xFFEFEFEF),
+      onSurfaceVariant: Color(0xFF424242),
+      shadow: Color(0xFF000000),
+      outline: Color(0xFFBDBDBD),
+      wireActive: Color(0xFF00E676),
+      wireInactive: Color(0xFF616161),
+      componentBase: Color(0xFF2196F3),
+      gridLine: Color(0xFFE0E0E0),
+      glowEffect: Color(0xFF00E5FF),
+      neonPrimary: Color(0xFF00FFFF),
+      neonAccent: Color(0xFFFF00FF),
+      errorGlow: Color(0xFFFF0040),
+      energyPulse: Color(0xFF39FF14),
+      highlightAccent: Color(0xFFFFFF00),
+    );
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -105,7 +134,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             color: colors.onSurface,
             shadows: [
               BoxShadow(
-                color: colors.neonPrimary.withOpacity(0.5),
+                color: colors.neonPrimary.withValues(alpha: 0.5),
                 blurRadius: 10.0,
                 spreadRadius: 2.0,
               ),
@@ -231,7 +260,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           color: colors.neonPrimary,
           shadows: [
             BoxShadow(
-              color: colors.neonPrimary.withOpacity(0.5),
+              color: colors.neonPrimary.withValues(alpha: 0.5),
               blurRadius: 8.0,
               spreadRadius: 1.0,
             ),
@@ -291,7 +320,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             Text(
               value,
               style: textTheme.bodyMedium?.copyWith(
-                color: colors.onSurface.withOpacity(0.7),
+                color: colors.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -308,7 +337,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         title: Text('Reset Progress', style: textTheme.titleLarge?.copyWith(color: colors.onSurface)),
         content: Text(
           'Are you sure you want to reset all progress? This action cannot be undone.',
-          style: textTheme.bodyMedium?.copyWith(color: colors.onSurface.withOpacity(0.8)),
+          style: textTheme.bodyMedium?.copyWith(color: colors.onSurface.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
@@ -318,13 +347,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           TextButton(
             onPressed: () async {
               await _resetProgress();
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Progress reset successfully', style: TextStyle(color: colors.onPrimary)),
-                  backgroundColor: colors.neonPrimary,
-                ),
-              );
+              if (context.mounted) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Progress reset successfully', style: TextStyle(color: colors.onPrimary)),
+                    backgroundColor: colors.neonPrimary,
+                  ),
+                );
+              }
             },
             style: TextButton.styleFrom(foregroundColor: colors.errorGlow),
             child: Text('Reset', style: textTheme.labelLarge),

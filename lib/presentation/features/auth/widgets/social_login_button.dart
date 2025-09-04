@@ -57,7 +57,7 @@ class SocialLoginButton extends StatelessWidget {
               width: 20,
               height: 20,
               decoration: BoxDecoration(
-                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.1),
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Icon(

@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../domain/entities/level_definition.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 part 'level_manager_state.freezed.dart';
 

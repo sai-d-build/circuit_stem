@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 import '../../core/persistence/storage_service.dart';
-import '../../application/game_engine_v3/providers_v3.dart';
+import '../../application/game_engine/v3/providers_v3.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 enum HudOverlayType {

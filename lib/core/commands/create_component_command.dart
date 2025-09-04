@@ -1,5 +1,5 @@
 
-import '../../domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../../application/enhanced_game_state.dart';
 import 'game_command.dart';
 

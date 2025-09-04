@@ -1,4 +1,4 @@
-import '../domain/entities/grid.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'game_engine_state.dart';
 
 class GameContext {

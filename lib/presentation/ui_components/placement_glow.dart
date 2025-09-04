@@ -87,12 +87,12 @@ class _PlacementGlowState extends State<PlacementGlow> with SingleTickerProvider
               color: Colors.transparent,
               boxShadow: [
                 BoxShadow(
-                  color: glowColor.withOpacity(_opacityAnimation.value * 0.6),
+                  color: glowColor.withValues(alpha: _opacityAnimation.value * 0.6),
                   blurRadius: 20.0 * _scaleAnimation.value,
                   spreadRadius: 5.0 * _scaleAnimation.value,
                 ),
                 BoxShadow(
-                  color: glowColor.withOpacity(_opacityAnimation.value * 0.3),
+                  color: glowColor.withValues(alpha: _opacityAnimation.value * 0.3),
                   blurRadius: 40.0 * _scaleAnimation.value,
                   spreadRadius: 10.0 * _scaleAnimation.value,
                 ),
@@ -104,15 +104,15 @@ class _PlacementGlowState extends State<PlacementGlow> with SingleTickerProvider
                 height: widget.size * 0.6,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: glowColor.withOpacity(_opacityAnimation.value * 0.2),
+                  color: glowColor.withValues(alpha: _opacityAnimation.value * 0.2),
                   border: Border.all(
-                    color: glowColor.withOpacity(_opacityAnimation.value * 0.8),
+                    color: glowColor.withValues(alpha: _opacityAnimation.value * 0.8),
                     width: 2.0,
                   ),
                 ),
                 child: Icon(
                   widget.isValid ? Icons.check : Icons.close,
-                  color: glowColor.withOpacity(_opacityAnimation.value),
+                  color: glowColor.withValues(alpha: _opacityAnimation.value),
                   size: widget.size * 0.3,
                 ),
               ),
@@ -187,7 +187,7 @@ class _GridHighlightState extends State<GridHighlight> with SingleTickerProvider
                   height: widget.cellSize,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: colors.energyPulse.withOpacity(_pulseAnimation.value),
+                      color: colors.energyPulse.withValues(alpha: _pulseAnimation.value),
                       width: 2.0,
                     ),
                     borderRadius: BorderRadius.circular(4.0),
@@ -206,7 +206,7 @@ class _GridHighlightState extends State<GridHighlight> with SingleTickerProvider
                   height: widget.cellSize,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: colors.errorGlow.withOpacity(_pulseAnimation.value),
+                      color: colors.errorGlow.withValues(alpha: _pulseAnimation.value),
                       width: 2.0,
                     ),
                     borderRadius: BorderRadius.circular(4.0),
@@ -214,7 +214,7 @@ class _GridHighlightState extends State<GridHighlight> with SingleTickerProvider
                   child: Center(
                     child: Icon(
                       Icons.block,
-                      color: colors.errorGlow.withOpacity(_pulseAnimation.value * 0.7),
+                      color: colors.errorGlow.withValues(alpha: _pulseAnimation.value * 0.7),
                       size: widget.cellSize * 0.4,
                     ),
                   ),

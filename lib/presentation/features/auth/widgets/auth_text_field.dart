@@ -53,7 +53,7 @@ class AuthTextField extends StatelessWidget {
         labelText: label,
         hintText: hint,
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
         ),
         prefixIcon: prefixIcon != null
             ? Icon(

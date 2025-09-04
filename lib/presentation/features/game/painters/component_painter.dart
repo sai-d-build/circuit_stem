@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/domain/entities/component.dart'; // Import ComponentType and ComponentState
-import 'package:sparkcircuit/domain/entities/circuit_component.dart'; // Import proper CircuitComponent
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 class ComponentPainter extends CustomPainter {
@@ -19,6 +18,8 @@ class ComponentPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Use optimized rendering with caching for performance
+    // Phase 1 MVP: Basic component rendering with architecture foundation
     for (final component in components) {
       _drawComponent(canvas, component);
     }
@@ -60,7 +61,7 @@ class ComponentPainter extends CustomPainter {
 
     // Draw component background
     final backgroundPaint = Paint()
-      ..color = circuitColors.componentBase.withOpacity(GameConstants.mediumOpacity)
+      ..color = circuitColors.componentBase.withValues(alpha: GameConstants.mediumOpacity)
       ..style = PaintingStyle.fill;
 
     canvas.drawRRect(
@@ -71,7 +72,7 @@ class ComponentPainter extends CustomPainter {
     // Draw glow effect
     if (glowColor != Colors.transparent) {
       final glowPaint = Paint()
-        ..color = glowColor.withOpacity(GameConstants.highOpacity)
+        ..color = glowColor.withValues(alpha: GameConstants.highOpacity)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, GameConstants.glowRadius * scale);
       canvas.drawRRect(
         RRect.fromRectAndRadius(rect, Radius.circular(GameConstants.componentBorderRadius * scale)),
@@ -91,13 +92,13 @@ class ComponentPainter extends CustomPainter {
     );
 
     // Draw component-specific details
-    _drawComponentDetails(canvas, component, rect);
+    drawComponentDetails(canvas, component, rect);
 
     // Restore canvas state after rotation
     canvas.restore();
   }
 
-  void _drawComponentDetails(Canvas canvas, CircuitComponent component, Rect rect) {
+  void drawComponentDetails(Canvas canvas, CircuitComponent component, Rect rect) {
     final detailPaint = Paint()
       ..color = circuitColors.onSurface
       ..strokeWidth = GameConstants.thickStroke * scale
@@ -193,7 +194,7 @@ class ComponentPainter extends CustomPainter {
     // Light rays if active
     if (isActive) {
       final glowPaint = Paint()
-        ..color = circuitColors.energyPulse.withOpacity(0.6) // Use energyPulse for LED glow
+        ..color = circuitColors.energyPulse.withValues(alpha: 0.6) // Use energyPulse for LED glow
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5 * scale;
       

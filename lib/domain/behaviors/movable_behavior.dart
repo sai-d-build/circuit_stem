@@ -1,6 +1,6 @@
 // lib/behaviors/movable_behavior.dart
 import '../../application/game_engine_notifier.dart';
-import '../entities/grid_cell.dart';
+import '../entities/core/grid_cell.dart';
 
 class MovableBehavior {
   final GameEngineNotifier gameEngineNotifier;

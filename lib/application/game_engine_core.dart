@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/grid.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'game_engine_state.dart'; // Corrected import
 import 'render_state.dart'; // Corrected import
 

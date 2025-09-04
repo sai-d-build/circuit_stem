@@ -54,6 +54,13 @@
         "properties": {
           "resistance": 0.01
         }
+      },
+      {
+        "type": "inductor",
+        "quantity": 1,
+        "properties": {
+          "inductance": 0.1
+        }
       }
     ],
     "preplaced": []
@@ -107,7 +114,8 @@
     ]
   },
   "tutorial": {
-    "enabled": false
+    "enabled": false,
+    "steps": []
   },
   "scoring": {
     "maxScore": 1200,

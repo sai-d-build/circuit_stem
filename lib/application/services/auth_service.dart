@@ -2,7 +2,7 @@
 // Firebase Authentication Service Interface and Implementation
 
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../domain/entities/user.dart' as domain;
+import 'package:sparkcircuit/domain/entities/entities.dart' as domain;
 
 abstract class AuthService {
   /// Stream of authentication state changes
@@ -157,7 +157,9 @@ class FirebaseAuthService implements AuthService {
     // final userDoc = await _firestore.collection('users').doc(firebaseUser.uid).get();
 
     return domain.User(
+      id: firebaseUser.uid,
       uid: firebaseUser.uid,
+      username: firebaseUser.displayName ?? firebaseUser.email!.split('@').first,
       email: firebaseUser.email!,
       displayName: firebaseUser.displayName,
       photoUrl: firebaseUser.photoURL,

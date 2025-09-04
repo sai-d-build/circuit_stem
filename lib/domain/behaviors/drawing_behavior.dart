@@ -1,5 +1,5 @@
 import 'package:flutter/painting.dart';
-import '../entities/component.dart';
+import '../entities/core/component.dart';
 import '../../infrastructure/rendering/asset_manager.dart';
 
 /// Defines the interface for a component's drawing behavior.

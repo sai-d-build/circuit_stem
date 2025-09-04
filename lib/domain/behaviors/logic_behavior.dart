@@ -1,7 +1,7 @@
 // Logic behavior interface for circuit components
 // Defines the behavior for components that have logical operations
 
-import '../entities/component.dart';
+import '../entities/core/component.dart';
 
 abstract class LogicBehavior {
   void execute(ComponentModel component);

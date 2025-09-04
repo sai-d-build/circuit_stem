@@ -1,6 +1,7 @@
 import '../behaviors/goal_checking_behavior.dart';
 import '../entities/goal.dart';
-import '../entities/grid.dart';
+import '../entities/core/grid.dart';
+import '../entities/core/component.dart';
 
 import '../../application/services/component_factory.dart';
 import '../../common/logger.dart';
@@ -16,7 +17,7 @@ class PowerBulbGoalBehavior implements GoalCheckingBehavior {
     }
 
     final component = grid.componentsById[targetId];
-    if (component == null || component.type != 'Component.Bulb') {
+    if (component == null || component.type != ComponentType.bulb) {
       Logger.log(
           'PowerBulbGoalBehavior: Target component \$targetId not found or not a bulb.');
       return false;

@@ -3,16 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/game_canvas.dart';
 import 'package:sparkcircuit/presentation/features/game/screens/game_screen.dart';
-import 'package:sparkcircuit/application/enhanced_game_state.dart';
 import 'package:sparkcircuit/application/providers.dart';
-import 'package:sparkcircuit/domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/application/services/component_factory.dart';
 import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
 import 'package:sparkcircuit/core/simulation/basic_simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
-import 'package:sparkcircuit/core/persistence/storage_service.dart';
 import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
-import 'package:sparkcircuit/application/enhanced_game_state_notifier.dart';
 
 void main() {
   group('Game Flow Integration Tests', () {
@@ -38,7 +35,13 @@ void main() {
     testWidgets('Complete game flow should work', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          parent: container,
+          overrides: [
+            commandStackProvider.overrideWithValue(InMemoryCommandStack()),
+            simulationEngineProvider.overrideWithValue(BasicSimulationEngine()),
+            netlistBuilderProvider.overrideWithValue(NetlistBuilder()),
+            storageServiceProvider.overrideWithValue(SharedPreferencesStorageService()),
+            componentFactoryProvider.overrideWithValue(ComponentFactory()),
+          ],
           child: const MaterialApp(
             home: GameScreen(levelId: '1'),
           ),
@@ -55,7 +58,13 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          parent: container,
+          overrides: [
+            commandStackProvider.overrideWithValue(InMemoryCommandStack()),
+            simulationEngineProvider.overrideWithValue(BasicSimulationEngine()),
+            netlistBuilderProvider.overrideWithValue(NetlistBuilder()),
+            storageServiceProvider.overrideWithValue(SharedPreferencesStorageService()),
+            componentFactoryProvider.overrideWithValue(ComponentFactory()),
+          ],
           child: const MaterialApp(
             home: SizedBox(
               width: 400,
@@ -70,7 +79,7 @@ void main() {
 
       expect(gameStateNotifier.state.grid.getComponentCount(), 0);
 
-      await gameStateNotifier.placeComponent(ComponentType.battery, 2, 2);
+      gameStateNotifier.placeComponent(ComponentType.battery, 2, 2);
 
       await tester.pump();
 
@@ -80,18 +89,24 @@ void main() {
     testWidgets('Wire drawing workflow', (WidgetTester tester) async {
       final gameStateNotifier = container.read(enhancedGameStateNotifierProvider.notifier);
 
-      await gameStateNotifier.placeComponent(ComponentType.battery, 0, 0);
-      await gameStateNotifier.placeComponent(ComponentType.wire, 0, 1);
+      gameStateNotifier.placeComponent(ComponentType.battery, 0, 0);
+      gameStateNotifier.placeComponent(ComponentType.wire, 0, 1);
 
       final components = gameStateNotifier.state.grid.getAllComponents();
       final battery = components[0];
       final wire = components[1];
 
-      await gameStateNotifier.addConnection(battery.id, wire.id);
+      gameStateNotifier.addConnection(battery.id, wire.id);
 
       await tester.pumpWidget(
         ProviderScope(
-          parent: container,
+          overrides: [
+            commandStackProvider.overrideWithValue(InMemoryCommandStack()),
+            simulationEngineProvider.overrideWithValue(BasicSimulationEngine()),
+            netlistBuilderProvider.overrideWithValue(NetlistBuilder()),
+            storageServiceProvider.overrideWithValue(SharedPreferencesStorageService()),
+            componentFactoryProvider.overrideWithValue(ComponentFactory()),
+          ],
           child: const MaterialApp(
             home: SizedBox(
               width: 400,

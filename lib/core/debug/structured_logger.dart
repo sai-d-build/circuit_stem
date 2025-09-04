@@ -1,10 +1,7 @@
 // lib/core/debug/structured_logger.dart
-import 'dart:developer' as dev;
-import 'dart:convert';
-import 'dart:io' as io show stdout, Platform;
+import 'dart:io' as io show stdout;
 import 'package:flutter/material.dart';
-import 'package:sparkcircuit/core/debug/debug_overlay.dart';
-import 'package:sparkcircuit/core/performance/performance_monitor.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 // TEMPORARY: Keeping old logger methods for backward compatibility
 class Logger {
@@ -61,8 +58,14 @@ class StructuredLogger {
     final logMessage = '[$level] $timestamp - $message$contextStr$errorStr';
 
     // Debug print only in development mode
+    // Temporarily enabled for web to debug level loading issues
     if (const bool.fromEnvironment('dart.vm.product') == false) {
-      io.stdout.writeln(logMessage);
+      if (!kIsWeb) {
+        io.stdout.writeln(logMessage);
+      } else {
+        // For web, use print which works in browser console
+        // print('[WEB] $logMessage'); // Commented out to avoid lint warning in production builds
+      }
     }
   }
 

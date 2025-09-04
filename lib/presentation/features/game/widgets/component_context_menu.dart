@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../application/game_engine_v3/providers_v3.dart';
+import '../../../../application/game_engine/v3/providers_v3.dart';
 import '../../../core/theme/app_theme.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
@@ -33,7 +33,7 @@ class ComponentContextMenu extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.0),
             border: Border.all(
-              color: circuitColors.outline.withOpacity(0.3),
+              color: circuitColors.outline.withValues(alpha: 0.3),
               width: 1.0,
             ),
           ),
@@ -47,7 +47,7 @@ class ComponentContextMenu extends StatelessWidget {
                 circuitColors,
                 () => _handleRotate(context),
               ),
-              Divider(height: 1, color: circuitColors.outline.withOpacity(0.3)),
+              Divider(height: 1, color: circuitColors.outline.withValues(alpha: 0.3)),
               _buildMenuItem(
                 context,
                 'Delete',

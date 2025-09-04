@@ -1,6 +1,5 @@
 import '../../application/services/power_simulation_service.dart';
-import '../../domain/entities/grid.dart';
-import '../../domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../../common/logger.dart';
 
 /// Service for validating educational objectives and learning progress

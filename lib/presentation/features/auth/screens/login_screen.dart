@@ -122,12 +122,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.background,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onBackground),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => context.go('/'),
         ),
       ),
@@ -143,7 +143,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   'Welcome Back',
                   style: theme.textTheme.headlineLarge?.copyWith(
-                    color: theme.colorScheme.onBackground,
+                    color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,

@@ -77,19 +77,19 @@ class _NeonDialogState extends State<NeonDialog> with SingleTickerProviderStateM
               height: widget.height,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16.0),
-                color: colors.surface.withOpacity(0.95),
+                color: colors.surface.withValues(alpha: 0.95),
                 border: Border.all(
-                  color: colors.neonPrimary.withOpacity(0.8),
+                  color: colors.neonPrimary.withValues(alpha: 0.8),
                   width: 2.0,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: colors.neonPrimary.withOpacity(_glowAnimation.value * 0.6),
+                    color: colors.neonPrimary.withValues(alpha: _glowAnimation.value * 0.6),
                     blurRadius: 20.0,
                     spreadRadius: 4.0,
                   ),
                   BoxShadow(
-                    color: colors.neonAccent.withOpacity(_glowAnimation.value * 0.3),
+                    color: colors.neonAccent.withValues(alpha: _glowAnimation.value * 0.3),
                     blurRadius: 30.0,
                     spreadRadius: 2.0,
                   ),
@@ -108,8 +108,8 @@ class _NeonDialogState extends State<NeonDialog> with SingleTickerProviderStateM
                         ),
                         gradient: LinearGradient(
                           colors: [
-                            colors.neonPrimary.withOpacity(0.2),
-                            colors.neonAccent.withOpacity(0.1),
+                            colors.neonPrimary.withValues(alpha: 0.2),
+                            colors.neonAccent.withValues(alpha: 0.1),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -123,7 +123,7 @@ class _NeonDialogState extends State<NeonDialog> with SingleTickerProviderStateM
                             fontWeight: FontWeight.bold,
                             shadows: [
                               BoxShadow(
-                                color: colors.neonPrimary.withOpacity(0.5),
+                                color: colors.neonPrimary.withValues(alpha: 0.5),
                                 blurRadius: 8.0,
                               ),
                             ],
@@ -132,7 +132,7 @@ class _NeonDialogState extends State<NeonDialog> with SingleTickerProviderStateM
                       ),
                     ),
                     Divider(
-                      color: colors.neonPrimary.withOpacity(0.3),
+                      color: colors.neonPrimary.withAlpha((255 * 0.3).round()),
                       thickness: 1.0,
                       height: 1.0,
                     ),
@@ -145,7 +145,7 @@ class _NeonDialogState extends State<NeonDialog> with SingleTickerProviderStateM
                   ),
                   if (widget.actions.isNotEmpty) ...[
                     Divider(
-                      color: colors.neonPrimary.withOpacity(0.3),
+                      color: colors.neonPrimary.withAlpha((255 * 0.3).round()),
                       thickness: 1.0,
                       height: 1.0,
                     ),

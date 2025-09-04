@@ -79,6 +79,11 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
       componentBase: Color(0xFF2196F3),
       gridLine: Color(0xFFE0E0E0),
       glowEffect: Color(0xFF00E5FF),
+      neonPrimary: Color(0xFF00FFFF),
+      neonAccent: Color(0xFFFF00FF),
+      errorGlow: Color(0xFFFF0040),
+      energyPulse: Color(0xFF39FF14),
+      highlightAccent: Color(0xFFFFFF00),
     );
   }
 }

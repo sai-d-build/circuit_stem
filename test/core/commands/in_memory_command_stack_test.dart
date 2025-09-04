@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:sparkcircuit/core/commands/game_command.dart';
 import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
-import 'package:sparkcircuit/application/enhanced_game_state.dart';
 
 // Mock GameCommand for testing purposes
 class MockGameCommand extends Mock implements GameCommand {}

@@ -1,22 +1,18 @@
-import '../../domain/entities/grid.dart';
-import '../../domain/entities/level_definition.dart';
-import '../../domain/entities/goal.dart';
-import '../../domain/entities/level_goal.dart';
-import '../../domain/entities/component.dart' as component_domain;
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 // Abstract base class for goal validation
 abstract class GoalValidator {
-  bool validate(Goal goal, Grid grid);
+  bool validate(LevelGoal goal, Grid grid);
 }
 
 // Concrete validators for each goal type
 class PowerGoalValidator extends GoalValidator {
   @override
-  bool validate(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.parameters?['targetId']];
+  bool validate(LevelGoal goal, Grid grid) {
+    final targetComponent = grid.componentsById[goal.conditions?['targetId']];
     if (targetComponent == null) return false;
 
-    final requiredPower = goal.parameters?['minPower'] ?? 0;
+    final requiredPower = goal.conditions?['minPower'] ?? 0;
     return targetComponent.isPowered &&
         (targetComponent.state['power'] ?? 0) >= requiredPower;
   }
@@ -24,8 +20,8 @@ class PowerGoalValidator extends GoalValidator {
 
 class UnpowerGoalValidator extends GoalValidator {
   @override
-  bool validate(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.parameters?['targetId']];
+  bool validate(LevelGoal goal, Grid grid) {
+    final targetComponent = grid.componentsById[goal.conditions?['targetId']];
     if (targetComponent == null) return false;
 
     return !targetComponent.isPowered;
@@ -34,9 +30,9 @@ class UnpowerGoalValidator extends GoalValidator {
 
 class ConnectGoalValidator extends GoalValidator {
   @override
-  bool validate(Goal goal, Grid grid) {
-    final sourceId = goal.parameters?['sourceId'];
-    final targetId = goal.parameters?['targetId'];
+  bool validate(LevelGoal goal, Grid grid) {
+    final sourceId = goal.conditions?['sourceId'];
+    final targetId = goal.conditions?['targetId'];
 
     if (sourceId == null || targetId == null) return false;
 
@@ -76,7 +72,7 @@ class ConnectGoalValidator extends GoalValidator {
     return false;
   }
 
-  List<String> _findNeighbors(component_domain.ComponentModel component, Grid grid) {
+  List<String> _findNeighbors(ComponentModel component, Grid grid) {
     final neighbors = <String>[];
 
     // Simplified neighbor finding - check adjacent cells
@@ -103,11 +99,11 @@ class ConnectGoalValidator extends GoalValidator {
 
 class VoltageGoalValidator extends GoalValidator {
   @override
-  bool validate(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.parameters?['targetId']];
+  bool validate(LevelGoal goal, Grid grid) {
+    final targetComponent = grid.componentsById[goal.conditions?['targetId']];
     if (targetComponent == null) return false;
 
-    final requiredVoltage = goal.parameters?['voltage'] ?? 0;
+    final requiredVoltage = goal.conditions?['voltage'] ?? 0;
     final actualVoltage = targetComponent.state['voltage'] ?? 0;
 
     return (actualVoltage - requiredVoltage).abs() < 0.1;
@@ -116,11 +112,11 @@ class VoltageGoalValidator extends GoalValidator {
 
 class CurrentGoalValidator extends GoalValidator {
   @override
-  bool validate(Goal goal, Grid grid) {
-    final targetComponent = grid.componentsById[goal.parameters?['targetId']];
+  bool validate(LevelGoal goal, Grid grid) {
+    final targetComponent = grid.componentsById[goal.conditions?['targetId']];
     if (targetComponent == null) return false;
 
-    final requiredCurrent = goal.parameters?['current'] ?? 0;
+    final requiredCurrent = goal.conditions?['current'] ?? 0;
     final actualCurrent = targetComponent.state['current'] ?? 0;
 
     return (actualCurrent - requiredCurrent).abs() < 0.01;
@@ -153,11 +149,11 @@ class GoalCheckingService {
   }
 
   bool _validateGoal(LevelGoal levelGoal, Grid grid) {
-    final validator = _validators[levelGoal.goal.type];
+    final validator = _validators[levelGoal.type];
     if (validator == null) {
       return false; // Unknown goal type
     }
 
-    return validator.validate(levelGoal.goal, grid);
+    return validator.validate(levelGoal, grid);
   }
 }

@@ -157,12 +157,12 @@ class _ParticlePainter extends CustomPainter {
       if (particle.life <= 0) continue;
 
       final paint = Paint()
-        ..color = particleColor.withOpacity(particle.life)
+        ..color = particleColor.withValues(alpha: particle.life)
         ..style = PaintingStyle.fill;
 
       // Add glow effect
       final glowPaint = Paint()
-        ..color = particleColor.withOpacity(particle.life * 0.3)
+        ..color = particleColor.withValues(alpha: particle.life * 0.3)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, particle.size);
 
       final center = Offset(

@@ -1,5 +1,4 @@
-import '../../domain/entities/grid.dart';
-import '../../domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 import '../../common/logger.dart';
 

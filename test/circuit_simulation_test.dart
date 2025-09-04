@@ -1,13 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/providers.dart';
-import 'package:sparkcircuit/domain/entities/component.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/application/services/component_factory.dart';
 import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
 import 'package:sparkcircuit/core/simulation/basic_simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
-import 'package:sparkcircuit/core/persistence/storage_service.dart';
-import 'package:sparkcircuit/application/game_engine_v3/providers_v3.dart';
 import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
 
 void main() {
@@ -19,7 +17,7 @@ void main() {
         commandStackProvider.overrideWithValue(InMemoryCommandStack()),
         simulationEngineProvider.overrideWithValue(BasicSimulationEngine()),
         netlistBuilderProvider.overrideWithValue(NetlistBuilder()),
-        storageServiceProvider.overrideWithValue(StorageService()),
+        storageServiceProvider.overrideWithValue(SharedPreferencesStorageService()),
         componentFactoryProvider.overrideWithValue(ComponentFactory()),
       ]);
     });
@@ -31,14 +29,14 @@ void main() {
     test('Simulation should run correctly', () async {
       final gameStateNotifier = container.read(enhancedGameStateNotifierProvider.notifier);
 
-      await gameStateNotifier.placeComponent(ComponentType.battery, 0, 0);
-      await gameStateNotifier.placeComponent(ComponentType.wire, 0, 1);
+      gameStateNotifier.placeComponent(ComponentType.battery, 0, 0);
+      gameStateNotifier.placeComponent(ComponentType.wire, 0, 1);
 
       final components = gameStateNotifier.state.grid.getAllComponents();
       final battery = components[0];
       final wire = components[1];
 
-      await gameStateNotifier.addConnection(battery.id, wire.id);
+      gameStateNotifier.addConnection(battery.id, wire.id);
 
       // The simulation is automatically run after each command,
       // so we just need to check the state.

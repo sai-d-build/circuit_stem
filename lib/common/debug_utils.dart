@@ -1,5 +1,3 @@
-import '../application/services/component_registry.dart';
-import '../domain/behaviors/move_behavior.dart';
 import 'logger.dart';
 import '../application/services/component_factory.dart';
 

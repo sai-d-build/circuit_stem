@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 // Domain entities
-import '../domain/entities/component.dart';
-import '../domain/entities/grid.dart';
-import '../domain/entities/level_definition.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 // Application services
 import 'services/component_palette_manager.dart';
@@ -36,11 +34,9 @@ class GameEngineState with _$GameEngineState {
 
   factory GameEngineState.initial(LevelDefinition? level) => GameEngineState(
         grid: Grid(
-          rows: level?.rows ?? 0,
-          cols: level?.cols ?? 0,
-          components: level?.initialComponentsList != null
-              ? {for (final comp in level!.initialComponentsList) comp.id: comp}
-              : {}, // Convert List to Map
+          rows: level?.grid.height ?? 0,
+          cols: level?.grid.width ?? 0,
+          components: {}, // Will be populated from level data
         ),
         isPaused: false,
         isWin: false,
@@ -50,20 +46,22 @@ class GameEngineState with _$GameEngineState {
         selectedComponentId: null,
         dragPosition: null,
         paletteComponents:
-            (level?.components.available ?? []).map((template) => ComponentModel(
-              id: template.type, // Using type as ID for palette components
-              type: ComponentType.values.firstWhere((e) => e.toString().split('.').last == template.type),
+            (level?.components.available ?? []).map((availability) => ComponentModel(
+              id: availability.toString(), // Convert ComponentAvailability to string ID
+              type: _mapAvailabilityToComponentType(availability),
               row: -1, // Placeholder for palette components
               col: -1, // Placeholder for palette components
-              properties: template.properties ?? {},
+              properties: {},
             )).toList(),
-        paletteManager: ComponentPaletteManager((level?.components.available ?? []).map((template) => ComponentModel(
-              id: template.type, // Using type as ID for palette components
-              type: ComponentType.values.firstWhere((e) => e.toString().split('.').last == template.type),
-              row: -1, // Placeholder for palette components
-              col: -1, // Placeholder for palette components
-              properties: template.properties ?? {},
-            )).toList()),
+        paletteManager: ComponentPaletteManager(
+          availableTemplates: (level?.components.available ?? []).map((availability) => ComponentModel(
+                id: availability.toString(), // Convert ComponentAvailability to string ID
+                type: _mapAvailabilityToComponentType(availability),
+                row: -1, // Placeholder for palette components
+                col: -1, // Placeholder for palette components
+                properties: {},
+              )).toList(),
+        ),
         poweredBuzzerIds: const {},
         history: const [],
         lastUpdated: DateTime.now(),
@@ -80,7 +78,7 @@ class GameEngineState with _$GameEngineState {
         selectedComponentId: null,
         dragPosition: null,
         paletteComponents: const [],
-        paletteManager: const ComponentPaletteManager([]),
+        paletteManager: const ComponentPaletteManager(availableTemplates: []),
         poweredBuzzerIds: const {},
         history: const [],
         lastUpdated: DateTime.now(),
@@ -91,7 +89,7 @@ class GameEngineState with _$GameEngineState {
   bool isValidState() {
     // Check grid bounds
     if (currentLevel != null) {
-      if (grid.rows != currentLevel!.rows || grid.cols != currentLevel!.cols) {
+      if (grid.rows != currentLevel!.grid.height || grid.cols != currentLevel!.grid.width) {
         return false;
       }
 
@@ -148,6 +146,32 @@ class GameEngineState with _$GameEngineState {
   bool get isPlaying => hasLevel && !isPaused && !isWin;
   bool get isDragging => draggedComponentId != null;
   bool get isInteractable => hasLevel && !isPaused && !isWin && !isShortCircuit;
-  String? get currentLevelId => currentLevel?.id;
+  String? get currentLevelId => currentLevel?.levelId;
   String get gridDimensions => '${grid.rows}x${grid.cols}';
+
+  static ComponentType _mapAvailabilityToComponentType(ComponentAvailability availability) {
+    // Map ComponentAvailability.type string to ComponentType
+    switch (availability.type) {
+      case 'wire':
+        return ComponentType.wire;
+      case 'switch':
+        return ComponentType.switch_;
+      case 'capacitor':
+        return ComponentType.capacitor;
+      case 'resistor':
+        return ComponentType.resistor;
+      case 'bulb':
+      case 'led':
+        return ComponentType.bulb;
+      case 'battery':
+        return ComponentType.battery;
+      case 'inductor':
+        return ComponentType.inductor;
+      case 'buzzer':
+        return ComponentType.buzzer;
+      default:
+        // Fallback to wire as default
+        return ComponentType.wire;
+    }
+  }
 }
