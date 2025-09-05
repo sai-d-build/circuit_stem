@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/services/coordinate_service.dart';
 
 class ComponentPainter extends CustomPainter {
   final List<CircuitComponent> components;
   final CircuitColorScheme circuitColors;
   final String? selectedComponentId;
+  final CoordinateService? coordinateService;
   final double scale;
 
   ComponentPainter({
     required this.components,
     required this.circuitColors,
     this.selectedComponentId,
+    this.coordinateService,
     this.scale = 1.0,
   });
 
@@ -27,12 +30,12 @@ class ComponentPainter extends CustomPainter {
 
   void _drawComponent(Canvas canvas, CircuitComponent component) {
     final isSelected = component.id == selectedComponentId;
+    final scale = coordinateService?.scale ?? 1.0;
     final componentSize = GameConstants.componentWidth * scale;
 
-    final center = Offset(
-      component.col * GameConstants.gridCellSize * scale,
-      component.row * GameConstants.gridCellSize * scale,
-    );
+    final center = coordinateService?.gridToScreen(Offset(component.col.toDouble(), component.row.toDouble())) ??
+                   Offset(component.col * GameConstants.gridCellSize * scale,
+                          component.row * GameConstants.gridCellSize * scale);
 
     final rect = Rect.fromCenter(
       center: center,
@@ -92,13 +95,13 @@ class ComponentPainter extends CustomPainter {
     );
 
     // Draw component-specific details
-    drawComponentDetails(canvas, component, rect);
+    drawComponentDetails(canvas, component, rect, scale);
 
     // Restore canvas state after rotation
     canvas.restore();
   }
 
-  void drawComponentDetails(Canvas canvas, CircuitComponent component, Rect rect) {
+  void drawComponentDetails(Canvas canvas, CircuitComponent component, Rect rect, double scale) {
     final detailPaint = Paint()
       ..color = circuitColors.onSurface
       ..strokeWidth = GameConstants.thickStroke * scale
@@ -356,8 +359,32 @@ class ComponentPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(ComponentPainter oldDelegate) {
-    return oldDelegate.components != components ||
-            oldDelegate.selectedComponentId != selectedComponentId ||
-            oldDelegate.scale != scale;
+    // Granular repaint detection for performance
+    if (oldDelegate.selectedComponentId != selectedComponentId) {
+      return true; // Selection change requires repaint
+    }
+
+    if (oldDelegate.scale != scale) {
+      return true; // Scale change affects all components
+    }
+
+    if (oldDelegate.components.length != components.length) {
+      return true; // Component count changed
+    }
+
+    // Check for component state changes (more efficient than full equality)
+    for (int i = 0; i < components.length; i++) {
+      final newComp = components[i];
+      final oldComp = oldDelegate.components[i];
+
+      if (newComp.id != oldComp.id ||
+          newComp.state != oldComp.state ||
+          newComp.rotation != oldComp.rotation ||
+          newComp.properties != oldComp.properties) {
+        return true; // Component changed
+      }
+    }
+
+    return false; // No changes detected
   }
 }

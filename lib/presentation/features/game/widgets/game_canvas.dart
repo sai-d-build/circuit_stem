@@ -16,6 +16,8 @@ import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_component_widget.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/component_context_menu.dart';
 import 'package:sparkcircuit/presentation/core/utils/feedback_utils.dart';
+import 'package:sparkcircuit/core/services/grid_service.dart';
+import 'package:sparkcircuit/core/services/coordinate_service.dart';
 
 
 class GameCanvas extends ConsumerStatefulWidget {
@@ -32,6 +34,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
   late GameCanvasController _canvasController;
   String? _draggedComponentType;
   Offset? _dragPosition;
+  Offset? _mousePosition;
   LevelDefinition? _levelDefinition;
 
   // Wire connection state
@@ -106,6 +109,11 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
 
         // Initialize game state with the loaded level
         StructuredLogger.debug('GameCanvas: Initializing game state with level data');
+        debugPrint('🎨 ===== LEVEL LOAD DEBUG =====');
+        debugPrint('🎨 Level tutorial config:');
+        debugPrint('🎨   - Tutorial enabled: ${level.tutorial?.enabled}');
+        debugPrint('🎨   - Level components count: ${level.components.available.length}');
+        debugPrint('🎨 ===== END LEVEL LOAD DEBUG =====');
         ref.read(enhancedGameStateNotifierProvider.notifier).loadLevel(level);
 
         StructuredLogger.info('GameCanvas: Level load process completed successfully', context: {
@@ -136,7 +144,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>() ?? _getDefaultCircuitColors();
-        final gameState = ref.watch(enhancedGameStateNotifierProvider);
+    final gameState = ref.watch(enhancedGameStateNotifierProvider);
     final paletteState = ref.watch(paletteStateProvider(widget.levelId));
 
     // If we have a loaded level but the game state doesn't have it, initialize with level
@@ -179,11 +187,28 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     debugPrint('🎨 Build: Game state components count: ${gameState.grid.components.length}');
     debugPrint('🎨 Build: Circuit components count: ${circuitComponents.length}');
 
+    // 🔍 DEBUG: Comprehensive build-time component tracking
+    debugPrint('🎨 📊 BUILD-TIME COMPONENT TRACKING:');
+    debugPrint('🎨   - Grid dimensions: ${gameState.grid.rows}x${gameState.grid.cols}');
+
     if (gameState.grid.components.isNotEmpty) {
-      debugPrint('🎨 Build: Component details:');
+      debugPrint('🎨 🗺️ CURRENT GRID COMPONENT MAP (Row,Col:Type):');
       gameState.grid.components.forEach((id, component) {
-        debugPrint('🎨   - $id: ${component.type} at (${component.col}, ${component.row})');
+        final side = (component.col < gameState.grid.cols ~/ 2) ? 'LEFT' : 'RIGHT';
+        debugPrint('🎨   - $id: ${component.type.toString().split('.').last} at (${component.row},${component.col}) [$side]');
       });
+
+      // 🔍 DEBUG: Grid occupancy analysis
+      debugPrint('🎨 📈 GRID OCCUPANCY ANALYSIS:');
+      final totalCells = gameState.grid.rows * gameState.grid.cols;
+      final occupiedCells = gameState.grid.components.length;
+      final occupancyPercent = (occupiedCells / totalCells * 100).round();
+      debugPrint('🎨   - Total grid cells: $totalCells');
+      debugPrint('🎨   - Occupied cells: $occupiedCells');
+      debugPrint('🎨   - Grid occupancy: ${occupancyPercent}%');
+
+    } else {
+      debugPrint('🎨 📭 GRID IS EMPTY');
     }
 
     // Convert Grid connections to CircuitWire for painter
@@ -232,10 +257,42 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
             debugPrint('🎯 Component: ${details.data.componentName} (${details.data.componentType})');
             debugPrint('🎯 Cost: ${details.data.cost}');
             debugPrint('🎯 Component properties: ${details.data.defaultProperties}');
-            debugPrint('🎯 Game state components before drop: ${gameState.grid.components.length}');
-            debugPrint('🎯 Palette inventory before drop: ${paletteState.inventory[details.data.componentType.toString().split('.').last]?.available ?? 0}');
+
+            // 🔍 DEBUG: Comprehensive Pre-placement state verification
+            debugPrint('🎯 📊 PRE-PLACEMENT STATE VERIFICATION:');
+            debugPrint('🎯   - Total components in grid: ${gameState.grid.components.length}');
+            final componentTypeString = details.data.componentType.toString().split('.').last;
+            debugPrint('🎯   - Palette inventory before drop: ${paletteState.inventory[componentTypeString]?.available ?? 0}');
+
+            // 🔍 DEBUG: Detailed grid occupancy map
+            debugPrint('🎯 📍 CURRENT GRID OCCUPANCY (Row,Col:Type):');
+            if (gameState.grid.components.isEmpty) {
+              debugPrint('🎯     [EMPTY GRID]');
+            } else {
+              gameState.grid.components.forEach((id, component) {
+                final rightLeft = (component.col < gameState.grid.cols ~/ 2) ? 'LEFT' : 'RIGHT';
+                debugPrint('🎯     (${component.row},${component.col}):${component.type.toString().split('.').last} [$rightLeft]');
+              });
+            }
+
+            // 🔍 DEBUG: Requested drop position analysis
+            debugPrint('🎯 🎯 REQUESTED DROP POSITION ANALYSIS:');
+            final coordService = _canvasController.coordinateService;
+            final requestedGridPos = coordService.screenToGrid(localPosition);
+            final snappedGridPos = Offset(requestedGridPos.dx.round().toDouble(), requestedGridPos.dy.round().toDouble());
+            final rightLeft = (snappedGridPos.dx < gameState.grid.cols ~/ 2) ? 'LEFT' : 'RIGHT';
+            debugPrint('🎯   - Requested local position: $localPosition');
+            debugPrint('🎯   - Converted grid position: $snappedGridPos');
+            debugPrint('🎯   - Position side: $rightLeft side of grid');
+            debugPrint('🎯   - Grid bounds: ${gameState.grid.rows}x${gameState.grid.cols}');
+
+            // 🔍 DEBUG: Position validity check
+            final isValidDrop = snappedGridPos.dx >= 0 && snappedGridPos.dx < gameState.grid.cols &&
+                               snappedGridPos.dy >= 0 && snappedGridPos.dy < gameState.grid.rows;
+            debugPrint('🎯   - Is requested position valid: $isValidDrop');
 
             // Process the component drop directly instead of recursive call
+            debugPrint('🎯 🔄 PROCEEDING TO COMPONENT DROP...');
             _processComponentDrop(details, localPosition, gameState, paletteState);
           },
           onWillAcceptWithDetails: (details) {
@@ -285,72 +342,87 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
                 'dataCount': candidateData.length,
               });
             }
-            return Stack(
-              children: [
-                // Grid background
-                Positioned.fill(
-                  child: CircuitGrid(
-                    controller: _canvasController,
-                    levelId: widget.levelId,
-                  ),
-                ),
-
-                // Drop zone highlight
-                if (candidateData.isNotEmpty)
+            return MouseRegion(
+              onHover: (event) {
+                setState(() {
+                  _mousePosition = event.localPosition;
+                });
+                debugPrint('🖱️ MOUSE POSITION: ${event.localPosition} -> Grid: (${(event.localPosition.dx / 60).floor()}, ${(event.localPosition.dy / 60).floor()})');
+              },
+              onExit: (event) {
+                setState(() {
+                  _mousePosition = null;
+                });
+              },
+              child: Stack(
+                children: [
+                  // Grid background
                   Positioned.fill(
-                    child: _buildDropZoneHighlight(circuitColors, candidateData.first!, gameState),
-                  ),
-
-                // Components and connections display
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: CircuitComponentsPainter(
-                      components: circuitComponents,
-                      wires: circuitWires,
-                      circuitColors: circuitColors,
-                      selectedComponentId: gameState.interactionState.selectedComponentId,
-                      scale: _canvasController.scale,
+                    child: CircuitGrid(
+                      controller: _canvasController,
+                      levelId: widget.levelId,
                     ),
-                    size: Size.infinite,
-                  ),
-                ),
-
-                // Interaction layer
-                Positioned.fill(
-                  child: _buildInteractionLayer(gameState, paletteState, circuitColors),
-                ),
-
-                // Drag preview
-                if (_draggedComponentType != null && _dragPosition != null)
-                  Positioned(
-                    left: _dragPosition!.dx - 25,
-                    top: _dragPosition!.dy - 25,
-                    child: _buildDragPreview(_draggedComponentType!, circuitColors),
                   ),
 
-                // Wire drawing overlay
-                if (_isDrawingWire && _wireStartPosition != null)
+                  // Drop zone highlight
+                  if (candidateData.isNotEmpty)
+                    Positioned.fill(
+                      child: _buildDropZoneHighlight(circuitColors, candidateData.first!, gameState),
+                    ),
+
+                  // Components and connections display
                   Positioned.fill(
-                    child: CustomPaint(
-                      painter: WireDrawingPainter(
-                        startPosition: _wireStartPosition,
-                        endPosition: _wireEndPosition,
-                        circuitColors: circuitColors,
+                    child: RepaintBoundary(
+                      child: CustomPaint(
+                        painter: CircuitComponentsPainter(
+                          components: circuitComponents,
+                          wires: circuitWires,
+                          circuitColors: circuitColors,
+                          selectedComponentId: gameState.interactionState.selectedComponentId,
+                          coordinateService: _canvasController.coordinateService,
+                        ),
+                        size: Size.infinite,
                       ),
                     ),
                   ),
 
-                // Render actual component widgets for interaction
-                ...gameState.grid.components.values.map((component) => CircuitComponentWidget(component: component)),
-
-                // Context menu overlay
-                if (_isContextMenuVisible && _contextMenuPosition != null && _contextMenuComponentId != null)
-                  ComponentContextMenu(
-                    componentId: _contextMenuComponentId!,
-                    position: _contextMenuPosition!,
-                    onDismiss: _hideComponentContextMenu,
+                  // Interaction layer
+                  Positioned.fill(
+                    child: _buildInteractionLayer(gameState, paletteState, circuitColors),
                   ),
-              ],
+
+                  // Drag preview
+                  if (_draggedComponentType != null && _dragPosition != null)
+                    Positioned(
+                      left: _dragPosition!.dx - 25,
+                      top: _dragPosition!.dy - 25,
+                      child: _buildDragPreview(_draggedComponentType!, circuitColors),
+                    ),
+
+                  // Wire drawing overlay
+                  if (_isDrawingWire && _wireStartPosition != null)
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: WireDrawingPainter(
+                          startPosition: _wireStartPosition,
+                          endPosition: _wireEndPosition,
+                          circuitColors: circuitColors,
+                        ),
+                      ),
+                    ),
+
+                  // Render actual component widgets for interaction
+                  ...gameState.grid.components.values.map((component) => CircuitComponentWidget(component: component)),
+
+                  // Context menu overlay
+                  if (_isContextMenuVisible && _contextMenuPosition != null && _contextMenuComponentId != null)
+                    ComponentContextMenu(
+                      componentId: _contextMenuComponentId!,
+                      position: _contextMenuPosition!,
+                      onDismiss: _hideComponentContextMenu,
+                    ),
+                ],
+              ),
             );
           },
         ),
@@ -456,6 +528,37 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
       ),
       child: Stack(
         children: [
+          // Debug overlay at the top of stack
+          Positioned(
+            top: 10,
+            right: 10,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.8),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '🐛 Debug Info',
+                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                  if (_mousePosition != null) ...[
+                    Text(
+                      'Mouse: (${_mousePosition!.dx.toStringAsFixed(1)}, ${_mousePosition!.dy.toStringAsFixed(1)})',
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontFamily: 'monospace'),
+                    ),
+                    Text(
+                      'Grid: (${(_mousePosition!.dx / 60).floor()}, ${(_mousePosition!.dy / 60).floor()})',
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontFamily: 'monospace'),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
           // Background overlay to make drop zones more visible
           Container(
             color: circuitColors.primary.withValues(alpha: 0.1),
@@ -604,29 +707,83 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
   }
 
   void _handleScaleStart(ScaleStartDetails details) {
+    debugPrint('🔄 ===== SCALE START =====');
+    debugPrint('🔄 Pointer count: ${details.pointerCount}');
+    debugPrint('🔄 Local focal point: ${details.localFocalPoint}');
+
     _canvasController.startScale();
 
     // Initialize pan state for single-touch gestures
     if (details.pointerCount == 1) {
       final localPosition = details.localFocalPoint;
+      debugPrint('🔄 Single touch detected at: $localPosition');
 
       // Check if starting drag from an existing component
       final gridPos = _canvasController.screenToGrid(localPosition);
       final snappedGridPos = Offset(gridPos.dx.round().toDouble(), gridPos.dy.round().toDouble());
-      final component = _getComponentAtPosition(snappedGridPos, ref.read(enhancedGameStateNotifierProvider));
+
+      debugPrint('🔄 Screen to grid conversion:');
+      debugPrint('🔄   - Screen pos: $localPosition');
+      debugPrint('🔄   - Grid pos: $gridPos');
+      debugPrint('🔄   - Snapped grid pos: $snappedGridPos');
+
+      final currentGameState = ref.read(enhancedGameStateNotifierProvider);
+      ComponentModel? component = _getComponentAtPosition(snappedGridPos, currentGameState);
+
+      // If no component at exact position, search nearby (within 1 cell radius)
+      if (component == null) {
+        debugPrint('🔄 Searching nearby positions for component...');
+        const int searchRadius = 1;
+        for (int rowOffset = -searchRadius; rowOffset <= searchRadius; rowOffset++) {
+          for (int colOffset = -searchRadius; colOffset <= searchRadius; colOffset++) {
+            if (rowOffset == 0 && colOffset == 0) continue; // Skip exact position
+
+            final searchGridPos = Offset(
+              snappedGridPos.dx + colOffset,
+              snappedGridPos.dy + rowOffset
+            );
+
+            // Check bounds
+            if (searchGridPos.dx >= 0 && searchGridPos.dx < currentGameState.grid.cols &&
+                searchGridPos.dy >= 0 && searchGridPos.dy < currentGameState.grid.rows) {
+              debugPrint('🔄 Checking nearby position (${searchGridPos.dy.toInt()}, ${searchGridPos.dx.toInt()})');
+              component = _getComponentAtPosition(searchGridPos, currentGameState);
+              if (component != null) {
+                debugPrint('🔄 ✅ FOUND COMPONENT NEARBY at (${searchGridPos.dy.toInt()}, ${searchGridPos.dx.toInt()})');
+                break;
+              }
+            }
+          }
+          if (component != null) break;
+        }
+      }
+
       if (component != null) {
+        debugPrint('🔄 ✅ FOUND COMPONENT TO DRAG!');
+        debugPrint('🔄   - Component ID: ${component.id}');
+        debugPrint('🔄   - Component type: ${component.type}');
+        debugPrint('🔄   - Component position: (${component.row}, ${component.col})');
+
         // Start dragging existing component
         _isDraggingComponent = true;
         _isPanningCanvas = false;
-        ref.read(enhancedGameStateNotifierProvider.notifier).startDragging(component.id, localPosition);
+        ref.read(enhancedGameStateNotifierProvider.notifier).startDragging(component!.id, localPosition);
         setState(() {
-          _draggedComponentType = component.type.toString();
+        _draggedComponentType = component!.type.toString();
           _dragPosition = localPosition;
         });
+        debugPrint('🔄 Component drag state initialized successfully');
         return;
+      } else {
+        debugPrint('🔄 ❌ NO COMPONENT FOUND AT POSITION!');
+        debugPrint('🔄 Available components:');
+        currentGameState.grid.components.forEach((id, comp) {
+          debugPrint('🔄   - $id: ${comp.type} at (${comp.row}, ${comp.col})');
+        });
       }
 
       // Starting pan on empty canvas
+      debugPrint('🔄 Starting canvas pan (no component found)');
       _isDraggingComponent = false;
       _isPanningCanvas = true;
 
@@ -637,8 +794,10 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
           _draggedComponentType = paletteState.selectedComponentType;
           _dragPosition = localPosition;
         });
+        debugPrint('🔄 Palette drag initiated: ${paletteState.selectedComponentType}');
       }
     }
+    debugPrint('🔄 ===== SCALE START END =====');
   }
 
   void _handleUnifiedGestureUpdate(ScaleUpdateDetails details, GameState gameState, PaletteState paletteState) {
@@ -656,7 +815,16 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     // Convert scale update to pan update for single-touch gestures
     final delta = details.focalPointDelta;
 
+    debugPrint('🖱️ ===== SINGLE TOUCH GESTURE =====');
+    debugPrint('🖱️ Local focal point: ${details.localFocalPoint}');
+    debugPrint('🖱️ Delta: $delta');
+    debugPrint('🖱️ Is dragging component: $_isDraggingComponent');
+    debugPrint('🖱️ Is panning canvas: $_isPanningCanvas');
+    debugPrint('🖱️ Dragged component type: $_draggedComponentType');
+    debugPrint('🖱️ Game state dragged ID: ${gameState.interactionState.draggedComponentId}');
+
     if (_isDraggingComponent && _draggedComponentType != null) {
+      debugPrint('🖱️ ✅ DRAGGING COMPONENT MODE');
       // Update drag preview position
       setState(() {
         _dragPosition = details.localFocalPoint;
@@ -664,23 +832,53 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
 
       // If dragging an existing component, update its position in real-time
       if (gameState.interactionState.draggedComponentId != null) {
+        debugPrint('🖱️ MOVING EXISTING COMPONENT');
         final gridPosition = _canvasController.screenToGrid(details.localFocalPoint);
         final snappedPosition = Offset(
           gridPosition.dx.round().toDouble(),
           gridPosition.dy.round().toDouble(),
         );
 
-        // Move component to new position
-        ref.read(enhancedGameStateNotifierProvider.notifier).moveComponent(
-          gameState.interactionState.draggedComponentId!,
-          snappedPosition.dy.toInt(),
-          snappedPosition.dx.toInt(),
-        );
+        debugPrint('🖱️ Coordinate conversion:');
+        debugPrint('🖱️   - Screen: ${details.localFocalPoint}');
+        debugPrint('🖱️   - Grid: $gridPosition');
+        debugPrint('🖱️   - Snapped: $snappedPosition');
+        // Get the current component being dragged to check its position
+        final currentComponent = gameState.grid.getComponentById(gameState.interactionState.draggedComponentId!);
+        debugPrint('🖱️   - Current component position: (${currentComponent?.row ?? 'unknown'}, ${currentComponent?.col ?? 'unknown'})');
+
+        // Verify the component exists at current position
+        debugPrint('🖱️   - Current component: ${currentComponent?.id ?? 'unknown'}');
+        debugPrint('🖱️   - Current position: (${currentComponent?.row ?? 'unknown'}, ${currentComponent?.col ?? 'unknown'})');
+
+        // FIXED: Use correct row/column ordering for moveComponent
+        // moveComponent expects (componentId, row, col) - not (id, col, row)
+        final newRow = snappedPosition.dy.toInt();
+        final newCol = snappedPosition.dx.toInt();
+        debugPrint('🖱️   - MOVING component ${gameState.interactionState.draggedComponentId} to ROW:$newRow, COL:$newCol');
+
+        // Move component to new position - ensure proper row/col order
+        if (newRow != currentComponent?.row || newCol != currentComponent?.col) {
+          ref.read(enhancedGameStateNotifierProvider.notifier).moveComponent(
+            gameState.interactionState.draggedComponentId!,
+            newRow, // row
+            newCol, // col
+          );
+          debugPrint('🖱️ ✅ Component move request sent to game state');
+        } else {
+          debugPrint('🖱️ ⚠️ Component already at target position, skipping move');
+        }
+      } else {
+        debugPrint('🖱️ ❌ No dragged component ID found');
       }
     } else if (_isPanningCanvas) {
+      debugPrint('🖱️ CANVAS PANNING MODE');
       // Handle canvas panning
       _canvasController.updatePan(delta);
+    } else {
+      debugPrint('🖱️ UNKNOWN STATE - not dragging or panning');
     }
+    debugPrint('🖱️ ===== GESTURE END =====');
   }
 
   void _handleScaleEnd(ScaleEndDetails details, GameState gameState, PaletteState paletteState) {
@@ -768,12 +966,21 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
   }
 
   ComponentModel? _getComponentAtPosition(Offset gridPosition, GameState gameState) {
+    debugPrint('🔍 ====== COMPONENT SEARCH =======');
+    debugPrint('🔍 Searching at grid position: (${gridPosition.dx.toInt()}, ${gridPosition.dy.toInt()})');
+    debugPrint('🔍 Grid bounds: ${gameState.grid.rows}x${gameState.grid.cols}');
+    debugPrint('🔍 Total components: ${gameState.grid.components.length}');
+
     // Find component at this exact grid position
     for (final component in gameState.grid.components.values) {
+      debugPrint('🔍 Checking component ${component.id} at (${component.row}, ${component.col})');
       if (component.col == gridPosition.dx.toInt() && component.row == gridPosition.dy.toInt()) {
+        debugPrint('🔍 ✅ FOUND MATCHING COMPONENT: ${component.id}');
         return component;
       }
     }
+
+    debugPrint('🔍 ❌ NO COMPONENT FOUND AT THIS POSITION');
     return null;
   }
 
@@ -874,7 +1081,34 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
     debugPrint('🎯 Local position: $localPosition');
     debugPrint('🎯 Component: ${details.data.componentName} (${details.data.componentType})');
     debugPrint('🎯 Component cost: ${details.data.cost}');
-    debugPrint('🎯 Current game state components: ${gameState.grid.components.length}');
+
+    // 🔍 DEBUG: Pre-placement component count verification
+    final prePlacementCount = gameState.grid.components.length;
+    debugPrint('🎯 📊 COMPONENT COUNT TRACKING:');
+    debugPrint('🎯   - Components BEFORE placement: $prePlacementCount');
+    debugPrint('🎯   - Current grid contents:');
+    gameState.grid.components.forEach((id, component) {
+      debugPrint('🎯     - $id: ${component.type} at (${component.row}, ${component.col})');
+    });
+
+    // 🔍 DEBUG: Final grid position verification
+    debugPrint('🎯 🎯 FINAL GRID POSITION CALCULATION:');
+    final coordService = _canvasController.coordinateService;
+    final calculatedFinalGridPos = coordService.screenToGrid(localPosition);
+    final finalGridPosSnapped = Offset(
+      calculatedFinalGridPos.dx.round().toDouble(),
+      calculatedFinalGridPos.dy.round().toDouble()
+    );
+    final finalSide = (finalGridPosSnapped.dx < gameState.grid.cols ~/ 2) ? 'LEFT' : 'RIGHT';
+    debugPrint('🎯   - Calculated final grid position: $finalGridPosSnapped');
+    debugPrint('🎯   - Final position side: $finalSide side of grid');
+
+    // Current game state components
+    debugPrint('🎯 Current game state components in grid:');
+    gameState.grid.components.forEach((id, component) {
+      final side = (component.col < gameState.grid.cols ~/ 2) ? 'LEFT' : 'RIGHT';
+      debugPrint('🎯   - $id: ${component.type.toString().split('.').last} at (${component.row},${component.col}) [${side}]');
+    });
 
     StructuredLogger.info('Component drop initiated', context: {
       'globalPosition': details.offset.toString(),
@@ -1004,15 +1238,52 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
       // Play placement sound
       _playComponentPlacementSound();
 
+      // 🔍 DEBUG: POST-PLACEMENT VERIFICATION
       debugPrint('🎯 ===== COMPONENT PLACEMENT SUCCESS =====');
       debugPrint('🎯 Component: ${details.data.componentName}');
-      debugPrint('🎯 Position: (${validGridPosition.dx.toInt()}, ${validGridPosition.dy.toInt()})');
-      debugPrint('🎯 Game state components: ${updatedGameState.grid.components.length}');
 
-      StructuredLogger.info('Component successfully placed', context: {
+      // 🔍 DEBUG: Position verification - Requested vs Actual
+      debugPrint('🎯 📍 POSITION VERIFICATION DETAILS:');
+      debugPrint('🎯   - Requested position: (${validGridPosition.dx.toInt()}, ${validGridPosition.dy.toInt()})');
+      final actualSide = (validGridPosition.dx < gameState.grid.cols ~/ 2) ? 'LEFT' : 'RIGHT';
+      debugPrint('🎯   - Actual placement side: $actualSide');
+
+      // 🔍 DEBUG: Component count verification
+      final postPlacementCount = updatedGameState.grid.components.length;
+      const expectedIncrease = 1;
+      final actualIncrease = postPlacementCount - prePlacementCount;
+      debugPrint('🎯 📊 COMPONENT COUNT VERIFICATION:');
+      debugPrint('🎯   - Components BEFORE placement: $prePlacementCount');
+      debugPrint('🎯   - Components AFTER placement: $postPlacementCount');
+      debugPrint('🎯   - Expected increase: $expectedIncrease');
+      debugPrint('🎯   - Actual increase: $actualIncrease');
+      debugPrint('🎯   - Placement successful: ${actualIncrease == expectedIncrease}');
+
+      // 🔍 DEBUG: Final grid state verification
+      debugPrint('🎯 📋 FINAL GRID STATE VERIFICATION:');
+      if (updatedGameState.grid.components.isEmpty) {
+        debugPrint('🎯     [GRID STILL EMPTY - CRITICAL ERROR!]');
+      } else {
+        debugPrint('🎯     Updated grid components:');
+        updatedGameState.grid.components.forEach((id, component) {
+          final side = (component.col < gameState.grid.cols ~/ 2) ? 'LEFT' : 'RIGHT';
+          final isLastPlaced = id.contains(details.data.componentType.toString().split('.').last);
+          debugPrint('🎯       - $id: ${component.type.toString().split('.').last} at (${component.row},${component.col}) [$side]${isLastPlaced ? ' [NEWLY PLACED]' : ''}');
+        });
+      }
+
+      debugPrint('🎯 🎉 COMPONENT PLACEMENT COMPLETED SUCCESSFULLY');
+      debugPrint('🎯 =========================================');
+
+      StructuredLogger.info('Component successfully placed - VERIFIED', context: {
         'componentName': details.data.componentName,
         'componentType': details.data.componentType.toString(),
-        'gridPosition': '${validGridPosition.dx.toInt()}, ${validGridPosition.dy.toInt()}',
+        'requestedGridPosition': '${validGridPosition.dx.toInt()}, ${validGridPosition.dy.toInt()}',
+        'placementSide': actualSide,
+        'prePlacementCount': prePlacementCount,
+        'postPlacementCount': postPlacementCount,
+        'countIncrease': actualIncrease,
+        'placementSuccessful': actualIncrease == expectedIncrease,
         'remainingInventory': paletteState.inventory,
         'totalComponentsAfterPlacement': updatedGameState.grid.components.length,
       });
@@ -1054,9 +1325,18 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
       'componentType': details.data.componentType.toString(),
     });
 
-    // Get valid grid position with more lenient bounds checking
-    final validGridPosition = _canvasController.getValidGridPosition(localPosition);
-    debugPrint('🔍 Step 1 - Valid grid position: $validGridPosition');
+    // 🔧 FIXED: Use consistent GridConfiguration instead of canvasController
+    final config = GridConfiguration(
+      rows: gameState.grid.rows,
+      cols: gameState.grid.cols,
+      cellSize: 60.0,  // Use standard cell size
+      scale: 1.0,      // No scaling in initial implementation
+      panOffset: Offset.zero, // No canvas pan offset yet
+    );
+
+    // Get valid grid position using GridService for consistency
+    final validGridPosition = GridService.getValidGridPosition(localPosition, config);
+    debugPrint('🔍 FIXED: Testing drop at local: $localPosition -> grid: $validGridPosition');
 
     if (validGridPosition == null) {
       debugPrint('🔍 ❌ REJECTED: Invalid grid position');
@@ -1064,7 +1344,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
       debugPrint('🔍   - Grid bounds: ${gameState.grid.rows}x${gameState.grid.cols}');
 
       // Calculate what grid position this would be for debugging
-      final gridPos = _canvasController.screenToGrid(localPosition);
+      final gridPos = GridService.screenToGrid(localPosition, config);
       debugPrint('🔍   - Calculated grid position: $gridPos');
       debugPrint('🔍   - Row valid: ${gridPos.dy >= 0 && gridPos.dy < gameState.grid.rows}');
       debugPrint('🔍   - Col valid: ${gridPos.dx >= 0 && gridPos.dx < gameState.grid.cols}');
@@ -1077,6 +1357,8 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
       return false;
     }
 
+    debugPrint('🔍 FIXED: ✅ Drop position is valid');
+
     // Check if position is available (no existing component)
     final existingComponent = _getComponentAtPosition(validGridPosition, gameState);
     final positionAvailable = existingComponent == null;
@@ -1084,7 +1366,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas>
 
     if (!positionAvailable) {
       debugPrint('🔍 ❌ REJECTED: Position occupied');
-      debugPrint('🔍   - Occupying component: ${existingComponent!.id} (${existingComponent.type})');
+      debugPrint('🔍   - Occupying component: ${existingComponent.id} (${existingComponent.type})');
       debugPrint('🔍   - Position: (${existingComponent.row}, ${existingComponent.col})');
       StructuredLogger.debug('Drop validation failed - position occupied', context: {
         'obstacleComponent': existingComponent.id,

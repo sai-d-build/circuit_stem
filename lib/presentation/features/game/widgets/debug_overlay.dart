@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_controller.dart';
 
-class DebugOverlay extends StatelessWidget {
+class DebugOverlay extends StatefulWidget {
   final GameCanvasController controller;
   final bool isVisible;
   final Map<String, dynamic>? gameDebugInfo;
+  final Offset? mousePosition;
 
   const DebugOverlay({
     super.key,
     required this.controller,
     this.isVisible = false,
     this.gameDebugInfo,
+    this.mousePosition,
   });
+
+  @override
+  State<DebugOverlay> createState() => _DebugOverlayState();
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +65,21 @@ class DebugOverlay extends StatelessWidget {
                 circuitColors,
               )),
             ],
+            if (mousePosition != null) ...[
+              const Divider(),
+              _buildDebugRow(
+                'Mouse Position',
+                '${mousePosition!.dx.toStringAsFixed(1)}, ${mousePosition!.dy.toStringAsFixed(1)}',
+                theme,
+                circuitColors,
+              ),
+              _buildDebugRow(
+                'Grid Position',
+                '${(mousePosition!.dx / 60).floor()}, ${(mousePosition!.dy / 60).floor()}',
+                theme,
+                circuitColors,
+              ),
+            ],
           ],
         ),
       ),
@@ -93,5 +113,12 @@ class DebugOverlay extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _DebugOverlayState extends State<DebugOverlay> {
+  @override
+  Widget build(BuildContext context) {
+    return widget.build(context);
   }
 }

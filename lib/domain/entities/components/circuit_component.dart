@@ -153,7 +153,7 @@ abstract class CircuitComponent {
       }
       canvas.translate(-center.dx, -center.dy);
 
-      painter.drawComponentDetails(canvas, this, bounds);
+      painter.drawComponentDetails(canvas, this, bounds, painter.scale);
       canvas.restore();
     }
   }

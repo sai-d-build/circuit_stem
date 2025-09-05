@@ -15,6 +15,7 @@ import 'package:sparkcircuit/core/persistence/storage_service.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
 import 'package:sparkcircuit/core/simulation/simulation_engine.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
+import 'package:sparkcircuit/core/services/drag_service.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart'; // Import for Offset
 
@@ -161,6 +162,14 @@ class EnhancedGameStateNotifier extends StateNotifier<GameState> {
   }
 
   void startDragging(String componentId, Offset localPosition) {
+    // Get component information to create drag data
+    final component = state.grid.getComponentById(componentId);
+    if (component == null) return;
+
+    final dragData = component.type.toDragData();
+    DragService().controller.startDrag(dragData, DragType.move, localPosition);
+
+    // Update state to maintain compatibility with existing code
     state = state.copyWith(
       interactionState: state.interactionState.copyWith(
         draggedComponentId: componentId,
@@ -171,6 +180,10 @@ class EnhancedGameStateNotifier extends StateNotifier<GameState> {
   }
 
   void dragUpdate(Offset localPosition) {
+    // Update DragService state
+    DragService().updateDragPosition(localPosition);
+
+    // Update state to maintain compatibility
     state = state.copyWith(
       interactionState: state.interactionState.copyWith(
         dragUpdateLocalPosition: localPosition,
@@ -179,16 +192,14 @@ class EnhancedGameStateNotifier extends StateNotifier<GameState> {
   }
 
   void endDragging() {
-    // This is where a move command would be dispatched
     final interaction = state.interactionState;
     final componentId = interaction.draggedComponentId;
     if (componentId == null) return;
 
-    // Logic to determine new grid position from drag would go here
-    // For now, we'll just clear the dragging state.
-    // In a real implementation, you'd calculate the new (row, col)
-    // and call `moveComponent`.
+    // End drag in service - no specific position, so cancel
+    DragService().cancelDrag();
 
+    // Clear dragging state (existing logic remains)
     state = state.copyWith(
       interactionState: state.interactionState.copyWith(
         draggedComponentId: null,

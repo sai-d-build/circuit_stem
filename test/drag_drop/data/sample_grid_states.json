@@ -1,0 +1,123 @@
+{
+  "empty_grid": {
+    "grid": {
+      "rows": 10,
+      "cols": 10,
+      "components": {}
+    },
+    "description": "Empty 10x10 grid with no components"
+  },
+
+  "single_battery": {
+    "grid": {
+      "rows": 10,
+      "cols": 10,
+      "components": {
+        "comp1": {
+          "id": "comp1",
+          "type": "battery",
+          "row": 2,
+          "col": 2,
+          "properties": {
+            "voltage": 9.0
+          }
+        }
+      }
+    },
+    "description": "Grid with single battery component"
+  },
+
+  "complex_circuit": {
+    "grid": {
+      "rows": 10,
+      "cols": 10,
+      "components": {
+        "battery1": {
+          "id": "battery1",
+          "type": "battery",
+          "row": 1,
+          "col": 1,
+          "properties": {
+            "voltage": 9.0
+          }
+        },
+        "resistor1": {
+          "id": "resistor1",
+          "type": "resistor",
+          "row": 1,
+          "col": 3,
+          "properties": {
+            "resistance": 1000.0
+          }
+        },
+        "bulb1": {
+          "id": "bulb1",
+          "type": "bulb",
+          "row": 1,
+          "col": 5,
+          "properties": {
+            "resistance": 100.0
+          }
+        },
+        "wire1": {
+          "id": "wire1",
+          "type": "wire",
+          "row": 1,
+          "col": 2,
+          "properties": {}
+        },
+        "wire2": {
+          "id": "wire2",
+          "type": "wire",
+          "row": 1,
+          "col": 4,
+          "properties": {}
+        }
+      }
+    },
+    "description": "Complex circuit with battery, resistor, bulb and connecting wires"
+  },
+
+  "edge_case_positions": {
+    "grid": {
+      "rows": 5,
+      "cols": 5,
+      "components": {
+        "top_left": {
+          "id": "top_left",
+          "type": "battery",
+          "row": 0,
+          "col": 0,
+          "properties": {}
+        },
+        "bottom_right": {
+          "id": "bottom_right",
+          "type": "resistor",
+          "row": 4,
+          "col": 4,
+          "properties": {}
+        }
+      }
+    },
+    "description": "Components at grid boundaries to test edge cases"
+  },
+
+  "maximum_density": {
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "components": {
+        "comp_0_0": {"id": "comp_0_0", "type": "battery", "row": 0, "col": 0, "properties": {}},
+        "comp_0_1": {"id": "comp_0_1", "type": "resistor", "row": 0, "col": 1, "properties": {}},
+        "comp_0_2": {"id": "comp_0_2", "type": "bulb", "row": 0, "col": 2, "properties": {}},
+        "comp_1_0": {"id": "comp_1_0", "type": "switch_", "row": 1, "col": 0, "properties": {}},
+        "comp_1_1": {"id": "comp_1_1", "type": "wire", "row": 1, "col": 1, "properties": {}},
+        "comp_1_2": {"id": "comp_1_2", "type": "capacitor", "row": 1, "col": 2, "properties": {}},
+        "comp_2_0": {"id": "comp_2_0", "type": "inductor", "row": 2, "col": 0, "properties": {}},
+        "comp_2_1": {"id": "comp_2_1", "type": "buzzer", "row": 2, "col": 1, "properties": {}},
+        "comp_2_2": {"id": "comp_2_2", "type": "timer", "row": 2, "col": 2, "properties": {}}
+      }
+    },
+    "description": "Maximum density grid with all component types"
+  }
+}

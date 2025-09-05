@@ -1,0 +1,176 @@
+[
+  {
+    "name": "missing_components_field",
+    "description": "Grid state without required components field",
+    "data": {
+      "grid": {
+        "rows": 10,
+        "cols": 10
+      }
+    }
+  },
+
+  {
+    "name": "invalid_component_type",
+    "description": "Component with unknown type",
+    "data": {
+      "grid": {
+        "rows": 10,
+        "cols": 10,
+        "components": {
+          "bad_comp": {
+            "id": "bad_comp",
+            "type": "invalid_component_type_xyz",
+            "row": 5,
+            "col": 5,
+            "properties": {}
+          }
+        }
+      }
+    }
+  },
+
+  {
+    "name": "out_of_bounds_position",
+    "description": "Component positioned outside grid boundaries",
+    "data": {
+      "grid": {
+        "rows": 5,
+        "cols": 5,
+        "components": {
+          "out_of_bounds": {
+            "id": "out_of_bounds",
+            "type": "battery",
+            "row": 10,
+            "col": 10,
+            "properties": {}
+          }
+        }
+      }
+    }
+  },
+
+  {
+    "name": "negative_position",
+    "description": "Component with negative position",
+    "data": {
+      "grid": {
+        "rows": 10,
+        "cols": 10,
+        "components": {
+          "negative_pos": {
+            "id": "negative_pos",
+            "type": "resistor",
+            "row": -1,
+            "col": -5,
+            "properties": {}
+          }
+        }
+      }
+    }
+  },
+
+  {
+    "name": "duplicate_positions",
+    "description": "Two components at same grid position",
+    "data": {
+      "grid": {
+        "rows": 10,
+        "cols": 10,
+        "components": {
+          "comp1": {
+            "id": "comp1",
+            "type": "battery",
+            "row": 2,
+            "col": 2,
+            "properties": {}
+          },
+          "comp2": {
+            "id": "comp2",
+            "type": "resistor",
+            "row": 2,
+            "col": 2,
+            "properties": {}
+          }
+        }
+      }
+    }
+  },
+
+  {
+    "name": "missing_required_properties",
+    "description": "Grid with negative dimensions",
+    "data": {
+      "grid": {
+        "rows": -5,
+        "cols": -5,
+        "components": {}
+      }
+    }
+  },
+
+  {
+    "name": "circular_references",
+    "description": "Components with self-referencing connections (simulated)",
+    "data": {
+      "grid": {
+        "rows": 10,
+        "cols": 10,
+        "components": {
+          "self_ref": {
+            "id": "self_ref",
+            "type": "wire",
+            "row": 5,
+            "col": 5,
+            "properties": {
+              "connections": ["self_ref"]
+            }
+          }
+        }
+      }
+    }
+  },
+
+  {
+    "name": "invalid_json_syntax",
+    "description": "JSON with syntax errors",
+    "data": {
+      "grid": {
+        "rows": 10,
+        "cols": 10,
+        "components": {
+          "broken": {
+            "id": "broken",
+            "type": "battery",
+            "row": 5,
+            "col": 5,
+            "properties": {
+              "voltage": 9.0,
+              "broken_array": [1, 2, 3,
+            }
+          }
+        }
+      }
+    }
+  },
+
+  {
+    "name": "maximum_size_grid",
+    "description": "Extremely large grid that may cause performance issues",
+    "data": {
+      "grid": {
+        "rows": 1000,
+        "cols": 1000,
+        "components": {
+          "huge_comp": {
+            "id": "huge_comp",
+            "type": "battery",
+            "row": 500,
+            "col": 500,
+            "properties": {}
+          }
+        }
+      }
+    }
+  }
+]

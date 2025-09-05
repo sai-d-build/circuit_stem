@@ -270,6 +270,7 @@ class Grid {
   // Serialization
   Map<String, dynamic> toJson() {
     return {
+      'schemaVersion': '1.0.0',
       'rows': rows,
       'cols': cols,
       'components': components.map((key, value) => MapEntry(key, {
@@ -290,41 +291,125 @@ class Grid {
   }
 
   factory Grid.fromJson(Map<String, dynamic> json) {
-    final componentsJson = json['components'] as Map<String, dynamic>;
+    // Schema version handling
+    final schemaVersion = json['schemaVersion'] as String? ?? 'legacy';
+    Logger.log('Grid.fromJson: Loading grid with schema version: $schemaVersion');
+
+    final componentsJson = json['components'] as Map<String, dynamic>? ?? {};
     final components = <String, ComponentModel>{};
+    final parsingErrors = <String>[];
 
     for (final entry in componentsJson.entries) {
-      final compJson = entry.value as Map<String, dynamic>;
-      components[entry.key] = ComponentModel(
-        id: compJson['id'],
-        type: ComponentType.values.firstWhere(
-          (e) => e.toString() == compJson['type'],
-        ),
-        row: compJson['row'],
-        col: compJson['col'],
-        state: ComponentState.values.firstWhere(
-          (e) => e.toString() == compJson['state'],
-          orElse: () => ComponentState.normal,
-        ),
-        properties: Map<String, dynamic>.from(compJson['properties'] ?? {}),
-        createdAt: DateTime.parse(compJson['createdAt']),
-        updatedAt: DateTime.parse(compJson['updatedAt']),
-      );
+      try {
+        final compJson = entry.value as Map<String, dynamic>;
+
+        // Defensive component type parsing
+        ComponentType? componentType;
+        final typeString = compJson['type'] as String?;
+        if (typeString != null) {
+          try {
+            componentType = ComponentType.values.firstWhere(
+              (e) => e.toString() == typeString,
+            );
+          } catch (e) {
+            parsingErrors.add('Unknown component type: $typeString for component ${entry.key}');
+            Logger.w('Grid.fromJson: Unknown component type $typeString, using default');
+            componentType = ComponentType.wire; // Safe default
+          }
+        } else {
+          parsingErrors.add('Missing component type for component ${entry.key}');
+          componentType = ComponentType.wire;
+        }
+
+        // Safe date parsing
+        DateTime createdAt;
+        DateTime updatedAt;
+        try {
+          createdAt = DateTime.parse(compJson['createdAt'] ?? DateTime.now().toIso8601String());
+          updatedAt = DateTime.parse(compJson['updatedAt'] ?? DateTime.now().toIso8601String());
+        } catch (e) {
+          createdAt = DateTime.now();
+          updatedAt = DateTime.now();
+          parsingErrors.add('Invalid date format for component ${entry.key}');
+        }
+
+        components[entry.key] = ComponentModel(
+          id: compJson['id'] ?? entry.key,
+          type: componentType,
+          row: compJson['row'] ?? 0,
+          col: compJson['col'] ?? 0,
+          state: ComponentState.values.firstWhere(
+            (e) => e.toString() == compJson['state'],
+            orElse: () => ComponentState.normal,
+          ),
+          properties: Map<String, dynamic>.from(compJson['properties'] ?? {}),
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+        );
+      } catch (e) {
+        parsingErrors.add('Failed to parse component ${entry.key}: $e');
+        Logger.w('Grid.fromJson: Failed to parse component ${entry.key}: $e');
+      }
     }
 
-    return Grid(
-      rows: json['rows'],
-      cols: json['cols'],
+    // Log parsing errors if any
+    if (parsingErrors.isNotEmpty) {
+      Logger.w('Grid.fromJson: ${parsingErrors.length} parsing errors encountered');
+      for (final error in parsingErrors) {
+        Logger.w('Grid.fromJson: $error');
+      }
+    }
+
+    // Create grid with validated data
+    final grid = Grid(
+      rows: json['rows'] ?? 10,
+      cols: json['cols'] ?? 15,
       components: components,
       occupiedPositions: Set<String>.from(json['occupiedPositions'] ?? []),
       connections: Map<String, List<String>>.from(
         (json['connections'] ?? {}).map(
-          (key, value) => MapEntry(key, List<String>.from(value)),
-        ),
+          (key, value) => MapEntry(key, List<String>.from(value ?? [])),
+        ) ?? {},
       ),
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: _safeDateParse(json['createdAt']),
+      updatedAt: _safeDateParse(json['updatedAt']),
     );
+
+    // Validate and repair occupied positions
+    final repairedGrid = _validateAndRepairOccupiedPositions(grid);
+    if (repairedGrid != grid) {
+      Logger.log('Grid.fromJson: Repaired occupied positions mismatch');
+    }
+
+    return repairedGrid;
+  }
+
+  // Helper method for safe date parsing
+  static DateTime _safeDateParse(dynamic dateString) {
+    if (dateString is String) {
+      try {
+        return DateTime.parse(dateString);
+      } catch (e) {
+        Logger.w('Grid._safeDateParse: Invalid date string: $dateString');
+      }
+    }
+    return DateTime.now();
+  }
+
+  // Validate and repair occupied positions consistency
+  static Grid _validateAndRepairOccupiedPositions(Grid grid) {
+    final expectedOccupied = <String>{};
+    for (final component in grid.components.values) {
+      expectedOccupied.add(grid._positionToKey(component.row, component.col));
+    }
+
+    if (expectedOccupied.length != grid.occupiedPositions.length ||
+        !expectedOccupied.containsAll(grid.occupiedPositions)) {
+      Logger.w('Grid validation: occupiedPositions mismatch detected, repairing');
+      return grid.copyWith(occupiedPositions: expectedOccupied);
+    }
+
+    return grid;
   }
 
   // Helper methods

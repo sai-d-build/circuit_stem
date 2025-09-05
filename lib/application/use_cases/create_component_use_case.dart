@@ -53,7 +53,9 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
         // Run simulation
         final simulatedGrid = _simulation.simulatePowerFlow(newGrid);
 
-        // Update the grid notifier
+        // TEMPORARY ADAPTER: Keep direct GridNotifier call but add logging to track migration
+        // TODO: Replace with command dispatch to GameEngineNotifierV3.placeComponent()
+        Logger.log('⚠️ CreateComponent: Using legacy GridNotifier.setState - migrate to command pattern');
         notifiers.grid.setState(simulatedGrid);
 
         Logger.log('CreateComponent: added component at (${action.row}, ${action.col})');

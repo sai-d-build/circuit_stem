@@ -5,6 +5,7 @@ import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
+import 'package:sparkcircuit/core/services/drag_service.dart';
 
 class HorizontalComponentPalette extends ConsumerWidget {
   final String levelId;
@@ -121,6 +122,14 @@ class HorizontalComponentPalette extends ConsumerWidget {
                             debugPrint('🎯 Available in inventory: ${paletteState.canUseComponent(componentDefinition.type)}');
                             debugPrint('🎯 Inventory state: available=${inventory?.available}, total=${inventory?.total}, used=${inventory?.used}');
 
+                            // Auto-select component when dragging starts
+                            if (!isSelected) {
+                              debugPrint('🎯 Auto-selecting component for drag: ${componentDefinition.name}');
+                              paletteNotifier.selectComponent(componentDefinition.type);
+                            }
+
+                            // Use centralized DragService
+                            DragService().controller.startDrag(dragData, DragType.component, Offset.zero); // Position will be updated by canvas
                             ref.read(paletteDragActiveProvider.notifier).state = true;
                             HapticFeedback.mediumImpact();
 
@@ -136,6 +145,9 @@ class HorizontalComponentPalette extends ConsumerWidget {
                           onDraggableCanceled: (velocity, offset) {
                             debugPrint('🎯 ❌ DRAG CANCELLED for ${componentDefinition.name} at $offset');
                             debugPrint('🎯 Cancellation reason: velocity=$velocity');
+
+                            // Use centralized DragService
+                            DragService().cancelDrag(position: offset);
                             ref.read(paletteDragActiveProvider.notifier).state = false;
                           },
                           onDragEnd: (details) {
@@ -150,6 +162,7 @@ class HorizontalComponentPalette extends ConsumerWidget {
                               debugPrint('🎯 ❌ Drag was cancelled or rejected - checking canvas acceptance');
                             }
 
+                            // For now, keep the palette notifier update - will be handled by canvas
                             if (ref.read(paletteDragActiveProvider)) {
                               ref.read(paletteDragActiveProvider.notifier).state = false;
                             }

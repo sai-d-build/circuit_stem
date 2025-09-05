@@ -130,7 +130,9 @@ class GameEngineOrchestrator {
   void onComponentPlaced(ComponentModel component) {
     Logger.log('GameEngineOrchestrator: Component placed - ${component.id}');
 
-    // Update grid
+    // TODO: Replace with GameEngineNotifierV3.placeComponent when orchestrator is migrated
+    // For now, keep legacy GridNotifier call but add logging
+    Logger.log('⚠️ GameEngineOrchestrator: Using legacy GridNotifier.addComponent - migrate to command pattern');
     grid.addComponent(component);
 
     // Clear selection after placement

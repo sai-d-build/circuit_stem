@@ -1,5 +1,44 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:sparkcircuit/core/services/coordinate_service.dart';
+
+/// Interaction modes for the canvas
+enum CanvasInteractionMode {
+  idle,
+  panning,
+  draggingExisting,
+  placingFromPalette,
+  drawingWire,
+}
+
+/// Gesture state machine for canvas interactions
+class CanvasInteractionState {
+  CanvasInteractionMode mode;
+  Offset? dragStartPosition;
+  String? draggedComponentId;
+  String? placingComponentType;
+
+  CanvasInteractionState({
+    this.mode = CanvasInteractionMode.idle,
+    this.dragStartPosition,
+    this.draggedComponentId,
+    this.placingComponentType,
+  });
+
+  CanvasInteractionState copyWith({
+    CanvasInteractionMode? mode,
+    Offset? dragStartPosition,
+    String? draggedComponentId,
+    String? placingComponentType,
+  }) {
+    return CanvasInteractionState(
+      mode: mode ?? this.mode,
+      dragStartPosition: dragStartPosition ?? this.dragStartPosition,
+      draggedComponentId: draggedComponentId ?? this.draggedComponentId,
+      placingComponentType: placingComponentType ?? this.placingComponentType,
+    );
+  }
+}
 
 class GameCanvasController extends ChangeNotifier {
   static const double _defaultCellSize = 60.0;
@@ -16,6 +55,73 @@ class GameCanvasController extends ChangeNotifier {
   Size _canvasSize = Size.zero;
   int _gridWidth = 8;  // Default to level size, will be updated
   int _gridHeight = 6; // Default to level size, will be updated
+
+  // Interaction state machine
+  CanvasInteractionState _interactionState = CanvasInteractionState();
+
+  // FSM methods
+  void transitionToIdle() {
+    _interactionState = _interactionState.copyWith(
+      mode: CanvasInteractionMode.idle,
+      dragStartPosition: null,
+      draggedComponentId: null,
+      placingComponentType: null,
+    );
+    notifyListeners();
+  }
+
+  void startDraggingComponent(String componentId, Offset startPosition) {
+    _interactionState = _interactionState.copyWith(
+      mode: CanvasInteractionMode.draggingExisting,
+      dragStartPosition: startPosition,
+      draggedComponentId: componentId,
+    );
+    notifyListeners();
+  }
+
+  void startPlacingFromPalette(String componentType, Offset startPosition) {
+    _interactionState = _interactionState.copyWith(
+      mode: CanvasInteractionMode.placingFromPalette,
+      dragStartPosition: startPosition,
+      placingComponentType: componentType,
+    );
+    notifyListeners();
+  }
+
+  void startPanning(Offset startPosition) {
+    _interactionState = _interactionState.copyWith(
+      mode: CanvasInteractionMode.panning,
+      dragStartPosition: startPosition,
+    );
+    notifyListeners();
+  }
+
+  void startDrawingWire(Offset startPosition) {
+    _interactionState = _interactionState.copyWith(
+      mode: CanvasInteractionMode.drawingWire,
+      dragStartPosition: startPosition,
+    );
+    notifyListeners();
+  }
+
+  void updateDragPosition(Offset currentPosition) {
+    // Update drag position but don't change mode
+    _interactionState = _interactionState.copyWith(
+      dragStartPosition: currentPosition,
+    );
+    // Don't notify listeners for performance - let caller handle
+  }
+
+  void endCurrentInteraction() {
+    transitionToIdle();
+  }
+
+  // Query methods for FSM state
+  bool get isIdle => _interactionState.mode == CanvasInteractionMode.idle;
+  bool get isDraggingComponent => _interactionState.mode == CanvasInteractionMode.draggingExisting;
+  bool get isPlacingFromPalette => _interactionState.mode == CanvasInteractionMode.placingFromPalette;
+  bool get isPanning => _interactionState.mode == CanvasInteractionMode.panning;
+  bool get isDrawingWire => _interactionState.mode == CanvasInteractionMode.drawingWire;
   
   // Getters
   double get gridCellSize => _gridCellSize;
@@ -25,6 +131,10 @@ class GameCanvasController extends ChangeNotifier {
   int get gridWidth => _gridWidth;
   int get gridHeight => _gridHeight;
   bool get isScaling => _isScaling;
+  CanvasInteractionState get interactionState => _interactionState;
+
+  // Coordinate service getter
+  CoordinateService get coordinateService => CoordinateService.fromController(this);
   
   // Calculated properties
   double get scaledCellSize => _gridCellSize * _scale;
@@ -257,13 +367,30 @@ class GameCanvasController extends ChangeNotifier {
     notifyListeners();
   }
   
+  // Interaction state management (FSM)
+  void setInteractionMode(CanvasInteractionMode mode, {
+    Offset? dragStartPosition,
+    String? draggedComponentId,
+    String? placingComponentType,
+  }) {
+    _interactionState = _interactionState.copyWith(
+      mode: mode,
+      dragStartPosition: dragStartPosition,
+      draggedComponentId: draggedComponentId,
+      placingComponentType: placingComponentType,
+    );
+    notifyListeners();
+  }
+
+
   void reset() {
     _gridCellSize = _defaultCellSize;
     _scale = 1.0;
     _panOffset = Offset.zero;
     _isScaling = false;
     _lastScale = 1.0;
-    
+    _interactionState = CanvasInteractionState(); // Reset FSM
+
     // Center the grid after reset
     if (_canvasSize != Size.zero) {
       centerGrid();
