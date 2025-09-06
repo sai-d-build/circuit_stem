@@ -1,6 +1,6 @@
 import 'dart:math' show pi, sqrt, cos;
-import 'package:flutter/foundation.dart' show debugPrint;
 import '../core/component.dart';
+import '../../../core/debug/structured_logger.dart';
 import 'circuit_component.dart';
 
 /// Inductor component with magnetic field energy storage
@@ -80,7 +80,7 @@ class Inductor extends CircuitComponent {
   void setCurrent(double value) {
     if (value.abs() > currentRating) {
       final warning = 'Current ${value.toStringAsFixed(3)}A exceeds rating ${currentRating.toStringAsFixed(1)}A';
-      debugPrint('⚠️ INDUCTOR WARNING: $warning');
+      StructuredLogger.warning('⚠️ INDUCTOR WARNING: $warning');
       setProperty('overCurrent', true);
       setProperty('error', 'Current overload');
     } else {
@@ -165,11 +165,11 @@ class Inductor extends CircuitComponent {
         rotation: model.rotation,
       );
     } catch (e) {
-      debugPrint('❌ Inductor.fromComponentModel failed for component ${model.id}: $e');
-      debugPrint('   Stack trace: ${StackTrace.current}');
+      StructuredLogger.error('❌ Inductor.fromComponentModel failed for component ${model.id}: $e');
+      StructuredLogger.error('   Stack trace: ${StackTrace.current}');
 
       // EMERGENCY FALLBACK - Create component with safe defaults
-      debugPrint('🛡️ Creating fallback inductor for ${model.id}');
+      StructuredLogger.warning('🛡️ Creating fallback inductor for ${model.id}');
       return Inductor(
         id: model.id,
         row: model.row,

@@ -188,13 +188,29 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
       // Portrait or tablet/desktop: vertical layout
       StructuredLogger.debug('Using vertical layout for portrait/tablet/desktop', context: {
         'orientation': isLandscape ? 'landscape' : 'portrait',
-        'palettePlacement': 'bottom_sized',
+        'palettePlacement': 'bottom_explicit_sized',
       });
+
+      // Calculate available height
+      final screenHeight = MediaQuery.of(context).size.height;
+      final availableHeight = screenHeight - kToolbarHeight - context.hudHeight - context.paletteHeight - 32; // 32 for padding
+
+      StructuredLogger.debug('Grid sizing calculation', context: {
+        'screenHeight': screenHeight,
+        'appBarHeight': kToolbarHeight,
+        'hudHeight': context.hudHeight,
+        'paletteHeight': context.paletteHeight,
+        'availableHeight': availableHeight,
+        'calculatedGridHeight': availableHeight > 0 ? availableHeight : 400, // Fallback if calculation fails
+      });
+
       return Column(
         children: [
           _buildResponsiveHud(context),
-          // Game Canvas
-          Expanded(
+          // Game Canvas with explicit sizing to fix zero-width issue
+          SizedBox(
+            height: availableHeight > 0 ? availableHeight : 400, // Use calculated height or fallback
+            width: double.infinity,
             child: GameCanvas(levelId: levelIdStr),
           ),
           // Component Palette

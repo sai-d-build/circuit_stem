@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../../core/commands/command_stack.dart';
 import '../../core/commands/create_component_command.dart';
 import '../enhanced_game_state.dart';
 import '../use_cases/providers.dart' as use_case_providers;
+import '../../core/debug/structured_logger.dart';
 
 /// Service for centralized component placement with transaction deduplication
 class PlacementService {
@@ -25,20 +25,32 @@ class PlacementService {
   }) {
     // Check for duplicate transaction
     if (_recentTransactions.contains(transactionId)) {
-      print('⚠️ PlacementService: Duplicate transaction $transactionId - ignoring');
+      StructuredLogger.warning('Duplicate transaction - ignoring', context: {
+        'service': 'PlacementService',
+        'transactionId': transactionId,
+      });
       return false;
     }
 
     // Validate placement
     if (!currentState.grid.canPlaceComponent(row, col)) {
-      print('❌ PlacementService: Invalid placement position ($row, $col)');
+      StructuredLogger.warning('Invalid placement position', context: {
+        'service': 'PlacementService',
+        'row': row,
+        'col': col,
+      });
       return false;
     }
 
     // Check if position is already occupied
     final existingComponent = currentState.grid.getComponentAt(row, col);
     if (existingComponent != null) {
-      print('❌ PlacementService: Position ($row, $col) already occupied');
+      StructuredLogger.warning('Position already occupied', context: {
+        'service': 'PlacementService',
+        'row': row,
+        'col': col,
+        'existingComponent': existingComponent.id,
+      });
       return false;
     }
 
@@ -53,7 +65,7 @@ class PlacementService {
 
     // Create and execute command
     final command = CreateComponentCommand(component);
-    final newState = command.execute(currentState);
+    command.execute(currentState);
 
     // Record transaction to prevent duplicates
     _recentTransactions.add(transactionId);
@@ -63,7 +75,12 @@ class PlacementService {
       _recentTransactions.remove(transactionId);
     });
 
-    print('✅ PlacementService: Component placed successfully - $componentId at ($row, $col)');
+    StructuredLogger.info('Component placed successfully', context: {
+      'service': 'PlacementService',
+      'componentId': componentId,
+      'row': row,
+      'col': col,
+    });
     return true;
   }
 

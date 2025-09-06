@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/presentation/features/game/painters/component_painter.dart';
-import 'package:sparkcircuit/presentation/features/game/painters/wire_painter.dart';
+import 'package:sparkcircuit/presentation/features/game/painters/painter_factory.dart';
 import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart' as drawing_models;
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/services/coordinate_service.dart';
@@ -23,15 +22,15 @@ class CircuitComponentsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw wires first
-    WirePainter(
+    // Draw wires first using factory
+    PainterFactory.createWirePainter(
       wires: wires,
       circuitColors: circuitColors,
       coordinateService: coordinateService,
     ).paint(canvas, size);
 
-    // Draw components on top of wires
-    ComponentPainter(
+    // Draw components on top of wires using factory
+    PainterFactory.createComponentPainter(
       components: components,
       circuitColors: circuitColors,
       selectedComponentId: selectedComponentId,

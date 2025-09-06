@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:sparkcircuit/application/providers.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
-import 'package:sparkcircuit/application/AUDIO/audio_service.dart';
+import 'package:sparkcircuit/infrastructure/audio/audio_service.dart';
 import 'package:sparkcircuit/infrastructure/rendering/asset_manager.dart';
-import 'package:sparkcircuit/application/game_engine/v3/level_service.dart';
+import 'package:sparkcircuit/application/services/level_service.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
+// Mock classes for testing - using direct imports to avoid path issues
+class MockAudioService extends Mock implements AudioService {}
+
+class MockAssetManager extends Mock implements AssetManagerNotifier {}
+
+class MockGridService extends Mock implements GridService {}
+
+class MockLevelService extends Mock {}
 
 // Test helper utilities for common provider overrides
 
@@ -14,7 +24,7 @@ List<Override> createTestProviderOverrides() {
   return [
     // Grid Service Provider
     gridServiceProvider.overrideWithValue(
-      _MockGridService(),
+      MockGridService(),
     ),
 
     // Grid Configuration Provider
@@ -38,17 +48,17 @@ List<Override> createTestProviderOverrides() {
 
     // Audio Service Provider
     audioServiceProvider.overrideWithValue(
-      _MockAudioService(),
+      MockAudioService(),
     ),
 
     // Asset Manager Provider
     assetManagerNotifierProvider.overrideWithValue(
-      _MockAssetManager(),
+      MockAssetManager(),
     ),
 
     // Mock level service (simplified)
     levelServiceProvider.overrideWithValue(
-      _MockLevelService(),
+      MockLevelService(),
     ),
   ];
 }

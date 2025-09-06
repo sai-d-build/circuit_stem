@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_controller.dart';
+import 'package:sparkcircuit/application/providers/game_canvas_providers.dart';
+import 'package:sparkcircuit/core/services/grid_service.dart';
+import 'package:sparkcircuit/application/states/game_canvas_state.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 class CircuitGrid extends ConsumerStatefulWidget {
-  final GameCanvasController controller;
   final String levelId;
 
   const CircuitGrid({
     super.key,
-    required this.controller,
     required this.levelId,
   });
 
@@ -21,31 +22,27 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
   @override
   void initState() {
     super.initState();
-    widget.controller.addListener(_onControllerChanged);
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_onControllerChanged);
     super.dispose();
-  }
-
-  void _onControllerChanged() {
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final canvasState = ref.watch(gameCanvasOrchestratorProvider(widget.levelId));
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Update controller with canvas size
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          widget.controller.updateCanvasSize(constraints.biggest);
-        });
+        // Log grid rendering parameters
+        final config = canvasState.viewportState.gridConfiguration;
+        final cellSize = config.cellSize * canvasState.viewportState.scale;
+        final panOffset = canvasState.viewportState.panOffset;
 
         return CustomPaint(
           painter: GridPainter(
-            controller: widget.controller,
+            canvasState: canvasState,
             circuitColors: Theme.of(context).extension<CircuitColorScheme>() ?? _getDefaultCircuitColors(),
           ),
           child: Container(),
@@ -89,16 +86,38 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
 }
 
 class GridPainter extends CustomPainter {
-  final GameCanvasController controller;
+  final GameCanvasState canvasState;
   final CircuitColorScheme circuitColors;
 
   GridPainter({
-    required this.controller,
+    required this.canvasState,
     required this.circuitColors,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
+    print('🎨 CircuitGrid: Painting with size ${size.width}x${size.height}');
+
+    // Log actual grid rendering
+    final loggingConfig = canvasState.viewportState.gridConfiguration;
+    final loggingCellSize = loggingConfig.cellSize * canvasState.viewportState.scale;
+    final loggingPanOffset = canvasState.viewportState.panOffset;
+
+    // Log grid bounds and canvas size
+    StructuredLogger.info('CircuitGrid: Painting grid', context: {
+      'canvas_size': size.toString(),
+      'gridConfig_rows': loggingConfig.rows,
+      'gridConfig_cols': loggingConfig.cols,
+      'gridConfig_cellSize': loggingConfig.cellSize,
+      'viewport_scale': canvasState.viewportState.scale,
+      'calculated_cellSize': loggingCellSize,
+      'viewport_panOffset': loggingPanOffset.toString(),
+      'grid_width_pixels': loggingConfig.cols * loggingCellSize,
+      'grid_height_pixels': loggingConfig.rows * loggingCellSize,
+      'hasLevel': canvasState.currentLevel != null,
+      'levelId': canvasState.currentLevel?.levelId ?? 'null',
+    });
+
     final gridPaint = Paint()
       ..color = circuitColors.gridLine
       ..strokeWidth = 1.0
@@ -109,8 +128,9 @@ class GridPainter extends CustomPainter {
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
-    final cellSize = controller.scaledCellSize;
-    final panOffset = controller.panOffset;
+    final config = canvasState.viewportState.gridConfiguration;
+    final cellSize = config.cellSize * canvasState.viewportState.scale;
+    final panOffset = canvasState.viewportState.panOffset;
 
     // Calculate visible grid bounds
     final startX = (-panOffset.dx / cellSize).floor();
@@ -182,7 +202,7 @@ class GridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(GridPainter oldDelegate) {
-    return oldDelegate.controller != controller ||
-           oldDelegate.circuitColors != circuitColors;
+    return oldDelegate.canvasState != canvasState ||
+            oldDelegate.circuitColors != circuitColors;
   }
 }

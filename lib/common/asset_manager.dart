@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../core/debug/structured_logger.dart';
 
 class AssetManager {
   final Map<String, ui.Image> _imageCache = {};
@@ -48,9 +49,9 @@ class AssetManager {
     for (final path in paths) {
       try {
         await getImage(path);
-        debugPrint('Successfully loaded image: $path');
+        StructuredLogger.info('Successfully loaded image: $path');
       } catch (e) {
-        debugPrint('Failed to load asset "$path": $e');
+        StructuredLogger.error('Failed to load asset "$path": $e');
       }
     }
   }
@@ -65,10 +66,10 @@ class AssetManager {
       try {
         final image = await _createCustomComponentImage(path, 128, 128);
         _imageCache[path] = image;
-        debugPrint('Successfully created custom image for: $path');
+        StructuredLogger.info('Successfully created custom image for: $path');
         return image;
       } catch (e) {
-        debugPrint('Failed to create custom image for "$path": $e');
+        StructuredLogger.error('Failed to create custom image for "$path": $e');
         final fallbackImage = await _createFallbackImage(128, 128);
         _imageCache[path] = fallbackImage;
         return fallbackImage;
@@ -83,7 +84,7 @@ class AssetManager {
       _imageCache[path] = frame.image;
       return frame.image;
     } catch (e) {
-      debugPrint('Failed to load regular image "$path": $e');
+      StructuredLogger.error('Failed to load regular image "$path": $e');
       final fallbackImage = await _createFallbackImage(128, 128);
       _imageCache[path] = fallbackImage;
       return fallbackImage;

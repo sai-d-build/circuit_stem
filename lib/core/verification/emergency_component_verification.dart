@@ -2,11 +2,11 @@
 // Ensures critical capacitor/inductor components are working to prevent app crashes
 // This is PHASE 0 of the component optimization project
 
-import 'package:flutter/foundation.dart' show debugPrint;
 import '../../domain/entities/core/component.dart';
 import '../../domain/entities/components/circuit_component.dart';
 import '../../domain/entities/components/capacitor.dart';
 import '../../domain/entities/components/inductor.dart';
+import '../debug/structured_logger.dart';
 
 /// Emergency verification system for critical component types
 class EmergencyComponentVerification {
@@ -29,8 +29,8 @@ class EmergencyComponentVerification {
   static Future<VerificationReport> verifyAllCriticalComponents() async {
     final report = VerificationReport();
 
-    debugPrint('🔬 STARTING PHASE 0 COMPONENT VERIFICATION');
-    debugPrint('Target components: ${_criticalComponents.map((c) => c.name).join(', ')}');
+    StructuredLogger.info('🔬 STARTING PHASE 0 COMPONENT VERIFICATION');
+    StructuredLogger.info('Target components: ${_criticalComponents.map((c) => c.name).join(', ')}');
 
     _verificationAttempts++;
 
@@ -40,10 +40,10 @@ class EmergencyComponentVerification {
 
       if (result.isSuccess) {
         _successCount++;
-        debugPrint('✅ ${componentType.name}: VERIFIED');
+        StructuredLogger.info('✅ ${componentType.name}: VERIFIED');
       } else {
         _failureCount++;
-        debugPrint('❌ ${componentType.name}: FAILED - ${result.message}');
+        StructuredLogger.error('❌ ${componentType.name}: FAILED - ${result.message}');
         report.addFailure(componentType, result.message);
       }
     }
@@ -209,58 +209,58 @@ class EmergencyComponentVerification {
     final statusEmoji = report.overallStatus == VerificationStatus.allPassed ? '✅' :
                        report.overallStatus == VerificationStatus.partialSuccess ? '⚠️' : '❌';
 
-    debugPrint('');
-    debugPrint('=' * 60);
-    debugPrint('PHASE 0 COMPONENT VERIFICATION REPORT');
-    debugPrint('=' * 60);
-    debugPrint('Status: $statusEmoji ${report.overallStatus.name.replaceAll('_', ' ')}');
-    debugPrint('');
+    StructuredLogger.info('');
+    StructuredLogger.info('=' * 60);
+    StructuredLogger.info('PHASE 0 COMPONENT VERIFICATION REPORT');
+    StructuredLogger.info('=' * 60);
+    StructuredLogger.info('Status: $statusEmoji ${report.overallStatus.name.replaceAll('_', ' ')}');
+    StructuredLogger.info('');
 
-    debugPrint('COMPONENTS TESTED:');
+    StructuredLogger.info('COMPONENTS TESTED:');
     for (final result in _verificationResults.values) {
       final status = result.isSuccess ? '✅ PASS' : '❌ FAIL';
-      debugPrint('  $status ${result.componentType.name}: ${result.message}');
+      StructuredLogger.info('  $status ${result.componentType.name}: ${result.message}');
     }
 
-    debugPrint('');
-    debugPrint('STATISTICS:');
-    debugPrint('  Total attempts: $report.totalAttempts');
-    debugPrint('  Successful: $report.successCount');
-    debugPrint('  Failed: $report.failureCount');
+    StructuredLogger.info('');
+    StructuredLogger.info('STATISTICS:');
+    StructuredLogger.info('  Total attempts: $report.totalAttempts');
+    StructuredLogger.info('  Successful: $report.successCount');
+    StructuredLogger.info('  Failed: $report.failureCount');
 
     if (report.failureCount > 0) {
-      debugPrint('');
-      debugPrint('FAILURES:');
+      StructuredLogger.info('');
+      StructuredLogger.info('FAILURES:');
       report.failures.forEach((type, error) {
-        debugPrint('  ❌ $type: $error');
+        StructuredLogger.error('  ❌ $type: $error');
       });
     }
 
-    debugPrint('');
-    debugPrint('RECOMMENDATIONS:');
+    StructuredLogger.info('');
+    StructuredLogger.info('RECOMMENDATIONS:');
     switch (report.overallStatus) {
       case VerificationStatus.allPassed:
-        debugPrint('  ✅ Phase 0 completion verified - app crashes resolved');
-        debugPrint('  ✅ Ready to proceed to Phase 1 architecture optimization');
+        StructuredLogger.info('  ✅ Phase 0 completion verified - app crashes resolved');
+        StructuredLogger.info('  ✅ Ready to proceed to Phase 1 architecture optimization');
         break;
 
       case VerificationStatus.partialSuccess:
-        debugPrint('  ⚠️  Partial success - some components have issues');
-        debugPrint('  ⚠️  Address remaining failures before proceeding');
+        StructuredLogger.warning('  ⚠️  Partial success - some components have issues');
+        StructuredLogger.warning('  ⚠️  Address remaining failures before proceeding');
         break;
 
       case VerificationStatus.criticalFailures:
-        debugPrint('  ❌ Critical failures detected - immediate action required');
-        debugPrint('  ❌ Do not deploy until all critical components pass');
+        StructuredLogger.error('  ❌ Critical failures detected - immediate action required');
+        StructuredLogger.error('  ❌ Do not deploy until all critical components pass');
         break;
 
       case VerificationStatus.unknown:
-        debugPrint('  ❓ Unknown verification status - verification may be incomplete');
-        debugPrint('  ❓ Run verification again to determine actual status');
+        StructuredLogger.warning('  ❓ Unknown verification status - verification may be incomplete');
+        StructuredLogger.warning('  ❓ Run verification again to determine actual status');
         break;
     }
 
-    debugPrint('=' * 60);
+    StructuredLogger.info('=' * 60);
   }
 }
 
@@ -313,24 +313,24 @@ enum VerificationStatus {
 class EmergencyVerificationRunner {
   /// RUN THIS AFTER PHASE 0 IMPLEMENTATION
   static Future<void> runEmergencyVerification() async {
-    debugPrint('🚨 STARTING EMERGENCY COMPONENT VERIFICATION');
+    StructuredLogger.info('🚨 STARTING EMERGENCY COMPONENT VERIFICATION');
 
     try {
       final report = await EmergencyComponentVerification.verifyAllCriticalComponents();
 
       if (report.allPassed) {
-        debugPrint('🎉 PHASE 0 SUCCESS! All component crashes resolved!');
-        debugPrint('✅ Safe to proceed with architectural optimization');
+        StructuredLogger.info('🎉 PHASE 0 SUCCESS! All component crashes resolved!');
+        StructuredLogger.info('✅ Safe to proceed with architectural optimization');
       } else {
-        debugPrint('⚠️  PHASE 0 INCOMPLETE! Component issues remain');
-        debugPrint('⚠️  Fix all failures before proceeding to production');
+        StructuredLogger.warning('⚠️  PHASE 0 INCOMPLETE! Component issues remain');
+        StructuredLogger.warning('⚠️  Fix all failures before proceeding to production');
       }
 
     } catch (e, stackTrace) {
-      debugPrint('💥 EMERGENCY VERIFICATION SYSTEM FAILURE');
-      debugPrint('   Error: $e');
-      debugPrint('   StackTrace: $stackTrace');
-      debugPrint('   This indicates a critical problem with the verification system itself');
+      StructuredLogger.fatal('💥 EMERGENCY VERIFICATION SYSTEM FAILURE');
+      StructuredLogger.error('   Error: $e');
+      StructuredLogger.error('   StackTrace: $stackTrace');
+      StructuredLogger.error('   This indicates a critical problem with the verification system itself');
     }
   }
 
@@ -340,7 +340,7 @@ class EmergencyVerificationRunner {
       final report = await EmergencyComponentVerification.verifyAllCriticalComponents();
       return report.allPassed;
     } catch (e) {
-      debugPrint('❌ Quick health check failed: $e');
+      StructuredLogger.error('❌ Quick health check failed: $e');
       return false;
     }
   }

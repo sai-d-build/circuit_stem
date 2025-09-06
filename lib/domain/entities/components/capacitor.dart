@@ -1,6 +1,6 @@
 import 'dart:math' show exp;
-import 'package:flutter/foundation.dart' show debugPrint;
 import '../core/component.dart';
+import '../../../core/debug/structured_logger.dart';
 import 'circuit_component.dart';
 
 /// Capacitor component with charge storing capability
@@ -88,7 +88,7 @@ class Capacitor extends CircuitComponent {
   void setCharge(double charge) {
     if (charge.abs() > maxChargeRating()) {
       final warning = 'Charge ${charge.toStringAsFixed(6)}C exceeds rating ${maxChargeRating().toStringAsFixed(6)}C';
-      debugPrint('⚠️ CAPACITOR WARNING: $warning');
+      StructuredLogger.warning('⚠️ CAPACITOR WARNING: $warning');
       setProperty('overCharged', true);
       setProperty('error', 'overload');
     } else {
@@ -161,11 +161,11 @@ class Capacitor extends CircuitComponent {
         rotation: model.rotation,
       );
     } catch (e) {
-      debugPrint('❌ Capacitor.fromComponentModel failed for component ${model.id}: $e');
-      debugPrint('   Stack trace: ${StackTrace.current}');
+      StructuredLogger.error('❌ Capacitor.fromComponentModel failed for component ${model.id}: $e');
+      StructuredLogger.error('   Stack trace: ${StackTrace.current}');
 
       // EMERGENCY FALLBACK - Create component with safe defaults
-      debugPrint('🛡️ Creating fallback capacitor for ${model.id}');
+      StructuredLogger.warning('🛡️ Creating fallback capacitor for ${model.id}');
       return Capacitor(
         id: model.id,
         row: model.row,

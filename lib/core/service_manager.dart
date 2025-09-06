@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'performance/performance_monitor.dart';
 import 'performance/adaptive_quality.dart';
 import 'accessibility/accessibility_manager.dart';
+import 'debug/structured_logger.dart';
 
 
 /// ServiceManager provides unified initialization and management of all critical systems
@@ -154,7 +155,7 @@ class ServiceManager {
     final timestamp = DateTime.now().toIso8601String();
     final logMessage = '[$timestamp] $message';
     _initializationLog.add(logMessage);
-    debugPrint(logMessage); // Also print to console for debugging
+    StructuredLogger.info(logMessage); // Also log to structured logger for debugging
   }
 }
 
