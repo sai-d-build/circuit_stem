@@ -184,31 +184,46 @@ class PaletteState {
   }
 
   List<ComponentDefinition> get filteredComponents {
-    StructuredLogger.debug('Component filtering analysis', context: {
+    StructuredLogger.info('🎨 ===== COMPONENT FILTERING START =====', context: {
       'totalAvailableComponents': availableComponents.length,
-      'unlockedComponents': availableComponents.where((c) => c.isUnlocked).length,
+      'availableComponentTypes': availableComponents.map((c) => c.type).toList(),
+      'availableComponentDetails': availableComponents.map((c) => '${c.type}:${c.isUnlocked}').toList(),
       'inventoryItems': inventory.length,
       'inventoryKeys': inventory.keys.toList(),
+      'inventoryDetails': inventory.entries.map((e) => '${e.key}:${e.value.available}/${e.value.total}').toList(),
       'searchQuery': searchQuery,
       'activeFilters': activeFilters,
     });
 
+    // Add simple debug prints for immediate visibility
+    print('🎨 FILTER DEBUG: Total available: ${availableComponents.length}');
+    print('🎨 FILTER DEBUG: Available types: ${availableComponents.map((c) => c.type).toList()}');
+    print('🎨 FILTER DEBUG: Inventory keys: ${inventory.keys.toList()}');
+    print('🎨 FILTER DEBUG: Unlocked components: ${availableComponents.where((c) => c.isUnlocked).length}');
+
     var filtered = availableComponents.where((component) => component.isUnlocked);
 
-    StructuredLogger.trace('After unlock filter', context: {
+    StructuredLogger.info('🎨 After unlock filter', context: {
       'count': filtered.length,
       'components': filtered.map((c) => '${c.type}:${c.isUnlocked}').toList(),
+      'filteredOut': availableComponents.where((c) => !c.isUnlocked).map((c) => c.type).toList(),
     });
 
     // Filter by inventory availability - only show components that exist in inventory
+    final beforeInventoryFilter = filtered.length;
     filtered = filtered.where((component) => inventory.containsKey(component.type));
 
-    StructuredLogger.trace('After inventory filter', context: {
-      'count': filtered.length,
+    StructuredLogger.info('🎨 After inventory filter', context: {
+      'before': beforeInventoryFilter,
+      'after': filtered.length,
       'components': filtered.map((c) => c.type).toList(),
       'missingFromInventory': availableComponents
           .where((c) => c.isUnlocked && !inventory.containsKey(c.type))
-          .map((c) => c.type)
+          .map((c) => '${c.type}:${c.isUnlocked}')
+          .toList(),
+      'inventoryLookupResults': availableComponents
+          .where((c) => c.isUnlocked)
+          .map((c) => '${c.type}:exists=${inventory.containsKey(c.type)}')
           .toList(),
     });
 
@@ -315,13 +330,17 @@ class PaletteStateNotifier extends StateNotifier<PaletteState> {
   final LevelDefinition? levelConfig;
 
   PaletteStateNotifier(this.levelId, this._storageService, [this.levelConfig]) : super(PaletteState(
-    availableComponents: _getAvailableComponents(),
+    availableComponents: _getAvailableComponentsForLevel(levelConfig),
     inventory: _getInventoryForLevel(levelId, levelConfig),
   )) {
-    StructuredLogger.info('Palette state notifier initialized', context: {
+    StructuredLogger.info('🎨 ===== PALETTE STATE NOTIFIER INITIALIZED =====', context: {
       'levelId': levelId,
       'levelConfigId': levelConfig?.levelId,
+      'levelConfigNull': levelConfig == null,
       'availableComponentsCount': levelConfig?.components.available.length ?? 0,
+      'availableComponentsList': levelConfig?.components.available.map((c) => c.type).toList() ?? [],
+      'inventoryFromConfig': _getInventoryForLevel(levelId, levelConfig).keys.toList(),
+      'componentsFromConfig': _getAvailableComponentsForLevel(levelConfig).map((c) => c.type).toList(),
     });
     _loadPaletteState();
   }
@@ -569,11 +588,26 @@ class PaletteStateNotifier extends StateNotifier<PaletteState> {
     });
   }
 
-  void reset() {
+  Future<void> reset() async {
+    // Clear saved inventory first to prevent _loadPaletteState override
+    // Delete the key entirely by saving an empty collection instead of null
+    final emptyInventoryJson = jsonEncode(<String, dynamic>{});
+    await _storageService.saveData<String>('inventory_$levelId', emptyInventoryJson);
+
+    // Then recreate fresh state with full inventory
     state = PaletteState(
-      availableComponents: _getAvailableComponents(),
-      inventory: _getInventoryForLevel(levelId),
+      availableComponents: _getAvailableComponentsForLevel(levelConfig),
+      inventory: _getInventoryForLevel(levelId, levelConfig),
     );
+
+    StructuredLogger.info('🎨 ===== INVENTORY RESET COMPLETED =====', context: {
+      'levelId': levelId,
+      'freshInventoryItems': state.inventory.length,
+      'totalComponentsRestored': state.inventory.values.fold(0, (sum, item) => sum + item.total),
+      'availableComponentsRestored': state.inventory.values.fold(0, (sum, item) => sum + item.available),
+      'inventoryDetails': state.inventory.entries.map((e) =>
+        '${e.key}: ${e.value.available}/${e.value.total}').toList(),
+    });
   }
 }
 
@@ -641,6 +675,74 @@ List<ComponentDefinition> _getAvailableComponents() {
       requiredLevels: [],
     ),
   ];
+}
+
+List<ComponentDefinition> _getAvailableComponentsForLevel(LevelDefinition? levelConfig) {
+  StructuredLogger.info('Getting available components for level', context: {
+    'levelId': levelConfig?.levelId ?? 'null',
+    'hasLevelConfig': levelConfig != null,
+    'availableComponentsCount': levelConfig?.components.available.length ?? 0,
+  });
+
+  // If we have a level config, use it as the source of truth
+  if (levelConfig != null && levelConfig.components.available.isNotEmpty) {
+    StructuredLogger.debug('Using level config for available components', context: {
+      'levelId': levelConfig.levelId,
+      'components': levelConfig.components.available.map((c) => '${c.type}:${c.quantity}').toList(),
+    });
+
+    final componentDefinitions = <ComponentDefinition>[];
+
+    // Get the base component definitions
+    final allComponents = _getAvailableComponents();
+
+    // Create component definitions based on what's available in the level
+    for (final componentAvailability in levelConfig.components.available) {
+      final componentType = componentAvailability.type;
+
+      // Find the base definition for this component type
+      final baseDefinition = allComponents.firstWhere(
+        (c) => c.type == componentType,
+        orElse: () => ComponentDefinition(
+          type: componentType,
+          name: componentType.toUpperCase(),
+          description: 'Component: $componentType',
+          iconPath: 'assets/components/$componentType.svg',
+          defaultProperties: componentAvailability.properties ?? {},
+          cost: componentAvailability.properties?['cost'] ?? 1,
+        ),
+      );
+
+      componentDefinitions.add(baseDefinition);
+
+      StructuredLogger.trace('Component definition added', context: {
+        'componentType': componentType,
+        'name': baseDefinition.name,
+        'cost': baseDefinition.cost,
+        'isUnlocked': baseDefinition.isUnlocked,
+      });
+    }
+
+    StructuredLogger.info('Component definitions generated from level config', context: {
+      'levelId': levelConfig.levelId,
+      'definitionsCount': componentDefinitions.length,
+      'componentTypes': componentDefinitions.map((c) => c.type).toList(),
+    });
+
+    // Add simple debug prints for immediate visibility
+    print('🎨 COMPONENT CREATION: Generated ${componentDefinitions.length} definitions');
+    print('🎨 COMPONENT CREATION: Types: ${componentDefinitions.map((c) => c.type).toList()}');
+    print('🎨 COMPONENT CREATION: Unlocked: ${componentDefinitions.where((c) => c.isUnlocked).length}');
+
+    return componentDefinitions;
+  }
+
+  // Fallback to all available components if no level config
+  StructuredLogger.info('Using fallback component definitions', context: {
+    'reason': 'no_level_config_provided',
+  });
+
+  return _getAvailableComponents();
 }
 
 Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefinition? levelConfig]) {

@@ -116,8 +116,8 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
 
   @override
   Future<void> resetInventoryForLevel(String levelId) async {
-    // Reset the palette state for the level
-    _paletteStateNotifier.reset();
+    // Reset the palette state for the level - now async due to inventory clearing
+    await _paletteStateNotifier.reset();
   }
 
   /// Converts ComponentType enum to string representation

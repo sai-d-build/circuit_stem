@@ -13,7 +13,7 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
   }
 
   /// Place a component on the grid
-  void placeComponent(ComponentType componentType, int row, int col) {
+  ComponentModel placeComponent(ComponentType componentType, int row, int col) {
     final componentId = '${componentType.toString().split('.').last}_${DateTime.now().millisecondsSinceEpoch}';
 
     // Create ComponentModel for grid storage
@@ -33,6 +33,8 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
       grid: updatedGrid,
       lastUpdated: DateTime.now(),
     );
+
+    return componentModel;
   }
 
   /// Select a component

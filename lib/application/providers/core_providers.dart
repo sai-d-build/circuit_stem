@@ -26,6 +26,7 @@ import '../../application/states/game_state.dart';
 // Canvas and orchestrator imports
 import '../states/game_canvas_state.dart';
 import '../../presentation/features/game/controllers/game_canvas_orchestrator.dart';
+import '../../presentation/features/game/controllers/canvas_interaction_controller.dart' as canvas_controller;
 import '../services/interfaces/component_placement_service.dart';
 import '../services/interfaces/game_interaction_service.dart';
 import '../services/interfaces/canvas_rendering_service.dart';
@@ -327,6 +328,11 @@ class LevelService {
 
 // Palette Drag Active Provider - Tracks if a drag from palette is in progress
 final paletteDragActiveProvider = StateProvider<bool>((ref) => false);
+
+// Interaction State Provider - For canvas drag-drop interactions
+final interactionStateProvider = StateNotifierProvider.family<canvas_controller.InteractionStateNotifier, canvas_controller.InteractionState, String>(
+  (ref, levelId) => canvas_controller.InteractionStateNotifier(ref: ref, levelId: levelId),
+);
 
 // ============================================================================
 // GOAL & VALIDATION PROVIDERS

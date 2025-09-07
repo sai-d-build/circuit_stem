@@ -15,7 +15,31 @@ class MockAssetManager extends Mock implements AssetManagerNotifier {}
 
 class MockGridService extends Mock implements GridService {}
 
-class MockLevelService extends Mock {}
+class MockLevelService extends Mock implements LevelService {
+  @override
+  Future<List<LevelDefinition>> loadAllLevels() async => [];
+
+  @override
+  Future<LevelDefinition?> loadLevel(String levelId) async => null;
+
+  @override
+  Future<LevelMetadata?> getLevelMetadata(String levelId) async => null;
+
+  @override
+  Future<List<String>> getAvailableLevelIds() async => [];
+
+  @override
+  Future<List<LevelDefinition>> getLevelsByDifficulty(String difficulty) async => [];
+
+  @override
+  Future<List<LevelDefinition>> getLevelsByTag(String tag) async => [];
+
+  @override
+  Future<bool> validateLevelFile(String levelId) async => true;
+
+  @override
+  void clearCache() {}
+}
 
 // Test helper utilities for common provider overrides
 

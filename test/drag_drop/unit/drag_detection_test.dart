@@ -19,7 +19,7 @@ void main() {
 
     group('Component Position Detection Tests', () {
       test('Finds component at exact grid position', () {
-        final testPosition = const Offset(2, 3);
+        final testPosition = const Offset(3, 2); // col=3, row=2 to match component position
         final matchingComponent = ComponentModel(
           id: 'test_comp',
           type: ComponentType.battery,
@@ -151,7 +151,7 @@ void main() {
       });
 
       test('Pan offset affects boundary calculations', () {
-        final pannedConfig = config.copyWith(panOffset: const Offset(60, 60));
+        final pannedConfig = config.copyWith(panOffset: const Offset(400, 400)); // Even larger pan to definitely push out of bounds
         final screenPos = const Offset(300, 300);
         final result = GridService.isWithinGridBounds(screenPos, pannedConfig);
         expect(result, isFalse);

@@ -10,6 +10,7 @@ import '../../../core/utils/error_utils.dart';
 import '../widgets/game_canvas.dart';
 import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart';
 import 'package:sparkcircuit/presentation/features/palette/widgets/horizontal_component_palette.dart';
+import 'package:sparkcircuit/presentation/state/palette_state.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
@@ -109,6 +110,53 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
         foregroundColor: AppTheme.lightTheme.colorScheme.onPrimary,
         toolbarHeight: appBarHeight,
         actions: [
+          // Always show reset button regardless of device type
+          IconButton(
+            icon: Icon(
+              Icons.refresh,
+              size: context.responsiveIconSize(24),
+            ),
+            onPressed: () async {
+              StructuredLogger.info('🌀 ===== RESET BUTTON PRESSED =====', context: {
+                'levelId': widget.levelId,
+                'timestamp': DateTime.now(),
+              });
+
+              try {
+                // Restart level functionality
+                _resetTimer();
+                ref.read(enhancedGameStateNotifierProvider.notifier).resetLevel();
+
+                // Also reset palette inventory - this clears components AND replenishes inventory
+                await ref.read(paletteStateProvider(widget.levelId).notifier).reset();
+
+                StructuredLogger.info('🌀 ===== RESET OPERATION COMPLETED SUCCESSFULLY =====');
+
+                // Show success feedback
+                if (context.mounted) {
+                  SuccessUtils.showSuccess(
+                    context,
+                    'Level has been reset successfully',
+                    title: 'Level Reset',
+                  );
+                }
+              } catch (e, stack) {
+                StructuredLogger.error('🌀 ===== RESET OPERATION FAILED =====', error: e, context: {
+                  'levelId': widget.levelId,
+                  'error': e.toString(),
+                  'stackTrace': stack.toString(),
+                });
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Reset failed: ${e.toString()}'), backgroundColor: Colors.red),
+                  );
+                }
+              }
+            },
+            tooltip: 'Restart Level',
+          ),
+          // Show undo button on non-mobile devices
           if (!context.isMobile) ...[
             IconButton(
               icon: Icon(
@@ -121,25 +169,6 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
               tooltip: 'Undo',
             ),
           ],
-          IconButton(
-            icon: Icon(
-              Icons.refresh,
-              size: context.responsiveIconSize(24),
-            ),
-            onPressed: () {
-              // Restart level functionality
-              _resetTimer();
-              ref.read(enhancedGameStateNotifierProvider.notifier).resetLevel();
-
-              // Show success feedback
-              SuccessUtils.showSuccess(
-                context,
-                'Level has been reset successfully',
-                title: 'Level Reset',
-              );
-            },
-            tooltip: 'Restart Level',
-          ),
         ],
       ),
     );

@@ -6,16 +6,15 @@ import '../../../../application/game_engine/v3/providers_v3.dart' as providers_v
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_grid.dart';
 import 'package:sparkcircuit/application/providers/core_providers.dart' as core_providers;
 import 'package:sparkcircuit/application/providers/game_canvas_providers.dart';
+import 'package:sparkcircuit/presentation/state/palette_state.dart';
 
-import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_component_widget.dart';
 
-import 'canvas_drag_drop_layer.dart';
-import 'canvas_gesture_layer.dart';
+import 'canvas_interaction_widget.dart';
 import 'canvas_rendering_layer.dart';
 import 'canvas_wire_layer.dart';
-import 'canvas_drop_zone_layer.dart';
-import 'canvas_drag_preview.dart';
+import 'package:sparkcircuit/presentation/features/game/services/viewport_service.dart';
+import 'package:sparkcircuit/presentation/features/game/controllers/canvas_interaction_controller.dart';
 
 class GameCanvas extends ConsumerStatefulWidget {
   final String levelId;
@@ -27,9 +26,6 @@ class GameCanvas extends ConsumerStatefulWidget {
 }
 
 class _GameCanvasState extends ConsumerState<GameCanvas> {
-  // Local drag state for layer integration
-  ComponentDragData? _currentDragData;
-  Offset? _dragPosition;
 
   @override
   void initState() {
@@ -41,15 +37,19 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
   }
 
   Future<void> _loadLevel() async {
+    print('🎮 GameCanvas: Starting level load process for ${widget.levelId}');
     StructuredLogger.info('GameCanvas: Starting level load process', context: {
       'levelId': widget.levelId,
     });
 
     try {
       final levelService = ref.read(providers_v3.levelServiceProvider);
+      print('🎮 GameCanvas: Got level service: $levelService');
       final level = await levelService.loadLevel(widget.levelId);
+      print('🎮 GameCanvas: Level loaded: ${level?.levelId ?? "NULL"}');
 
       if (level != null) {
+        print('🎮 GameCanvas: Loading level into game state');
         // Initialize game state with the loaded level
         ref.read(providers_v3.enhancedGameStateNotifierProvider.notifier).loadLevel(level);
 
@@ -65,8 +65,12 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
           'levelId': level.levelId,
           'levelTitle': level.metadata.title,
         });
+        print('🎮 GameCanvas: Level load completed successfully');
+      } else {
+        print('🎮 GameCanvas: Level is NULL - this is the problem!');
       }
     } catch (e) {
+      print('🎮 GameCanvas: Error loading level: $e');
       StructuredLogger.error('GameCanvas: Error loading level', context: {
         'levelId': widget.levelId,
         'errorType': e.runtimeType.toString(),
@@ -77,29 +81,19 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
 
   @override
   Widget build(BuildContext context) {
+    print('🎮 GameCanvas: BUILD METHOD CALLED for level ${widget.levelId}');
     print('🎮 GameCanvas: Building level ${widget.levelId}');
     StructuredLogger.trace('GameCanvas: Building - checking orchestrator state', context: {
       'context_available': context != null,
       'levelId': widget.levelId,
     });
+    StructuredLogger.debug('GameCanvas: Build started', context: {
+      'levelId': widget.levelId,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
 
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>() ?? _getDefaultCircuitColors();
-    final gameState = ref.watch(providers_v3.enhancedGameStateNotifierProvider);
-
-    final canvasState = ref.watch(gameCanvasOrchestratorProvider(widget.levelId));
-    StructuredLogger.trace('GameCanvas: Orchestrator state received', context: {
-      'orchestrator_available': true,
-      'canvasState_error': canvasState.error,
-      'canvasState_isLoading': canvasState.isLoading,
-      'canvasState_hasLevel': canvasState.currentLevel != null,
-      'viewport_scale': canvasState.viewportState.scale,
-      'viewport_canvasSize': canvasState.viewportState.canvasSize.toString(),
-      'viewport_panOffset': canvasState.viewportState.panOffset.toString(),
-      'gridConfig_rows': canvasState.viewportState.gridConfiguration.rows,
-      'gridConfig_cols': canvasState.viewportState.gridConfiguration.cols,
-      'gridConfig_cellSize': canvasState.viewportState.gridConfiguration.cellSize,
-    });
 
     return Container(
       decoration: BoxDecoration(
@@ -115,91 +109,247 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
           return ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Stack(
-          children: [
-            // Grid background
-            Positioned.fill(
-              child: CircuitGrid(levelId: widget.levelId),
-            ),
-
-            // Wire layer
-            CanvasWireLayer(levelId: widget.levelId),
-
-            // Rendering layer
-            Positioned.fill(
-              child: CanvasRenderingLayer(levelId: widget.levelId),
-            ),
-
-            // Interaction layer (gesture handling)
-            Positioned.fill(
-              child: CanvasGestureLayer(
-                levelId: widget.levelId,
-                child: Container(color: Colors.transparent),
-              ),
-            ),
-
-            // Debug Layer: Event blocking test
-            Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onPanStart: (details) => debugPrint('🎯 DEBUG: Stack level pan start ${details.globalPosition}'),
-                onPanUpdate: (details) => debugPrint('🎯 DEBUG: Stack level pan update ${details.globalPosition}'),
-                onPanEnd: (details) => debugPrint('🎯 DEBUG: Stack level pan end ${details.velocity}'),
-                child: Container(
-                  color: Colors.transparent, // Fully transparent for visual debugging
-                  child: const IgnorePointer(), // Don't block events, just observe them
+              fit: StackFit.expand, // Ensure stack fills the entire container
+              children: [
+              // 🔧 FIX: Unified interaction layer with proper hit testing elevation
+              // This must be FIRST to receive drag events - other layers must allow pass-through
+              Positioned.fill(
+                child: Builder(
+                  builder: (context) {
+                    StructuredLogger.debug('GameCanvas building CanvasInteractionWidget', context: {
+                      'levelId': widget.levelId,
+                      'contextAvailable': context != null,
+                      'widgetOrder': 'first_in_stack',
+                      'hitTestingEnabled': true,
+                    });
+                    return CanvasInteractionWidget(levelId: widget.levelId);
+                  },
                 ),
               ),
-            ),
-
-            // Drag and drop layer
-            Positioned.fill(
-              child: CanvasDragDropLayer(
-                levelId: widget.levelId,
-                child: const SizedBox.shrink(),
+  
+              // Grid background - MUST receive drag events for drop zones
+              Positioned.fill(
+                child: CircuitGrid(levelId: widget.levelId),
               ),
-            ),
+  
+              // Wire layer - must allow touch pass-through
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: CanvasWireLayer(levelId: widget.levelId),
+                ),
+              ),
+  
+              // Rendering layer - must allow touch pass-through
+              Consumer(
+                builder: (context, ref, child) {
+                  final gameState = ref.watch(providers_v3.enhancedGameStateNotifierProvider);
+                  return Positioned.fill(
+                    child: IgnorePointer(
+                      child: CanvasRenderingLayer(levelId: widget.levelId),
+                    ),
+                  );
+                },
+              ),
+  
+              // Component widgets - must allow touch pass-through
+              // These need to be draggable themselves but shouldn't block the canvas
+              Consumer(
+                builder: (context, ref, child) {
+                  final componentState = ref.watch(providers_v3.enhancedGameStateNotifierProvider.select((state) => state.grid.components));
+                  return Positioned.fill(
+                    child: IgnorePointer(
+                      // 🔧 CRITICAL: Allow components to be interactive but pass through canvas drags
+                      ignoring: false, // Allow component interaction
+                      child: Stack(
+                        children: componentState.values.map((component) =>
+                          // Components handle their own interaction - don't block canvas
+                          Positioned(
+                            left: component.col * 60.0, // Use a constant for cell size
+                            top: component.row * 60.0,  // Use a constant for cell size
+                            child: AbsorbPointer(
+                              absorbing: false, // Allow component interaction
+                              child: CircuitComponentWidget(
+                                key: ValueKey(component.id),
+                                component: component,
+                              )
+                            ),
+                          )
+                        ).toList(),
+                      ),
+                    ),
+                  );
+                },
+              ),
 
-            // Drop zone highlight (conditional)
-            () {
-              final isPaletteDragActive = ref.watch(core_providers.paletteDragActiveProvider);
-              final hasCurrentDragData = _currentDragData != null;
+            // Enhanced Debug Dashboard - comprehensive debugging information
+            Consumer(
+              builder: (context, ref, child) {
+                final gameState = ref.watch(providers_v3.enhancedGameStateNotifierProvider);
+                final interactionState = ref.watch(interactionStateProvider(widget.levelId));
+                final paletteState = ref.watch(paletteStateProvider(widget.levelId));
 
-              StructuredLogger.debug('GameCanvas: Drop zone condition check', context: {
-                'paletteDragActive': isPaletteDragActive,
-                'currentDragData_exists': hasCurrentDragData,
-                'currentDragData_componentName': _currentDragData?.componentName ?? 'null',
-                'currentDragData_componentType': _currentDragData?.componentType?.toString() ?? 'null',
-                'dropZone_will_render': isPaletteDragActive && hasCurrentDragData,
-              });
+                // Group components by type for better display
+                final componentsByType = <String, int>{};
+                for (final component in gameState.grid.components.values) {
+                  final typeKey = component.type.toString().split('.').last;
+                  componentsByType[typeKey] = (componentsByType[typeKey] ?? 0) + 1;
+                }
 
-              if (isPaletteDragActive && hasCurrentDragData) {
-                return Positioned.fill(
-                  child: CanvasDropZoneLayer(
-                    dragData: _currentDragData,
-                    child: const SizedBox.shrink(),
+                // Calculate inventory summary
+                final totalAvailable = paletteState.inventory.values.fold<int>(
+                  0, (sum, inv) => sum + inv.available);
+                final totalUsed = paletteState.inventory.values.fold<int>(
+                  0, (sum, inv) => sum + (inv.total - inv.available));
+
+                return Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 300, maxHeight: 400),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white, width: 1),
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header
+                          Row(
+                            children: [
+                              Text(
+                                '🔧 DEBUG DASHBOARD',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: interactionState.isValid ? Colors.green : Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Interaction State
+                          _buildDebugSection('🎯 INTERACTION STATE', [
+                            'Mode: ${interactionState.currentMode.toString().split('.').last}',
+                            'Valid: ${interactionState.isValid}',
+                            'Selected: ${interactionState.componentData?.componentName ?? "None"}',
+                            'Target: ${interactionState.targetPosition?.toString() ?? "None"}',
+                            'Path Length: ${interactionState.path.length}',
+                          ]),
+
+                          const SizedBox(height: 8),
+
+                          // Grid State
+                          _buildDebugSection('📊 GRID STATE', [
+                            'Components: ${gameState.grid.components.length}',
+                            'Grid Size: ${gameState.grid.rows}x${gameState.grid.cols}',
+                            'Occupied Cells: ${gameState.grid.components.length}',
+                            'Free Cells: ${(gameState.grid.rows * gameState.grid.cols) - gameState.grid.components.length}',
+                          ]),
+
+                          const SizedBox(height: 8),
+
+                          // Components by Type
+                          _buildDebugSection('🔧 COMPONENTS BY TYPE',
+                            componentsByType.entries.map((e) => '${e.key}: ${e.value}').toList()
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          // Inventory Summary
+                          _buildDebugSection('📦 INVENTORY SUMMARY', [
+                            'Total Available: $totalAvailable',
+                            'Total Used: $totalUsed',
+                            'Total Capacity: ${totalAvailable + totalUsed}',
+                            'Utilization: ${totalUsed > 0 ? (((totalUsed / (totalAvailable + totalUsed)) * 100).round()) : 0}%',
+                          ]),
+
+                          const SizedBox(height: 8),
+
+                          // Individual Component Inventory
+                          _buildDebugSection('📋 COMPONENT INVENTORY',
+                            paletteState.inventory.entries.map((e) {
+                              final type = e.key.toString().split('.').last;
+                              final inv = e.value;
+                              return '$type: ${inv.available}/${inv.total} (${inv.total - inv.available} used)';
+                            }).toList()
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          // Error Display
+                          if (interactionState.errorMessage != null)
+                            _buildDebugSection('❌ ERROR', [
+                              interactionState.errorMessage!,
+                            ], Colors.red[100]!),
+
+                          // Performance metrics
+                          _buildDebugSection('⚡ PERFORMANCE', [
+                            'Grid Components: ${gameState.grid.components.length}',
+                            'Palette Items: ${paletteState.filteredComponents.length}',
+                            'Interaction Mode: ${interactionState.currentMode.toString().split('.').last}',
+                          ]),
+                        ],
+                      ),
+                    ),
                   ),
                 );
-              }
-              return const SizedBox.shrink();
-            }(),
-
-            // Drag preview
-            if (_currentDragData != null && _dragPosition != null)
-              CanvasDragPreview(
-                componentType: _currentDragData!.componentType.toString().split('.').last,
-                position: _dragPosition!,
-              ),
-
-            // Component widgets
-            ...gameState.grid.components.values.map((component) =>
-              CircuitComponentWidget(component: component)
+              },
             ),
           ],
         ),
       );
     },
-    ),
-  );
+  ),
+);
+  }
+
+  Widget _buildDebugSection(String title, List<String> items, [Color? backgroundColor]) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? Colors.grey[800],
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: Colors.grey[600]!, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 2),
+          ...items.map((item) => Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Text(
+              item,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 8,
+              ),
+            ),
+          )),
+        ],
+      ),
+    );
   }
 
   CircuitColorScheme _getDefaultCircuitColors() {

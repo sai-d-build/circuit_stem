@@ -26,15 +26,13 @@ class CanvasWireLayer extends ConsumerWidget {
     // Convert Grid connections to CircuitWire for rendering
     final circuitWires = _buildCircuitWires(gameState);
 
-    return Positioned.fill(
-      child: RepaintBoundary(
-        child: CustomPaint(
-          painter: WireRenderingPainter(
-            wires: circuitWires,
-            circuitColors: circuitColors,
-          ),
-          size: Size.infinite,
+    return RepaintBoundary(
+      child: CustomPaint(
+        painter: WireRenderingPainter(
+          wires: circuitWires,
+          circuitColors: circuitColors,
         ),
+        size: Size.infinite,
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:integration_test/integration_test.dart';
 
 // Import the actual providers we want to test
-import 'package:sparkcircuit/application/providers/core_providers.dart';
+import 'package:sparkcircuit/application/providers/core_providers.dart' hide enhancedGameStateNotifierProvider;
 import 'package:sparkcircuit/application/providers/game_providers.dart';
 
 /// Provider Integration Test Suite

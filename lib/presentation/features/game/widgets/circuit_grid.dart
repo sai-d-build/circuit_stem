@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/application/providers/game_canvas_providers.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
 import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/presentation/models/drag_models.dart';
+import 'package:sparkcircuit/presentation/state/palette_state.dart';
+
+// Provider to track the currently hovered cell index
+final hoveredCellProvider = StateProvider<int?>((ref) => null);
 
 class CircuitGrid extends ConsumerStatefulWidget {
   final String levelId;
@@ -20,32 +26,94 @@ class CircuitGrid extends ConsumerStatefulWidget {
 
 class _CircuitGridState extends ConsumerState<CircuitGrid> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final canvasState = ref.watch(gameCanvasOrchestratorProvider(widget.levelId));
+    final gridConfig = canvasState.viewportState.gridConfiguration;
+    final hoveredCellIndex = ref.watch(hoveredCellProvider);
+    final components = ref.watch(providers_v3.enhancedGameStateNotifierProvider.select((state) => state.grid.components));
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Log grid rendering parameters
-        final config = canvasState.viewportState.gridConfiguration;
-        final cellSize = config.cellSize * canvasState.viewportState.scale;
-        final panOffset = canvasState.viewportState.panOffset;
+        return Stack(
+          children: [
+            // Layer 1: The visual grid painter
+            CustomPaint(
+              painter: GridPainter(
+                canvasState: canvasState,
+                circuitColors: Theme.of(context).extension<CircuitColorScheme>() ?? _getDefaultCircuitColors(),
+              ),
+              child: Container(),
+            ),
+            // Layer 2: The interactive DragTarget grid
+            GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: gridConfig.cols,
+              ),
+              itemCount: gridConfig.rows * gridConfig.cols,
+              itemBuilder: (context, index) {
+                final row = index ~/ gridConfig.cols;
+                final col = index % gridConfig.cols;
+                final isHovered = hoveredCellIndex == index;
+                final isOccupied = components.values.any((c) => c.row == row && c.col == col);
 
-        return CustomPaint(
-          painter: GridPainter(
-            canvasState: canvasState,
-            circuitColors: Theme.of(context).extension<CircuitColorScheme>() ?? _getDefaultCircuitColors(),
-          ),
-          child: Container(),
+                return DragTarget<ComponentDragData>(
+                  onWillAccept: (data) {
+                    if (isOccupied) {
+                      ref.read(hoveredCellProvider.notifier).state = null;
+                      return false;
+                    }
+                    ref.read(hoveredCellProvider.notifier).state = index;
+                    return true;
+                  },
+                  onLeave: (data) {
+                    ref.read(hoveredCellProvider.notifier).state = null;
+                  },
+                  onAccept: (data) async {
+                    ref.read(hoveredCellProvider.notifier).state = null;
+                    final paletteNotifier = ref.read(paletteStateProvider(widget.levelId).notifier);
+
+                    // Convert ComponentType enum to String
+                    final componentTypeString = data.componentType.toString().split('.').last;
+
+                    // Check if component can be used before attempting
+                    if (!paletteNotifier.canUseComponent(componentTypeString)) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No items left in inventory!'), backgroundColor: Colors.red,));
+                      return;
+                    }
+
+                    // 1. Update inventory (useComponent returns void)
+                    paletteNotifier.useComponent(componentTypeString);
+
+                    // 2. Commit placement to game state
+                    final gameStateNotifier = ref.read(providers_v3.enhancedGameStateNotifierProvider.notifier);
+                    final newComponent = gameStateNotifier.placeComponent(data.componentType, row, col);
+
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${data.componentName} placed!'), backgroundColor: Colors.green,));
+
+                    // 3. TODO: Send backend request and handle rollback
+                    // final backendOk = await _sendPlacementToServer(index, data);
+                    // if (!backendOk) {
+                    //   paletteNotifier.returnComponent(data.componentType);
+                    //   gameStateNotifier.removeComponent(newComponent.id);
+                    //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Placement failed — rolled back')));
+                    // }
+                  },
+                  builder: (context, candidateData, rejectedData) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: isHovered ? (isOccupied ? Colors.red.withOpacity(0.4) : Colors.green.withOpacity(0.4)) : Colors.transparent,
+                        border: Border.all(
+                          color: isHovered ? (isOccupied ? Colors.red : Colors.green) : Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
         );
       },
     );
@@ -96,7 +164,11 @@ class GridPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    print('🎨 CircuitGrid: Painting with size ${size.width}x${size.height}');
+    // 🔧 RCA: Add structured logging for re-render analysis
+    StructuredLogger.trace('CircuitGrid painting initiated', context: {
+      'canvasSize': '${size.width}x${size.height}',
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
 
     // Log actual grid rendering
     final loggingConfig = canvasState.viewportState.gridConfiguration;
@@ -202,7 +274,17 @@ class GridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(GridPainter oldDelegate) {
-    return oldDelegate.canvasState != canvasState ||
-            oldDelegate.circuitColors != circuitColors;
+    // 🔧 RCA: More selective repaint conditions to reduce excessive re-renders
+    final shouldRepaint = oldDelegate.canvasState.viewportState != canvasState.viewportState ||
+                         oldDelegate.circuitColors != circuitColors;
+
+    if (shouldRepaint) {
+      StructuredLogger.trace('CircuitGrid repainting due to state change', context: {
+        'viewportChanged': oldDelegate.canvasState.viewportState != canvasState.viewportState,
+        'colorsChanged': oldDelegate.circuitColors != circuitColors,
+      });
+    }
+
+    return shouldRepaint;
   }
 }
