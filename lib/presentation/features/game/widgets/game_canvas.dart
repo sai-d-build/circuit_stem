@@ -156,6 +156,16 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
               Consumer(
                 builder: (context, ref, child) {
                   final componentState = ref.watch(providers_v3.enhancedGameStateNotifierProvider.select((state) => state.grid.components));
+                  final canvasState = ref.watch(gameCanvasOrchestratorProvider(widget.levelId));
+                  final cellSize = canvasState.viewportState.gridConfiguration.cellSize; // 🔧 FIX 5: Use dynamic cell size
+
+                  StructuredLogger.debug('GameCanvas: Component positioning using dynamic cell size', context: {
+                    'dynamicCellSize': cellSize,
+                    'oldHardcodedSize': 60.0,
+                    'totalComponents': componentState.length,
+                    'scaleFactor': canvasState.viewportState.gridConfiguration.cellSize / 60.0,
+                  });
+
                   return Positioned.fill(
                     child: IgnorePointer(
                       // 🔧 CRITICAL: Allow components to be interactive but pass through canvas drags
@@ -164,8 +174,8 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
                         children: componentState.values.map((component) =>
                           // Components handle their own interaction - don't block canvas
                           Positioned(
-                            left: component.col * 60.0, // Use a constant for cell size
-                            top: component.row * 60.0,  // Use a constant for cell size
+                            left: component.col * cellSize, // 🔧 FIX 5: Use dynamic cell size instead of 60.0
+                            top: component.row * cellSize,   // 🔧 FIX 5: Use dynamic cell size instead of 60.0
                             child: AbsorbPointer(
                               absorbing: false, // Allow component interaction
                               child: CircuitComponentWidget(

@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'secure_coordinate_validator.dart';
+import '../../domain/entities/core/component.dart';
 
 // Cache entry classes for performance optimization
 class _CacheEntry {
@@ -16,6 +17,55 @@ class _ValidationEntry {
   final DateTime timestamp;
 
   const _ValidationEntry(this.isValid, this.timestamp);
+}
+
+/// Grid footprint definition for component boundary calculation (PHASE 2 FEATURE)
+class GridFootprint {
+  final int width;
+  final int height;
+
+  const GridFootprint({
+    required this.width,
+    required this.height,
+  });
+
+  Size toSize() => Size(width.toDouble(), height.toDouble());
+}
+
+/// Phase 2: User configuration for grid density (ADVANCED BOUNDARY FEATURES)
+class GridDensityConfig {
+  final double cellSpacing; // In pixels
+  final bool showMinorGrid; // Minor vs major grid lines
+  final double boundaryTolerance; // Edge detection sensitivity (0.0-1.0)
+  final bool showComponentFootprints; // Show grid occupation overlays
+  final Color boundaryHighlightColor;
+
+  const GridDensityConfig({
+    this.cellSpacing = 60.0,
+    this.showMinorGrid = true,
+    this.boundaryTolerance = 0.1, // 10% tolerance
+    this.showComponentFootprints = true,
+    this.boundaryHighlightColor = const Color(0xFFFF5252), // Red highlight
+  });
+
+  /// Get effective boundary tolerance in pixels
+  double effectiveTolerance(GridConfiguration config) {
+    return boundaryTolerance * config.cellSize;
+  }
+
+  /// Calculate component spacing based on density preferences
+  double componentSpacing(double baseSize) {
+    return cellSpacing > 0 ? cellSpacing : baseSize;
+  }
+
+  /// Validate density configuration against grid constraints
+  bool isConfigurationValid(GridConfiguration config) {
+    final effectiveCellSize = componentSpacing(config.cellSize);
+    return effectiveCellSize > 0 &&
+           effectiveCellSize <= (config.cellSize * 2) && // Prevent excessive scaling
+           boundaryTolerance >= 0.0 &&
+           boundaryTolerance <= 1.0;
+  }
 }
 
 /// Unified coordinate service that consolidates all coordinate-related operations
@@ -132,6 +182,31 @@ class UnifiedCoordinateService {
     return gridToScreen(Offset(gridX.toDouble() + 0.5, gridY.toDouble() + 0.5), config);
   }
 
+  /// Enhanced component-sized boundary checks (PHASE 2 FEATURE)
+  bool canComponentFitAt(int row, int col, ComponentType type, GridConfiguration config) {
+    final componentSize = _getComponentGridFootprint(type);
+    return (col + componentSize.width) <= config.cols &&
+           (row + componentSize.height) <= config.rows &&
+           col >= 0 && row >= 0;
+  }
+
+  /// Get component's grid footprint for boundary calculation
+  GridFootprint _getComponentGridFootprint(ComponentType type) {
+    switch (type) {
+      case ComponentType.wire:
+        return GridFootprint(width: 1, height: 1); // Wires can span segments
+      case ComponentType.resistor:
+      case ComponentType.bulb:
+      case ComponentType.capacitor:
+      case ComponentType.inductor:
+        return GridFootprint(width: 1, height: 1); // Standard components
+      case ComponentType.battery:
+        return GridFootprint(width: 1, height: 1); // Battery terminal footprint
+      default:
+        return GridFootprint(width: 1, height: 1); // Default to 1x1
+    }
+  }
+
   /// Check if a grid position is within grid bounds
   bool isInGridBounds(Offset gridPos, GridConfiguration config) {
     return gridPos.dx >= 0 &&
@@ -203,6 +278,28 @@ class UnifiedCoordinateService {
     );
   }
 
+  /// Phase 3: Viewport-culling boundary validation (PERFORMANCE OPTIMIZATION)
+  bool isComponentWithinViewportBoundaries(
+    Offset componentPos,
+    GridConfiguration config,
+    Size screenSize,
+    {double viewportThreshold = 0.1, // 10% buffer}
+  ) {
+    // Calculate visible grid bounds with buffer
+    final visibleBounds = calculateVisibleGridBounds(config, screenSize);
+
+    // Expand bounds by viewport threshold for smooth scrolling
+    final bufferedBounds = Rect.fromLTRB(
+      visibleBounds.left - (visibleBounds.width * viewportThreshold),
+      visibleBounds.top - (visibleBounds.height * viewportThreshold),
+      visibleBounds.right + (visibleBounds.width * viewportThreshold),
+      visibleBounds.bottom + (visibleBounds.height * viewportThreshold),
+    );
+
+    // Check if component position is within viewport + buffer
+    return bufferedBounds.contains(componentPos);
+  }
+
   /// Check if a grid position is visible on screen
   bool isGridPositionVisible(Offset gridPosition, GridConfiguration config, Size screenSize) {
     final visibleBounds = calculateVisibleGridBounds(config, screenSize);
@@ -268,5 +365,29 @@ class GridConfiguration {
   /// Check if grid coordinates are valid
   static bool isValidGridCoordinate(int x, int y, int gridWidth, int gridHeight) {
     return x >= 0 && x < gridWidth && y >= 0 && y < gridHeight;
+  }
+}
+
+// Phase 2: Extension methods for GridDensityConfig integration
+extension GridDensityConfigExtensions on GridDensityConfig {
+
+  /// Apply density configuration to a grid position
+  Offset applyDensityToPosition(Offset position) {
+    return Offset(
+      position.dx * (cellSpacing / 60.0), // Scale relative to default 60px
+      position.dy * (cellSpacing / 60.0),
+    );
+  }
+
+  /// Check if position is within density-configured tolerances
+  bool isPositionWithinBoundaryTolerance(Offset position, Offset boundary) {
+    final distance = (position - boundary).distance;
+    return distance <= effectiveTolerance(GridConfiguration(
+      rows: 8, // Default values for tolerance calculation
+      cols: 6,
+      cellSize: 60.0,
+      scale: 1.0,
+      panOffset: Offset.zero,
+    ));
   }
 }

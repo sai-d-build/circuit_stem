@@ -194,8 +194,9 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
       _renderBox = renderBox;
     }
 
-    // Now that we have a valid RenderBox, we can safely perform coordinate conversion.
-    final localPosition = _renderBox!.globalToLocal(details.offset);
+    // 🔧 COORDINATE BUG FIX: DragTargetDetails.offset is already in local coordinates!
+    // No need for globalToLocal() conversion here - it causes double conversion!
+    final localPosition = details.offset; // details.offset is already local to this widget
     final newDetails = DragTargetDetails<ComponentDragData>(
       data: details.data,
       offset: localPosition,
@@ -248,7 +249,9 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
   }
 
   void _onAcceptDrag(DragTargetDetails<ComponentDragData> details) {
-    final localPosition = _renderBox!.globalToLocal(details.offset);
+    // 🔧 COORDINATE BUG FIX: DragTargetDetails.offset is already in local coordinates!
+    // No need for globalToLocal() conversion here - it causes double conversion!
+    final localPosition = details.offset; // details.offset is already local to this widget
     final newDetails = DragTargetDetails<ComponentDragData>(
       data: details.data,
       offset: localPosition,
