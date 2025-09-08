@@ -246,5 +246,29 @@ class CoordinateSystemService implements ICoordinateService {
            position.col < boundaryTolerance || position.col >= context.gridDimensions.width.toInt() - boundaryTolerance;
   }
 
+  /// Get snapped and validated grid position for component placement
+  GridPosition? getSnappedValidPosition(
+    Offset screenPosition,
+    CoordinateContext context,
+    RenderBox renderBox, {
+    Set<GridPosition>? occupiedPositions,
+    bool requireEmptyCell = true,
+  }) {
+    final validation = validateDropPosition(
+      screenPosition,
+      context,
+      renderBox,
+      occupiedPositions: occupiedPositions,
+      requireEmptyCell: requireEmptyCell,
+    );
+
+    if (!validation.isValid) {
+      debugPrint('Position validation failed: ${validation.errorMessage}');
+      return null;
+    }
+
+    return validation.gridPosition;
+  }
+
   void clearCache() => _cache.clear();
 }

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'secure_coordinate_validator.dart';
 import '../../domain/entities/core/component.dart';
+import '../../../presentation/features/game/controllers/game_canvas_controller.dart';
 
 // Cache entry classes for performance optimization
 class _CacheEntry {
@@ -118,7 +119,8 @@ class UnifiedCoordinateService {
   }
 
   /// Coordinate translation: screen coordinates to grid coordinates
-  Offset screenToGrid(Offset screenPos, GridConfiguration config) {
+  /// Supports optional RenderBox for globalToLocal conversion (consolidated from coordinate_system_service)
+  Offset screenToGrid(Offset screenPos, GridConfiguration config, {RenderBox? renderBox}) {
     // Check cache first for performance
     final cacheKey = 'screenToGrid_${screenPos.dx}_${screenPos.dy}_${config.hashCode}';
     final cached = _coordinateCache[cacheKey];
@@ -127,7 +129,11 @@ class UnifiedCoordinateService {
     }
 
     // 🛡️ SECURITY: Sanitize input position
-    final sanitizedPos = SecureCoordinateValidator.sanitizePosition(screenPos);
+    Offset localPos = screenPos;
+    if (renderBox != null) {
+      localPos = renderBox.globalToLocal(screenPos);
+    }
+    final sanitizedPos = SecureCoordinateValidator.sanitizePosition(localPos);
 
     // Reverse pan and scale transformations
     final adjustedX = (sanitizedPos.dx - config.panOffset.dx) / config.scale;
@@ -168,8 +174,8 @@ class UnifiedCoordinateService {
   }
 
   /// Snap screen coordinates to nearest grid cell center
-  Offset snapToGrid(Offset screenPos, GridConfiguration config) {
-    final gridPos = screenToGrid(screenPos, config);
+  Offset snapToGrid(Offset screenPos, GridConfiguration config, {RenderBox? renderBox}) {
+    final gridPos = screenToGrid(screenPos, config, renderBox: renderBox);
     final snappedGridPos = Offset(
       gridPos.dx.round().toDouble(),
       gridPos.dy.round().toDouble(),
@@ -216,17 +222,18 @@ class UnifiedCoordinateService {
   }
 
   /// Check if screen coordinates are within visible grid bounds
-  bool isWithinGridBounds(Offset screenPosition, GridConfiguration config) {
-    final gridPos = screenToGrid(screenPosition, config);
+  bool isWithinGridBounds(Offset screenPosition, GridConfiguration config, {RenderBox? renderBox}) {
+    final gridPos = screenToGrid(screenPosition, config, renderBox: renderBox);
     return isInGridBounds(gridPos, config);
   }
 
   /// Get valid grid position from screen coordinates (returns null if out of bounds)
-  Offset? getValidGridPosition(Offset screenPosition, GridConfiguration config) {
-    final gridPos = screenToGrid(screenPosition, config);
+  /// Consolidated to use round() for consistency across implementations
+  Offset? getValidGridPosition(Offset screenPosition, GridConfiguration config, {RenderBox? renderBox}) {
+    final gridPos = screenToGrid(screenPosition, config, renderBox: renderBox);
     final snappedPos = Offset(
-      gridPos.dx.floor().toDouble(),  // Use floor instead of round for boundary handling
-      gridPos.dy.floor().toDouble(),
+      gridPos.dx.round().toDouble(),  // Unified to round for nearest cell
+      gridPos.dy.round().toDouble(),
     );
 
     if (isInGridBounds(snappedPos, config)) {
@@ -243,9 +250,9 @@ class UnifiedCoordinateService {
   }
 
   /// Find all valid grid positions in a screen area
-  List<Offset> getGridPositionsInScreenRect(Rect screenRect, GridConfiguration config) {
-    final topLeft = screenToGrid(screenRect.topLeft, config);
-    final bottomRight = screenToGrid(screenRect.bottomRight, config);
+  List<Offset> getGridPositionsInScreenRect(Rect screenRect, GridConfiguration config, {RenderBox? renderBox}) {
+    final topLeft = screenToGrid(screenRect.topLeft, config, renderBox: renderBox);
+    final bottomRight = screenToGrid(screenRect.bottomRight, config, renderBox: renderBox);
 
     final startRow = topLeft.dy.floor();
     final endRow = bottomRight.dy.ceil();
@@ -282,9 +289,9 @@ class UnifiedCoordinateService {
   bool isComponentWithinViewportBoundaries(
     Offset componentPos,
     GridConfiguration config,
-    Size screenSize,
-    {double viewportThreshold = 0.1, // 10% buffer}
-  ) {
+    Size screenSize, {
+    double viewportThreshold = 0.1, // 10% buffer
+  }) {
     // Calculate visible grid bounds with buffer
     final visibleBounds = calculateVisibleGridBounds(config, screenSize);
 
@@ -304,6 +311,17 @@ class UnifiedCoordinateService {
   bool isGridPositionVisible(Offset gridPosition, GridConfiguration config, Size screenSize) {
     final visibleBounds = calculateVisibleGridBounds(config, screenSize);
     return visibleBounds.contains(gridPosition);
+  }
+
+  /// Factory to create config from GameCanvasController for easy integration
+  static GridConfiguration createConfigFromController(GameCanvasController controller) {
+    return GridConfiguration(
+      rows: controller.gridHeight,
+      cols: controller.gridWidth,
+      cellSize: controller.gridCellSize,
+      scale: controller.scale,
+      panOffset: controller.panOffset,
+    );
   }
 
   void clearCache() {

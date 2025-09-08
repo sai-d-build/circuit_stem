@@ -207,6 +207,7 @@ class CanvasInteractionController {
   RenderBox? _renderBox;
   Timer? _throttleTimer;
   DragTargetDetails<ComponentDragData>? _currentDragDetails;
+  DragOrigin? _currentOrigin;
   final Map<String, WirePath> _wirePaths = {};
 
   ICoordinateService get coordinateService => _coordinateService;
@@ -254,6 +255,7 @@ class CanvasInteractionController {
     );
 
     _currentDragDetails = details;
+    _currentOrigin = origin;
 
     // Log game state before drag operation
     final gameStateBefore = ref.read(providers_v3.enhancedGameStateNotifierProvider);
@@ -627,7 +629,7 @@ class CanvasInteractionController {
           'levelId': levelId,
         });
 
-        // 🔧 CRITICAL FIX: Convert global screen position to local position
+        // 🔧 FIX: Use currentPosition directly as it's already local from DragTargetDetails
         if (_renderBox == null || !_renderBox!.attached) {
           StructuredLogger.error('RenderBox not available for coordinate conversion', context: {
             'renderBoxNull': _renderBox == null,
@@ -638,7 +640,7 @@ class CanvasInteractionController {
           return;
         }
 
-        final localPosition = _renderBox!.globalToLocal(currentPosition);
+        final localPosition = currentPosition; // Already local from DragTargetDetails
 
         StructuredLogger.debug('Coordinate conversion completed', context: {
           'screenPosition': currentPosition.toString(),
@@ -717,8 +719,18 @@ class CanvasInteractionController {
             'targetPosition': currentState.targetPosition.toString(),
             'currentDragDetails': _currentDragDetails != null,
             'componentType': _currentDragDetails?.data?.componentType.toString(),
+            'currentOrigin': _currentOrigin.toString(),
             'levelId': levelId,
           });
+
+          // Guard against duplicate placement: if from palette and grid DragTargets are active, skip placement
+          if (_currentOrigin == DragOrigin.palette && currentState.currentMode == InteractionMode.placeComponent) {
+            StructuredLogger.info('🎯 DRAG END - SKIPPING PALETTE PLACEMENT (handled by grid)', context: {
+              'reason': 'Grid DragTargets handle palette component placement',
+              'levelId': levelId,
+            });
+            return;
+          }
 
           if (currentState.currentMode == InteractionMode.drawWire) {
             StructuredLogger.info('🪙 DRAWING WIRE', context: {

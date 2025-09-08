@@ -105,6 +105,8 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
 
                   // Component preview layer - DISABLED to prevent ghost duplication
                   // The Draggable feedback from palette already provides the preview
+                  // This overlay is intentionally disabled to avoid visual confusion with the
+                  // active drag feedback from HorizontalComponentPalette Draggable.feedback
                   // if (interactionState.currentMode == canvas_controller.InteractionMode.placeComponent &&
                   //     interactionState.componentData != null)
                   //   _buildComponentPreview(interactionState),
