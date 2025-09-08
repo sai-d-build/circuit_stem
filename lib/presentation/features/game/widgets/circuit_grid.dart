@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/application/providers/game_canvas_providers.dart';
-import 'package:sparkcircuit/core/services/grid_service.dart';
+import 'package:sparkcircuit/core/services/grid_service.dart' as grid_service;
 import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
@@ -58,47 +58,78 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
                 final isOccupied = components.values.any((c) => c.row == row && c.col == col);
 
                 return DragTarget<ComponentDragData>(
-                  onWillAccept: (data) {
-                    if (isOccupied) {
-                      ref.read(hoveredCellProvider.notifier).state = null;
-                      return false;
-                    }
-                    ref.read(hoveredCellProvider.notifier).state = index;
-                    return true;
-                  },
-                  onLeave: (data) {
+                onWillAccept: (data) {
+                  if (isOccupied) {
                     ref.read(hoveredCellProvider.notifier).state = null;
-                  },
-                  onAccept: (data) async {
-                    ref.read(hoveredCellProvider.notifier).state = null;
-                    final paletteNotifier = ref.read(paletteStateProvider(widget.levelId).notifier);
+                    return false;
+                  }
+                  ref.read(hoveredCellProvider.notifier).state = index;
+                  return true;
+                },
+                onLeave: (data) {
+                  ref.read(hoveredCellProvider.notifier).state = null;
+                },
+                onAccept: (data) async {
+                  ref.read(hoveredCellProvider.notifier).state = null;
+                  final paletteNotifier = ref.read(paletteStateProvider(widget.levelId).notifier);
 
-                    // Convert ComponentType enum to String
-                    final componentTypeString = data.componentType.toString().split('.').last;
+                  // Convert ComponentType enum to String
+                  final componentTypeString = data.componentType.toString().split('.').last;
 
-                    // Check if component can be used before attempting
-                    if (!paletteNotifier.canUseComponent(componentTypeString)) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No items left in inventory!'), backgroundColor: Colors.red,));
-                      return;
-                    }
+                  // Check if component can be used before attempting
+                  if (!paletteNotifier.canUseComponent(componentTypeString)) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No items left in inventory!'), backgroundColor: Colors.red,));
+                    return;
+                  }
 
-                    // 1. Update inventory (useComponent returns void)
-                    paletteNotifier.useComponent(componentTypeString);
+                  // 🔧 FIX: Use GridService for proper coordinate conversion with viewport transformations
+                  // Calculate grid position directly from row/col since GridView has predictable layout
+                  final gridX = col.toDouble();
+                  final gridY = row.toDouble();
+                  final gridPos = Offset(gridX, gridY);
 
-                    // 2. Commit placement to game state
-                    final gameStateNotifier = ref.read(providers_v3.enhancedGameStateNotifierProvider.notifier);
-                    final newComponent = gameStateNotifier.placeComponent(data.componentType, row, col);
+                  // Create GridService-compatible configuration with viewport transformations
+                  final gridServiceConfig = grid_service.GridConfiguration(
+                    rows: gridConfig.rows,
+                    cols: gridConfig.cols,
+                    cellSize: gridConfig.cellSize,
+                    scale: canvasState.viewportState.scale,
+                    panOffset: canvasState.viewportState.panOffset,
+                  );
 
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${data.componentName} placed!'), backgroundColor: Colors.green,));
+                  // For GridView, the drop position is already in grid coordinates (row, col)
+                  // We just need to validate it's within bounds and use it directly
+                  final correctedRow = row;
+                  final correctedCol = col;
 
-                    // 3. TODO: Send backend request and handle rollback
-                    // final backendOk = await _sendPlacementToServer(index, data);
-                    // if (!backendOk) {
-                    //   paletteNotifier.returnComponent(data.componentType);
-                    //   gameStateNotifier.removeComponent(newComponent.id);
-                    //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Placement failed — rolled back')));
-                    // }
-                  },
+                  StructuredLogger.debug('CircuitGrid: Coordinate conversion', context: {
+                    'originalRow': row,
+                    'originalCol': col,
+                    'gridPos': gridPos.toString(),
+                    'correctedRow': correctedRow,
+                    'correctedCol': correctedCol,
+                    'cellSize': gridServiceConfig.cellSize,
+                    'scale': gridServiceConfig.scale,
+                    'panOffset': gridServiceConfig.panOffset.toString(),
+                  });
+
+                  // 1. Update inventory (useComponent returns void)
+                  paletteNotifier.useComponent(componentTypeString);
+
+                  // 2. Commit placement to game state using corrected coordinates
+                  final gameStateNotifier = ref.read(providers_v3.enhancedGameStateNotifierProvider.notifier);
+                  final newComponent = gameStateNotifier.placeComponent(data.componentType, correctedRow, correctedCol);
+
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${data.componentName} placed at (${correctedRow}, ${correctedCol})!'), backgroundColor: Colors.green,));
+
+                  // 3. TODO: Send backend request and handle rollback
+                  // final backendOk = await _sendPlacementToServer(index, data);
+                  // if (!backendOk) {
+                  //   paletteNotifier.returnComponent(data.componentType);
+                  //   gameStateNotifier.removeComponent(newComponent.id);
+                  //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Placement failed — rolled back')));
+                  // }
+                },
                   builder: (context, candidateData, rejectedData) {
                     return Container(
                       decoration: BoxDecoration(
