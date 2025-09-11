@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/game_canvas.dart';
-import 'package:sparkcircuit/core/services/game_state_reader.dart';
 /// Test demonstrating the new CanvasInteractionWidget integration
 void main() {
   group('CanvasInteractionWidget Integration Test', () {

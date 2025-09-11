@@ -1,34 +1,111 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart';
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/component_painter.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+import 'package:sparkcircuit/application/use_cases/component_interaction_use_case.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
+
+// ✅ CLEAN ARCHITECTURE: Component Interaction Service
+class ComponentInteractionService {
+  final ComponentInteractionUseCase _useCase;
+
+  ComponentInteractionService(this._useCase);
+
+  void handleTap(String componentId) {
+    _useCase.handleComponentTap(componentId);
+  }
+
+  void handleDragStart(String componentId, Offset position) {
+    _useCase.handleComponentDragStart(componentId, position);
+  }
+
+  void handleDragUpdate(Offset position) {
+    _useCase.handleComponentDragUpdate(position);
+  }
+
+  void handleDragEnd() {
+    _useCase.handleComponentDragEnd();
+  }
+}
+
+final componentInteractionServiceProvider = Provider.family<ComponentInteractionService, String>((ref, levelId) {
+  final useCase = ref.watch(componentInteractionUseCaseProvider(levelId));
+  return ComponentInteractionService(useCase);
+});
 
 class CircuitComponentWidget extends ConsumerWidget {
   final ComponentModel component;
+  final String levelId; // Add levelId parameter
 
-  const CircuitComponentWidget({super.key, required this.component});
+  const CircuitComponentWidget({
+    super.key,
+    required this.component,
+    required this.levelId, // Require levelId
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedComponentId = ref.watch(enhancedGameStateNotifierProvider.select((state) => state.interactionState.selectedComponentId));
+    final selectedComponentId = ref.watch(unifiedGameStateProvider.select((state) => state.interactionState.selectedComponentId));
     final isSelected = selectedComponentId == component.id;
+    final interactionService = ref.watch(componentInteractionServiceProvider(levelId));
+
+    // Mark file as migrated to unified provider
+    MigrationTracker.markFileMigrated(
+      'lib/presentation/features/game/widgets/circuit_component_widget.dart',
+      DateTime.now().toIso8601String()
+    );
 
     // The Positioned widget was removed from here.
     // The parent (GameCanvas) is now responsible for positioning this widget in the Stack.
     return GestureDetector(
       onTap: () {
-        ref.read(enhancedGameStateNotifierProvider.notifier).tapComponent(component.id);
+        StructuredLogger.info('👆 COMPONENT TAPPED', context: {
+          'componentId': component.id,
+          'componentType': component.type.toString(),
+          'currentlySelected': selectedComponentId,
+          'willSelectThis': component.id,
+          'levelId': levelId,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+        interactionService.handleTap(component.id);
       },
       onPanStart: (details) {
-        ref.read(enhancedGameStateNotifierProvider.notifier).startDragging(component.id, details.localPosition);
+        StructuredLogger.info('🎯 COMPONENT DRAG STARTED', context: {
+          'componentId': component.id,
+          'componentType': component.type.toString(),
+          'localPosition': details.localPosition.toString(),
+          'globalPosition': details.globalPosition.toString(),
+          'componentRow': component.row,
+          'componentCol': component.col,
+          'levelId': levelId,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+        interactionService.handleDragStart(component.id, details.localPosition);
       },
       onPanUpdate: (details) {
-        ref.read(enhancedGameStateNotifierProvider.notifier).dragUpdate(details.localPosition);
+        StructuredLogger.debug('🔄 COMPONENT DRAG UPDATE', context: {
+          'componentId': component.id,
+          'componentType': component.type.toString(),
+          'localPosition': details.localPosition.toString(),
+          'globalPosition': details.globalPosition.toString(),
+          'delta': details.delta.toString(),
+          'levelId': levelId,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+        interactionService.handleDragUpdate(details.localPosition);
       },
       onPanEnd: (details) {
-        ref.read(enhancedGameStateNotifierProvider.notifier).endDragging();
+        StructuredLogger.info('🏁 COMPONENT DRAG ENDED', context: {
+          'componentId': component.id,
+          'componentType': component.type.toString(),
+          'velocity': details.velocity.toString(),
+          'levelId': levelId,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+        interactionService.handleDragEnd();
       },
       child: Stack(
         children: [

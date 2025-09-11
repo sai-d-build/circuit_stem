@@ -44,7 +44,7 @@ class ComponentPaletteAdapter {
         return Icons.battery_full;
       case 'resistor':
         return Icons.linear_scale;
-      case 'led':
+      case 'bulb':
         return Icons.lightbulb;
       case 'wire':
         return Icons.horizontal_rule;

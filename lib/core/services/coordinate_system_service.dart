@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'secure_coordinate_validator.dart';
+import 'unified_coordinate_service.dart';
 
 
 part 'coordinate_system_service.freezed.dart';
@@ -89,10 +90,10 @@ class CoordinateValidationResult with _$CoordinateValidationResult {
 enum ValidationLevel { info, warning, error }
 
 abstract class ICoordinateService {
-  GridPosition? screenToGrid(Offset screenPosition, CoordinateContext context, RenderBox renderBox);
-  CoordinateValidationResult validateDropPosition(Offset screenPosition, CoordinateContext context, RenderBox renderBox, {Set<GridPosition>? occupiedPositions});
+  GridPosition? screenToGrid(Offset screenPosition, CoordinateContext context, {RenderBox? renderBox});
+  CoordinateValidationResult validateDropPosition(Offset screenPosition, CoordinateContext context, {RenderBox? renderBox, Set<GridPosition>? occupiedPositions});
   Offset gridToLocal(GridPosition gridPosition, CoordinateContext context);
-  Offset globalToLocal(Offset globalPosition, RenderBox renderBox);
+  Offset globalToLocal(Offset globalPosition, {RenderBox? renderBox});
 }
 
 class CoordinateSystemService implements ICoordinateService {
@@ -101,13 +102,12 @@ class CoordinateSystemService implements ICoordinateService {
   CoordinateSystemService._();
 
   final _cache = <String, dynamic>{};
-  static const double _floatTolerance = 0.001;
-  static const double _snapTolerance = 0.3;
 
   @override
-  Offset globalToLocal(Offset globalPosition, RenderBox renderBox) {
-    if (!renderBox.attached) {
-      throw StateError('RenderBox is not attached to render tree');
+  Offset globalToLocal(Offset globalPosition, {RenderBox? renderBox}) {
+    if (renderBox == null || !renderBox.attached) {
+      // Return position unchanged if no RenderBox provided or not attached
+      return globalPosition;
     }
     return renderBox.globalToLocal(globalPosition);
   }
@@ -127,6 +127,7 @@ class CoordinateSystemService implements ICoordinateService {
     );
   }
 
+  @override
   Offset gridToLocal(GridPosition gridPosition, CoordinateContext context) {
     return gridToLocalFromOffset(gridPosition.toOffset(), context);
   }
@@ -153,13 +154,25 @@ class CoordinateSystemService implements ICoordinateService {
   }
 
   @override
-  GridPosition? screenToGrid(Offset screenPosition, CoordinateContext context, RenderBox renderBox) {
+  GridPosition? screenToGrid(Offset screenPosition, CoordinateContext context, {RenderBox? renderBox}) {
     final cacheKey = '${screenPosition.dx}_${screenPosition.dy}_${context.hashCode}';
     if (_cache.containsKey(cacheKey)) return _cache[cacheKey] as GridPosition?;
 
     try {
-      final local = globalToLocal(screenPosition, renderBox);
-      final position = localToGridPosition(local, context);
+      // 🔧 FIX: Delegate to UnifiedCoordinateService to eliminate duplicate logic
+      final unifiedService = UnifiedCoordinateService();
+      final config = GridConfiguration.fromCanvas(
+        rows: context.gridDimensions.height.toInt(),
+        cols: context.gridDimensions.width.toInt(),
+        cellSize: context.cellSize,
+        scale: context.scale,
+        panOffset: context.panOffset,
+      );
+
+      final gridOffset = unifiedService.screenToGrid(screenPosition, config, renderBox: renderBox);
+
+      // Convert Offset to GridPosition for backward compatibility
+      final position = GridPosition.fromOffset(gridOffset);
       _cache[cacheKey] = position;
       return position;
     } catch (e) {
@@ -171,8 +184,8 @@ class CoordinateSystemService implements ICoordinateService {
   @override
   CoordinateValidationResult validateDropPosition(
     Offset screenPosition,
-    CoordinateContext context,
-    RenderBox renderBox, {
+    CoordinateContext context, {
+    RenderBox? renderBox,
     Set<GridPosition>? occupiedPositions,
     bool requireEmptyCell = true,
   }) {
@@ -194,12 +207,10 @@ class CoordinateSystemService implements ICoordinateService {
       // 🛡️ SECURITY: Sanitize input position to prevent overflow attacks
       final sanitizedPosition = SecureCoordinateValidator.sanitizePosition(screenPosition);
 
-      final clampedPosition = Offset(
-        sanitizedPosition.dx.clamp(0, context.canvasSize.width),
-        sanitizedPosition.dy.clamp(0, context.canvasSize.height),
-      );
+      // Use sanitized position without clamping - let bounds validation handle out-of-bounds
+      final clampedPosition = sanitizedPosition;
 
-      final gridPosition = screenToGrid(clampedPosition, context, renderBox);
+      final gridPosition = screenToGrid(clampedPosition, context, renderBox: renderBox);
 
       if (gridPosition == null) {
         return CoordinateValidationResult.failure(
@@ -207,8 +218,14 @@ class CoordinateSystemService implements ICoordinateService {
         );
       }
 
-      // For edge cases, allow positions outside bounds but add warnings
+      // Strictly enforce bounds checking - reject out-of-bounds positions
       final isWithinBounds = gridPosition.isWithinBounds(context.gridDimensions);
+
+      if (!isWithinBounds) {
+        return CoordinateValidationResult.failure(
+          errorMessage: 'Drop position outside grid boundaries (row: ${gridPosition.row}, col: ${gridPosition.col}, grid: ${context.gridDimensions.height.toInt()}x${context.gridDimensions.width.toInt()})',
+        );
+      }
 
       final warnings = <String>[];
       final sanitizedOccupied = occupiedPositions?.where((pos) =>
@@ -216,13 +233,11 @@ class CoordinateSystemService implements ICoordinateService {
       ).toSet() ?? <GridPosition>{};
 
       if (requireEmptyCell && sanitizedOccupied.contains(gridPosition)) {
-        return CoordinateValidationResult.failure(errorMessage: 'Cell occupied');
+        return CoordinateValidationResult.failure(errorMessage: 'Grid position already occupied by another component');
       }
 
-      if (!isWithinBounds) {
-        warnings.add('Position outside grid bounds');
-      } else if (_isNearBoundary(gridPosition, context)) {
-        warnings.add('Near boundary - potential clipping');
+      if (_isNearBoundary(gridPosition, context)) {
+        warnings.add('Near grid boundary - may cause visual clipping');
       }
 
       return CoordinateValidationResult.success(
@@ -235,10 +250,6 @@ class CoordinateSystemService implements ICoordinateService {
     }
   }
 
-  bool _isWithinGridBounds(Offset gridOffset, Size gridDimensions) {
-    return gridOffset.dx >= 0 && gridOffset.dy >= 0 &&
-           gridOffset.dx < gridDimensions.width && gridOffset.dy < gridDimensions.height;
-  }
 
   bool _isNearBoundary(GridPosition position, CoordinateContext context) {
     const boundaryTolerance = 1;
@@ -249,15 +260,15 @@ class CoordinateSystemService implements ICoordinateService {
   /// Get snapped and validated grid position for component placement
   GridPosition? getSnappedValidPosition(
     Offset screenPosition,
-    CoordinateContext context,
-    RenderBox renderBox, {
+    CoordinateContext context, {
+    RenderBox? renderBox,
     Set<GridPosition>? occupiedPositions,
     bool requireEmptyCell = true,
   }) {
     final validation = validateDropPosition(
       screenPosition,
       context,
-      renderBox,
+      renderBox: renderBox,
       occupiedPositions: occupiedPositions,
       requireEmptyCell: requireEmptyCell,
     );

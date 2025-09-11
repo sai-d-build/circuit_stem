@@ -8,10 +8,37 @@ import '../../../core/utils/responsive_utils.dart';
 import '../../../core/utils/animation_utils.dart';
 import '../../../core/utils/error_utils.dart';
 import '../widgets/game_canvas.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart';
 import 'package:sparkcircuit/presentation/features/palette/widgets/horizontal_component_palette.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
+import 'package:sparkcircuit/presentation/state/palette_state.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
+
+// ✅ CLEAN ARCHITECTURE: Game Screen Service
+class GameScreenService {
+  final dynamic gameStateNotifier;
+  final dynamic paletteNotifier;
+
+  GameScreenService(this.gameStateNotifier, this.paletteNotifier);
+
+  void resetLevel() {
+    gameStateNotifier.resetLevel();
+  }
+
+  void resetPalette() {
+    paletteNotifier.reset();
+  }
+
+  Future<void> undo() async {
+    await gameStateNotifier.undo();
+  }
+}
+
+final gameScreenServiceProvider = Provider.family<GameScreenService, String>((ref, levelId) {
+  final gameStateNotifier = ref.watch(unifiedGameStateProvider.notifier);
+  final paletteNotifier = ref.watch(paletteStateProvider(levelId).notifier);
+  return GameScreenService(gameStateNotifier, paletteNotifier);
+});
 
 class GameScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -76,6 +103,7 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
     final levelIdStr = widget.levelId.toString();
     final isLandscape = context.isLandscape;
     final isMobile = context.isMobile;
+    final gameService = ref.watch(gameScreenServiceProvider(levelIdStr));
 
     StructuredLogger.info('Game screen building', context: {
       'levelId': levelIdStr,
@@ -86,14 +114,17 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
       },
     });
 
+    // Mark file as migrated to unified provider
+    MigrationTracker.markFileMigrated('lib/presentation/features/game/screens/game_screen.dart', DateTime.now().toIso8601String());
+
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.colorScheme.surface,
-      appBar: _buildResponsiveAppBar(context),
+      appBar: _buildResponsiveAppBar(context, gameService),
       body: _buildResponsiveBody(context, levelIdStr, isLandscape, isMobile),
     );
   }
 
-  PreferredSizeWidget _buildResponsiveAppBar(BuildContext context) {
+  PreferredSizeWidget _buildResponsiveAppBar(BuildContext context, GameScreenService gameService) {
     final isMobile = context.isMobile;
     final appBarHeight = isMobile ? kToolbarHeight * 0.9 : kToolbarHeight;
 
@@ -125,10 +156,10 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
               try {
                 // Restart level functionality
                 _resetTimer();
-                ref.read(enhancedGameStateNotifierProvider.notifier).resetLevel();
+                gameService.resetLevel();
 
                 // Also reset palette inventory - this clears components AND replenishes inventory
-                await ref.read(paletteStateProvider(widget.levelId).notifier).reset();
+                gameService.resetPalette();
 
                 StructuredLogger.info('🌀 ===== RESET OPERATION COMPLETED SUCCESSFULLY =====');
 
@@ -163,8 +194,8 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
                 Icons.undo,
                 size: context.responsiveIconSize(24),
               ),
-              onPressed: () {
-                ref.read(enhancedGameStateNotifierProvider.notifier).undo();
+              onPressed: () async {
+                await gameService.undo();
               },
               tooltip: 'Undo',
             ),

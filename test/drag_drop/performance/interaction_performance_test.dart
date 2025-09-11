@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
@@ -27,7 +28,7 @@ void main() {
 
       for (int i = 0; i < 1000; i++) {
         final screenPos = Offset(100 + i % 900, 100 + i % 650);
-        final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+        final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
         expect(gridPos, isNotNull);
       }
 
@@ -63,7 +64,7 @@ void main() {
       // Perform 300 transformations (100 of each position)
       for (int i = 0; i < 100; i++) {
         for (final pos in repeatedPositions) {
-          final gridPos = coordinateService.screenToGrid(pos, context, mockRenderBox);
+          final gridPos = coordinateService.screenToGrid(pos, context, renderBox: mockRenderBox);
           expect(gridPos, isNotNull);
         }
       }
@@ -97,7 +98,7 @@ void main() {
         // Test 100 transformations at this scale
         for (int i = 0; i < 100; i++) {
           final screenPos = Offset(100 + i * 8, 100 + i * 6);
-          final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+          final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
           expect(gridPos, isNotNull);
         }
 
@@ -131,7 +132,7 @@ void main() {
       for (int row = 0; row < 50; row++) {
         for (int col = 0; col < 50; col++) {
           final screenPos = Offset(col * 20.0, row * 20.0);
-          final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+          final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
           expect(gridPos, isNotNull);
           expect(gridPos!.row, row);
           expect(gridPos.col, col);
@@ -172,7 +173,7 @@ void main() {
         final result = coordinateService.validateDropPosition(
           screenPos,
           context,
-          mockRenderBox,
+          renderBox: mockRenderBox,
           occupiedPositions: occupiedPositions,
         );
         expect(result, isNotNull);
@@ -204,7 +205,7 @@ void main() {
       for (int x = -50; x < 600; x += 25) {
         for (int y = -50; y < 600; y += 25) {
           final screenPos = Offset(x.toDouble(), y.toDouble());
-          final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+          coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
           // Grid position can be null for out-of-bounds positions
         }
       }
@@ -232,7 +233,7 @@ void main() {
       // Fill cache with transformations
       for (int i = 0; i < 100; i++) {
         final screenPos = Offset(100 + i * 8, 100 + i * 5);
-        coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+        coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
       }
 
       final stopwatch = Stopwatch()..start();
@@ -242,7 +243,7 @@ void main() {
 
       for (int i = 0; i < 100; i++) {
         final screenPos = Offset(200 + i * 8, 200 + i * 5);
-        final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+        final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
         expect(gridPos, isNotNull);
       }
 

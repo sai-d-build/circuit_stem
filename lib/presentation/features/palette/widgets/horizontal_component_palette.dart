@@ -1,12 +1,130 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
+import 'package:sparkcircuit/presentation/state/palette_state.dart' as palette_state;
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/application/providers/core_providers.dart';
+import 'package:sparkcircuit/presentation/helpers/central_interaction_helper.dart';
+
+// Performance optimization: Cached component filtering service
+class OptimizedComponentFilter {
+  static final Map<String, _FilterCache> _cache = {};
+
+  static List<palette_state.ComponentDefinition> getFilteredComponents(
+    String levelId,
+    List<palette_state.ComponentDefinition> availableComponents,
+    Map<String, palette_state.ComponentInventory> inventory,
+    String searchQuery,
+    Set<String> activeFilters,
+  ) {
+    final cacheKey = _generateCacheKey(levelId, availableComponents, inventory, searchQuery, activeFilters);
+
+    // Check cache first
+    if (_cache.containsKey(cacheKey)) {
+      final cached = _cache[cacheKey]!;
+      if (!cached.isExpired) {
+        return cached.result;
+      }
+    }
+
+    // Perform filtering
+    final result = _performFiltering(availableComponents, inventory, searchQuery, activeFilters);
+
+    // Cache result
+    _cache[cacheKey] = _FilterCache(result);
+
+    // Clean up old cache entries (keep last 10)
+    if (_cache.length > 10) {
+      final keysToRemove = _cache.keys.take(_cache.length - 10).toList();
+      for (final key in keysToRemove) {
+        _cache.remove(key);
+      }
+    }
+
+    return result;
+  }
+
+  static String _generateCacheKey(
+    String levelId,
+    List<palette_state.ComponentDefinition> availableComponents,
+    Map<String, palette_state.ComponentInventory> inventory,
+    String searchQuery,
+    Set<String> activeFilters,
+  ) {
+    // Generate a stable cache key based on relevant data
+    final componentsHash = availableComponents.map((c) => '${c.type}:${c.isUnlocked}').join(',');
+    final inventoryHash = inventory.entries.map((e) => '${e.key}:${e.value.available}:${e.value.canUse}').join(',');
+    final filtersHash = activeFilters.join(',');
+    return '$levelId|$componentsHash|$inventoryHash|$searchQuery|$filtersHash';
+  }
+
+  static List<palette_state.ComponentDefinition> _performFiltering(
+    List<palette_state.ComponentDefinition> availableComponents,
+    Map<String, palette_state.ComponentInventory> inventory,
+    String searchQuery,
+    Set<String> activeFilters,
+  ) {
+    return availableComponents.where((component) {
+      // Unlock filter
+      if (!component.isUnlocked) return false;
+
+      // Inventory filter
+      final componentInventory = inventory[component.type];
+      if (componentInventory == null || !componentInventory.canUse) return false;
+
+      // Search filter
+      if (searchQuery.isNotEmpty) {
+        final query = searchQuery.toLowerCase();
+        if (!component.name.toLowerCase().contains(query) &&
+            !component.type.toLowerCase().contains(query)) {
+          return false;
+        }
+      }
+
+      // Active filters
+      if (activeFilters.isNotEmpty) {
+        // Apply any active filters (basic implementation)
+        for (final filter in activeFilters) {
+          if (!component.type.contains(filter)) return false;
+        }
+      }
+
+      return true;
+    }).toList();
+  }
+}
+
+class _FilterCache {
+  final List<palette_state.ComponentDefinition> result;
+  final DateTime _createdAt;
+
+  _FilterCache(this.result) : _createdAt = DateTime.now();
+
+  bool get isExpired => DateTime.now().difference(_createdAt).inSeconds > 5; // 5 second cache
+}
+
+// ✅ CLEAN ARCHITECTURE: Reuse Palette Service
+class PaletteService {
+  final dynamic paletteNotifier;
+
+  PaletteService(this.paletteNotifier);
+
+  void updateSearchQuery(String query) => paletteNotifier.updateSearchQuery(query);
+  void clearSearch() => paletteNotifier.clearSearch();
+  void addFilter(String filter) => paletteNotifier.addFilter(filter);
+  void removeFilter(String filter) => paletteNotifier.removeFilter(filter);
+  void clearFilters() => paletteNotifier.clearFilters();
+  bool canUseComponent(String componentType) => paletteNotifier.canUseComponent(componentType);
+  void selectComponent(String componentType) => paletteNotifier.selectComponent(componentType);
+  void startPlacingComponent(String componentType) => paletteNotifier.startPlacingComponent(componentType);
+}
+
+final paletteServiceProvider = Provider.family<PaletteService, String>((ref, levelId) {
+  final paletteNotifier = ref.watch(palette_state.paletteStateProvider(levelId).notifier);
+  return PaletteService(paletteNotifier);
+});
 
 class HorizontalComponentPalette extends ConsumerWidget {
   final String levelId;
@@ -18,73 +136,26 @@ class HorizontalComponentPalette extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    print('🎨 HORIZONTAL PALETTE BUILD CALLED for level: $levelId');
-    final paletteState = ref.watch(paletteStateProvider(levelId));
-    final paletteNotifier = ref.read(paletteStateProvider(levelId).notifier);
-
-    // Add comprehensive debug logging for palette state
-    StructuredLogger.info('🎨 ===== PALETTE STATE ANALYSIS =====', context: {
+    StructuredLogger.debug('🎨 HORIZONTAL PALETTE BUILD CALLED for level: $levelId', context: {
       'levelId': levelId,
-      'availableComponentsCount': paletteState.availableComponents.length,
-      'filteredComponentsCount': paletteState.filteredComponents.length,
-      'inventoryCount': paletteState.inventory.length,
-      'inventoryItems': paletteState.inventory.keys.toList(),
-      'selectedComponentType': paletteState.selectedComponentType,
-      'isPlacingComponent': paletteState.isPlacingComponent,
-      'placingComponentType': paletteState.placingComponentType,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
+    final paletteState = ref.watch(palette_state.paletteStateProvider(levelId));
+    final paletteService = ref.watch(paletteServiceProvider(levelId));
+    // Note: paletteNotifier variable removed - using helper methods instead
 
-    // Add simple debug prints for immediate visibility
-    print('🎨 PALETTE DEBUG: Available components: ${paletteState.availableComponents.length}');
-    print('🎨 PALETTE DEBUG: Filtered components: ${paletteState.filteredComponents.length}');
-    print('🎨 PALETTE DEBUG: Inventory items: ${paletteState.inventory.keys.toList()}');
-    print('🎨 PALETTE DEBUG: Available component types: ${paletteState.availableComponents.map((c) => c.type).toList()}');
-    print('🎨 PALETTE DEBUG: Filtered component types: ${paletteState.filteredComponents.map((c) => c.type).toList()}');
-
-    // Log detailed component availability
-    StructuredLogger.info('🎨 ===== COMPONENT AVAILABILITY =====', context: {
-      'levelId': levelId,
-      'totalComponentsInLevel': paletteState.inventory.values.fold(0, (sum, inv) => sum + inv.total),
-      'availableComponentsInLevel': paletteState.inventory.values.fold(0, (sum, inv) => sum + inv.available),
-      'usedComponentsInLevel': paletteState.inventory.values.fold(0, (sum, inv) => sum + inv.used),
-      'componentDetails': paletteState.inventory.entries.map((entry) {
-        final type = entry.key;
-        final inv = entry.value;
-        return {
-          'type': type,
-          'available': inv.available,
-          'total': inv.total,
-          'used': inv.used,
-          'canUse': inv.canUse,
-          'isExhausted': inv.isExhausted,
-          'usagePercentage': inv.usagePercentage,
-        };
-      }).toList(),
-    });
-
-    if (paletteState.filteredComponents.isEmpty) {
-      StructuredLogger.warning('No filtered components available', context: {
+    // Performance optimization: Minimize logging in hot paths
+    // Only log essential information and reduce frequency
+    if (paletteState.filteredComponents.isEmpty && paletteState.availableComponents.isNotEmpty) {
+      StructuredLogger.warning('🎨 No filtered components available', context: {
         'levelId': levelId,
         'availableComponentsCount': paletteState.availableComponents.length,
         'inventoryCount': paletteState.inventory.length,
       });
-    } else {
-      StructuredLogger.trace('Filtered components details', context: {
-        'levelId': levelId,
-        'filteredComponents': paletteState.filteredComponents.map((c) {
-          final inventory = paletteState.inventory[c.type];
-          final canUse = inventory?.canUse ?? false;
-          return {
-            'name': c.name,
-            'type': c.type,
-            'cost': c.cost,
-            'unlocked': c.isUnlocked,
-            'canUse': canUse,
-            'available': inventory?.available ?? 0,
-          };
-        }).toList(),
-      });
     }
+
+    // Performance optimization: Remove redundant filtering operations
+    // The filteredComponents getter already handles all filtering logic
 
     return Container(
       height: _paletteHeight,
@@ -94,7 +165,7 @@ class HorizontalComponentPalette extends ConsumerWidget {
           // Instruction text with component counts
           Consumer(
             builder: (context, ref, child) {
-              final paletteState = ref.watch(paletteStateProvider(levelId));
+              final paletteState = ref.watch(palette_state.paletteStateProvider(levelId));
               final totalComponents = paletteState.inventory.values.fold<int>(
                 0,
                 (sum, inventory) => sum + inventory.total,
@@ -156,69 +227,24 @@ class HorizontalComponentPalette extends ConsumerWidget {
               itemCount: paletteState.filteredComponents.length,
               itemBuilder: (context, index) {
                 final componentDefinition = paletteState.filteredComponents[index];
-                print('🎨 BUILDING COMPONENT CHIP at index $index for ${componentDefinition.name} (${componentDefinition.type})');
                 final isSelected = paletteState.selectedComponentType == componentDefinition.type;
                 final dragData = ComponentDragData.fromPaletteComponentDefinition(componentDefinition);
 
-                StructuredLogger.trace('Building draggable component', context: {
-                  'componentName': componentDefinition.name,
-                  'componentType': componentDefinition.type,
-                  'levelId': levelId,
-                });
-
-                // Enhanced logging for component building
+                // Performance optimization: Minimize logging in hot paths
                 final inventory = paletteState.inventory[componentDefinition.type];
                 final canUse = inventory?.canUse ?? false;
                 final isExhausted = inventory?.isExhausted ?? false;
-
-                StructuredLogger.debug('Component draggability analysis', context: {
-                  'componentName': componentDefinition.name,
-                  'componentType': componentDefinition.type,
-                  'isSelected': isSelected,
-                  'canUse': canUse,
-                  'isExhausted': isExhausted,
-                  'availableCount': inventory?.available ?? 0,
-                  'willBeDraggable': isSelected && canUse && !isExhausted,
-                  'levelId': levelId,
-                });
-
-                 // 🔧 RCA: Add detailed debugging for draggability logic
-                 if (!isSelected) {
-                   StructuredLogger.debug('Component not draggable - not selected', context: {
-                     'componentName': componentDefinition.name,
-                     'componentType': componentDefinition.type,
-                     'levelId': levelId,
-                   });
-                 } else if (!canUse) {
-                   StructuredLogger.warning('Component not draggable - inventory issue', context: {
-                     'componentName': componentDefinition.name,
-                     'componentType': componentDefinition.type,
-                     'available': inventory?.available ?? 0,
-                     'levelId': levelId,
-                   });
-                 } else if (isExhausted) {
-                   StructuredLogger.debug('Component not draggable - exhausted', context: {
-                     'componentName': componentDefinition.name,
-                     'componentType': componentDefinition.type,
-                     'levelId': levelId,
-                   });
-                 } else {
-                   StructuredLogger.debug('Component should be draggable - all conditions met', context: {
-                     'componentName': componentDefinition.name,
-                     'componentType': componentDefinition.type,
-                     'levelId': levelId,
-                   });
-                 }
-
-                // 🔧 DEBUG: Detailed draggability analysis
                 final shouldBeDraggable = isSelected && canUse && !isExhausted;
-                print('🎨 DRAGGABILITY CHECK for ${componentDefinition.name}:');
-                print('🎨   - isSelected: $isSelected');
-                print('🎨   - canUse: $canUse');
-                print('🎨   - isExhausted: $isExhausted');
-                print('🎨   - available: ${inventory?.available ?? 0}');
-                print('🎨   - total: ${inventory?.total ?? 0}');
-                print('🎨   - shouldBeDraggable: $shouldBeDraggable');
+
+                // Only log warnings for problematic states, not every component
+                if (!canUse && inventory != null && inventory.available > 0) {
+                  StructuredLogger.debug('Component not draggable - inventory issue', context: {
+                    'componentName': componentDefinition.name,
+                    'componentType': componentDefinition.type,
+                    'available': inventory.available,
+                    'levelId': levelId,
+                  });
+                }
 
                 return Padding(
                   padding: const EdgeInsets.all(_chipPadding),
@@ -247,77 +273,17 @@ class HorizontalComponentPalette extends ConsumerWidget {
                             ),
                           ),
                           onDragStarted: () {
-                            print('🎯 ===== DRAG STARTED ===== for ${componentDefinition.name}');
-                            // Simple, clear inventory logging that user expects
-                            StructuredLogger.info('🎯 ===== DRAG STARTED =====', context: {
+                            // Performance optimization: Consolidate drag start logging
+                            StructuredLogger.info('🎯 DRAG STARTED', context: {
                               'component': componentDefinition.name,
                               'type': componentDefinition.type.toString(),
-                              'levelId': levelId,
-                            });
-
-                            // Explicit inventory state logging
-                            StructuredLogger.info('🎯 DRAG START - INVENTORY STATE', context: {
-                              'componentType': componentDefinition.type,
-                              'availableBeforeDrag': inventory?.available ?? 0,
-                              'total': inventory?.total ?? 0,
-                              'usedBeforeDrag': inventory?.used ?? 0,
-                              'canUse': inventory?.canUse ?? false,
-                              'levelId': levelId,
-                            });
-
-                            // Log overall level inventory
-                            final totalAvailable = paletteState.inventory.values.fold<int>(
-                              0, (sum, inv) => sum + inv.available);
-                            final totalUsed = paletteState.inventory.values.fold<int>(
-                              0, (sum, inv) => sum + inv.used);
-
-                            StructuredLogger.info('🎯 DRAG START - LEVEL INVENTORY SUMMARY', context: {
-                              'totalAvailable': totalAvailable,
-                              'totalUsed': totalUsed,
-                              'totalCapacity': paletteState.inventory.values.fold(0, (sum, inv) => sum + inv.total),
-                              'componentBreakdown': paletteState.inventory.entries.map((e) =>
-                                '${e.key}: ${e.value.available}/${e.value.total} (${e.value.used} used)').toList(),
-                              'levelId': levelId,
-                            });
-
-                            // More detailed logging
-                            StructuredLogger.info('🎯 DRAG START DETAILS', context: {
-                              'component': componentDefinition.name,
-                              'type': componentDefinition.type.toString(),
-                              'dragDataType': dragData.componentType.toString(),
-                              'dragDataName': dragData.componentName,
-                              'cost': dragData.cost,
-                              'availableInInventory': paletteState.canUseComponent(componentDefinition.type),
-                              'inventoryAvailable': inventory?.available,
-                              'inventoryTotal': inventory?.total,
-                              'inventoryUsed': inventory?.used,
-                              'totalComponentsInPalette': paletteState.filteredComponents.length,
-                              'levelId': levelId,
-                              'timestamp': DateTime.now().millisecondsSinceEpoch,
-                            });
-
-                            // Log current game state
-                            final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
-                            StructuredLogger.info('🎯 DRAG START - GAME STATE', context: {
-                              'gridComponentsCount': gameState.grid.components.length,
-                              'gridWidth': gameState.grid.cols,
-                              'gridHeight': gameState.grid.rows,
-                              'placedComponents': gameState.grid.components.values.map((c) => {
-                                'id': c.id,
-                                'type': c.type.toString(),
-                                'position': '${c.row},${c.col}',
-                              }).toList(),
+                              'available': inventory?.available ?? 0,
                               'levelId': levelId,
                             });
 
                             // Auto-select component when dragging starts
                             if (!isSelected) {
-                              StructuredLogger.info('🎯 AUTO-SELECTING COMPONENT', context: {
-                                'component': componentDefinition.name,
-                                'wasSelected': isSelected,
-                                'levelId': levelId,
-                              });
-                              paletteNotifier.selectComponent(componentDefinition.type);
+                              paletteService.selectComponent(componentDefinition.type);
                             }
 
                             ref.read(paletteDragActiveProvider.notifier).state = true;
@@ -331,76 +297,37 @@ class HorizontalComponentPalette extends ConsumerWidget {
                                 backgroundColor: Colors.green,
                               ),
                             );
-
-                            StructuredLogger.info('🎯 DRAG START COMPLETED', context: {
-                              'component': componentDefinition.name,
-                              'dragActive': true,
-                              'levelId': levelId,
-                            });
                           },
                           onDraggableCanceled: (velocity, offset) {
-                            StructuredLogger.warning('Component drag cancelled', context: {
-                              'componentName': componentDefinition.name,
-                              'componentType': componentDefinition.type,
-                              'velocity': velocity.toString(),
-                              'offset': offset.toString(),
+                            // Performance optimization: Minimal logging for cancelled drags
+                            StructuredLogger.debug('Component drag cancelled', context: {
+                              'component': componentDefinition.name,
                               'levelId': levelId,
                             });
-
                             ref.read(paletteDragActiveProvider.notifier).state = false;
                           },
                           onDragEnd: (details) {
-                            StructuredLogger.info('Component drag completed', context: {
-                              'componentName': componentDefinition.name,
-                              'componentType': componentDefinition.type,
-                              'wasAccepted': details.wasAccepted,
-                              'velocity': details.velocity.toString(),
-                              'offset': details.offset.toString(),
-                              'levelId': levelId,
-                            });
-
+                            // Performance optimization: Only log important drag outcomes
                             if (details.wasAccepted) {
-                              StructuredLogger.info('Component drag accepted by canvas', context: {
-                                'componentName': componentDefinition.name,
-                                'componentType': componentDefinition.type,
+                              StructuredLogger.info('Component drag accepted', context: {
+                                'component': componentDefinition.name,
                                 'levelId': levelId,
                               });
                             } else {
-                              StructuredLogger.warning('Component drag rejected by canvas', context: {
-                                'componentName': componentDefinition.name,
-                                'componentType': componentDefinition.type,
+                              StructuredLogger.debug('Component drag rejected', context: {
+                                'component': componentDefinition.name,
                                 'levelId': levelId,
                               });
                             }
-
-                            // Reset drag state
                             ref.read(paletteDragActiveProvider.notifier).state = false;
                           },
                           child: GestureDetector(
                             onTap: () {
-                              print('🎨 COMPONENT TAPPED: ${componentDefinition.name} (was selected: $isSelected)');
-                              StructuredLogger.info('Component tap detected', context: {
-                                'componentName': componentDefinition.name,
-                                'componentType': componentDefinition.type,
-                                'wasSelected': isSelected,
-                                'levelId': levelId,
-                              });
-
-                              // If already selected, start placement mode
+                              // Performance optimization: Minimal logging for tap events
                               if (isSelected) {
-                                StructuredLogger.info('Starting placement mode for component', context: {
-                                  'componentName': componentDefinition.name,
-                                  'componentType': componentDefinition.type,
-                                  'levelId': levelId,
-                                });
-                                paletteNotifier.startPlacingComponent(componentDefinition.type);
+                                paletteService.startPlacingComponent(componentDefinition.type);
                               } else {
-                                StructuredLogger.info('Selecting component for dragging', context: {
-                                  'componentName': componentDefinition.name,
-                                  'componentType': componentDefinition.type,
-                                  'levelId': levelId,
-                                });
-                                paletteNotifier.selectComponent(componentDefinition.type);
+                                paletteService.selectComponent(componentDefinition.type);
                               }
                             },
                             child: _buildChip(
@@ -416,16 +343,8 @@ class HorizontalComponentPalette extends ConsumerWidget {
                         )
                       : GestureDetector(
                         onTap: () {
-                          print('🎨 NON-DRAGGABLE COMPONENT TAPPED: ${componentDefinition.name} (reason: selected=$isSelected, canUse=$canUse, exhausted=$isExhausted)');
-                          StructuredLogger.info('Non-draggable component tap detected', context: {
-                            'componentName': componentDefinition.name,
-                            'componentType': componentDefinition.type,
-                            'isSelected': isSelected,
-                            'canUse': canUse,
-                            'isExhausted': isExhausted,
-                            'levelId': levelId,
-                          });
-                          paletteNotifier.selectComponent(componentDefinition.type);
+                          // Performance optimization: Minimal logging for non-draggable taps
+                          paletteService.selectComponent(componentDefinition.type);
                         },
                           child: _buildChip(
                             componentDefinition.name,
@@ -452,13 +371,13 @@ class HorizontalComponentPalette extends ConsumerWidget {
 
     // Enhanced tooltip with inventory info
     final tooltipMessage = isDraggable
-        ? 'DRAGGABLE: $name (${available}/${total} available) - Drag onto grid'
+        ? 'DRAGGABLE: $name ($available/$total available) - Drag onto grid'
         : !isSelected
-            ? 'Tap to select $name (${available}/${total} available)'
+            ? 'Tap to select $name ($available/$total available)'
             : !canUse
-                ? 'NOT AVAILABLE: $name (${available}/${total} available)'
+                ? 'NOT AVAILABLE: $name ($available/$total available)'
                 : available == 0
-                    ? 'EXHAUSTED: $name (0/${total} available)'
+                    ? 'EXHAUSTED: $name (0/$total available)'
                     : 'Tap again to enter placement mode for $name';
 
     return Tooltip(
@@ -512,7 +431,7 @@ class HorizontalComponentPalette extends ConsumerWidget {
                   ),
                 ),
                 child: Text(
-                  '${available}/${total}',
+                  '$available/$total',
                   style: TextStyle(
                     fontSize: 10,
                     color: available == 0 ? Colors.red[800] : Colors.black,

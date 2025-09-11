@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
-import 'package:sparkcircuit/application/states/game_state.dart';
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
+import 'package:sparkcircuit/application/providers/core_providers.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
+import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_component_widget.dart';
 
@@ -19,11 +21,33 @@ class CanvasComponentLayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(providers_v3.enhancedGameStateNotifierProvider);
+    MigrationTracker.markFileMigrated('canvas_component_layer.dart', DateTime.now().toIso8601String());
+    final gameState = ref.watch(unifiedGameStateProvider);
+    final canvasState = ref.watch(gameCanvasOrchestratorProvider(levelId));
+    final viewportState = canvasState.viewportState;
+
+    // Create unified GridConfiguration with scale and panOffset
+    final unifiedGridConfig = GridConfiguration(
+      rows: viewportState.gridConfiguration.rows,
+      cols: viewportState.gridConfiguration.cols,
+      cellSize: viewportState.gridConfiguration.cellSize,
+      scale: viewportState.scale,
+      panOffset: viewportState.panOffset,
+    );
 
     return Stack(
       children: gameState.grid.components.values.map((component) {
-        return CircuitComponentWidget(component: component);
+        // Calculate screen position for the component
+        final screenPos = ComponentRenderingUtils.getComponentScreenPosition(component, unifiedGridConfig);
+
+        return Positioned(
+          left: screenPos.dx - 30, // Center the 60x60 component
+          top: screenPos.dy - 30,
+          child: CircuitComponentWidget(
+            component: component,
+            levelId: levelId,
+          ),
+        );
       }).toList(),
     );
   }

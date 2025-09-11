@@ -10,6 +10,28 @@ import 'package:sparkcircuit/presentation/ui_components/neon_switch.dart';
 import 'package:sparkcircuit/presentation/ui_components/neon_slider.dart';
 import 'package:sparkcircuit/presentation/ui_components/neon_dropdown.dart';
 
+// ✅ CLEAN ARCHITECTURE: Settings Service
+class SettingsService {
+  final dynamic storageService;
+  final dynamic audioManager;
+
+  SettingsService(this.storageService, this.audioManager);
+
+  // Storage operations
+  T? readData<T>(String key) => storageService.readData<T>(key);
+  Future<void> saveData<T>(String key, T value) => storageService.saveData<T>(key, value);
+
+  // Audio operations
+  void setSfxVolume(double volume) => audioManager.setSfxVolume(volume);
+  void setBgmVolume(double volume) => audioManager.setBgmVolume(volume);
+}
+
+final settingsServiceProvider = Provider<SettingsService>((ref) {
+  final storageService = ref.watch(storageServiceProvider);
+  final audioManager = ref.watch(audioManagerProvider);
+  return SettingsService(storageService, audioManager);
+});
+
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
@@ -28,15 +50,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAudioSettings();
+    // _loadAudioSettings will be called in build when service is available
   }
 
-  Future<void> _loadAudioSettings() async {
-    final storageService = ref.read(storageServiceProvider);
-    final soundEnabled = storageService.readData<bool>('sound_enabled') ?? true;
-    final musicEnabled = storageService.readData<bool>('music_enabled') ?? true;
-    final soundVolume = storageService.readData<double>('sound_volume') ?? 1.0;
-    final musicVolume = storageService.readData<double>('music_volume') ?? 0.5;
+  Future<void> _loadAudioSettings(SettingsService settingsService) async {
+    final soundEnabled = settingsService.readData<bool>('sound_enabled') ?? true;
+    final musicEnabled = settingsService.readData<bool>('music_enabled') ?? true;
+    final soundVolume = settingsService.readData<double>('sound_volume') ?? 1.0;
+    final musicVolume = settingsService.readData<double>('music_volume') ?? 0.5;
 
     setState(() {
       _soundEnabled = soundEnabled;
@@ -46,34 +67,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
 
     // Apply settings to AudioManager
-    final audioManager = ref.read(audioManagerProvider);
-    audioManager.setSfxVolume(soundEnabled ? soundVolume : 0.0);
-    audioManager.setBgmVolume(musicEnabled ? musicVolume : 0.0);
+    settingsService.setSfxVolume(soundEnabled ? soundVolume : 0.0);
+    settingsService.setBgmVolume(musicEnabled ? musicVolume : 0.0);
   }
 
-  Future<void> _saveAudioSettings() async {
-    final storageService = ref.read(storageServiceProvider);
-    await storageService.saveData<bool>('sound_enabled', _soundEnabled);
-    await storageService.saveData<bool>('music_enabled', _musicEnabled);
-    await storageService.saveData<double>('sound_volume', _soundVolume);
-    await storageService.saveData<double>('music_volume', _musicVolume);
+  Future<void> _saveAudioSettings(SettingsService settingsService) async {
+    await settingsService.saveData<bool>('sound_enabled', _soundEnabled);
+    await settingsService.saveData<bool>('music_enabled', _musicEnabled);
+    await settingsService.saveData<double>('sound_volume', _soundVolume);
+    await settingsService.saveData<double>('music_volume', _musicVolume);
   }
 
-  Future<void> _resetProgress() async {
-    final storageService = ref.read(storageServiceProvider);
-
+  Future<void> _resetProgress(SettingsService settingsService) async {
     // Clear all progress-related data
-    await storageService.saveData('completed_levels', <String>[]);
-    await storageService.saveData('player_progress', {});
-    await storageService.saveData('level_scores', {});
-    await storageService.saveData('hints_used', {});
-    await storageService.saveData('time_spent', {});
+    await settingsService.saveData('completed_levels', <String>[]);
+    await settingsService.saveData('player_progress', {});
+    await settingsService.saveData('level_scores', {});
+    await settingsService.saveData('hints_used', {});
+    await settingsService.saveData('time_spent', {});
 
     // Reset settings to defaults
-    await storageService.saveData<bool>('sound_enabled', true);
-    await storageService.saveData<bool>('music_enabled', true);
-    await storageService.saveData<double>('sound_volume', 1.0);
-    await storageService.saveData<double>('music_volume', 0.5);
+    await settingsService.saveData<bool>('sound_enabled', true);
+    await settingsService.saveData<bool>('music_enabled', true);
+    await settingsService.saveData<double>('sound_volume', 1.0);
+    await settingsService.saveData<double>('music_volume', 0.5);
 
     // Update local state
     setState(() {
@@ -86,13 +103,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
 
     // Apply default audio settings
-    final audioManager = ref.read(audioManagerProvider);
-    audioManager.setSfxVolume(1.0);
-    audioManager.setBgmVolume(0.5);
+    settingsService.setSfxVolume(1.0);
+    settingsService.setBgmVolume(0.5);
   }
 
   @override
   Widget build(BuildContext context) {
+    final settingsService = ref.watch(settingsServiceProvider);
+
+    // Load audio settings on first build
+    if (_soundEnabled == true && _musicEnabled == true && _soundVolume == 1.0 && _musicVolume == 0.5) {
+      // This is likely the first build, load settings
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadAudioSettings(settingsService);
+      });
+    }
+
     final colors = Theme.of(context).extension<CircuitColorScheme>() ?? const CircuitColorScheme(
       primary: Color(0xFF1E88E5),
       onPrimary: Color(0xFFFFFFFF),
@@ -155,9 +181,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _soundEnabled,
             (value) {
               setState(() => _soundEnabled = value);
-              final audioManager = ref.read(audioManagerProvider);
-              audioManager.setSfxVolume(value ? 1.0 : 0.0);
-              _saveAudioSettings();
+              settingsService.setSfxVolume(value ? 1.0 : 0.0);
+              _saveAudioSettings(settingsService);
             },
             colors,
             textTheme,
@@ -167,9 +192,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _musicEnabled,
             (value) {
               setState(() => _musicEnabled = value);
-              final audioManager = ref.read(audioManagerProvider);
-              audioManager.setBgmVolume(value ? _musicVolume : 0.0);
-              _saveAudioSettings();
+              settingsService.setBgmVolume(value ? _musicVolume : 0.0);
+              _saveAudioSettings(settingsService);
             },
             colors,
             textTheme,
@@ -185,9 +209,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 divisions: 10,
                 onChanged: (value) {
                   setState(() => _soundVolume = value);
-                  final audioManager = ref.read(audioManagerProvider);
-                  audioManager.setSfxVolume(_soundEnabled ? value : 0.0);
-                  _saveAudioSettings();
+                  settingsService.setSfxVolume(_soundEnabled ? value : 0.0);
+                  _saveAudioSettings(settingsService);
                 },
               ),
             ),
@@ -202,9 +225,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 divisions: 10,
                 onChanged: (value) {
                   setState(() => _musicVolume = value);
-                  final audioManager = ref.read(audioManagerProvider);
-                  audioManager.setBgmVolume(_musicEnabled ? value : 0.0);
-                  _saveAudioSettings();
+                  settingsService.setBgmVolume(_musicEnabled ? value : 0.0);
+                  _saveAudioSettings(settingsService);
                 },
               ),
             ),
@@ -235,7 +257,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           ElevatedButton(
             onPressed: () {
-              _showResetDialog(colors, textTheme);
+              _showResetDialog(colors, textTheme, settingsService);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.errorGlow,
@@ -329,7 +351,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _showResetDialog(CircuitColorScheme colors, TextTheme textTheme) {
+  void _showResetDialog(CircuitColorScheme colors, TextTheme textTheme, SettingsService settingsService) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -346,7 +368,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           TextButton(
             onPressed: () async {
-              await _resetProgress();
+              await _resetProgress(settingsService);
               if (context.mounted) {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(

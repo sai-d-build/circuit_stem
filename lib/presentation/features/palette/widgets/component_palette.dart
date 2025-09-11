@@ -5,6 +5,27 @@ import 'package:sparkcircuit/presentation/state/palette_state.dart';
 import 'package:sparkcircuit/presentation/features/palette/widgets/component_widget.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
+// ✅ CLEAN ARCHITECTURE: Palette Service
+class PaletteService {
+  final dynamic paletteNotifier;
+
+  PaletteService(this.paletteNotifier);
+
+  void updateSearchQuery(String query) => paletteNotifier.updateSearchQuery(query);
+  void clearSearch() => paletteNotifier.clearSearch();
+  void addFilter(String filter) => paletteNotifier.addFilter(filter);
+  void removeFilter(String filter) => paletteNotifier.removeFilter(filter);
+  void clearFilters() => paletteNotifier.clearFilters();
+  bool canUseComponent(String componentType) => paletteNotifier.canUseComponent(componentType);
+  void selectComponent(String componentType) => paletteNotifier.selectComponent(componentType);
+  void startPlacingComponent(String componentType) => paletteNotifier.startPlacingComponent(componentType);
+}
+
+final paletteServiceProvider = Provider.family<PaletteService, String>((ref, levelId) {
+  final paletteNotifier = ref.watch(paletteStateProvider(levelId).notifier);
+  return PaletteService(paletteNotifier);
+});
+
 class ComponentPalette extends ConsumerStatefulWidget {
   final String levelId;
 
@@ -51,6 +72,7 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>()!;
     final paletteState = ref.watch(paletteStateProvider(widget.levelId));
+    final paletteService = ref.watch(paletteServiceProvider(widget.levelId));
     
     return AnimatedBuilder(
       animation: _slideAnimation,
@@ -78,12 +100,12 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
             child: Column(
               children: [
                 _buildHeader(theme, circuitColors),
-                _buildSearchBar(theme, circuitColors),
-                _buildFilters(theme, circuitColors, paletteState),
+                _buildSearchBar(theme, circuitColors, paletteService),
+                _buildFilters(theme, circuitColors, paletteState, paletteService),
                 Expanded(
-                  child: _buildComponentList(theme, circuitColors, paletteState),
+                  child: _buildComponentList(theme, circuitColors, paletteState, paletteService),
                 ),
-                _buildFooter(theme, circuitColors, paletteState),
+                _buildFooter(theme, circuitColors, paletteState, paletteService),
               ],
             ),
           ),
@@ -136,13 +158,13 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     );
   }
 
-  Widget _buildSearchBar(ThemeData theme, CircuitColorScheme circuitColors) {
+  Widget _buildSearchBar(ThemeData theme, CircuitColorScheme circuitColors, PaletteService paletteService) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: TextField(
         controller: _searchController,
         onChanged: (value) {
-          ref.read(paletteStateProvider(widget.levelId).notifier).updateSearchQuery(value);
+          paletteService.updateSearchQuery(value);
         },
         decoration: InputDecoration(
           hintText: 'Search components...',
@@ -154,7 +176,7 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
               ? IconButton(
                   onPressed: () {
                     _searchController.clear();
-                    ref.read(paletteStateProvider(widget.levelId).notifier).clearSearch();
+                    paletteService.clearSearch();
                   },
                   icon: Icon(
                     Icons.clear,
@@ -178,6 +200,7 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     ThemeData theme,
     CircuitColorScheme circuitColors,
     PaletteState paletteState,
+    PaletteService paletteService,
   ) {
     final filters = ['Basic', 'Active', 'Passive', 'Power', 'Measurement'];
     
@@ -198,9 +221,9 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
               selected: isActive,
               onSelected: (selected) {
                 if (selected) {
-                  ref.read(paletteStateProvider(widget.levelId).notifier).addFilter(filter.toLowerCase());
+                  paletteService.addFilter(filter.toLowerCase());
                 } else {
-                  ref.read(paletteStateProvider(widget.levelId).notifier).removeFilter(filter.toLowerCase());
+                  paletteService.removeFilter(filter.toLowerCase());
                 }
               },
               backgroundColor: circuitColors.surface,
@@ -221,6 +244,7 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     ThemeData theme,
     CircuitColorScheme circuitColors,
     PaletteState paletteState,
+    PaletteService paletteService,
   ) {
     final filteredComponents = paletteState.filteredComponents;
     
@@ -267,8 +291,8 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
             component: component,
             inventory: inventory,
             isSelected: paletteState.selectedComponentType == component.type,
-            onTap: () => _selectComponent(component.type),
-            onDragStart: () => _startDrag(component.type),
+            onTap: () => _selectComponent(component.type, paletteService),
+            onDragStart: () => _startDrag(component.type, paletteService),
           ),
         );
       },
@@ -279,6 +303,7 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     ThemeData theme,
     CircuitColorScheme circuitColors,
     PaletteState paletteState,
+    PaletteService paletteService,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -304,8 +329,8 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
             TextButton(
               onPressed: () {
                 _searchController.clear();
-                ref.read(paletteStateProvider(widget.levelId).notifier).clearSearch();
-                ref.read(paletteStateProvider(widget.levelId).notifier).clearFilters();
+                paletteService.clearSearch();
+                paletteService.clearFilters();
               },
               child: const Text('Clear'),
             ),
@@ -314,22 +339,22 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     );
   }
 
-  void _selectComponent(String componentType) {
+  void _selectComponent(String componentType, PaletteService paletteService) {
     StructuredLogger.info('Component selection initiated', context: {
       'componentType': componentType,
       'levelId': widget.levelId,
     });
 
-    final paletteNotifier = ref.read(paletteStateProvider(widget.levelId).notifier);
+    final canUse = paletteService.canUseComponent(componentType);
 
-    if (paletteNotifier.canUseComponent(componentType)) {
+    if (canUse) {
       StructuredLogger.info('Component selection approved - starting placement mode', context: {
         'componentType': componentType,
         'action': 'selection_and_placement',
       });
 
-      paletteNotifier.selectComponent(componentType);
-      paletteNotifier.startPlacingComponent(componentType);
+      paletteService.selectComponent(componentType);
+      paletteService.startPlacingComponent(componentType);
 
       StructuredLogger.debug('Component selection complete', context: {
         'componentType': componentType,
@@ -350,7 +375,7 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     }
   }
 
-  void _startDrag(String componentType) {
-    ref.read(paletteStateProvider(widget.levelId).notifier).selectComponent(componentType);
+  void _startDrag(String componentType, PaletteService paletteService) {
+    paletteService.selectComponent(componentType);
   }
 }

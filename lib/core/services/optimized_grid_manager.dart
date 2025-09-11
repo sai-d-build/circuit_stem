@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
 import '../../../core/debug/structured_logger.dart';
 
 /// Optimized grid manager that replaces O(n) operations with O(1) Set-based lookups

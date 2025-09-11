@@ -42,7 +42,7 @@ class DefaultCanvasRenderingService implements CanvasRenderingService {
       for (final targetId in connectedIds) {
         if (sourceId.hashCode < targetId.hashCode) {
           wires.add(CircuitWire(
-            id: '${sourceId}_${targetId}',
+            id: '${sourceId}_$targetId',
             startRow: 0,
             startCol: 0,
             endRow: 0,

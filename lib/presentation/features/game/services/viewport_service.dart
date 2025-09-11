@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
+import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 
 part 'viewport_service.freezed.dart';
 
@@ -43,64 +43,24 @@ class ViewportService extends StateNotifier<ViewportState> {
     state = const ViewportState();
   }
 
-  /// Build CoordinateContext for integration with CoordinateSystemService
-  CoordinateContext buildCoordinateContext({
-    Size? gridDimensions,
-    double? devicePixelRatio,
-  }) {
-    return CoordinateContext(
-      gridDimensions: gridDimensions ?? state.gridConfiguration,
+
+  /// Calculate visible grid bounds for optimization
+  /// Calculate visible grid bounds for optimization
+  Rect getVisibleGridBounds() {
+    final gridConfig = GridConfiguration(
+      rows: state.gridConfiguration.height.toInt(),
+      cols: state.gridConfiguration.width.toInt(),
       cellSize: state.cellSize,
       scale: state.scale,
       panOffset: state.panOffset,
-      canvasSize: state.canvasSize,
-      devicePixelRatio: devicePixelRatio ?? 1.0,
     );
-  }
 
-  /// Calculate visible grid bounds for optimization
-  Rect getVisibleGridBounds() {
-    final context = buildCoordinateContext();
     final topLeft = const Offset(0, 0);
-    final bottomRight = state.canvasSize;
+    final bottomRight = Offset(state.canvasSize.width, state.canvasSize.height);
 
-    final topLeftGrid = CoordinateSystemService().screenToGrid(
-      topLeft,
-      context,
-      // This would need a RenderBox in real usage
-      _createMockRenderBox(),
-    );
+    final topLeftGrid = UnifiedCoordinateService().screenToGrid(topLeft, gridConfig);
+    final bottomRightGrid = UnifiedCoordinateService().screenToGrid(bottomRight, gridConfig);
 
-    final bottomRightGrid = CoordinateSystemService().screenToGrid(
-      Offset(bottomRight.width, bottomRight.height),
-      context,
-      _createMockRenderBox(),
-    );
-
-    if (topLeftGrid != null && bottomRightGrid != null) {
-      return Rect.fromPoints(
-        topLeftGrid.toOffset(),
-        bottomRightGrid.toOffset(),
-      );
-    }
-
-    return Rect.zero;
+    return Rect.fromPoints(topLeftGrid, bottomRightGrid);
   }
-
-  RenderBox _createMockRenderBox() {
-    // Mock implementation for bounds calculation
-    return _MockRenderBox(size: state.canvasSize);
-  }
-}
-
-class _MockRenderBox extends RenderBox {
-  _MockRenderBox({required Size size}) {
-    this.size = size;
-  }
-
-  @override
-  bool get attached => true;
-
-  @override
-  Offset globalToLocal(Offset globalPosition, {RenderObject? ancestor}) => globalPosition;
 }

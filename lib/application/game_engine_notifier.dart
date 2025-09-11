@@ -12,9 +12,7 @@ import 'animation_scheduler.dart';
 import 'transaction.dart';
 import 'services/component_palette_manager.dart';
 
-// V2 Use Cases
 import 'use_cases/component_action.dart';
-import 'use_cases/providers.dart';
 
 // Middleware
 import 'middleware/middleware.dart';
@@ -24,11 +22,6 @@ import 'middleware/performance_middleware.dart';
 
 // Core
 import 'core/result.dart';
-import 'grid_notifier.dart';
-import 'history_notifier.dart';
-import 'game_progress_notifier.dart';
-import 'component_selection_notifier.dart';
-import 'interaction_state_notifier.dart';
 
 import 'use_cases/notifier_integrated_use_case.dart';
 
@@ -36,14 +29,48 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   final InputManager input;
   final AudioManager audio;
   final AnimationScheduler animationScheduler;
-  final Ref ref;
 
   final List<GameEngineMiddleware> _middleware;
+
+  // ✅ INJECTED: No longer using ref.read() - dependencies injected directly
+  final dynamic gridNotifier;
+  final dynamic historyNotifier;
+  final dynamic progressNotifier;
+  final dynamic selectionNotifier;
+  final dynamic interactionNotifier;
+  final dynamic paletteManager;
+
+  // ✅ INJECTED: Use case instances injected directly
+  final dynamic loadLevelUseCase;
+  final dynamic createComponentUseCase;
+  final dynamic rotateComponentUseCase;
+  final dynamic moveComponentUseCase;
+  final dynamic tapComponentUseCase;
+  final dynamic updateComponentUseCase;
+  final dynamic restartLevelUseCase;
+  final dynamic selectPaletteComponentUseCase;
+  final dynamic togglePauseUseCase;
+  final dynamic undoUseCase;
 
   GameEngineNotifier({
     required AudioService audioService,
     required this.animationScheduler,
-    required this.ref,
+    required this.gridNotifier,
+    required this.historyNotifier,
+    required this.progressNotifier,
+    required this.selectionNotifier,
+    required this.interactionNotifier,
+    required this.paletteManager,
+    required this.loadLevelUseCase,
+    required this.createComponentUseCase,
+    required this.rotateComponentUseCase,
+    required this.moveComponentUseCase,
+    required this.tapComponentUseCase,
+    required this.updateComponentUseCase,
+    required this.restartLevelUseCase,
+    required this.selectPaletteComponentUseCase,
+    required this.togglePauseUseCase,
+    required this.undoUseCase,
   })  : input = InputManager(),
         audio = AudioManager(),
         _middleware = [
@@ -60,6 +87,23 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
           paletteManager: const ComponentPaletteManager(availableTemplates: []),
         )) {
     _init();
+  }
+
+
+  Map<String, dynamic> _getUseCaseInstances() {
+    // ✅ RETURN: Map of injected use case instances
+    return {
+      '_loadLevelUseCase': loadLevelUseCase,
+      '_createComponentUseCase': createComponentUseCase,
+      '_rotateComponentUseCase': rotateComponentUseCase,
+      '_moveComponentUseCase': moveComponentUseCase,
+      '_tapComponentUseCase': tapComponentUseCase,
+      '_updateComponentUseCase': updateComponentUseCase,
+      '_restartLevelUseCase': restartLevelUseCase,
+      '_selectPaletteComponentUseCase': selectPaletteComponentUseCase,
+      '_togglePauseUseCase': togglePauseUseCase,
+      '_undoUseCase': undoUseCase,
+    };
   }
 
   void _init() {
@@ -114,27 +158,39 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
 
   Future<Result<void>> _executeUseCase(
       ComponentAction action, NotifierContext context, GameTransaction transaction) async {
+    // ✅ OPTIMIZED: Use injected use case instances
+    final useCases = _getUseCaseInstances();
     switch (action.runtimeType) {
       case LoadLevelAction _:
-        return ref.read(loadLevelUseCaseProvider).executeWithNotifiers(action as LoadLevelAction, context, transaction);
+        return useCases['_loadLevelUseCase']?.executeWithNotifiers(action as LoadLevelAction, context, transaction) ??
+               const Failure('Load level use case not available');
       case CreateComponentFromTemplateAction _:
-        return ref.read(createComponentUseCaseProvider).executeWithNotifiers(action as CreateComponentFromTemplateAction, context, transaction);
+        return useCases['_createComponentUseCase']?.executeWithNotifiers(action as CreateComponentFromTemplateAction, context, transaction) ??
+               const Failure('Create component use case not available');
       case RotateComponentAction _:
-        return ref.read(rotateComponentUseCaseProvider).executeWithNotifiers(action as RotateComponentAction, context, transaction);
+        return useCases['_rotateComponentUseCase']?.executeWithNotifiers(action as RotateComponentAction, context, transaction) ??
+               const Failure('Rotate component use case not available');
       case MoveComponentAction _:
-        return ref.read(moveComponentUseCaseProvider).executeWithNotifiers(action as MoveComponentAction, context, transaction);
+        return useCases['_moveComponentUseCase']?.executeWithNotifiers(action as MoveComponentAction, context, transaction) ??
+               const Failure('Move component use case not available');
       case TapComponentAction _:
-        return ref.read(tapComponentUseCaseProvider).executeWithNotifiers(action as TapComponentAction, context, transaction);
+        return useCases['_tapComponentUseCase']?.executeWithNotifiers(action as TapComponentAction, context, transaction) ??
+               const Failure('Tap component use case not available');
       case UpdateComponentAction _:
-        return ref.read(updateComponentUseCaseProvider).executeWithNotifiers(action as UpdateComponentAction, context, transaction);
+        return useCases['_updateComponentUseCase']?.executeWithNotifiers(action as UpdateComponentAction, context, transaction) ??
+               const Failure('Update component use case not available');
       case RestartLevelAction _:
-        return ref.read(restartLevelUseCaseProvider).executeWithNotifiers(action as RestartLevelAction, context, transaction);
+        return useCases['_restartLevelUseCase']?.executeWithNotifiers(action as RestartLevelAction, context, transaction) ??
+               const Failure('Restart level use case not available');
       case SelectPaletteComponentAction _:
-        return ref.read(selectPaletteComponentUseCaseProvider).executeWithNotifiers(action as SelectPaletteComponentAction, context, transaction);
+        return useCases['_selectPaletteComponentUseCase']?.executeWithNotifiers(action as SelectPaletteComponentAction, context, transaction) ??
+               const Failure('Select palette component use case not available');
       case TogglePauseAction _:
-        return ref.read(togglePauseUseCaseProvider).executeWithNotifiers(action as TogglePauseAction, context, transaction);
+        return useCases['_togglePauseUseCase']?.executeWithNotifiers(action as TogglePauseAction, context, transaction) ??
+               const Failure('Toggle pause use case not available');
       case UndoAction _:
-        return ref.read(undoUseCaseProvider).executeWithNotifiers(action as UndoAction, context, transaction);
+        return useCases['_undoUseCase']?.executeWithNotifiers(action as UndoAction, context, transaction) ??
+               const Failure('Undo use case not available');
       default:
         return const Failure('Unknown action type');
     }
@@ -197,13 +253,14 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
   }
 
   NotifierContext _createNotifierContext() {
+    // ✅ DECOUPLED: Using injected notifier instances
     return NotifierContext(
-      grid: ref.read(gridNotifierProvider.notifier),
-      history: ref.read(historyNotifierProvider.notifier),
-      progress: ref.read(gameProgressNotifierProvider.notifier),
-      selection: ref.read(componentSelectionNotifierProvider.notifier),
-      interaction: ref.read(interactionStateNotifierProvider.notifier),
-      paletteManager: ref.read(componentPaletteManagerProvider),
+      grid: gridNotifier,
+      history: historyNotifier,
+      progress: progressNotifier,
+      selection: selectionNotifier,
+      interaction: interactionNotifier,
+      paletteManager: paletteManager,
     );
   }
 }

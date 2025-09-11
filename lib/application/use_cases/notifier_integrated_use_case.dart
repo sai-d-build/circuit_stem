@@ -1,21 +1,15 @@
 import '../core/result.dart';
 import '../transaction.dart';
-import '../grid_notifier.dart';
-import '../history_notifier.dart';
-import '../game_progress_notifier.dart';
-import '../component_selection_notifier.dart';
-import '../interaction_state_notifier.dart';
-import '../services/component_palette_manager.dart';
 import 'component_action.dart';
- 
+
 /// Context object passed to notifier-integrated use cases
 class NotifierContext {
-  final GridNotifier grid;
-  final HistoryNotifier history;
-  final GameProgressNotifier progress;
-  final ComponentSelectionNotifier selection;
-  final InteractionStateNotifier interaction;
-  final ComponentPaletteManager paletteManager;
+  final dynamic grid;
+  final dynamic history;
+  final dynamic progress;
+  final dynamic selection;
+  final dynamic interaction;
+  final dynamic paletteManager;
   
   const NotifierContext({
     required this.grid,

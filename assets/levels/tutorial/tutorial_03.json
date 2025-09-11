@@ -1,0 +1,121 @@
+{
+  "levelId": "tutorial_03",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "tutorial_03",
+    "title": "Parallel Circuits",
+    "description": "Connect components in parallel configuration",
+    "difficulty": "tutorial",
+    "estimatedTime": 180,
+    "learningObjectives": [
+      "Understand parallel circuit behavior",
+      "Learn current division",
+      "Compare parallel vs series circuits"
+    ],
+    "tags": ["tutorial", "parallel", "current"],
+    "unlocksComponents": ["switch"],
+    "prerequisites": ["tutorial_02"]
+  },
+  "grid": {
+    "width": 10,
+    "height": 8,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 9.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "led",
+        "quantity": 2,
+        "properties": {
+          "forwardVoltage": 2.0,
+          "color": "red",
+          "maxCurrent": 0.02
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 2,
+        "properties": {
+          "resistance": 470.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 8,
+        "properties": {
+          "resistance": 0.01
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "parallel_leds",
+      "type": "component_state",
+      "description": "Light both LEDs in parallel",
+      "conditions": {
+        "targetComponent": "led_1",
+        "targetState": "on"
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Connect both LED+resistor pairs between the same two points",
+          "trigger": "time_elapsed",
+          "triggerValue": 45
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits",
+      "parallel_configuration"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": true,
+    "steps": [
+      {
+        "id": "step_1",
+        "title": "Parallel Connections",
+        "description": "Connect components across the same voltage points",
+        "highlight": "grid_connections",
+        "requiredAction": "create_parallel_connection"
+      }
+    ]
+  },
+  "scoring": {
+    "maxScore": 1200,
+    "timeBonus": {
+      "maxTime": 300,
+      "bonusPerSecond": 2
+    },
+    "efficiencyBonus": {
+      "maxComponents": 8,
+      "bonusPerUnusedComponent": 40
+    },
+    "starThresholds": {
+      "threeStars": 900,
+      "twoStars": 700,
+      "oneStar": 500
+    }
+  }
+}

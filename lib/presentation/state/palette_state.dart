@@ -1,12 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart';
-
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'dart:convert';
 import '../../core/persistence/storage_service.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/application/providers/core_providers.dart';
 
 class ComponentDefinition {
   final String type;
@@ -195,11 +194,23 @@ class PaletteState {
       'activeFilters': activeFilters,
     });
 
-    // Add simple debug prints for immediate visibility
-    print('🎨 FILTER DEBUG: Total available: ${availableComponents.length}');
-    print('🎨 FILTER DEBUG: Available types: ${availableComponents.map((c) => c.type).toList()}');
-    print('🎨 FILTER DEBUG: Inventory keys: ${inventory.keys.toList()}');
-    print('🎨 FILTER DEBUG: Unlocked components: ${availableComponents.where((c) => c.isUnlocked).length}');
+    // Add simple debug logs for immediate visibility
+    StructuredLogger.debug('🎨 FILTER DEBUG: Total available: ${availableComponents.length}', context: {
+      'availableComponents': availableComponents.length,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+    StructuredLogger.debug('🎨 FILTER DEBUG: Available types', context: {
+      'availableTypes': availableComponents.map((c) => c.type).toList(),
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+    StructuredLogger.debug('🎨 FILTER DEBUG: Inventory keys', context: {
+      'inventoryKeys': inventory.keys.toList(),
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+    StructuredLogger.debug('🎨 FILTER DEBUG: Unlocked components: ${availableComponents.where((c) => c.isUnlocked).length}', context: {
+      'unlockedComponents': availableComponents.where((c) => c.isUnlocked).length,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
 
     var filtered = availableComponents.where((component) => component.isUnlocked);
 
@@ -287,7 +298,7 @@ class PaletteState {
       case 'basic':
         return ['resistor', 'wire', 'battery'].contains(component.type);
       case 'active':
-        return ['led', 'switch', 'transistor'].contains(component.type);
+        return ['bulb', 'switch', 'transistor'].contains(component.type);
       case 'measurement':
         return ['voltmeter', 'ammeter', 'multimeter'].contains(component.type);
       case 'power':
@@ -631,7 +642,7 @@ List<ComponentDefinition> _getAvailableComponents() {
       cost: 1,
     ),
     const ComponentDefinition(
-      type: 'led',
+      type: 'bulb',
       name: 'LED',
       description: 'Light Emitting Diode',
       iconPath: 'assets/components/led.svg',
@@ -729,10 +740,19 @@ List<ComponentDefinition> _getAvailableComponentsForLevel(LevelDefinition? level
       'componentTypes': componentDefinitions.map((c) => c.type).toList(),
     });
 
-    // Add simple debug prints for immediate visibility
-    print('🎨 COMPONENT CREATION: Generated ${componentDefinitions.length} definitions');
-    print('🎨 COMPONENT CREATION: Types: ${componentDefinitions.map((c) => c.type).toList()}');
-    print('🎨 COMPONENT CREATION: Unlocked: ${componentDefinitions.where((c) => c.isUnlocked).length}');
+    // Add simple debug logs for immediate visibility
+    StructuredLogger.debug('🎨 COMPONENT CREATION: Generated ${componentDefinitions.length} definitions', context: {
+      'componentDefinitionsLength': componentDefinitions.length,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+    StructuredLogger.debug('🎨 COMPONENT CREATION: Types', context: {
+      'componentTypes': componentDefinitions.map((c) => c.type).toList(),
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+    StructuredLogger.debug('🎨 COMPONENT CREATION: ${componentDefinitions.where((c) => c.isUnlocked).length} unlocked components', context: {
+      'unlockedComponentsCount': componentDefinitions.where((c) => c.isUnlocked).length,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
 
     return componentDefinitions;
   }
@@ -794,21 +814,21 @@ Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefi
     '1': {
       'battery': const ComponentInventory(componentType: 'battery', available: 1, total: 1),
       'resistor': const ComponentInventory(componentType: 'resistor', available: 2, total: 2),
-      'led': const ComponentInventory(componentType: 'led', available: 1, total: 1),
+      'bulb': const ComponentInventory(componentType: 'bulb', available: 1, total: 1),
       'wire': const ComponentInventory(componentType: 'wire', available: 5, total: 5),
       'switch': const ComponentInventory(componentType: 'switch', available: 1, total: 1),
     },
     '2': {
       'battery': const ComponentInventory(componentType: 'battery', available: 1, total: 1),
       'resistor': const ComponentInventory(componentType: 'resistor', available: 3, total: 3),
-      'led': const ComponentInventory(componentType: 'led', available: 2, total: 2),
+      'bulb': const ComponentInventory(componentType: 'bulb', available: 2, total: 2),
       'wire': const ComponentInventory(componentType: 'wire', available: 8, total: 8),
       'switch': const ComponentInventory(componentType: 'switch', available: 1, total: 1),
     },
     '3': {
       'battery': const ComponentInventory(componentType: 'battery', available: 1, total: 1),
       'resistor': const ComponentInventory(componentType: 'resistor', available: 2, total: 2),
-      'led': const ComponentInventory(componentType: 'led', available: 2, total: 2),
+      'bulb': const ComponentInventory(componentType: 'bulb', available: 2, total: 2),
       'wire': const ComponentInventory(componentType: 'wire', available: 10, total: 10),
       'switch': const ComponentInventory(componentType: 'switch', available: 1, total: 1),
     },

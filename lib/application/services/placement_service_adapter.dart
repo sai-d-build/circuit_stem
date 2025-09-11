@@ -1,51 +1,79 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
+import 'package:sparkcircuit/core/services/unified_coordinate_service.dart' as ucs;
 import 'package:sparkcircuit/domain/entities/core/component.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
-import 'package:sparkcircuit/presentation/features/game/services/viewport_service.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
+import 'package:sparkcircuit/application/states/game_canvas_state.dart';
+import 'package:sparkcircuit/application/use_cases/create_component_use_case.dart';
+import 'package:sparkcircuit/application/use_cases/notifier_integrated_use_case.dart';
+import 'package:sparkcircuit/application/transaction.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 
 class PlacementServiceAdapter {
-  final WidgetRef ref;
+  final dynamic gameStateNotifier;
+  final dynamic paletteStateNotifier;
+  final dynamic componentPlacementService;
   final String levelId;
 
-  PlacementServiceAdapter({required this.ref, required this.levelId});
+  PlacementServiceAdapter({
+    required this.gameStateNotifier,
+    required this.paletteStateNotifier,
+    required this.componentPlacementService,
+    required this.levelId,
+  });
 
   Future<bool> placeComponent(ComponentType componentType, int row, int col) async {
+    // Mark file as migrated to unified provider
+    MigrationTracker.markFileMigrated('placement_service_adapter.dart', DateTime.now().toIso8601String());
+
     try {
-      // Validate position using CoordinateService
-      final viewportService = ref.read(viewportServiceProvider(levelId).notifier);
-      final context = viewportService.buildCoordinateContext(
-        gridDimensions: Size(20, 15), // Get from game state
-        devicePixelRatio: 1.0,
+      // Get game state for validation
+      final gameState = gameStateNotifier.state;
+
+      // Create grid configuration for validation
+      final config = ucs.GridConfiguration(
+        rows: gameState.grid.rows,
+        cols: gameState.grid.cols,
+        cellSize: 60.0, // Default cell size
+        scale: 1.0,
+        panOffset: Offset.zero,
       );
 
-      final mockBox = MockRenderBox(Size.infinite);
-      final validation = CoordinateSystemService().validateDropPosition(
-        Offset.zero, // Not used in mock
-        context,
-        mockBox,
-        occupiedPositions: _getOccupiedPositions(),
-      );
+      // Check if position is valid using UnifiedCoordinateService
+      final gridPos = Offset(col.toDouble(), row.toDouble());
+      final isValid = ucs.UnifiedCoordinateService().isInGridBounds(gridPos, config);
 
-      if (!validation.isValid) {
+      if (!isValid) {
         return false;
       }
 
-      // Place component using v3 notifier
-      final gameNotifier = ref.read(providers_v3.enhancedGameStateNotifierProvider.notifier);
-      gameNotifier.placeComponent(componentType, row, col);
+      // Check if position is occupied
+      final isOccupied = gameState.grid.components.values.any(
+        (component) => component.row == row && component.col == col
+      );
 
-      // Update palette state
-      final paletteState = ref.read(paletteStateProvider(levelId));
-      final componentName = componentType.toString().split('.').last;
-      if (!paletteState.canUseComponent(componentName)) {
+      if (isOccupied) {
         return false;
       }
 
-      ref.read(paletteStateProvider(levelId).notifier).stopPlacingComponent();
-      return true;
+      // Use centralized CreateComponentUseCase instead of direct notifier call
+      final transaction = GameTransaction();
+      final result = await CreateComponentUseCase.placeComponent(
+        componentType,
+        row,
+        col,
+        _createMinimalNotifierContext(),
+        transaction,
+      );
+
+      if (result.isSuccess) {
+        await transaction.commit();
+
+        // Update palette state
+        paletteStateNotifier.stopPlacingComponent();
+        return true;
+      } else {
+        transaction.rollback();
+        return false;
+      }
     } catch (e) {
       debugPrint('PlacementServiceAdapter error: $e');
       return false;
@@ -70,24 +98,16 @@ class PlacementServiceAdapter {
     }
   }
 
-  Set<GridPosition> _getOccupiedPositions() {
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
-    return gameState.grid.components.values
-        .map((component) => GridPosition(row: component.row, col: component.col))
-        .toSet();
-  }
-}
-
-class MockRenderBox extends RenderBox {
-  MockRenderBox([Size? size]) {
-    if (size != null) {
-      this.size = size;
-    }
+  /// Create minimal NotifierContext with just the grid notifier
+  NotifierContext _createMinimalNotifierContext() {
+    return NotifierContext(
+      grid: gameStateNotifier,
+      history: null,
+      progress: null,
+      selection: null,
+      interaction: null,
+      paletteManager: null,
+    );
   }
 
-  @override
-  bool get attached => true;
-
-  @override
-  Offset globalToLocal(Offset globalPosition, {RenderObject? ancestor}) => globalPosition;
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:sparkcircuit/core/services/coordinate_service.dart';
+import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 
 /// Interaction modes for the canvas
 enum CanvasInteractionMode {
@@ -246,9 +247,9 @@ class GameCanvasController extends ChangeNotifier {
   
   void _constrainPan() {
     if (_canvasSize == Size.zero) return;
-    
+
     final gridPixelSize = this.gridPixelSize;
-    
+
     // Calculate bounds for panning
     final rawMinPanX = _canvasSize.width - gridPixelSize.width - 50;
     final rawMaxPanX = 50.0;
@@ -265,76 +266,80 @@ class GameCanvasController extends ChangeNotifier {
       _panOffset.dy.clamp(minPanY, maxPanY),
     );
   }
-  
+
   // Convert screen coordinates to grid coordinates
   Offset screenToGrid(Offset screenPosition) {
-    final adjustedX = (screenPosition.dx - _panOffset.dx) / scaledCellSize;
-    final adjustedY = (screenPosition.dy - _panOffset.dy) / scaledCellSize;
-
-    // Return unclamped coordinates - let the caller handle bounds checking
-    return Offset(adjustedX, adjustedY);
+    return UnifiedCoordinateService().screenToGrid(
+      screenPosition,
+      GridConfiguration(
+        rows: _gridHeight,
+        cols: _gridWidth,
+        cellSize: _gridCellSize,
+        scale: _scale,
+        panOffset: _panOffset,
+      ),
+    );
   }
+  
   
   // Convert grid coordinates to screen coordinates
   Offset gridToScreen(Offset gridPosition) {
-    return Offset(
-      gridPosition.dx * scaledCellSize + _panOffset.dx,
-      gridPosition.dy * scaledCellSize + _panOffset.dy,
+    final config = GridConfiguration(
+      rows: _gridHeight,
+      cols: _gridWidth,
+      cellSize: _gridCellSize,
+      scale: _scale,
+      panOffset: _panOffset,
     );
+    return UnifiedCoordinateService().gridToScreen(gridPosition, config);
   }
   
   // Snap screen coordinates to grid with bounds checking
   Offset snapToGrid(Offset screenPosition) {
-    final gridPos = screenToGrid(screenPosition);
-    final snappedGridPos = Offset(
-      gridPos.dx.round().toDouble(),
-      gridPos.dy.round().toDouble(),
+    final config = GridConfiguration(
+      rows: _gridHeight,
+      cols: _gridWidth,
+      cellSize: _gridCellSize,
+      scale: _scale,
+      panOffset: _panOffset,
     );
-
-    // Ensure snapped position is within grid bounds
-    final clampedGridPos = Offset(
-      snappedGridPos.dx.clamp(0, _gridWidth.toDouble() - 1),
-      snappedGridPos.dy.clamp(0, _gridHeight.toDouble() - 1),
-    );
-
-    return gridToScreen(clampedGridPos);
+    return UnifiedCoordinateService().snapToGrid(screenPosition, config);
   }
 
   // Check if screen coordinates are within grid bounds
   bool isWithinGridBounds(Offset screenPosition) {
-    final gridPos = screenToGrid(screenPosition);
-    return gridPos.dx >= 0 && gridPos.dx < _gridWidth &&
-           gridPos.dy >= 0 && gridPos.dy < _gridHeight;
+    final config = GridConfiguration(
+      rows: _gridHeight,
+      cols: _gridWidth,
+      cellSize: _gridCellSize,
+      scale: _scale,
+      panOffset: _panOffset,
+    );
+    return UnifiedCoordinateService().isWithinGridBounds(screenPosition, config);
   }
 
   // Get valid grid position from screen coordinates (returns null if out of bounds)
   Offset? getValidGridPosition(Offset screenPosition) {
-    final gridPos = screenToGrid(screenPosition);
-    final snappedPos = Offset(
-      gridPos.dx.round().toDouble(),
-      gridPos.dy.round().toDouble(),
+    final config = GridConfiguration(
+      rows: _gridHeight,
+      cols: _gridWidth,
+      cellSize: _gridCellSize,
+      scale: _scale,
+      panOffset: _panOffset,
     );
-
-    // Check if snapped position is within bounds
-    if (snappedPos.dx >= 0 && snappedPos.dx < _gridWidth &&
-        snappedPos.dy >= 0 && snappedPos.dy < _gridHeight) {
-      return snappedPos;
-    }
-
-    return null; // Out of bounds
+    return UnifiedCoordinateService().getValidGridPosition(screenPosition, config);
   }
   
   // Get the grid bounds visible on screen
   Rect getVisibleGridBounds() {
-    final topLeft = screenToGrid(Offset.zero);
-    final bottomRight = screenToGrid(Offset(_canvasSize.width, _canvasSize.height));
-    
-    return Rect.fromLTRB(
-      topLeft.dx.floor().toDouble(),
-      topLeft.dy.floor().toDouble(),
-      bottomRight.dx.ceil().toDouble(),
-      bottomRight.dy.ceil().toDouble(),
+    final config = GridConfiguration(
+      rows: _gridHeight,
+      cols: _gridWidth,
+      cellSize: _gridCellSize,
+      scale: _scale,
+      panOffset: _panOffset,
     );
+    return UnifiedCoordinateService().calculateVisibleGridBounds(config, _canvasSize);
   }
   
   // Check if a grid position is visible

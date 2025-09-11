@@ -76,7 +76,7 @@ class ServiceManager {
     _instance._log('Disposing ServiceManager...');
 
     try {
-      PerformanceMonitor.dispose();
+      PerformanceMonitor.disposeStatic();
       AnimationControllerPool.disposeAll();
       // GestureManager doesn't have a public dispose method
       // Add dispose logic here if needed in the future
@@ -128,7 +128,7 @@ class ServiceManager {
   // Private initialization methods
   Future<void> _initializePerformanceMonitor() async {
     _log('Initializing PerformanceMonitor...');
-    PerformanceMonitor.startMonitoring();
+    PerformanceMonitor.startStaticMonitoring();
     _log('PerformanceMonitor initialized');
   }
 

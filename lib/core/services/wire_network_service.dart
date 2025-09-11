@@ -1,9 +1,7 @@
-import 'dart:collection';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
-import 'package:sparkcircuit/domain/entities/core/component.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/canvas_interaction_controller.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
 
 enum WireSegmentType {
   straight,    // Single straight segment
@@ -158,11 +156,13 @@ class WireNetwork {
 }
 
 final wireNetworkServiceProvider = Provider.family<WireNetworkService, String>(
-  (ref, levelId) => WireNetworkService(ref: ref, levelId: levelId),
+  (ref, levelId) {
+    MigrationTracker.markFileMigrated('wire_network_service.dart', DateTime.now().toIso8601String());
+    return WireNetworkService(levelId: levelId);
+  },
 );
 
 class WireNetworkService {
-  final Ref ref;
   final String levelId;
 
   // In-memory storage for wire networks
@@ -170,7 +170,7 @@ class WireNetworkService {
   final Map<String, WireJunction> _junctions = {};
   final Map<GridPosition, List<String>> _positionToNetworkMap = {};
 
-  WireNetworkService({required this.ref, required this.levelId});
+  WireNetworkService({required this.levelId});
 
   /// Create a new wire network from a path
   Future<WireNetwork> createNetworkFromPath(
@@ -231,7 +231,7 @@ class WireNetworkService {
     if (path.length < 2) return segments;
 
     GridPosition currentStart = path[0];
-    GridPosition? previous = null;
+    GridPosition? previous;
 
     for (int i = 1; i < path.length; i++) {
       final current = path[i];

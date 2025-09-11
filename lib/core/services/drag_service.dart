@@ -139,24 +139,22 @@ class DragStartEvent extends DragEvent {
   final ComponentDragData dragData;
   final DragType dragType;
 
-  const DragStartEvent(DateTime timestamp, Offset position, this.dragData, this.dragType)
-      : super(timestamp, position);
+  const DragStartEvent(super.timestamp, super.position, this.dragData, this.dragType);
 }
 
 class DragUpdateEvent extends DragEvent {
-  const DragUpdateEvent(DateTime timestamp, Offset position) : super(timestamp, position);
+  const DragUpdateEvent(super.timestamp, super.position);
 }
 
 class DragEndEvent extends DragEvent {
   final bool wasSuccessful;
   final Offset? finalPosition;
 
-  const DragEndEvent(DateTime timestamp, Offset position, this.wasSuccessful, this.finalPosition)
-      : super(timestamp, position);
+  const DragEndEvent(super.timestamp, super.position, this.wasSuccessful, this.finalPosition);
 }
 
 class DragCancelEvent extends DragEvent {
-  const DragCancelEvent(DateTime timestamp, Offset position) : super(timestamp, position);
+  const DragCancelEvent(super.timestamp, super.position);
 }
 
 /// Validation result for drop operations
@@ -358,7 +356,7 @@ extension DragServiceExtensions on ComponentType {
   ComponentDragData toDragData() {
     return ComponentDragData(
       componentType: this,
-      componentName: this.name,
+      componentName: name,
       description: _getComponentDescription(this),
       defaultProperties: _getDefaultProperties(this),
       cost: _getComponentCost(this),

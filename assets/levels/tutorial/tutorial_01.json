@@ -48,6 +48,13 @@
         }
       },
       {
+        "type": "switch",
+        "quantity": 1,
+        "properties": {
+          "resistance": 0.1
+        }
+      },
+      {
         "type": "inductor",
         "quantity": 1,
         "properties": {

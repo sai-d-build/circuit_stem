@@ -1,0 +1,42 @@
+{
+  "levelId": "intermediate_05",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "intermediate_05",
+    "title": "Intermediate Circuit 5",
+    "description": "Advanced circuit design principles",
+    "difficulty": "intermediate",
+    "estimatedTime": 300,
+    "learningObjectives": ["Circuit analysis", "Component integration"],
+    "tags": ["intermediate"],
+    "unlocksComponents": [],
+    "prerequisites": ["intermediate_04"]
+  },
+  "grid": {"width": 14, "height": 10, "background": "circuit_board"},
+  "components": {
+    "available": [
+      {"type": "battery", "quantity": 1, "properties": {"voltage": 12.0}},
+      {"type": "resistor", "quantity": 3, "properties": {"resistance": 1000.0}},
+      {"type": "capacitor", "quantity": 1, "properties": {"capacitance": 1000e-6}},
+      {"type": "wire", "quantity": 12, "properties": {"resistance": 0.01}}
+    ],
+    "preplaced": []
+  },
+  "goals": [{
+    "id": "circuit_analysis",
+    "type": "circuit_analysis",
+    "description": "Analyze and complete the intermediate circuit",
+    "conditions": {"current_flow": {"minValue": 0.01}}
+  }],
+  "validation": {
+    "circuitRules": ["no_short_circuits", "proper_component_connections"],
+    "successConditions": ["all_goals_completed"]
+  },
+  "tutorial": {"enabled": false, "steps": []},
+  "scoring": {
+    "maxScore": 1500,
+    "timeBonus": {"maxTime": 600, "bonusPerSecond": 1},
+    "efficiencyBonus": {"maxComponents": 19, "bonusPerUnusedComponent": 30},
+    "starThresholds": {"threeStars": 1200, "twoStars": 900, "oneStar": 600}
+  }
+}

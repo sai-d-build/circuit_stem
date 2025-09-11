@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
@@ -19,7 +20,8 @@ class CanvasWireLayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(providers_v3.enhancedGameStateNotifierProvider);
+    MigrationTracker.markFileMigrated('canvas_wire_layer.dart', DateTime.now().toIso8601String());
+    final gameState = ref.watch(unifiedGameStateProvider);
     final circuitColors = Theme.of(context).extension<CircuitColorScheme>() ??
                          _getDefaultCircuitColors();
 
@@ -51,7 +53,7 @@ class CanvasWireLayer extends ConsumerWidget {
           if (targetComponent != null) {
             // Ensure each wire is added only once (e.g., A-B, not B-A)
             if (sourceId.hashCode < targetId.hashCode) {
-              final wireId = '${sourceId}_${targetId}';
+              final wireId = '$sourceId\_$targetId';
               wires.add(drawing_models.CircuitWire(
                 id: wireId,
                 startX: sourceComponent.col.toDouble(),
@@ -81,10 +83,10 @@ class CanvasWireLayer extends ConsumerWidget {
       if (sourceComponent != null && _isPowerSource(sourceComponent.type)) {
         for (final targetId in connectedIds) {
           if (sourceId.hashCode < targetId.hashCode) {
-            final wireId = '${sourceId}_${targetId}';
+            final wireId = '$sourceId\_$targetId';
             activityMap[wireId] = true;
           } else {
-            final wireId = '${targetId}_${sourceId}';
+            final wireId = '$targetId\_$sourceId';
             activityMap[wireId] = true;
           }
         }
@@ -97,34 +99,6 @@ class CanvasWireLayer extends ConsumerWidget {
   bool _isPowerSource(ComponentType type) {
     // Basic power source detection - could be enhanced with component properties
     return type == ComponentType.battery;
-  }
-
-  List<drawing_models.CircuitWire> _buildCircuitWiresOld(GameState gameState) {
-    final wires = <drawing_models.CircuitWire>[];
-
-    gameState.grid.connections.forEach((sourceId, connectedIds) {
-      final sourceComponent = gameState.grid.getComponentById(sourceId);
-      if (sourceComponent != null) {
-        for (final targetId in connectedIds) {
-          final targetComponent = gameState.grid.getComponentById(targetId);
-          if (targetComponent != null) {
-            // Ensure each wire is added only once (e.g., A-B, not B-A)
-            if (sourceId.hashCode < targetId.hashCode) {
-              wires.add(drawing_models.CircuitWire(
-                id: '${sourceId}_${targetId}',
-                startX: sourceComponent.col.toDouble(),
-                startY: sourceComponent.row.toDouble(),
-                endX: targetComponent.col.toDouble(),
-                endY: targetComponent.row.toDouble(),
-                isActive: false, // TODO: Determine active state from simulationResult
-              ));
-            }
-          }
-        }
-      }
-    });
-
-    return wires;
   }
 
   CircuitColorScheme _getDefaultCircuitColors() {

@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/services/interfaces/canvas_business_service.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
-import 'package:sparkcircuit/core/services/grid_service.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
-import 'package:sparkcircuit/application/providers/game_canvas_providers.dart';
 import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';
+import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 
 /// Implementation of CanvasBusinessService
 /// Handles business logic for canvas operations like component placement and validation
 class CanvasBusinessServiceImpl implements CanvasBusinessService {
-  final Ref ref;
+  final dynamic paletteStateNotifier;
+  final dynamic componentPlacementService;
 
-  CanvasBusinessServiceImpl(this.ref);
+  CanvasBusinessServiceImpl({
+    required this.paletteStateNotifier,
+    required this.componentPlacementService,
+  });
 
   @override
   Future<ComponentPlacementResult> placeComponent(
@@ -42,7 +44,8 @@ class CanvasBusinessServiceImpl implements CanvasBusinessService {
 
     // Get grid configuration and convert position
     final config = _getGridConfiguration(gameState);
-    final gridPosition = GridService.screenToGrid(position, config);
+    final unifiedService = UnifiedCoordinateService();
+    final gridPosition = unifiedService.screenToGrid(position, config);
     final snappedPosition = Offset(
       gridPosition.dx.round().toDouble(),
       gridPosition.dy.round().toDouble(),
@@ -75,8 +78,8 @@ class CanvasBusinessServiceImpl implements CanvasBusinessService {
     });
 
     // Update game state
-    ref.read(paletteStateProvider(levelId).notifier).useComponent(componentTypeString);
-    ref.read(paletteStateProvider(levelId).notifier).stopPlacingComponent();
+    paletteStateNotifier.useComponent(componentTypeString);
+    paletteStateNotifier.stopPlacingComponent();
 
     StructuredLogger.info('Component placement successful', context: {
       'componentType': componentTypeString,
@@ -101,7 +104,7 @@ class CanvasBusinessServiceImpl implements CanvasBusinessService {
     });
 
     // Get placement service
-    final placementService = ref.read(componentPlacementServiceProvider(levelId));
+    final placementService = componentPlacementService;
 
     // Convert component type
     final componentType = ComponentType.values.firstWhere(
@@ -111,7 +114,8 @@ class CanvasBusinessServiceImpl implements CanvasBusinessService {
 
     // Convert position
     final config = _getGridConfiguration(gameState);
-    final gridPosition = GridService.screenToGrid(localPosition, config);
+    final unifiedService = UnifiedCoordinateService();
+    final gridPosition = unifiedService.screenToGrid(localPosition, config);
     final row = gridPosition.dy.round();
     final col = gridPosition.dx.round();
 
@@ -128,7 +132,7 @@ class CanvasBusinessServiceImpl implements CanvasBusinessService {
       final result = await placementService.executeComponentPlacement(request);
 
       if (result.isSuccess) {
-        ref.read(paletteStateProvider(levelId).notifier).stopPlacingComponent();
+        paletteStateNotifier.stopPlacingComponent();
         return ComponentDropResult.success(componentType, row, col);
       } else {
         return ComponentDropResult.failure(result.errorMessage ?? 'Failed to place component');
@@ -156,7 +160,8 @@ class CanvasBusinessServiceImpl implements CanvasBusinessService {
 
     // Get grid configuration
     final config = _getGridConfiguration(gameState);
-    final validGridPosition = GridService.getValidGridPosition(localPosition, config);
+    final unifiedService = UnifiedCoordinateService();
+    final validGridPosition = unifiedService.getValidGridPosition(localPosition, config);
 
     if (validGridPosition == null) {
       StructuredLogger.debug('Drop validation failed - invalid grid position');

@@ -1,0 +1,43 @@
+{
+  "levelId": "advanced_03",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "advanced_03",
+    "title": "Advanced Design 3",
+    "description": "Complex circuit design challenges",
+    "difficulty": "advanced",
+    "estimatedTime": 600,
+    "learningObjectives": ["Advanced circuit design", "Complex analysis"],
+    "tags": ["advanced"],
+    "unlocksComponents": [],
+    "prerequisites": ["advanced_02"]
+  },
+  "grid": {"width": 16, "height": 12, "background": "circuit_board"},
+  "components": {
+    "available": [
+      {"type": "battery", "quantity": 1, "properties": {"voltage": 15.0}},
+      {"type": "resistor", "quantity": 4, "properties": {"resistance": 1000.0}},
+      {"type": "capacitor", "quantity": 2, "properties": {"capacitance": 10e-6}},
+      {"type": "inductor", "quantity": 1, "properties": {"inductance": 0.01}},
+      {"type": "wire", "quantity": 15, "properties": {"resistance": 0.01}}
+    ],
+    "preplaced": []
+  },
+  "goals": [{
+    "id": "advanced_design",
+    "type": "circuit_analysis",
+    "description": "Design and analyze complex circuits",
+    "conditions": {"frequency_response": {"targetFrequency": 1000}}
+  }],
+  "validation": {
+    "circuitRules": ["no_short_circuits", "proper_component_connections"],
+    "successConditions": ["all_goals_completed"]
+  },
+  "tutorial": {"enabled": false, "steps": []},
+  "scoring": {
+    "maxScore": 2000,
+    "timeBonus": {"maxTime": 900, "bonusPerSecond": 1},
+    "efficiencyBonus": {"maxComponents": 23, "bonusPerUnusedComponent": 25},
+    "starThresholds": {"threeStars": 1600, "twoStars": 1200, "oneStar": 800}
+  }
+}

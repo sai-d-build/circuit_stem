@@ -41,7 +41,7 @@ void main() {
         expect(paletteState.inventory.length, 5);
         expect(paletteState.inventory.containsKey('battery'), true);
         expect(paletteState.inventory.containsKey('resistor'), true);
-        expect(paletteState.inventory.containsKey('led'), true);
+        expect(paletteState.inventory.containsKey('bulb'), true);
         expect(paletteState.inventory.containsKey('wire'), true);
         expect(paletteState.inventory.containsKey('switch'), true);
       });
@@ -50,7 +50,7 @@ void main() {
         final paletteState = container.read(paletteStateProvider('2'));
         expect(paletteState.inventory.length, 5);
         expect(paletteState.inventory['resistor']?.total, 3);
-        expect(paletteState.inventory['led']?.total, 2);
+        expect(paletteState.inventory['bulb']?.total, 2);
         expect(paletteState.inventory['wire']?.total, 8);
       });
 
@@ -66,21 +66,21 @@ void main() {
         final level1State = container.read(paletteStateProvider('1'));
         expect(level1State.inventory['battery']?.total, 1);
         expect(level1State.inventory['resistor']?.total, 2);
-        expect(level1State.inventory['led']?.total, 1);
+        expect(level1State.inventory['bulb']?.total, 1);
         expect(level1State.inventory['wire']?.total, 5);
         expect(level1State.inventory['switch']?.total, 1);
 
         final level2State = container.read(paletteStateProvider('2'));
         expect(level2State.inventory['battery']?.total, 1);
         expect(level2State.inventory['resistor']?.total, 3);
-        expect(level2State.inventory['led']?.total, 2);
+        expect(level2State.inventory['bulb']?.total, 2);
         expect(level2State.inventory['wire']?.total, 8);
         expect(level2State.inventory['switch']?.total, 1);
 
         final level3State = container.read(paletteStateProvider('3'));
         expect(level3State.inventory['battery']?.total, 1);
         expect(level3State.inventory['resistor']?.total, 2);
-        expect(level3State.inventory['led']?.total, 2);
+        expect(level3State.inventory['bulb']?.total, 2);
         expect(level3State.inventory['wire']?.total, 10);
         expect(level3State.inventory['switch']?.total, 1);
       });

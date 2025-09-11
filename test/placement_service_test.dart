@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'package:sparkcircuit/application/enhanced_game_state.dart';
+import 'package:sparkcircuit/application/states/game_state.dart';
+import 'package:sparkcircuit/application/states/interaction_state.dart';
+import 'package:sparkcircuit/application/states/history_state.dart';
 import 'package:sparkcircuit/application/services/placement_service.dart';
-import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
 
 void main() {
   group('PlacementService', () {
@@ -22,7 +22,7 @@ void main() {
     }
 
     setUp(() {
-      placementService = PlacementService(InMemoryCommandStack());
+      placementService = PlacementService();
       initialState = createInitialState();
     });
 

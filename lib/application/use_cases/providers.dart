@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/migration/migration_tracker.dart';
 
 // ============================================================================
 // LEGACY COMPATIBILITY BACKWARD EXPORTS
@@ -64,6 +65,7 @@ final componentPaletteManagerProvider = Provider((ref) {
 });
 
 final checkWinConditionUseCaseProvider = Provider((ref) {
+  MigrationTracker.markFileMigrated('check_win_condition_use_case.dart', DateTime.now().toIso8601String());
   final goalCheckingService = ref.watch(goalCheckingServiceProvider);
   return CheckWinConditionUseCase(goalCheckingService);
 });
@@ -75,48 +77,58 @@ final createComponentUseCaseProvider = Provider((ref) {
 });
 
 final loadLevelUseCaseProvider = Provider((ref) {
+  MigrationTracker.markFileMigrated('load_level_use_case.dart', DateTime.now().toIso8601String());
   final powerSimulationService = ref.watch(powerSimulationServiceProvider);
   final goalCheckingService = ref.watch(goalCheckingServiceProvider);
   return LoadLevelUseCase(powerSimulationService, goalCheckingService);
 });
 
 final moveComponentUseCaseProvider = Provider((ref) {
+  MigrationTracker.markFileMigrated('move_component_use_case.dart', DateTime.now().toIso8601String());
   final simulationService = ref.watch(powerSimulationServiceProvider);
   return MoveComponentUseCase(simulationService);
 });
 
 final restartLevelUseCaseProvider = Provider((ref) {
+  MigrationTracker.markFileMigrated('restart_level_use_case.dart', DateTime.now().toIso8601String());
   final powerSimulationService = ref.watch(powerSimulationServiceProvider);
   return RestartLevelUseCase(powerSimulationService);
 });
 
 final rotateComponentUseCaseProvider = Provider((ref) {
+  MigrationTracker.markFileMigrated('rotate_component_use_case.dart', DateTime.now().toIso8601String());
   return const RotateComponentUseCase();
 });
 
 final selectPaletteComponentUseCaseProvider = Provider((ref) {
+  MigrationTracker.markFileMigrated('select_palette_component_use_case.dart', DateTime.now().toIso8601String());
   return const SelectPaletteComponentUseCase();
 });
 
 final simulatePowerFlowUseCaseProvider = Provider((ref) {
+  MigrationTracker.markFileMigrated('simulate_power_flow_use_case.dart', DateTime.now().toIso8601String());
   final simulationService = ref.watch(powerSimulationServiceProvider);
   return SimulatePowerFlowUseCase(simulationService);
 });
 
 final tapComponentUseCaseProvider = Provider((ref) {
+  MigrationTracker.markFileMigrated('tap_component_use_case.dart', DateTime.now().toIso8601String());
   final simulationService = ref.watch(powerSimulationServiceProvider);
   return TapComponentUseCase(simulationService);
 });
 
 final togglePauseUseCaseProvider = Provider((ref) {
+  MigrationTracker.markFileMigrated('toggle_pause_use_case.dart', DateTime.now().toIso8601String());
   return const TogglePauseUseCase();
 });
 
 final undoUseCaseProvider = Provider((ref) {
+  MigrationTracker.markFileMigrated('undo_use_case.dart', DateTime.now().toIso8601String());
   return UndoUseCase();
 });
 
 final updateComponentUseCaseProvider = Provider((ref) {
+  MigrationTracker.markFileMigrated('update_component_use_case.dart', DateTime.now().toIso8601String());
   final simulationService = ref.watch(powerSimulationServiceProvider);
   return UpdateComponentUseCase(simulationService);
 });
@@ -137,4 +149,6 @@ final netlistBuilderProvider = Provider((ref) => NetlistBuilder());
 
 final commandStackProvider = Provider((ref) => InMemoryCommandStack());
 
-final storageServiceProvider = Provider((ref) => SharedPreferencesStorageService());
+final storageServiceProvider = Provider<SharedPreferencesStorageService>((ref) {
+  throw UnimplementedError('SharedPreferencesStorageService must be initialized in main.dart and overridden via ProviderScope');
+});

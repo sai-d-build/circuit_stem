@@ -21,7 +21,7 @@ class Logger {
   }
 
   static void log(String message, {String level = 'INFO'}) {
-    StructuredLogger.log(level, message);
+    StructuredLogger.log(message, context: {'level': level});
   }
 
   static void logComponentEvent(String componentId, String event, [Map<String, dynamic>? data]) {

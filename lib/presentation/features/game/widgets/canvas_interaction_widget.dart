@@ -5,9 +5,10 @@ import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/canvas_interaction_controller.dart' as canvas_controller;
-import 'package:sparkcircuit/presentation/features/game/services/viewport_service.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
+import 'package:sparkcircuit/presentation/helpers/central_interaction_helper.dart';
+
+// Import interactionStateProvider
 import 'package:sparkcircuit/application/providers/core_providers.dart';
 
 class CanvasInteractionWidget extends ConsumerStatefulWidget {
@@ -23,9 +24,10 @@ class CanvasInteractionWidget extends ConsumerStatefulWidget {
 }
 
 class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidget> {
-  late final canvas_controller.CanvasInteractionController _controller;
+  canvas_controller.CanvasInteractionController? _controller;
   RenderBox? _renderBox;
   Timer? _throttleTimer;
+  bool _isControllerInitialized = false;
 
   @override
   void initState() {
@@ -33,7 +35,24 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
     StructuredLogger.info('CanvasInteractionWidget initState called', context: {
       'levelId': widget.levelId,
     });
-    _controller = canvas_controller.CanvasInteractionController(levelId: widget.levelId, ref: ref);
+
+    // Defer controller initialization to after the first build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeController();
+    });
+  }
+
+  void _initializeController() {
+    if (_isControllerInitialized) return;
+
+    _controller = canvas_controller.CanvasInteractionController(
+      ref: ref,
+      levelId: widget.levelId,
+    );
+    _isControllerInitialized = true;
+    StructuredLogger.info('CanvasInteractionController initialized successfully', context: {
+      'levelId': widget.levelId,
+    });
   }
 
   @override
@@ -42,7 +61,7 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
       'levelId': widget.levelId,
     });
     _throttleTimer?.cancel();
-    _controller.dispose();
+    _controller?.dispose();
     StructuredLogger.debug('CanvasInteractionWidget: Resources disposed', context: {
       'levelId': widget.levelId,
     });
@@ -123,24 +142,11 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
     );
   }
 
-  void _handlePanStart(DragStartDetails details) {
-    final renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      _renderBox = renderBox;
-      _controller.initialize(renderBox);
-    }
-
-    // For pan gestures, determine if this should trigger pan/zoom mode
-    final interactionState = ref.read(interactionStateProvider(widget.levelId));
-    if (interactionState.currentMode == canvas_controller.InteractionMode.idle) {
-      _controller.handlePanUpdate(details.globalPosition);
-    }
-  }
 
   void _handlePanUpdate(DragUpdateDetails details) {
     // Handle pan gestures for viewport movement
     final delta = details.delta;
-    _controller.handlePanUpdate(delta);
+    _controller?.handlePanUpdate(delta);
   }
 
   void _handlePanEnd(DragEndDetails details) {
@@ -152,11 +158,12 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
   }
 
   void _handleScaleUpdate(ScaleUpdateDetails details) {
+    if (_controller == null) return;
     if (details.scale != 1.0) {
-      _controller.handleScaleUpdate(details.scale);
+      _controller!.handleScaleUpdate(details.scale);
     }
     if (details.focalPointDelta != Offset.zero) {
-      _controller.handlePanUpdate(details.focalPointDelta);
+      _controller!.handlePanUpdate(details.focalPointDelta);
     }
   }
 
@@ -174,94 +181,127 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox != null) {
       _renderBox = renderBox;
-      _controller.initialize(renderBox!);
+      _controller?.initialize(renderBox);
     }
 
     // Determine drag origin based on the drag data and position
     final dragOrigin = _determineDragOrigin(details.offset);
-    _handleDragStart(details, dragOrigin);
+    if (_controller != null) {
+      _handleDragStart(details, dragOrigin);
+    }
   }
 
   bool _onWillAcceptDrag(DragTargetDetails<ComponentDragData> details) {
-    // Safely get the RenderBox. If it's not available, reject the drag for this frame.
-    final renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null) {
-      StructuredLogger.warning(
-        'RenderBox not available in onWillAcceptDrag. Rejecting drag for this frame.',
-        context: {'levelId': widget.levelId},
-      );
-      return false;
-    }
-    // Assign the valid renderBox if it's not already set or has changed.
-    if (_renderBox != renderBox) {
-      _renderBox = renderBox;
-    }
+    // ✅ ENHANCED: Debug drag events at canvas level
+    StructuredLogger.debug('🎯 CANVAS LEVEL: Drag Accept Check Received', context: {
+      'canvasWidth': _renderBox?.size.width ?? 0,
+      'canvasHeight': _renderBox?.size.height ?? 0,
+      'dragOffset': details.offset.toString(),
+      'componentType': details.data.componentType.toString(),
+      'componentName': details.data.componentName,
+      'levelId': widget.levelId,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
 
-    // 🔧 COORDINATE BUG FIX: DragTargetDetails.offset is already in local coordinates!
-    // No need for globalToLocal() conversion here - it causes double conversion!
-    final localPosition = details.offset; // details.offset is already local to this widget
-    final newDetails = DragTargetDetails<ComponentDragData>(
-      data: details.data,
-      offset: localPosition,
-    );
-
-    StructuredLogger.info(
-      '🎯 DRAG EVENT RECEIVED - CanvasInteractionWidget is active!',
-      context: {
-        'operation': 'drag_acceptance_check_received',
-        'componentName': newDetails.data?.componentName ?? 'unknown',
-        'globalPosition': details.offset.toString(),
-        'localPosition': newDetails.offset.toString(),
-        'levelId': widget.levelId,
-      },
-    );
-
-    if (newDetails.data == null) {
-      StructuredLogger.error('❌ Invalid drag data in onWillAccept', context: {
+    bool result;
+    try {
+      result = _originalOnWillAcceptDrag(details);
+    } catch (e) {
+      StructuredLogger.error('🎯 CANVAS LEVEL: Drag Accept Check Failed', context: {
+        'error': e.toString(),
         'levelId': widget.levelId,
       });
       return false;
     }
 
-    // Initialize the controller with the renderBox if it hasn't been already.
-    _controller.initialize(renderBox);
+    StructuredLogger.info('🎯 CANVAS LEVEL: Drag Accept Result', context: {
+      'result': result,
+      'levelId': widget.levelId,
+    });
 
-    // Start the drag operation if not already started
-    final currentState = ref.read(interactionStateProvider(widget.levelId));
-    if (currentState.currentMode == canvas_controller.InteractionMode.idle) {
-      StructuredLogger.info('🔄 Starting drag operation from onWillAccept', context: {
-        'componentType': newDetails.data.componentType.toString(),
-        'levelId': widget.levelId,
-      });
-      _handleDragStart(newDetails, canvas_controller.DragOrigin.palette);
-    }
-
-    // Accept if data is valid - the controller will perform detailed validation on move.
-    final isValidData = newDetails.data.componentType != null && newDetails.data.componentName.isNotEmpty;
-    
-    StructuredLogger.info(
-      '✅ Drag acceptance preliminary check completed.',
-      context: {
-        'isValidData': isValidData,
-        'willAccept': isValidData,
-        'levelId': widget.levelId,
-      },
-    );
-
-    return isValidData;
+    return result;
   }
 
+  bool _originalOnWillAcceptDrag(DragTargetDetails<ComponentDragData> details) {
+   // Safely get the RenderBox. If it's not available, reject the drag for this frame.
+   final renderBox = context.findRenderObject() as RenderBox?;
+   if (renderBox == null) {
+     StructuredLogger.warning(
+       'RenderBox not available in onWillAcceptDrag. Rejecting drag for this frame.',
+       context: {'levelId': widget.levelId},
+     );
+     return false;
+   }
+   // Assign the valid renderBox if it's not already set or has changed.
+   if (_renderBox != renderBox) {
+     _renderBox = renderBox;
+   }
+
+   // ✅ FIXED: Standardize coordinate conversion - always convert from global to local
+   final correctLocalPosition = renderBox.globalToLocal(details.offset);
+   final newDetails = DragTargetDetails<ComponentDragData>(
+     data: details.data,
+     offset: correctLocalPosition,
+   );
+
+   StructuredLogger.info(
+     '🎯 DRAG EVENT RECEIVED - CanvasInteractionWidget is active!',
+     context: {
+       'operation': 'drag_acceptance_check_received',
+       'componentName': newDetails.data.componentName,
+       'globalPosition': details.offset.toString(),
+       'localPosition': correctLocalPosition.toString(),
+       'levelId': widget.levelId,
+     },
+   );
+
+   // newDetails.data is always non-null in this context, no need for null check
+   StructuredLogger.info('✅ Invalid drag data handling in onWillAccept', context: {
+     'levelId': widget.levelId,
+   });
+   // Continue with validation...
+
+   // Initialize the controller with the renderBox if it hasn't been already.
+   _controller?.initialize(renderBox);
+
+   // Start the drag operation if not already started
+   final currentState = CentralInteractionHelper.getInteractionState(ref, widget.levelId);
+   if (currentState.currentMode == canvas_controller.InteractionMode.idle) {
+     StructuredLogger.info('🔄 Starting drag operation from onWillAccept', context: {
+       'componentType': newDetails.data.componentType.toString(),
+       'levelId': widget.levelId,
+     });
+     _handleDragStart(newDetails, canvas_controller.DragOrigin.palette);
+   }
+
+   // Accept if data is valid - the controller will perform detailed validation on move.
+   final isValidData = newDetails.data.componentName.isNotEmpty;
+
+   StructuredLogger.info(
+     '✅ Drag acceptance preliminary check completed.',
+     context: {
+       'isValidData': isValidData,
+       'willAccept': isValidData,
+       'levelId': widget.levelId,
+     },
+   );
+
+   return isValidData;
+ }
+
   void _onAcceptDrag(DragTargetDetails<ComponentDragData> details) {
-    // 🔧 COORDINATE BUG FIX: DragTargetDetails.offset is already in local coordinates!
-    // No need for globalToLocal() conversion here - it causes double conversion!
-    final localPosition = details.offset; // details.offset is already local to this widget
+    // ✅ FIX: Standardize coordinate conversion - always convert from global to local
+    final localPosition = _renderBox!.globalToLocal(details.offset);
     final newDetails = DragTargetDetails<ComponentDragData>(
       data: details.data,
       offset: localPosition,
     );
 
-    // Explicit print for successful drop acceptance
-    print('🎉 DRAG ACCEPTED - Component: ${newDetails.data.componentName} at (${newDetails.offset.dx.toStringAsFixed(1)}, ${newDetails.offset.dy.toStringAsFixed(1)})');
+    // Explicit logging for successful drop acceptance
+    StructuredLogger.debug('🎉 DRAG ACCEPTED - Component: ${newDetails.data.componentName} at (${newDetails.offset.dx.toStringAsFixed(1)}, ${newDetails.offset.dy.toStringAsFixed(1)})', context: {
+      'levelId': widget.levelId,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
 
     StructuredLogger.info('🎯 ===== CANVAS DRAG ACCEPTED =====', context: {
       'componentType': newDetails.data.componentType.toString(),
@@ -272,16 +312,16 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
     });
 
     // Log state before placement
-    final gameStateBefore = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+    final gameStateBefore = CentralInteractionHelper.getGameState(ref);
     StructuredLogger.info('🎯 CANVAS DRAG ACCEPT - STATE BEFORE PLACEMENT', context: {
       'componentsBefore': gameStateBefore.grid.components.length,
       'levelId': widget.levelId,
     });
 
-    _controller.handleDragEnd(newDetails);
+    _controller?.handleDragEnd(newDetails);
 
     // Log state after placement attempt
-    final gameStateAfter = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+    final gameStateAfter = CentralInteractionHelper.getGameState(ref);
     StructuredLogger.info('🎯 CANVAS DRAG ACCEPT - STATE AFTER PLACEMENT', context: {
       'componentsAfter': gameStateAfter.grid.components.length,
       'placementSuccessful': gameStateAfter.grid.components.length > gameStateBefore.grid.components.length,
@@ -308,14 +348,14 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
   }
 
   void _handleDragStart(DragTargetDetails<ComponentDragData> details, canvas_controller.DragOrigin origin) {
-    StructuredLogger.info('🎯 ===== CANVAS DRAG START =====', context: {
-      'componentType': details.data?.componentType.toString(),
-      'componentName': details.data?.componentName,
-      'screenPosition': details.offset.toString(),
-      'origin': origin.toString(),
-      'levelId': widget.levelId,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
+   StructuredLogger.info('🎯 ===== CANVAS DRAG START =====', context: {
+     'componentType': details.data.componentType.toString(),
+     'componentName': details.data.componentName,
+     'screenPosition': details.offset.toString(),
+     'origin': origin.toString(),
+     'levelId': widget.levelId,
+     'timestamp': DateTime.now().millisecondsSinceEpoch,
+   });
 
     final renderBox = context.findRenderObject() as RenderBox?;
     StructuredLogger.debug('Canvas drag start - RenderBox check', context: {
@@ -327,7 +367,7 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
 
     if (renderBox != null) {
       _renderBox = renderBox;
-      _controller.initialize(renderBox);
+      _controller?.initialize(renderBox);
       StructuredLogger.info('Canvas RenderBox initialized for drag operation', context: {
         'renderBoxSize': renderBox.size.toString(),
         'levelId': widget.levelId,
@@ -338,24 +378,26 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
       });
     }
 
-    // Log current game state before drag
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
-    StructuredLogger.info('🎯 CANVAS DRAG START - CURRENT GAME STATE', context: {
-      'gridComponentsCount': gameState.grid.components.length,
-      'gridWidth': gameState.grid.cols,
-      'gridHeight': gameState.grid.rows,
-      'placedComponents': gameState.grid.components.values.map((c) => {
-        'id': c.id,
-        'type': c.type.toString(),
-        'position': '${c.row},${c.col}',
-      }).toList(),
-      'levelId': widget.levelId,
-    });
+    if (_controller != null) {
+      // Log current game state before drag
+      final gameState = CentralInteractionHelper.getGameState(ref);
+      StructuredLogger.info('🎯 CANVAS DRAG START - CURRENT GAME STATE', context: {
+        'gridComponentsCount': gameState.grid.components.length,
+        'gridWidth': gameState.grid.cols,
+        'gridHeight': gameState.grid.rows,
+        'placedComponents': gameState.grid.components.values.map((c) => {
+          'id': c.id,
+          'type': c.type.toString(),
+          'position': '${c.row},${c.col}',
+        }).toList(),
+        'levelId': widget.levelId,
+      });
 
-    _controller.handleDragStart(details, origin);
+      _controller!.handleDragStart(details, origin);
+    }
 
     StructuredLogger.info('🎯 CANVAS DRAG START COMPLETED', context: {
-      'componentType': details.data?.componentType.toString(),
+      'componentType': details.data.componentType.toString(),
       'levelId': widget.levelId,
     });
   }
@@ -366,11 +408,11 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
       'localPosition': details.offset.toString(), // This is actually global in DragTargetDetails
       'levelId': widget.levelId,
     });
-    _controller.handleDragUpdate(details);
+    _controller?.handleDragUpdate(details);
   }
 
   void _handleDragEnd(DragTargetDetails<ComponentDragData> details) {
-    _controller.handleDragEnd(details);
+    _controller?.handleDragEnd(details);
   }
 
 
@@ -387,12 +429,12 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
   }
 
   Widget _buildComponentPreview(canvas_controller.InteractionState state) {
-    if (state.componentData == null || state.targetPosition == null) {
+    if (state.componentData == null || state.targetPosition == null || _controller == null) {
       return const SizedBox.shrink();
     }
 
     final context = _buildCoordinateContext();
-    final localPosition = _controller.coordinateService.gridToLocal(
+    final localPosition = _controller!.coordinateService.gridToLocal(
       state.targetPosition!,
       context,
     );
@@ -436,11 +478,8 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
   }
 
   CoordinateContext _buildCoordinateContext() {
-    final viewportState = ref.read(viewportServiceProvider(widget.levelId));
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
-
-    // Create coordinate service instance
-    final coordinateService = CoordinateSystemService();
+    final viewportState = CentralInteractionHelper.getViewportState(ref, widget.levelId);
+    final gameState = CentralInteractionHelper.getGameState(ref);
 
     return CoordinateContext(
       gridDimensions: Size(gameState.grid.cols.toDouble(), gameState.grid.rows.toDouble()),

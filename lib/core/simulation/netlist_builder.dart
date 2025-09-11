@@ -1,4 +1,4 @@
-import 'package:sparkcircuit/application/enhanced_game_state.dart';
+import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/core/simulation/circuit_netlist.dart';
 
 

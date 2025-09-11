@@ -63,63 +63,30 @@ void main() {
       expect(service.state.canvasSize, Size.zero);
     });
 
-    test('should build coordinate context correctly', () {
+    test('should calculate visible grid bounds correctly', () {
       service.setCanvasSize(const Size(800, 600));
       service.updateScale(1.5);
       service.updatePan(const Offset(50, 25));
 
-      final context = service.buildCoordinateContext(
-        gridDimensions: const Size(10, 10),
-        devicePixelRatio: 2.0,
-      );
+      final bounds = service.getVisibleGridBounds();
 
-      expect(context.gridDimensions, const Size(10, 10));
-      expect(context.cellSize, 60.0);
-      expect(context.scale, 1.5);
-      expect(context.panOffset, const Offset(50, 25));
-      expect(context.canvasSize, const Size(800, 600));
-      expect(context.devicePixelRatio, 2.0);
+      // Should return a valid Rect
+      expect(bounds, isA<Rect>());
+      expect(bounds.width, greaterThan(0));
+      expect(bounds.height, greaterThan(0));
     });
 
-    test('should use default grid dimensions when not provided', () {
-      final context = service.buildCoordinateContext();
-
-      expect(context.gridDimensions, const Size(20, 15));
-    });
-
-    test('should build coordinate context with all parameters', () {
-      service.setCanvasSize(const Size(800, 600));
-      service.updateScale(1.5);
-      service.updatePan(const Offset(50, 25));
-
-      final context = service.buildCoordinateContext(
-        gridDimensions: const Size(10, 10),
-        devicePixelRatio: 2.0,
-      );
-
-      expect(context.gridDimensions, const Size(10, 10));
-      expect(context.cellSize, 60.0);
-      expect(context.scale, 1.5);
-      expect(context.panOffset, const Offset(50, 25));
-      expect(context.canvasSize, const Size(800, 600));
-      expect(context.devicePixelRatio, 2.0);
-    });
-
-    test('should handle scale transformations in coordinate context', () {
+    test('should handle scale transformations correctly', () {
       service.updateScale(2.0); // 2x zoom
 
-      final context = service.buildCoordinateContext();
-
-      // At 2x scale, coordinates should be transformed accordingly
-      expect(context.scale, 2.0);
+      // Scale should be updated
+      expect(service.state.scale, 2.0);
     });
 
-    test('should handle pan transformations in coordinate context', () {
+    test('should handle pan transformations correctly', () {
       service.updatePan(const Offset(100, 50));
 
-      final context = service.buildCoordinateContext();
-
-      expect(context.panOffset, const Offset(100, 50));
+      expect(service.state.panOffset, const Offset(100, 50));
     });
 
     test('should maintain state consistency across operations', () {

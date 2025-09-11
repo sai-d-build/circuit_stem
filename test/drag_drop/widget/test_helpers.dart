@@ -99,44 +99,6 @@ Widget wrapWithTestProviders(Widget child) {
 
 /// Mock implementations for testing
 
-class _MockGridService {
-  Offset screenToGrid(Offset screenPos, GridConfiguration config) {
-    final adjustedX = (screenPos.dx - config.panOffset.dx) / config.scale;
-    final adjustedY = (screenPos.dy - config.panOffset.dy) / config.scale;
-    final gridX = adjustedX / config.cellSize;
-    final gridY = adjustedY / config.cellSize;
-    return Offset(gridX, gridY);
-  }
-
-  Offset gridToScreen(Offset gridPos, GridConfiguration config) {
-    final screenX = (gridPos.dx * config.cellSize * config.scale) + config.panOffset.dx;
-    final screenY = (gridPos.dy * config.cellSize * config.scale) + config.panOffset.dy;
-    return Offset(screenX, screenY);
-  }
-
-  Offset snapToGrid(Offset screenPos, GridConfiguration config) {
-    final gridPos = screenToGrid(screenPos, config);
-    final snappedGridPos = Offset(
-      gridPos.dx.round().toDouble(),
-      gridPos.dy.round().toDouble(),
-    );
-    return snappedGridPos;
-  }
-
-  Offset? getValidGridPosition(Offset screenPosition, GridConfiguration config) {
-    final gridPos = screenToGrid(screenPosition, config);
-    final snappedPos = Offset(
-      gridPos.dx.floor().toDouble(),  // Use floor for boundary handling to match test expectations
-      gridPos.dy.floor().toDouble(),
-    );
-
-    if (snappedPos.dx >= 0 && snappedPos.dy >= 0 &&
-        snappedPos.dx < config.cols && snappedPos.dy < config.rows) {
-      return snappedPos;
-    }
-    return null;
-  }
-}
 
 class _MockAudioService {
   void play(String sound) {}

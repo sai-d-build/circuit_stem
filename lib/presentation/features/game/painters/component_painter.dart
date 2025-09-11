@@ -49,7 +49,7 @@ class ComponentPainter extends CustomPainter {
     // Apply rotation transformation if needed
     if (component.rotation != 0) {
       canvas.translate(center.dx, center.dy);
-      canvas.rotate(component.rotation * (GameConstants.piRadians / 180.0)); // Convert degrees to radians
+      canvas.rotate(component.rotation.toDouble() * (GameConstants.piRadians / 180.0)); // Convert degrees to radians
       canvas.translate(-center.dx, -center.dy);
     }
 

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/component_painter.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/wire_painter.dart';

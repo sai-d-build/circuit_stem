@@ -8,13 +8,11 @@ import '../interfaces/component_inventory_service.dart';
 /// Default implementation of ComponentInventoryService
 class DefaultComponentInventoryService implements ComponentInventoryService {
   final PaletteStateNotifier _paletteStateNotifier;
-  final String _levelId;
 
   DefaultComponentInventoryService({
     required PaletteStateNotifier paletteStateNotifier,
     required String levelId,
-  }) : _paletteStateNotifier = paletteStateNotifier,
-       _levelId = levelId;
+  }) : _paletteStateNotifier = paletteStateNotifier;
 
   @override
   InventoryCheckResult checkAvailability(ComponentType type) {
@@ -123,13 +121,5 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
   /// Converts ComponentType enum to string representation
   String _componentTypeToString(ComponentType type) {
     return type.toString().split('.').last;
-  }
-
-  /// Converts string representation to ComponentType enum
-  ComponentType? _stringToComponentType(String typeString) {
-    return ComponentType.values.cast<ComponentType?>().firstWhere(
-      (type) => type.toString().split('.').last == typeString,
-      orElse: () => null,
-    );
   }
 }

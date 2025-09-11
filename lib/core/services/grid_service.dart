@@ -2,77 +2,10 @@ import 'dart:ui';
 import 'dart:math' as math;
 import '../../domain/entities/core/grid.dart';
 import '../../domain/entities/core/component.dart';
+import 'unified_coordinate_service.dart';
 
-/// Configuration for grid operations
-class GridConfiguration {
-  final int rows;
-  final int cols;
-  final double cellSize;
-  final double scale;
-  final Offset panOffset;
-
-  const GridConfiguration({
-    required this.rows,
-    required this.cols,
-    required this.cellSize,
-    required this.scale,
-    required this.panOffset,
-  });
-
-  /// Create configuration from Grid entity
-  factory GridConfiguration.fromGrid(Grid grid, {
-    double cellSize = 60.0,
-    double scale = 1.0,
-    Offset panOffset = Offset.zero,
-  }) {
-    return GridConfiguration(
-      rows: grid.rows,
-      cols: grid.cols,
-      cellSize: cellSize,
-      scale: scale,
-      panOffset: panOffset,
-    );
-  }
-
-  /// Create configuration from canvas controller parameters
-  factory GridConfiguration.fromCanvas({
-    required int rows,
-    required int cols,
-    required double cellSize,
-    required double scale,
-    required Offset panOffset,
-  }) {
-    return GridConfiguration(
-      rows: rows,
-      cols: cols,
-      cellSize: cellSize,
-      scale: scale,
-      panOffset: panOffset,
-    );
-  }
-
-  /// Create a copy with modified values
-  GridConfiguration copyWith({
-    int? rows,
-    int? cols,
-    double? cellSize,
-    double? scale,
-    Offset? panOffset,
-  }) {
-    return GridConfiguration(
-      rows: rows ?? this.rows,
-      cols: cols ?? this.cols,
-      cellSize: cellSize ?? this.cellSize,
-      scale: scale ?? this.scale,
-      panOffset: panOffset ?? this.panOffset,
-    );
-  }
-
-  /// Check if grid coordinates are valid
-  static bool isValidGridCoordinate(int x, int y, int gridWidth, int gridHeight) {
-    return x >= 0 && x < gridWidth && y >= 0 && y < gridHeight;
-  }
-}
+// Re-export GridConfiguration from unified_coordinate_service for backward compatibility
+export 'unified_coordinate_service.dart' show GridConfiguration;
 
 /// Configuration for grid rendering
 class RenderConfiguration {
@@ -99,15 +32,7 @@ class RenderConfiguration {
 class GridService {
   /// Coordinate translation: screen coordinates to grid coordinates
   static Offset screenToGrid(Offset screenPos, GridConfiguration config) {
-    // Reverse pan and scale transformations
-    final adjustedX = (screenPos.dx - config.panOffset.dx) / config.scale;
-    final adjustedY = (screenPos.dy - config.panOffset.dy) / config.scale;
-
-    // Convert to grid coordinates
-    final gridX = adjustedX / config.cellSize;
-    final gridY = adjustedY / config.cellSize;
-
-    return Offset(gridX, gridY);
+    return UnifiedCoordinateService().screenToGrid(screenPos, config);
   }
 
   /// Coordinate translation: grid coordinates to screen coordinates
@@ -120,12 +45,7 @@ class GridService {
 
   /// Snap screen coordinates to nearest grid cell center
   static Offset snapToGrid(Offset screenPos, GridConfiguration config) {
-    final gridPos = screenToGrid(screenPos, config);
-    final snappedGridPos = Offset(
-      gridPos.dx.round().toDouble(),
-      gridPos.dy.round().toDouble(),
-    );
-    return snappedGridPos; // Return grid coordinates, not screen coordinates
+    return UnifiedCoordinateService().snapToGrid(screenPos, config); // Returns screen coordinates as per original implementation
   }
 
   /// Get the center position of a grid cell in screen coordinates
@@ -143,22 +63,12 @@ class GridService {
 
   /// Check if screen coordinates are within visible grid bounds
   static bool isWithinGridBounds(Offset screenPosition, GridConfiguration config) {
-    final gridPos = screenToGrid(screenPosition, config);
-    return isInGridBounds(gridPos, config);
+    return UnifiedCoordinateService().isWithinGridBounds(screenPosition, config);
   }
 
   /// Get valid grid position from screen coordinates (returns null if out of bounds)
   static Offset? getValidGridPosition(Offset screenPosition, GridConfiguration config) {
-    final gridPos = screenToGrid(screenPosition, config);
-    final snappedPos = Offset(
-      gridPos.dx.floor().toDouble(),  // Use floor instead of round for boundary handling
-      gridPos.dy.floor().toDouble(),
-    );
-
-    if (isInGridBounds(snappedPos, config)) {
-      return snappedPos;
-    }
-    return null;
+    return UnifiedCoordinateService().getValidGridPosition(screenPosition, config);
   }
 
   /// Calculate distance between two grid positions
@@ -308,15 +218,7 @@ class GridService {
 
   /// Calculate visible grid bounds based on screen size
   static Rect calculateVisibleGridBounds(GridConfiguration config, Size screenSize) {
-    final topLeft = screenToGrid(Offset.zero, config);
-    final bottomRight = screenToGrid(Offset(screenSize.width, screenSize.height), config);
-
-    return Rect.fromLTRB(
-      topLeft.dx.floor().toDouble(),
-      topLeft.dy.floor().toDouble(),
-      bottomRight.dx.ceil().toDouble(),
-      bottomRight.dy.ceil().toDouble(),
-    );
+    return UnifiedCoordinateService().calculateVisibleGridBounds(config, screenSize);
   }
 
   /// Check if a grid position is visible on screen
@@ -325,6 +227,9 @@ class GridService {
     return visibleBounds.contains(gridPosition);
   }
 }
+
+/// Core grid service with consolidated coordinate operations
+/// GridConfiguration exported from unified_coordinate_service.dart for system-wide access
 
 /// Constants used throughout grid operations
 class GridConstants {

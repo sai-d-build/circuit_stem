@@ -1,11 +1,9 @@
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import '../../../core/debug/structured_logger.dart';
 
 /// Base command interface for undo/redo functionality
 abstract class Command {
   /// Unique identifier for the command
-  String get id => runtimeType.toString() + '_' + DateTime.now().millisecondsSinceEpoch.toString();
+  String get id => '${runtimeType.toString()}_${DateTime.now().millisecondsSinceEpoch}';
 
   /// Human-readable description of the command
   String get description;

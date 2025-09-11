@@ -1,0 +1,126 @@
+{
+  "levelId": "expert_01",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "expert_01",
+    "title": "Signal Oscillator",
+    "description": "Build a Wien Bridge oscillator circuit",
+    "difficulty": "expert",
+    "estimatedTime": 900,
+    "learningObjectives": [
+      "Design oscillator circuits",
+      "Calculate gain and phase margins",
+      "Understand stability criteria"
+    ],
+    "tags": ["expert", "oscillator", "wien_bridge"],
+    "unlocksComponents": ["operational_amplifier"],
+    "prerequisites": ["advanced_01"]
+  },
+  "grid": {
+    "width": 20,
+    "height": 16,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 15.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "operational_amplifier",
+        "quantity": 1,
+        "properties": {
+          "gain": 1.0,
+          "inputImpedance": 1000000.0
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 4,
+        "properties": {
+          "resistance": 10000.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "capacitor",
+        "quantity": 2,
+        "properties": {
+          "capacitance": 100e-9,
+          "initialVoltage": 0.0
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 20,
+        "properties": {
+          "resistance": 0.01
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "oscillation_stable",
+      "type": "circuit_analysis",
+      "description": "Achieve stable sinusoidal oscillation",
+      "conditions": {
+        "oscillation_frequency": {"target": 1000, "tolerance": 50},
+        "oscillation_amplitude": {"stable": true}
+      },
+      "timeLimit": 1200,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Start with the classic Wien Bridge configuration",
+          "trigger": "time_elapsed",
+          "triggerValue": 300
+        },
+        {
+          "id": "hint_2",
+          "text": "Adjust feedback for unity gain at oscillation frequency",
+          "trigger": "time_elapsed",
+          "triggerValue": 600
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits",
+      "oscillator_conditions"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": false,
+    "steps": []
+  },
+  "scoring": {
+    "maxScore": 3000,
+    "timeBonus": {
+      "maxTime": 1200,
+      "bonusPerSecond": 1
+    },
+    "efficiencyBonus": {
+      "maxComponents": 28,
+      "bonusPerUnusedComponent": 20
+    },
+    "starThresholds": {
+      "threeStars": 2400,
+      "twoStars": 1800,
+      "oneStar": 1200
+    }
+  }
+}

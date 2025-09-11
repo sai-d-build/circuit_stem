@@ -1,0 +1,128 @@
+{
+  "levelId": "tutorial_02",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "tutorial_02",
+    "title": "Adding Resistance",
+    "description": "Learn how resistors limit current and protect components",
+    "difficulty": "tutorial",
+    "estimatedTime": 150,
+    "learningObjectives": [
+      "Understand resistor function in circuits",
+      "Learn current limiting",
+      "Observe voltage drops across resistors"
+    ],
+    "tags": ["tutorial", "resistors", "current"],
+    "unlocksComponents": ["resistor"],
+    "prerequisites": ["tutorial_01"]
+  },
+  "grid": {
+    "width": 8,
+    "height": 6,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 9.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "led",
+        "quantity": 1,
+        "properties": {
+          "forwardVoltage": 2.0,
+          "color": "red",
+          "maxCurrent": 0.02
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 1,
+        "properties": {
+          "resistance": 470.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 4,
+        "properties": {
+          "resistance": 0.01
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "limit_current",
+      "type": "component_state",
+      "description": "Limit current through the LED with a resistor",
+      "conditions": {
+        "targetComponent": "led_1",
+        "targetState": "on"
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Place the resistor in series between the battery and LED",
+          "trigger": "time_elapsed",
+          "triggerValue": 30
+        }
+      ]
+    },
+    {
+      "id": "observe_voltage_drop",
+      "type": "circuit_analysis",
+      "description": "Measure voltage drop across the resistor",
+      "conditions": {
+        "current_flow": {"minValue": 0.008, "maxValue": 0.12}
+      }
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": true,
+    "steps": [
+      {
+        "id": "step_1",
+        "title": "Place the Resistor",
+        "description": "Add a resistor to protect the LED",
+        "highlight": "component_palette",
+        "requiredAction": "place_component"
+      }
+    ]
+  },
+  "scoring": {
+    "maxScore": 1000,
+    "timeBonus": {
+      "maxTime": 300,
+      "bonusPerSecond": 2
+    },
+    "efficiencyBonus": {
+      "maxComponents": 5,
+      "bonusPerUnusedComponent": 50
+    },
+    "starThresholds": {
+      "threeStars": 800,
+      "twoStars": 600,
+      "oneStar": 400
+    }
+  }
+}

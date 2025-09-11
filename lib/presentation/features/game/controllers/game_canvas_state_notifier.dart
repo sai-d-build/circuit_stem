@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 
 /// Interaction modes for the canvas
 enum CanvasInteractionMode {
@@ -293,11 +294,14 @@ class GameCanvasStateNotifier extends StateNotifier<GameCanvasState> {
 
   // Convert screen coordinates to grid coordinates
   Offset screenToGrid(Offset screenPosition) {
-    final adjustedX = (screenPosition.dx - state.panOffset.dx) / state.scaledCellSize;
-    final adjustedY = (screenPosition.dy - state.panOffset.dy) / state.scaledCellSize;
-
-    // Return unclamped coordinates - let the caller handle bounds checking
-    return Offset(adjustedX, adjustedY);
+    final config = GridConfiguration(
+      rows: state.gridHeight,
+      cols: state.gridWidth,
+      cellSize: state.gridCellSize,
+      scale: state.scale,
+      panOffset: state.panOffset,
+    );
+    return UnifiedCoordinateService().screenToGrid(screenPosition, config);
   }
 
   // Convert grid coordinates to screen coordinates
@@ -310,56 +314,50 @@ class GameCanvasStateNotifier extends StateNotifier<GameCanvasState> {
 
   // Snap screen coordinates to grid with bounds checking
   Offset snapToGrid(Offset screenPosition) {
-    final gridPos = screenToGrid(screenPosition);
-    final snappedGridPos = Offset(
-      gridPos.dx.round().toDouble(),
-      gridPos.dy.round().toDouble(),
+    final config = GridConfiguration(
+      rows: state.gridHeight,
+      cols: state.gridWidth,
+      cellSize: state.gridCellSize,
+      scale: state.scale,
+      panOffset: state.panOffset,
     );
-
-    // Ensure snapped position is within grid bounds
-    final clampedGridPos = Offset(
-      snappedGridPos.dx.clamp(0, state.gridWidth.toDouble() - 1),
-      snappedGridPos.dy.clamp(0, state.gridHeight.toDouble() - 1),
-    );
-
-    return gridToScreen(clampedGridPos);
+    return UnifiedCoordinateService().snapToGrid(screenPosition, config);
   }
 
   // Check if screen coordinates are within grid bounds
   bool isWithinGridBounds(Offset screenPosition) {
-    final gridPos = screenToGrid(screenPosition);
-    return gridPos.dx >= 0 && gridPos.dx < state.gridWidth &&
-           gridPos.dy >= 0 && gridPos.dy < state.gridHeight;
+    final config = GridConfiguration(
+      rows: state.gridHeight,
+      cols: state.gridWidth,
+      cellSize: state.gridCellSize,
+      scale: state.scale,
+      panOffset: state.panOffset,
+    );
+    return UnifiedCoordinateService().isWithinGridBounds(screenPosition, config);
   }
 
   // Get valid grid position from screen coordinates (returns null if out of bounds)
   Offset? getValidGridPosition(Offset screenPosition) {
-    final gridPos = screenToGrid(screenPosition);
-    final snappedPos = Offset(
-      gridPos.dx.round().toDouble(),
-      gridPos.dy.round().toDouble(),
+    final config = GridConfiguration(
+      rows: state.gridHeight,
+      cols: state.gridWidth,
+      cellSize: state.gridCellSize,
+      scale: state.scale,
+      panOffset: state.panOffset,
     );
-
-    // Check if snapped position is within bounds
-    if (snappedPos.dx >= 0 && snappedPos.dx < state.gridWidth &&
-        snappedPos.dy >= 0 && snappedPos.dy < state.gridHeight) {
-      return snappedPos;
-    }
-
-    return null; // Out of bounds
+    return UnifiedCoordinateService().getValidGridPosition(screenPosition, config);
   }
 
   // Get the grid bounds visible on screen
   Rect getVisibleGridBounds() {
-    final topLeft = screenToGrid(Offset.zero);
-    final bottomRight = screenToGrid(Offset(state.canvasSize.width, state.canvasSize.height));
-
-    return Rect.fromLTRB(
-      topLeft.dx.floor().toDouble(),
-      topLeft.dy.floor().toDouble(),
-      bottomRight.dx.ceil().toDouble(),
-      bottomRight.dy.ceil().toDouble(),
+    final config = GridConfiguration(
+      rows: state.gridHeight,
+      cols: state.gridWidth,
+      cellSize: state.gridCellSize,
+      scale: state.scale,
+      panOffset: state.panOffset,
     );
+    return UnifiedCoordinateService().calculateVisibleGridBounds(config, state.canvasSize);
   }
 
   // Check if a grid position is visible

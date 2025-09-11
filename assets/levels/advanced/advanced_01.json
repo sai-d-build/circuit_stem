@@ -1,0 +1,121 @@
+{
+  "levelId": "advanced_01",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "advanced_01",
+    "title": "RLC Filter",
+    "description": "Design a low-pass RLC filter circuit",
+    "difficulty": "advanced",
+    "estimatedTime": 600,
+    "learningObjectives": [
+      "Design RLC circuits",
+      "Calculate filter characteristics",
+      "Understand frequency response"
+    ],
+    "tags": ["advanced", "filter", "rlc"],
+    "unlocksComponents": ["capacitor", "inductor"],
+    "prerequisites": ["intermediate_01"]
+  },
+  "grid": {
+    "width": 16,
+    "height": 12,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 12.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 2,
+        "properties": {
+          "resistance": 100.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "capacitor",
+        "quantity": 1,
+        "properties": {
+          "capacitance": 10e-6,
+          "initialVoltage": 0.0
+        }
+      },
+      {
+        "type": "inductor",
+        "quantity": 1,
+        "properties": {
+          "inductance": 0.01
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 12,
+        "properties": {
+          "resistance": 0.01
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "filter_design",
+      "type": "circuit_analysis",
+      "description": "Design a filter with specific frequency response",
+      "conditions": {
+        "frequency_response": {
+          "targetFrequency": 1000,
+          "targetAttenuation": -3.0
+        }
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Calculate L and C values for the desired cutoff frequency",
+          "trigger": "time_elapsed",
+          "triggerValue": 180
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits",
+      "filter_topology"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": false,
+    "steps": []
+  },
+  "scoring": {
+    "maxScore": 2000,
+    "timeBonus": {
+      "maxTime": 900,
+      "bonusPerSecond": 1
+    },
+    "efficiencyBonus": {
+      "maxComponents": 17,
+      "bonusPerUnusedComponent": 25
+    },
+    "starThresholds": {
+      "threeStars": 1600,
+      "twoStars": 1200,
+      "oneStar": 800
+    }
+  }
+}

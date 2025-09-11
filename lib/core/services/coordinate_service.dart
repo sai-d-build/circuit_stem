@@ -1,6 +1,6 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_controller.dart';
+import 'unified_coordinate_service.dart';
 
 /// Canonical coordinate conversion service that provides a single source of truth
 /// for all screen ↔ grid transformations in the application.
@@ -38,43 +38,50 @@ class CoordinateService {
 
   /// Convert screen coordinates to grid coordinates
   Offset screenToGrid(Offset screenPos) {
-    // Reverse pan and scale transformations
-    final adjustedX = (screenPos.dx - panOffset.dx) / scaledCellSize;
-    final adjustedY = (screenPos.dy - panOffset.dy) / scaledCellSize;
-
-    return Offset(adjustedX, adjustedY);
+    final config = GridConfiguration(
+      rows: gridHeight,
+      cols: gridWidth,
+      cellSize: cellSize,
+      scale: scale,
+      panOffset: panOffset,
+    );
+    return UnifiedCoordinateService().screenToGrid(screenPos, config);
   }
 
   /// Convert grid coordinates to screen coordinates
   Offset gridToScreen(Offset gridPos) {
-    final screenX = (gridPos.dx * scaledCellSize) + panOffset.dx;
-    final screenY = (gridPos.dy * scaledCellSize) + panOffset.dy;
-
-    return Offset(screenX, screenY);
+    final config = GridConfiguration(
+      rows: gridHeight,
+      cols: gridWidth,
+      cellSize: cellSize,
+      scale: scale,
+      panOffset: panOffset,
+    );
+    return UnifiedCoordinateService().gridToScreen(gridPos, config);
   }
 
   /// Snap screen coordinates to nearest grid cell center
   Offset snapScreenToGrid(Offset screenPos) {
-    final gridPos = screenToGrid(screenPos);
-    final snappedGridPos = Offset(
-      gridPos.dx.round().toDouble(),
-      gridPos.dy.round().toDouble(),
+    final config = GridConfiguration(
+      rows: gridHeight,
+      cols: gridWidth,
+      cellSize: cellSize,
+      scale: scale,
+      panOffset: panOffset,
     );
-    return gridToScreen(snappedGridPos);
+    return UnifiedCoordinateService().snapToGrid(screenPos, config);
   }
 
   /// Get valid grid position from screen coordinates (returns null if out of bounds)
   Offset? getValidGridPosition(Offset screenPosition) {
-    final gridPos = screenToGrid(screenPosition);
-    final snappedPos = Offset(
-      gridPos.dx.round().toDouble(),
-      gridPos.dy.round().toDouble(),
+    final config = GridConfiguration(
+      rows: gridHeight,
+      cols: gridWidth,
+      cellSize: cellSize,
+      scale: scale,
+      panOffset: panOffset,
     );
-
-    if (isValidGridPosition(snappedPos)) {
-      return snappedPos;
-    }
-    return null;
+    return UnifiedCoordinateService().getValidGridPosition(screenPosition, config);
   }
 
   /// Check if grid coordinates are within bounds
@@ -87,8 +94,14 @@ class CoordinateService {
 
   /// Check if screen coordinates are within grid bounds
   bool isWithinGridBounds(Offset screenPosition) {
-    final gridPos = screenToGrid(screenPosition);
-    return isValidGridPosition(gridPos);
+    final config = GridConfiguration(
+      rows: gridHeight,
+      cols: gridWidth,
+      cellSize: cellSize,
+      scale: scale,
+      panOffset: panOffset,
+    );
+    return UnifiedCoordinateService().isWithinGridBounds(screenPosition, config);
   }
 
   /// Get the center position of a grid cell in screen coordinates
@@ -98,15 +111,14 @@ class CoordinateService {
 
   /// Calculate visible grid bounds based on screen size
   Rect calculateVisibleGridBounds(Size screenSize) {
-    final topLeft = screenToGrid(Offset.zero);
-    final bottomRight = screenToGrid(Offset(screenSize.width, screenSize.height));
-
-    return Rect.fromLTRB(
-      topLeft.dx.floor().toDouble(),
-      topLeft.dy.floor().toDouble(),
-      bottomRight.dx.ceil().toDouble(),
-      bottomRight.dy.ceil().toDouble(),
+    final config = GridConfiguration(
+      rows: gridHeight,
+      cols: gridWidth,
+      cellSize: cellSize,
+      scale: scale,
+      panOffset: panOffset,
     );
+    return UnifiedCoordinateService().calculateVisibleGridBounds(config, screenSize);
   }
 
   /// Check if a grid position is visible on screen

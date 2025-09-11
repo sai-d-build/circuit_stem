@@ -1,10 +1,8 @@
-import 'dart:collection';
-import 'dart:math' as math;
-import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 
 enum PathfindingAlgorithm {
   manhattan,  // Current implementation
@@ -93,18 +91,27 @@ class PathfindingResult {
 }
 
 final pathfindingServiceProvider = Provider.family<PathfindingService, String>(
-  (ref, levelId) => PathfindingService(ref: ref, levelId: levelId),
+  (ref, levelId) {
+    MigrationTracker.markFileMigrated('pathfinding_service.dart', DateTime.now().toIso8601String());
+    return PathfindingService(
+      gameState: ref.read(unifiedGameStateProvider),
+      levelId: levelId,
+    );
+  },
 );
 
 class PathfindingService {
-  final Ref ref;
+  final dynamic gameState;
   final String levelId;
 
   // Precomputed heuristic cache for optimization
   final Map<String, double> _heuristicCache = {};
   final Map<String, List<GridPosition>> _neighborCache = {};
 
-  PathfindingService({required this.ref, required this.levelId});
+  PathfindingService({
+    required this.gameState,
+    required this.levelId,
+  });
 
   /// Main pathfinding method with algorithm selection
   Future<PathfindingResult> findPath(
@@ -331,7 +338,6 @@ class PathfindingService {
   /// Check if position is valid (within bounds and not occupied)
   bool _isValidPosition(GridPosition position, Set<GridPosition>? occupiedPositions) {
     // Get grid dimensions from game state
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
     final grid = gameState.grid;
 
     // Check bounds
@@ -367,8 +373,6 @@ class PathfindingService {
     final baseCost = _movementCost(from, to);
 
     // Add penalties for moving near certain components
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
-
     // Check if the target position has a component that affects routing
     final componentAtTarget = gameState.grid.components.values
         .where((component) => component.row == to.row && component.col == to.col)
@@ -391,7 +395,6 @@ class PathfindingService {
 
   /// Get neighboring positions that contain wires
   List<GridPosition> _getWireNeighbors(GridPosition position) {
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
     final neighbors = <GridPosition>[];
 
     final directions = [
@@ -521,7 +524,6 @@ class PathfindingService {
 
   /// Precompute heuristics for optimization
   void _precomputeHeuristics(GridPosition end) {
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
     final grid = gameState.grid;
 
     for (int row = 0; row < grid.rows; row++) {
@@ -534,7 +536,6 @@ class PathfindingService {
 
   /// Precompute neighbors for optimization
   void _precomputeNeighbors(Set<GridPosition>? occupiedPositions) {
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
     final grid = gameState.grid;
 
     for (int row = 0; row < grid.rows; row++) {

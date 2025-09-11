@@ -1,5 +1,5 @@
 
-import '../../application/enhanced_game_state.dart';
+import '../../application/states/game_state.dart';
 import 'game_command.dart';
 
 /// A command to move a component from one position to another.

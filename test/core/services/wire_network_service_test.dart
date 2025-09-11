@@ -10,11 +10,7 @@ class MockRef extends Mock implements Ref {}
 
 void main() {
   group('WireNetworkService Tests', () {
-    late WireNetworkService service;
-    late MockRef mockRef;
-
     setUp(() {
-      mockRef = MockRef();
       // Note: In a real test, you'd need to set up the provider container
     });
 
@@ -220,7 +216,7 @@ void main() {
         final startTime = DateTime.now();
 
         // Create test data
-        final positions = List.generate(
+        List.generate(
           10,
           (i) => GridPosition(row: i, col: i),
         );

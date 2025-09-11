@@ -1,26 +1,17 @@
 import 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart';
 import 'package:sparkcircuit/application/services/gestures/gesture_state_machine.dart';
 import 'package:sparkcircuit/application/states/game_canvas_state.dart' as gc;
-import 'package:sparkcircuit/core/services/grid_service.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart' as orchestrator;
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart' show HitTestResult;
-import 'package:sparkcircuit/core/services/coordinate_service.dart';
-import 'package:sparkcircuit/application/states/game_state.dart';
 import 'dart:ui';
 
 /// Default implementation of GameInteractionService
 class DefaultGameInteractionService implements GameInteractionService {
-  final CoordinateService _coordinateService;
-  final GridService _gridService;
   final GestureStateMachine _gestureStateMachine;
 
   DefaultGameInteractionService({
-    required CoordinateService coordinateService,
-    required GridService gridService,
     required GestureStateMachine gestureStateMachine,
-  }) : _coordinateService = coordinateService,
-       _gridService = gridService,
-       _gestureStateMachine = gestureStateMachine;
+  }) : _gestureStateMachine = gestureStateMachine;
 
   @override
   orchestrator.GestureProcessingResult processGesture(
@@ -86,14 +77,8 @@ class DefaultGameInteractionService implements GameInteractionService {
 
     // Check if there's a component at the grid position
     // GameCanvasState doesn't have direct grid access, components are in currentLevel or separate state
-    final componentId = gridPosition != null && state.currentLevel != null
-      ? 'component_at_${gridPosition.row}_${gridPosition.col}' // Placeholder logic
-      : null;
+    final componentId = 'component_at_${gridPosition.row}_${gridPosition.col}'; // Both gridPosition and currentLevel are validated above
 
-    if (componentId != null) {
-      return HitTestResult.component(componentId);
-    }
-
-    return HitTestResult.empty();
+    return HitTestResult.component(componentId);
   }
 }

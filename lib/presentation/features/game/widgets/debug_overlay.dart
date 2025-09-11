@@ -19,7 +19,6 @@ class DebugOverlay extends StatefulWidget {
   @override
   State<DebugOverlay> createState() => _DebugOverlayState();
 
-  @override
   Widget build(BuildContext context) {
     if (!isVisible) return const SizedBox.shrink();
 

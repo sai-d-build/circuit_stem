@@ -24,7 +24,7 @@ void main() {
 
       // Test with very large coordinates
       final largePos = const Offset(999999, 999999);
-      final gridPos = coordinateService.screenToGrid(largePos, context, mockRenderBox);
+      final gridPos = coordinateService.screenToGrid(largePos, context, renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       expect(gridPos!.row, 999999);
@@ -45,7 +45,7 @@ void main() {
 
       // Test negative coordinates
       final negativePos = const Offset(-100, -50);
-      final gridPos = coordinateService.screenToGrid(negativePos, context, mockRenderBox);
+      final gridPos = coordinateService.screenToGrid(negativePos, context, renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       expect(gridPos!.row, -1); // -50 / 50 = -1
@@ -66,7 +66,7 @@ void main() {
 
       // Test zero coordinates
       final zeroPos = Offset.zero;
-      final gridPos = coordinateService.screenToGrid(zeroPos, context, mockRenderBox);
+      final gridPos = coordinateService.screenToGrid(zeroPos, context, renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       expect(gridPos!.row, 0);
@@ -74,7 +74,7 @@ void main() {
 
       // Test very small positive values
       final tinyPos = const Offset(0.001, 0.001);
-      final tinyGridPos = coordinateService.screenToGrid(tinyPos, context, mockRenderBox);
+      final tinyGridPos = coordinateService.screenToGrid(tinyPos, context, renderBox: mockRenderBox);
 
       expect(tinyGridPos, isNotNull);
       expect(tinyGridPos!.row, 0);
@@ -97,7 +97,7 @@ void main() {
       final smallScalePos = coordinateService.screenToGrid(
         const Offset(500, 375),
         tinyScaleContext,
-        mockRenderBox,
+        renderBox: mockRenderBox,
       );
 
       expect(smallScalePos, isNotNull);
@@ -116,7 +116,7 @@ void main() {
       final largeScalePos = coordinateService.screenToGrid(
         const Offset(500, 375),
         largeScaleContext,
-        mockRenderBox,
+        renderBox: mockRenderBox,
       );
 
       expect(largeScalePos, isNotNull);
@@ -137,7 +137,7 @@ void main() {
 
       // Test with values that might cause precision issues
       final precisionPos = const Offset(1.1, 2.2);
-      final gridPos = coordinateService.screenToGrid(precisionPos, context, mockRenderBox);
+      final gridPos = coordinateService.screenToGrid(precisionPos, context, renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       // Should not crash due to floating-point precision
@@ -156,7 +156,7 @@ void main() {
       final mockRenderBox = MockRenderBox();
 
       final screenPos = const Offset(500, 375);
-      final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+      final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       // Should handle large pan offsets without overflow
@@ -176,7 +176,7 @@ void main() {
       final mockRenderBox = MockRenderBox();
 
       final screenPos = const Offset(500, 375);
-      final gridPos = coordinateService.screenToGrid(screenPos, zeroGridContext, mockRenderBox);
+      final gridPos = coordinateService.screenToGrid(screenPos, zeroGridContext, renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       // Should handle zero-sized grids gracefully
@@ -191,7 +191,7 @@ void main() {
         devicePixelRatio: 1.0,
       );
 
-      final largeGridPos = coordinateService.screenToGrid(screenPos, largeGridContext, mockRenderBox);
+      final largeGridPos = coordinateService.screenToGrid(screenPos, largeGridContext, renderBox: mockRenderBox);
 
       expect(largeGridPos, isNotNull);
       expect(largeGridPos!.row, 8); // 375 / 50 = 7.5 -> 8 (rounded)
@@ -214,7 +214,7 @@ void main() {
       final tinyCellPos = coordinateService.screenToGrid(
         const Offset(500, 375),
         tinyCellContext,
-        mockRenderBox,
+        renderBox: mockRenderBox,
       );
 
       expect(tinyCellPos, isNotNull);
@@ -234,7 +234,7 @@ void main() {
       final largeCellPos = coordinateService.screenToGrid(
         const Offset(500, 375),
         largeCellContext,
-        mockRenderBox,
+        renderBox: mockRenderBox,
       );
 
       expect(largeCellPos, isNotNull);
@@ -259,7 +259,7 @@ void main() {
         );
 
         final screenPos = const Offset(500, 375);
-        final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+        final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
 
         expect(gridPos, isNotNull);
         // Device pixel ratio should not affect grid calculations
@@ -283,7 +283,7 @@ void main() {
         );
 
         final screenPos = Offset(100 + i * 5, 100 + i * 3);
-        final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+        final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
 
         expect(gridPos, isNotNull);
         // Should handle rapidly changing contexts without issues
@@ -305,7 +305,7 @@ void main() {
       // Create many cache entries
       for (int i = 0; i < 10000; i++) {
         final screenPos = Offset(i % 1000, (i ~/ 1000) % 1000);
-        coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+        coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
       }
 
       // System should handle large cache without memory issues
@@ -331,7 +331,7 @@ void main() {
       for (int i = 0; i < 100; i++) {
         futures.add(Future(() {
           final screenPos = Offset(100 + i * 8, 100 + i * 5);
-          final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+          final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
           expect(gridPos, isNotNull);
         }));
       }

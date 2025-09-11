@@ -1,0 +1,139 @@
+{
+  "levelId": "advanced_04",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "advanced_04",
+    "title": "Active Filter Design",
+    "description": "Design an active low-pass filter with operational amplification",
+    "difficulty": "advanced",
+    "estimatedTime": 700,
+    "learningObjectives": ["Active filters", "Op-amp circuits", "Frequency response", "Amplification"],
+    "tags": ["advanced", "filter", "op-amp", "amplification"],
+    "unlocksComponents": ["operational_amplifier"],
+    "prerequisites": ["advanced_03"]
+  },
+  "grid": {
+    "width": 18,
+    "height": 12,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 2,
+        "properties": {
+          "voltage": 15.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "operational_amplifier",
+        "quantity": 1,
+        "properties": {
+          "gain": 2.0,
+          "inputImpedance": 1000000.0
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 6,
+        "properties": {
+          "resistance": 10000.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "capacitor",
+        "quantity": 3,
+        "properties": {
+          "capacitance": 100e-9,
+          "initialVoltage": 0.0
+        }
+      },
+      {
+        "type": "inductor",
+        "quantity": 2,
+        "properties": {
+          "inductance": 0.01
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 20,
+        "properties": {
+          "resistance": 0.01
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "active_filter_design",
+      "type": "circuit_analysis",
+      "description": "Design an active filter with specific gain and cutoff frequency",
+      "conditions": {
+        "frequency_response": {
+          "targetFrequency": 1000,
+          "targetAttenuation": -6.0,
+          "targetGain": 6.0
+        }
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Use the op-amp in non-inverting configuration for the filter",
+          "trigger": "time_elapsed",
+          "triggerValue": 180
+        },
+        {
+          "id": "hint_2",
+          "text": "Calculate R and C values to achieve the desired filter characteristics",
+          "trigger": "time_elapsed",
+          "triggerValue": 360
+        },
+        {
+          "id": "hint_3",
+          "text": "Consider the feedback resistors for the required gain",
+          "trigger": "time_elapsed",
+          "triggerValue": 540
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits",
+      "opamp_stability",
+      "filter_topology"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": false,
+    "steps": []
+  },
+  "scoring": {
+    "maxScore": 2200,
+    "timeBonus": {
+      "maxTime": 1000,
+      "bonusPerSecond": 1
+    },
+    "efficiencyBonus": {
+      "maxComponents": 27,
+      "bonusPerUnusedComponent": 20
+    },
+    "starThresholds": {
+      "threeStars": 1700,
+      "twoStars": 1300,
+      "oneStar": 900
+    }
+  }
+}

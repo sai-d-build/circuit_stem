@@ -1,9 +1,9 @@
-import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'secure_coordinate_validator.dart';
 import '../../domain/entities/core/component.dart';
 import '../../../presentation/features/game/controllers/game_canvas_controller.dart';
+import '../migration/migration_tracker.dart';
 
 // Cache entry classes for performance optimization
 class _CacheEntry {
@@ -75,7 +75,10 @@ class GridDensityConfig {
 class UnifiedCoordinateService {
   static final UnifiedCoordinateService _instance = UnifiedCoordinateService._();
   factory UnifiedCoordinateService() => _instance;
-  UnifiedCoordinateService._();
+  UnifiedCoordinateService._() {
+    // Mark this file as migrated to unified provider system
+    MigrationTracker.markFileMigrated('lib/core/services/unified_coordinate_service.dart', DateTime.now().toIso8601String());
+  }
 
   // Performance optimization: LRU cache for coordinate transformations
   final Map<String, _CacheEntry> _coordinateCache = {};
@@ -109,13 +112,6 @@ class UnifiedCoordinateService {
         _validationCache.remove(key);
       }
     }
-  }
-
-  // Clean expired cache entries
-  void _cleanExpiredCache() {
-    final now = DateTime.now();
-    _coordinateCache.removeWhere((key, entry) => now.difference(entry.timestamp) > _cacheExpiration);
-    _validationCache.removeWhere((key, entry) => now.difference(entry.timestamp) > _cacheExpiration);
   }
 
   /// Coordinate translation: screen coordinates to grid coordinates

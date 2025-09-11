@@ -1,0 +1,117 @@
+{
+  "levelId": "advanced_05",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "advanced_05",
+    "title": "Bandpass Filter",
+    "description": "Design a bandpass filter for selective frequency transmission",
+    "difficulty": "advanced",
+    "estimatedTime": 600,
+    "learningObjectives": ["Bandpass filters", "Multiple feedback loops", "Center frequency design"],
+    "tags": ["advanced", "bandpass", "filter", "multiple_feedback"],
+    "unlocksComponents": [],
+    "prerequisites": ["advanced_04"]
+  },
+  "grid": {
+    "width": 16,
+    "height": 14,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 12.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 6,
+        "properties": {
+          "resistance": 10000.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "capacitor",
+        "quantity": 3,
+        "properties": {
+          "capacitance": 10e-9,
+          "initialVoltage": 0.0
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 18,
+        "properties": {
+          "resistance": 0.01
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "bandpass_design",
+      "type": "circuit_analysis",
+      "description": "Create a bandpass filter with specific center frequency and bandwidth",
+      "conditions": {
+        "frequency_response": {
+          "centerFrequency": 1000,
+          "bandwidth": 200,
+          "passBandGain": 0.7
+        }
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Combine high-pass and low-pass sections for bandpass characteristics",
+          "trigger": "time_elapsed",
+          "triggerValue": 180
+        },
+        {
+          "id": "hint_2",
+          "text": "Choose capacitor ratios to achieve the desired bandwidth",
+          "trigger": "time_elapsed",
+          "triggerValue": 360
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits",
+      "bandpass_topology"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": false,
+    "steps": []
+  },
+  "scoring": {
+    "maxScore": 2000,
+    "timeBonus": {
+      "maxTime": 900,
+      "bonusPerSecond": 1
+    },
+    "efficiencyBonus": {
+      "maxComponents": 23,
+      "bonusPerUnusedComponent": 25
+    },
+    "starThresholds": {
+      "threeStars": 1600,
+      "twoStars": 1200,
+      "oneStar": 800
+    }
+  }
+}

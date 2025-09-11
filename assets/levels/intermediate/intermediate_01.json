@@ -1,0 +1,118 @@
+{
+  "levelId": "intermediate_01",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "intermediate_01",
+    "title": "RC Circuit",
+    "description": "Build an RC circuit and understand charging/discharging",
+    "difficulty": "intermediate",
+    "estimatedTime": 300,
+    "learningObjectives": [
+      "Understand capacitor charging curves",
+      "Calculate time constants",
+      "Observe RC circuit behavior"
+    ],
+    "tags": ["intermediate", "capacitor", "time_constant"],
+    "unlocksComponents": ["capacitor", "switch"],
+    "prerequisites": ["beginner_02"]
+  },
+  "grid": {
+    "width": 14,
+    "height": 10,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 12.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "capacitor",
+        "quantity": 1,
+        "properties": {
+          "capacitance": 1000e-6,
+          "initialVoltage": 0.0
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 1,
+        "properties": {
+          "resistance": 1000.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "switch",
+        "quantity": 1,
+        "properties": {
+          "initialState": "open"
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 10,
+        "properties": {
+          "resistance": 0.01
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "capacitor_charged",
+      "type": "component_state",
+      "description": "Charge the capacitor to near battery voltage",
+      "conditions": {
+        "targetComponent": "capacitor_1",
+        "capacitorVoltage": {"minValue": 9.0}
+      },
+      "timeLimit": 600,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Connect R and C in series with battery and switch",
+          "trigger": "time_elapsed",
+          "triggerValue": 120
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": false,
+    "steps": []
+  },
+  "scoring": {
+    "maxScore": 1500,
+    "timeBonus": {
+      "maxTime": 600,
+      "bonusPerSecond": 1
+    },
+    "efficiencyBonus": {
+      "maxComponents": 14,
+      "bonusPerUnusedComponent": 30
+    },
+    "starThresholds": {
+      "threeStars": 1200,
+      "twoStars": 900,
+      "oneStar": 600
+    }
+  }
+}

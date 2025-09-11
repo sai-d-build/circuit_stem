@@ -1,0 +1,167 @@
+{
+  "levelId": "tutorial_05",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "tutorial_05",
+    "title": "Circuit Testing",
+    "description": "Learn to test and verify circuit functionality",
+    "difficulty": "tutorial",
+    "estimatedTime": 160,
+    "learningObjectives": ["Circuit testing", "Measurement techniques", "Debugging"],
+    "tags": ["tutorial", "testing", "debugging"],
+    "unlocksComponents": ["switch"],
+    "prerequisites": ["tutorial_04"]
+  },
+  "grid": {
+    "width": 10,
+    "height": 8,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 2,
+        "properties": {
+          "voltage": 9.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "led",
+        "quantity": 2,
+        "properties": {
+          "forwardVoltage": 2.0,
+          "color": "red",
+          "maxCurrent": 0.02
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 2,
+        "properties": {
+          "resistance": 470.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "switch",
+        "quantity": 1,
+        "properties": {
+          "initialState": "open"
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 8,
+        "properties": {
+          "resistance": 0.01
+        }
+      },
+      {
+        "type": "capacitor",
+        "quantity": 1,
+        "properties": {
+          "capacitance": 1000e-6,
+          "initialVoltage": 0.0
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "switch_test",
+      "type": "component_state",
+      "description": "Test the switch by turning it on and off",
+      "conditions": {
+        "deviceTest": {
+          "switch_1": "open"
+        }
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Build a circuit with the switch, then test it by toggling the switch",
+          "trigger": "time_elapsed",
+          "triggerValue": 45
+        },
+        {
+          "id": "hint_2",
+          "text": "The LED should only light when the switch is closed",
+          "trigger": "time_elapsed",
+          "triggerValue": 90
+        }
+      ]
+    },
+    {
+      "id": "dual_battery_test",
+      "type": "circuit_analysis",
+      "description": "Test circuit with parallel battery configuration",
+      "conditions": {
+        "current_flow": {
+          "minValue": 0.015,
+          "maxValue": 0.025
+        },
+        "voltage_drop": {
+          "maxValue": 7.0
+        }
+      }
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits",
+      "switch_functionality"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": true,
+    "steps": [
+      {
+        "id": "step_1",
+        "title": "Build Test Circuit",
+        "description": "Create a circuit for testing the switch",
+        "highlight": "component_palette",
+        "requiredAction": "build_test_circuit"
+      },
+      {
+        "id": "step_2",
+        "title": "Test Functionality",
+        "description": "Toggle the switch and observe the results",
+        "highlight": "switch_component",
+        "requiredAction": "test_switch"
+      },
+      {
+        "id": "step_3",
+        "title": "Debug Issues",
+        "description": "Identify and fix any circuit problems",
+        "highlight": "circuit_debug",
+        "requiredAction": "debug_circuit"
+      }
+    ]
+  },
+  "scoring": {
+    "maxScore": 1200,
+    "timeBonus": {
+      "maxTime": 400,
+      "bonusPerSecond": 2
+    },
+    "efficiencyBonus": {
+      "maxComponents": 13,
+      "bonusPerUnusedComponent": 35
+    },
+    "starThresholds": {
+      "threeStars": 950,
+      "twoStars": 750,
+      "oneStar": 550
+    }
+  }
+}

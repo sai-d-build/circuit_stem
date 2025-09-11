@@ -1,8 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
+import 'package:sparkcircuit/application/use_cases/create_component_use_case.dart';
+import 'package:sparkcircuit/application/use_cases/notifier_integrated_use_case.dart';
+import 'package:sparkcircuit/application/transaction.dart';
 
 enum ComponentAction {
   place,
@@ -39,14 +42,26 @@ class ComponentActionResult {
 }
 
 final componentActionServiceProvider = Provider.family<ComponentActionService, String>(
-  (ref, levelId) => ComponentActionService(ref: ref, levelId: levelId),
+  (ref, levelId) {
+    MigrationTracker.markFileMigrated('component_action_service.dart', DateTime.now().toIso8601String());
+    return ComponentActionService(
+      gameNotifier: ref.read(unifiedGameStateProvider.notifier),
+      gameState: ref.read(unifiedGameStateProvider),
+      levelId: levelId,
+    );
+  },
 );
 
 class ComponentActionService {
-  final Ref ref;
+  final dynamic gameNotifier; // 🔧 INJECTED: No longer accessing provider directly
+  final dynamic gameState;    // 🔧 INJECTED: Passed at construction time
   final String levelId;
 
-  ComponentActionService({required this.ref, required this.levelId});
+  ComponentActionService({
+    required this.gameNotifier,
+    required this.gameState,
+    required this.levelId,
+  });
 
   Future<ComponentActionResult> executeAction(
     ComponentAction action,
@@ -54,15 +69,31 @@ class ComponentActionService {
     GridPosition? targetPosition,
   ) async {
     try {
-      final gameNotifier = ref.read(providers_v3.enhancedGameStateNotifierProvider.notifier);
+      // 🔧 DECOUPLED: Using injected gameNotifier instead of ref.read()
+      final gameNotifier = this.gameNotifier;
 
       switch (action) {
         case ComponentAction.place:
           if (targetPosition == null) {
             return ComponentActionResult.failure('Target position required for placement');
           }
-          gameNotifier.placeComponent(component.type, targetPosition.row, targetPosition.col);
-          return ComponentActionResult.success(component);
+          // Use centralized CreateComponentUseCase instead of direct notifier call
+          final transaction = GameTransaction();
+          final result = await CreateComponentUseCase.placeComponent(
+            component.type,
+            targetPosition.row,
+            targetPosition.col,
+            _createMinimalNotifierContext(gameNotifier),
+            transaction,
+          );
+
+          if (result.isSuccess) {
+            await transaction.commit();
+            return ComponentActionResult.success(component);
+          } else {
+            transaction.rollback();
+            return ComponentActionResult.failure(result.error ?? 'Failed to place component');
+          }
 
         case ComponentAction.delete:
           // TODO: Implement delete functionality in game engine
@@ -93,21 +124,50 @@ class ComponentActionService {
 
   Future<ComponentActionResult> placeComponent(ComponentType type, GridPosition position) async {
     try {
-      final gameNotifier = ref.read(providers_v3.enhancedGameStateNotifierProvider.notifier);
-      gameNotifier.placeComponent(type, position.row, position.col);
+      // 🔧 DECOUPLED: Using injected gameNotifier instead of ref.read()
+      final gameNotifier = this.gameNotifier;
 
-      // Create a component model for the result
-      final component = ComponentModel(
-        id: 'temp_${position.row}_${position.col}',
-        type: type,
-        row: position.row,
-        col: position.col,
+      // Use the centralized CreateComponentUseCase static method
+      final transaction = GameTransaction();
+      final result = await CreateComponentUseCase.placeComponent(
+        type,
+        position.row,
+        position.col,
+        _createMinimalNotifierContext(gameNotifier),
+        transaction,
       );
 
-      return ComponentActionResult.success(component);
+      if (result.isSuccess) {
+        await transaction.commit();
+
+        // Create a component model for the result
+        final component = ComponentModel(
+          id: 'placed_${position.row}_${position.col}',
+          type: type,
+          row: position.row,
+          col: position.col,
+        );
+
+        return ComponentActionResult.success(component);
+      } else {
+        transaction.rollback();
+        return ComponentActionResult.failure(result.error ?? 'Failed to place component');
+      }
     } catch (e) {
       return ComponentActionResult.failure('Failed to place component: $e');
     }
+  }
+
+  /// Create minimal NotifierContext with just the grid notifier
+  NotifierContext _createMinimalNotifierContext(dynamic gameNotifier) {
+    return NotifierContext(
+      grid: gameNotifier,
+      history: null,
+      progress: null,
+      selection: null,
+      interaction: null,
+      paletteManager: null,
+    );
   }
 
   Future<ComponentActionResult> validateAction(
@@ -122,7 +182,8 @@ class ComponentActionService {
           return ComponentActionResult.failure('Target position required');
         }
         // Check if position is occupied
-        final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+        // 🔧 DECOUPLED: Using injected gameState instead of ref.read()
+        final gameState = this.gameState;
         final occupied = gameState.grid.components.values.any(
           (c) => c.row == targetPosition.row && c.col == targetPosition.col
         );

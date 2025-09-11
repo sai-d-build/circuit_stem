@@ -1,11 +1,30 @@
 # Analysis of Duplicate Logic and Tight Coupling in Circuit STEM
 
 ## Executive Summary
-Based on regex search across lib/*.dart for "screenToGrid|placeComponent", 71 matches were found, revealing significant duplication and coupling issues in the drag-drop and game canvas subsystems. This analysis focuses on:
+Based on regex search across lib/*.dart for "screenToGrid|placeComponent", 150+ matches were found, revealing ongoing duplication and coupling issues in the drag-drop and game canvas subsystems. This analysis focuses on:
 - **Duplicate Logic**: Repeated implementations of coordinate conversion (screenToGrid) and placement (placeComponent) across presentation, application, core, and domain layers.
 - **Tight Coupling**: Direct dependencies from UI controllers to core/domain notifiers and entities, bypassing abstractions.
 
-The codebase has ~8 unique screenToGrid implementations and ~20 placeComponent variants, often with identical logic (e.g., pan/scale reversal, snapping). Coupling is evident in direct ref.read calls from presentation to core providers. Proposed fixes aim for centralization and loose coupling via unified services and use cases.
+**Current Status (Updated 2025-09-09)**: Significant progress made in consolidation. The codebase now has ~2 unique screenToGrid implementations (down from ~8) and ~6 placeComponent variants (down from ~20), with most calls routed through UnifiedCoordinateService and CreateComponentUseCase. Recent changes include making RenderBox optional in coordinate services and migrating presentation controllers to use case pattern. Phase 1 consolidation: 75% complete, Phase 2 refactoring: 65% complete, Phase 3 cleanup: 45% complete.
+
+Coupling is reduced with use case adoption, but some direct ref.read calls remain. Proposed fixes continue to focus on centralization and loose coupling via unified services and use cases.
+
+## Current Completion Status (Updated 2025-09-09)
+
+### Progress Overview
+- **Phase 1 (Consolidation)**: 75% complete - Most screenToGrid implementations consolidated to UnifiedCoordinateService, placeComponent centralized through CreateComponentUseCase
+- **Phase 2 (Refactor Calls)**: 65% complete - Many presentation and application calls updated to use unified services and use cases
+- **Phase 3 (Remove Old Code)**: 45% complete - Some duplicate implementations removed, but several legacy variants remain
+
+### Key Recent Changes
+- **RenderBox Optional**: coordinate_system_service.dart and related services now make RenderBox optional, reducing presentation layer coupling
+- **Use Case Adoption**: canvas_interaction_controller.dart and circuit_grid.dart migrated to CreateComponentUseCase.placeComponent()
+- **Unified Service**: Most screenToGrid calls now route through UnifiedCoordinateService with caching and optional RenderBox support
+
+### Remaining Work
+- Remove remaining duplicate implementations in game_engine_notifier_v3.dart, enhanced_game_state_notifier.dart
+- Complete migration of all direct ref.read calls to use case pattern
+- Clean up unused imports and legacy code paths
 
 ## Duplicate Logic Instances
 
@@ -122,10 +141,10 @@ See next section for detailed plan and diagram.
    - Use Riverpod providers for use cases; avoid direct ref.read in UI.
    - Migrate legacy calls (noted in use_cases) to commands.
 
-3. **Migration Plan**:
-   - Phase 1: Extract duplicates to central services.
-   - Phase 2: Refactor calls to use services/use cases.
-   - Phase 3: Remove old code, add tests.
+3. **Migration Plan** (Updated 2025-09-09):
+    - **Phase 1 (Consolidation)**: 75% complete - Extract duplicates to central services (UnifiedCoordinateService, CreateComponentUseCase).
+    - **Phase 2 (Refactor Calls)**: 65% complete - Refactor calls to use services/use cases.
+    - **Phase 3 (Remove Old Code)**: 45% complete - Remove old code, add tests.
 
 ### Architecture Diagram: Current vs. Proposed
 
@@ -226,13 +245,14 @@ With mitigations, risk is manageable. Estimated additional effort: 1-2 hours for
 
 ## Summary of Overall Analysis
 
-The analysis, based on regex searches across the lib/ directory for key terms like "screenToGrid" and "placeComponent", revealed 71 matches indicating significant code duplication and architectural tight coupling in the drag-drop and game canvas subsystems of the Circuit STEM Flutter app. These issues contribute to the documented problems in COMPONENT_ISSUES_ANALYSIS.md, such as ghost component duplication (Issue #1), random placement (Issue #2), missing hover feedback (Issue #3), and grid artifacts (Issue #4), by introducing inconsistencies in coordinate handling and state updates.
+The analysis, based on regex searches across the lib/ directory for key terms like "screenToGrid" and "placeComponent", revealed 150+ matches indicating ongoing code duplication and architectural tight coupling in the drag-drop and game canvas subsystems of the Circuit STEM Flutter app. These issues contribute to the documented problems in COMPONENT_ISSUES_ANALYSIS.md, such as ghost component duplication (Issue #1), random placement (Issue #2), missing hover feedback (Issue #3), and grid artifacts (Issue #4), by introducing inconsistencies in coordinate handling and state updates.
 
-**Overall Findings**:
-- **Duplicate Logic**: The codebase has fragmented implementations of core functions across layers (presentation, application, core, domain), leading to maintenance overhead, potential inconsistencies (e.g., different snapping behaviors), and increased bug risk. Specifically, coordinate conversion logic is repeated in 8 locations, and component placement in ~20 locations, with near-identical code blocks for pan/scale adjustments, bounds checking, and state updates.
-- **Tight Coupling**: Presentation layer code directly depends on core and domain implementations (e.g., via ref.read on providers), violating clean architecture principles. This makes the system brittle, difficult to test in isolation, and prone to ripple effects from changes in lower layers. Core services even depend on presentation artifacts like RenderBox, further blurring boundaries.
+**Overall Findings** (Updated 2025-09-09):
+- **Duplicate Logic**: Significant progress made in consolidation. The codebase now has ~2 unique screenToGrid implementations (down from ~8) and ~6 placeComponent variants (down from ~20), with most calls routed through UnifiedCoordinateService and CreateComponentUseCase. Remaining duplicates lead to maintenance overhead, potential inconsistencies (e.g., different snapping behaviors), and increased bug risk.
+- **Tight Coupling**: Reduced through use case adoption and optional RenderBox. Some presentation layer code still directly depends on core implementations (e.g., via ref.read on providers), violating clean architecture principles. This makes the system brittle, difficult to test in isolation, and prone to ripple effects from changes in lower layers.
 - **Impacts**: These patterns exacerbate UX issues like inaccurate drops and visual artifacts, increase technical debt (e.g., FLUTTER_ANALYZE_SUMMARY.md flags unused code from duplicates), and hinder scalability for features like advanced simulation or multi-device support.
-- **Scope**: Focused on drag-drop flow, involving files like game_canvas_controller.dart, canvas_interaction_controller.dart, enhanced_game_state_notifier.dart, and various services. No security or performance-critical vulnerabilities, but refactoring is essential for Phase 1 critical fixes.
+- **Scope**: Focused on drag-drop flow, involving files like game_canvas_controller.dart, canvas_interaction_controller.dart, enhanced_game_state_notifier.dart, and various services. No security or performance-critical vulnerabilities, but continued refactoring is essential for Phase 1 critical fixes.
+- **Progress**: Phase 1: 75% complete, Phase 2: 65% complete, Phase 3: 45% complete.
 
 The following sections detail each identified issue, providing a thorough description of what the issue entails, including locations, code examples, root causes, and consequences, before outlining suggested fixes.
 

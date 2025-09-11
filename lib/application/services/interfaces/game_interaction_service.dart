@@ -1,4 +1,3 @@
-import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart';
 
 /// Service interface for handling game interactions and gestures

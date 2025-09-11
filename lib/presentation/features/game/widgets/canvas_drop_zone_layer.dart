@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
@@ -26,21 +26,17 @@ class CanvasDropZoneLayer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     StructuredLogger.trace('CanvasDropZoneLayer: Building drop zone layer', context: {
       'dragData_componentName': dragData?.componentName ?? 'null',
-      'dragData_componentType': dragData?.componentType?.toString() ?? 'null',
+      'dragData_componentType': dragData?.componentType.toString() ?? 'null',
       'dragData_cost': dragData?.cost ?? 0,
-      'context_available': context != null,
     });
 
-    final gameState = ref.watch(providers_v3.enhancedGameStateNotifierProvider);
-    final paletteState = ref.watch(paletteStateProvider('default')); // TODO: Use proper levelId
+    MigrationTracker.markFileMigrated('canvas_drop_zone_layer.dart', DateTime.now().toIso8601String());
+    final gameState = ref.watch(unifiedGameStateProvider);
     final circuitColors = Theme.of(context).extension<CircuitColorScheme>() ??
                           _getDefaultCircuitColors();
 
     StructuredLogger.debug('CanvasDropZoneLayer: State watchers resolved', context: {
-      'gameState_available': gameState != null,
       'gameState_grid_components_count': gameState.grid.components.length,
-      'paletteState_available': paletteState != null,
-      'circuitColors_available': circuitColors != null,
     });
 
     if (dragData == null) {
@@ -86,8 +82,8 @@ class CanvasDropZoneLayer extends ConsumerWidget {
                   rows: gameState.grid.rows,
                   cols: gameState.grid.cols,
                   cellSize: 60.0,
-                  scale: 1.0,
-                  panOffset: Offset.zero,
+                  scale: 1.0, // Using default scale to match highlighter
+                  panOffset: Offset.zero, // Using default pan to match highlighter
                 ),
                 hoveredCellIndex: hoveredCellIndex,
               ),

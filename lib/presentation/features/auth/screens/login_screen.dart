@@ -8,6 +8,31 @@ import 'package:go_router/go_router.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/social_login_button.dart';
 
+// ✅ CLEAN ARCHITECTURE: Authentication service for login
+class AuthScreenService {
+  // Placeholder for future auth service injection
+  // When auth service is implemented, it will be injected here
+
+  Future<void> signInWithEmail(String email, String password) async {
+    // TODO: Implement when auth service is available
+    await Future.delayed(const Duration(seconds: 2));
+  }
+
+  Future<void> signInWithGoogle() async {
+    // TODO: Implement when auth service is available
+    await Future.delayed(const Duration(seconds: 2));
+  }
+
+  Future<void> signInWithApple() async {
+    // TODO: Implement when auth service is available
+    await Future.delayed(const Duration(seconds: 2));
+  }
+}
+
+final authScreenServiceProvider = Provider<AuthScreenService>((ref) {
+  return AuthScreenService();
+});
+
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -39,15 +64,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      // TODO: Implement actual authentication
-      // final authService = ref.read(authServiceProvider);
-      // await authService.signInWithEmail(
-      //   _emailController.text.trim(),
-      //   _passwordController.text,
-      // );
-
-      // For now, simulate successful login
-      await Future.delayed(const Duration(seconds: 2));
+      // ✅ CLEAN ARCHITECTURE: Use injected auth service
+      final authService = ref.read(authScreenServiceProvider);
+      await authService.signInWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
 
       if (mounted) {
         context.go('/');
@@ -70,11 +92,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      // TODO: Implement Google Sign-In
-      // final authService = ref.read(authServiceProvider);
-      // await authService.signInWithGoogle();
-
-      await Future.delayed(const Duration(seconds: 2));
+      // ✅ CLEAN ARCHITECTURE: Use injected auth service
+      final authService = ref.read(authScreenServiceProvider);
+      await authService.signInWithGoogle();
 
       if (mounted) {
         context.go('/');
@@ -97,11 +117,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      // TODO: Implement Apple Sign-In
-      // final authService = ref.read(authServiceProvider);
-      // await authService.signInWithApple();
-
-      await Future.delayed(const Duration(seconds: 2));
+      // ✅ CLEAN ARCHITECTURE: Use injected auth service
+      final authService = ref.read(authScreenServiceProvider);
+      await authService.signInWithApple();
 
       if (mounted) {
         context.go('/');

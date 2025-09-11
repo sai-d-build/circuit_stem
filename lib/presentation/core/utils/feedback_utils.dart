@@ -3,6 +3,45 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../application/audio_manager.dart';
 
+// ✅ CLEAN ARCHITECTURE: Audio service for feedback
+class AudioFeedbackService {
+  final AudioManager _audioManager;
+
+  AudioFeedbackService(this._audioManager);
+
+  void playSound(SoundType type) {
+    String audioPath;
+    switch (type) {
+      case SoundType.tap:
+        audioPath = 'audio/tap.mp3';
+        break;
+      case SoundType.success:
+        audioPath = 'audio/success.mp3';
+        break;
+      case SoundType.error:
+        audioPath = 'audio/error.mp3';
+        break;
+      case SoundType.componentPlaced:
+        audioPath = 'audio/place.mp3';
+        break;
+      case SoundType.componentSelected:
+        audioPath = 'audio/select.mp3';
+        break;
+    }
+
+    try {
+      _audioManager.playSfx(audioPath);
+    } catch (e) {
+      debugPrint('Audio playback failed for $audioPath: $e');
+    }
+  }
+}
+
+final audioFeedbackServiceProvider = Provider<AudioFeedbackService>((ref) {
+  final audioManager = ref.watch(audioManagerProvider);
+  return AudioFeedbackService(audioManager);
+});
+
 /// Visual feedback utilities for SparkCircuit UI/UX
 class FeedbackUtils {
   /// Haptic feedback for different interaction types
@@ -35,35 +74,10 @@ class FeedbackUtils {
   /// Sound feedback using audio manager with error handling
   static void provideSoundFeedback(WidgetRef ref, SoundType type) {
     try {
-      final audioManager = ref.read(audioManagerProvider);
-      String audioPath;
-      switch (type) {
-        case SoundType.tap:
-          audioPath = 'audio/tap.mp3';
-          break;
-        case SoundType.success:
-          audioPath = 'audio/success.mp3';
-          break;
-        case SoundType.error:
-          audioPath = 'audio/error.mp3';
-          break;
-        case SoundType.componentPlaced:
-          audioPath = 'audio/place.mp3';
-          break;
-        case SoundType.componentSelected:
-          audioPath = 'audio/select.mp3';
-          break;
-      }
-
-      // For web environments, wrap audio playback in try-catch
-      try {
-        audioManager.playSfx(audioPath);
-      } catch (e) {
-        // Silently handle audio errors in web environment
-        debugPrint('Audio playback failed for $audioPath: $e');
-      }
+      final audioService = ref.read(audioFeedbackServiceProvider);
+      audioService.playSound(type);
     } catch (e) {
-      // Handle any other audio-related errors
+      // Handle any audio-related errors
       debugPrint('Sound feedback error: $e');
     }
   }

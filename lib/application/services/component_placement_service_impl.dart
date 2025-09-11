@@ -107,8 +107,8 @@ class DefaultComponentPlacementService implements ComponentPlacementService {
       final updatedComponents = Map<String, ComponentModel>.from(request.currentGameState.grid.components);
       updatedComponents[componentId] = component;
 
-      final updatedGrid = request.currentGameState.grid.copyWith(components: updatedComponents);
-      final updatedGameState = request.currentGameState.copyWith(grid: updatedGrid);
+      // Create updated grid (Note: Interface doesn't currently support returning updated state)
+      request.currentGameState.grid.copyWith(components: updatedComponents);
 
       StructuredLogger.info('Component placement successful', context: {
         'componentId': componentId,

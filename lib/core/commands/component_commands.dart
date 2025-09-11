@@ -11,10 +11,10 @@ class PlaceComponentCommand implements Command {
   final Offset position;
   final ComponentType componentType;
   final GameCanvasStateNotifier canvasController;
-  final WidgetRef ref;
+  final OptimizedGridManager manager;
 
   ComponentModel? _placedComponent;
-  bool _wasOccupied = false;
+  final bool _wasOccupied = false;
   final String _commandId;
   final DateTime _timestamp;
 
@@ -22,7 +22,7 @@ class PlaceComponentCommand implements Command {
     required this.position,
     required this.componentType,
     required this.canvasController,
-    required this.ref,
+    required this.manager,
   }) :
     _commandId = 'PlaceComponent_${DateTime.now().millisecondsSinceEpoch}',
     _timestamp = DateTime.now();
@@ -52,8 +52,7 @@ class PlaceComponentCommand implements Command {
       });
 
       // Check if position is available
-      final gridManager = ref.read(gridManagerProvider);
-      if (!gridManager.canPlaceComponent(position)) {
+      if (!manager.canPlaceComponent(position)) {
         return CommandResult.failure(
           errorMessage: 'Position ${position.toString()} is not available for component placement',
           data: {'position': position.toString(), 'componentType': componentType.toString()},
@@ -61,7 +60,7 @@ class PlaceComponentCommand implements Command {
       }
 
       // Place the component
-      gridManager.placeComponent(position);
+      manager.placeComponent(position);
 
       // Create component model for tracking
       _placedComponent = ComponentModel(
@@ -115,8 +114,7 @@ class PlaceComponentCommand implements Command {
       });
 
       // Remove the component
-      final gridManager = ref.read(gridManagerProvider);
-      gridManager.removeComponent(position);
+      manager.removeComponent(position);
 
       StructuredLogger.info('Component removed successfully', context: {
         'componentId': _placedComponent!.id,
@@ -165,7 +163,7 @@ class PlaceComponentCommand implements Command {
 class RemoveComponentCommand implements Command {
   final Offset position;
   final GameCanvasStateNotifier canvasController;
-  final WidgetRef ref;
+  final OptimizedGridManager manager;
 
   ComponentModel? _removedComponent;
   final String _commandId;
@@ -174,7 +172,7 @@ class RemoveComponentCommand implements Command {
   RemoveComponentCommand({
     required this.position,
     required this.canvasController,
-    required this.ref,
+    required this.manager,
   }) :
     _commandId = 'RemoveComponent_${DateTime.now().millisecondsSinceEpoch}',
     _timestamp = DateTime.now();
@@ -202,10 +200,8 @@ class RemoveComponentCommand implements Command {
         'commandId': id,
       });
 
-      final gridManager = ref.read(gridManagerProvider);
-
       // Check if there's a component to remove
-      if (!gridManager.isPositionOccupied(position)) {
+      if (!manager.isPositionOccupied(position)) {
         return CommandResult.failure(
           errorMessage: 'No component at position ${position.toString()}',
           data: {'position': position.toString()},
@@ -223,7 +219,7 @@ class RemoveComponentCommand implements Command {
       );
 
       // Remove the component
-      gridManager.removeComponent(position);
+      manager.removeComponent(position);
 
       StructuredLogger.info('Component removed successfully', context: {
         'position': position.toString(),
@@ -263,8 +259,7 @@ class RemoveComponentCommand implements Command {
       });
 
       // Restore the component
-      final gridManager = ref.read(gridManagerProvider);
-      gridManager.placeComponent(position);
+      manager.placeComponent(position);
 
       StructuredLogger.info('Component restored successfully', context: {
         'position': position.toString(),
@@ -312,7 +307,7 @@ class MoveComponentCommand implements Command {
   final Offset fromPosition;
   final Offset toPosition;
   final GameCanvasStateNotifier canvasController;
-  final WidgetRef ref;
+  final OptimizedGridManager manager;
 
   ComponentModel? _movedComponent;
   final String _commandId;
@@ -322,7 +317,7 @@ class MoveComponentCommand implements Command {
     required this.fromPosition,
     required this.toPosition,
     required this.canvasController,
-    required this.ref,
+    required this.manager,
   }) :
     _commandId = 'MoveComponent_${DateTime.now().millisecondsSinceEpoch}',
     _timestamp = DateTime.now();
@@ -351,17 +346,15 @@ class MoveComponentCommand implements Command {
         'commandId': id,
       });
 
-      final gridManager = ref.read(gridManagerProvider);
-
       // Validate the move
-      if (!gridManager.isPositionOccupied(fromPosition)) {
+      if (!manager.isPositionOccupied(fromPosition)) {
         return CommandResult.failure(
           errorMessage: 'No component at source position ${fromPosition.toString()}',
           data: {'fromPosition': fromPosition.toString()},
         );
       }
 
-      if (!gridManager.canPlaceComponent(toPosition)) {
+      if (!manager.canPlaceComponent(toPosition)) {
         return CommandResult.failure(
           errorMessage: 'Destination position ${toPosition.toString()} is not available',
           data: {'toPosition': toPosition.toString()},
@@ -379,8 +372,8 @@ class MoveComponentCommand implements Command {
       );
 
       // Perform the move
-      gridManager.removeComponent(fromPosition);
-      gridManager.placeComponent(toPosition);
+      manager.removeComponent(fromPosition);
+      manager.placeComponent(toPosition);
 
       StructuredLogger.info('Component moved successfully', context: {
         'fromPosition': fromPosition.toString(),
@@ -419,11 +412,9 @@ class MoveComponentCommand implements Command {
         'componentId': _movedComponent?.id,
       });
 
-      final gridManager = ref.read(gridManagerProvider);
-
       // Move back to original position
-      gridManager.removeComponent(toPosition);
-      gridManager.placeComponent(fromPosition);
+      manager.removeComponent(toPosition);
+      manager.placeComponent(fromPosition);
 
       StructuredLogger.info('Component move undone successfully', context: {
         'fromPosition': fromPosition.toString(),

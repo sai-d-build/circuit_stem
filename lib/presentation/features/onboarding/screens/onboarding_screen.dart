@@ -6,6 +6,20 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../../application/game_engine/v3/providers_v3.dart';
 
+// ✅ CLEAN ARCHITECTURE: Storage Service
+class StorageService {
+  final dynamic storage;
+
+  StorageService(this.storage);
+
+  Future<void> saveData<T>(String key, T value) => storage.saveData<T>(key, value);
+}
+
+final storageServiceProviderWrapper = Provider<StorageService>((ref) {
+  final storage = ref.watch(storageServiceProvider);
+  return StorageService(storage);
+});
+
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -175,7 +189,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _completeOnboarding() async {
-    final storageService = ref.read(storageServiceProvider);
+    final storageService = ref.watch(storageServiceProviderWrapper);
     await storageService.saveData<bool>('onboarding_completed', true);
     // Navigate to main menu using GoRouter
     if (mounted) {

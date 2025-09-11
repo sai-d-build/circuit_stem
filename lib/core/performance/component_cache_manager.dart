@@ -133,7 +133,7 @@ class ComponentCacheManager {
 
       canvas.translate(centerX, centerY);
       if (component.rotation != 0) {
-        canvas.rotate(component.rotation * (3.141592653589793 / 180.0)); // Convert to radians
+        canvas.rotate(component.rotation.toDouble() * (3.141592653589793 / 180.0)); // Convert to radians
       }
       canvas.translate(-centerX, -centerY);
 

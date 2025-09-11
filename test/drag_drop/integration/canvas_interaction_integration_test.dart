@@ -24,7 +24,7 @@ void main() {
 
       // Test screen to grid conversion
       final screenPos = const Offset(250, 200);
-      final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+      final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       expect(gridPos!.row, 4); // 200 / 50 = 4
@@ -50,7 +50,7 @@ void main() {
 
       // At 2x scale, screen coordinates should map to smaller grid coordinates
       final screenPos = const Offset(200, 150);
-      final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+      final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       expect(gridPos!.row, 2); // (150 / 2) / 50 = 1.5 -> 2 (rounded)
@@ -71,7 +71,7 @@ void main() {
 
       // With pan offset, screen coordinates should account for the offset
       final screenPos = const Offset(200, 150);
-      final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+      final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       expect(gridPos!.row, 2); // (150 - 50) / 50 = 2
@@ -94,7 +94,7 @@ void main() {
       final validResult = coordinateService.validateDropPosition(
         const Offset(200, 150),
         context,
-        mockRenderBox,
+        renderBox: mockRenderBox,
       );
 
       expect(validResult.isValid, true);
@@ -104,7 +104,7 @@ void main() {
       final invalidResult = coordinateService.validateDropPosition(
         const Offset(600, 600),
         context,
-        mockRenderBox,
+        renderBox: mockRenderBox,
       );
 
       // With our updated validation, positions outside bounds are now allowed but with warnings
@@ -132,7 +132,7 @@ void main() {
       final occupiedResult = coordinateService.validateDropPosition(
         const Offset(100, 100), // Grid position (2, 2)
         context,
-        mockRenderBox,
+        renderBox: mockRenderBox,
         occupiedPositions: occupiedPositions,
       );
 
@@ -143,7 +143,7 @@ void main() {
       final freeResult = coordinateService.validateDropPosition(
         const Offset(150, 150), // Grid position (3, 3) - occupied
         context,
-        mockRenderBox,
+        renderBox: mockRenderBox,
         occupiedPositions: occupiedPositions,
       );
 
@@ -164,7 +164,7 @@ void main() {
 
       // High DPI should not affect grid calculations (handled at widget level)
       final screenPos = const Offset(200, 150);
-      final gridPos = coordinateService.screenToGrid(screenPos, context, mockRenderBox);
+      final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       expect(gridPos!.row, 3); // 150 / 50 = 3
@@ -191,7 +191,7 @@ void main() {
       ];
 
       for (final originalPos in originalPositions) {
-        final gridPos = coordinateService.screenToGrid(originalPos, context, mockRenderBox);
+        final gridPos = coordinateService.screenToGrid(originalPos, context, renderBox: mockRenderBox);
         expect(gridPos, isNotNull);
 
         final screenPos = coordinateService.gridToLocal(gridPos!, context);
@@ -223,7 +223,7 @@ void main() {
       ];
 
       for (final pos in boundaryPositions) {
-        final gridPos = coordinateService.screenToGrid(pos, context, mockRenderBox);
+        final gridPos = coordinateService.screenToGrid(pos, context, renderBox: mockRenderBox);
         expect(gridPos, isNotNull);
 
         // Verify position is within bounds

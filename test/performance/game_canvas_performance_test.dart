@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_controller.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 
 void main() {
   group('GameCanvas Performance Tests', () {
@@ -19,8 +19,15 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       // Test 1000 coordinate transformations
+      final config = GridConfiguration(
+        rows: controller.gridHeight,
+        cols: controller.gridWidth,
+        cellSize: controller.gridCellSize,
+        scale: controller.scale,
+        panOffset: controller.panOffset,
+      );
       for (int i = 0; i < 1000; i++) {
-        controller.screenToGrid(Offset(100.0 + i, 100.0 + i));
+        UnifiedCoordinateService().screenToGrid(Offset(100.0 + i, 100.0 + i), config);
       }
 
       stopwatch.stop();
@@ -83,10 +90,17 @@ void main() {
 
     test('Memory usage stability', () {
       // Test for memory leaks during rapid operations
-      final initialMemory = controller.hashCode; // Placeholder for actual memory check
+      // final initialMemory = controller.hashCode; // Placeholder for actual memory check
 
+      final config = GridConfiguration(
+        rows: controller.gridHeight,
+        cols: controller.gridWidth,
+        cellSize: controller.gridCellSize,
+        scale: controller.scale,
+        panOffset: controller.panOffset,
+      );
       for (int i = 0; i < 100; i++) {
-        controller.screenToGrid(Offset(i.toDouble(), i.toDouble()));
+        UnifiedCoordinateService().screenToGrid(Offset(i.toDouble(), i.toDouble()), config);
         controller.updatePan(const Offset(1, 1));
       }
 

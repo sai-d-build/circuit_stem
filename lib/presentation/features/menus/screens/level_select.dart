@@ -9,6 +9,9 @@ import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../../../../application/game_engine/v3/providers_v3.dart';
 import 'package:sparkcircuit/presentation/ui_components/neon_level_card.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+// Import added for enhanced debug logging system
+// Uncomment when ready to migrate to conditional logging:
+// import 'package:sparkcircuit/core/debug/debug_helpers.dart';
 
 class LevelSelectScreen extends ConsumerStatefulWidget {
   const LevelSelectScreen({super.key});
@@ -38,9 +41,11 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
     try {
       setState(() => _isLoading = true);
 
-      StructuredLogger.debug('LevelSelectScreen: Getting level service from Riverpod', context: {
-        'provider': 'levelServiceProvider',
-      });
+      if (StructuredLogger.debugPresentation) {
+        StructuredLogger.presentation('Getting level service from Riverpod', context: {
+          'provider': 'levelServiceProvider',
+        });
+      }
 
       // Get level service from Riverpod
       final levelService = ref.read(levelServiceProvider);
@@ -70,6 +75,13 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
         _levels = levels;
         _isLoading = false;
         _error = null;
+
+        // Log successful loading with diagnostic info
+        StructuredLogger.info('✅ STATE UPDATED: Levels successfully loaded', context: {
+          'levelsCount': levels.length,
+          'firstLevelId': levels.isNotEmpty ? levels.first.levelId : 'none',
+          'totalLevelsInCache': _levels?.length ?? 0,
+        });
       });
 
       StructuredLogger.info('LevelSelectScreen: Level loading completed successfully', context: {

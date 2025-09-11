@@ -1,0 +1,102 @@
+{
+  "levelId": "beginner_02",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "beginner_02",
+    "title": "Voltage Divider",
+    "description": "Create a voltage divider circuit using resistors",
+    "difficulty": "beginner",
+    "estimatedTime": 200,
+    "learningObjectives": [
+      "Understand voltage division",
+      "Calculate resistor ratio effects",
+      "Measure voltage at different points"
+    ],
+    "tags": ["beginner", "voltage", "resistors"],
+    "unlocksComponents": [],
+    "prerequisites": ["beginner_01"]
+  },
+  "grid": {
+    "width": 12,
+    "height": 8,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 12.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 2,
+        "properties": {
+          "resistance": 1000.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 8,
+        "properties": {
+          "resistance": 0.01
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "voltage_at_midpoint",
+      "type": "circuit_analysis",
+      "description": "Achieve 6V at the midpoint between resistors",
+      "conditions": {
+        "voltage_at_point": {"target_voltage": 6.0, "tolerance": 0.5}
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Use two equal resistors (1kΩ each) in series",
+          "trigger": "time_elapsed",
+          "triggerValue": 60
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": false,
+    "steps": []
+  },
+  "scoring": {
+    "maxScore": 1300,
+    "timeBonus": {
+      "maxTime": 400,
+      "bonusPerSecond": 2
+    },
+    "efficiencyBonus": {
+      "maxComponents": 12,
+      "bonusPerUnusedComponent": 35
+    },
+    "starThresholds": {
+      "threeStars": 1000,
+      "twoStars": 800,
+      "oneStar": 600
+    }
+  }
+}

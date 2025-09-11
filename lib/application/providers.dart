@@ -10,6 +10,14 @@ import 'animation_scheduler.dart';
 import '../infrastructure/rendering/asset_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Import missing providers
+import 'grid_notifier.dart' show gridNotifierProvider;
+import 'history_notifier.dart' show historyNotifierProvider;
+import 'game_progress_notifier.dart' show gameProgressNotifierProvider;
+import 'component_selection_notifier.dart' show componentSelectionNotifierProvider;
+import '../application/providers/core_providers.dart' show interactionStateProvider;
+import '../application/services/component_palette_manager.dart';
+
 // Import all provider definitions with prefixes to avoid conflicts
 import 'use_cases/providers.dart' as use_case_providers;
 import 'game_engine/v3/providers_v3.dart' as v3_providers;
@@ -65,7 +73,22 @@ final gameEngineNotifierProvider = StateNotifierProvider<GameEngineNotifier, Gam
   return GameEngineNotifier(
     audioService: ref.watch(audioServiceProvider),
     animationScheduler: ref.watch(animationSchedulerProvider),
-    ref: ref,
+    gridNotifier: ref.watch(gridNotifierProvider.notifier),
+    historyNotifier: ref.watch(historyNotifierProvider.notifier),
+    progressNotifier: ref.watch(gameProgressNotifierProvider.notifier),
+    selectionNotifier: ref.watch(componentSelectionNotifierProvider.notifier),
+    interactionNotifier: ref.watch(interactionStateProvider('default').notifier),
+    paletteManager: ComponentPaletteManager(availableTemplates: []),
+    loadLevelUseCase: ref.watch(loadLevelUseCaseProvider),
+    createComponentUseCase: ref.watch(createComponentUseCaseProvider),
+    rotateComponentUseCase: ref.watch(rotateComponentUseCaseProvider),
+    moveComponentUseCase: ref.watch(moveComponentUseCaseProvider),
+    tapComponentUseCase: ref.watch(tapComponentUseCaseProvider),
+    updateComponentUseCase: ref.watch(updateComponentUseCaseProvider),
+    restartLevelUseCase: ref.watch(restartLevelUseCaseProvider),
+    selectPaletteComponentUseCase: ref.watch(selectPaletteComponentUseCaseProvider),
+    togglePauseUseCase: ref.watch(togglePauseUseCaseProvider),
+    undoUseCase: ref.watch(undoUseCaseProvider),
   );
 });
 

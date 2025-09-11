@@ -1,18 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
-import '../../core/commands/command_stack.dart';
 import '../../core/commands/create_component_command.dart';
-import '../enhanced_game_state.dart';
-import '../use_cases/providers.dart' as use_case_providers;
+import '../states/game_state.dart';
 import '../../core/debug/structured_logger.dart';
 
 /// Service for centralized component placement with transaction deduplication
 class PlacementService {
-  final CommandStack _commandStack;
   final Set<String> _recentTransactions = {};
   static const Duration _transactionTimeout = Duration(seconds: 5);
 
-  PlacementService(this._commandStack);
+  PlacementService();
 
   /// Place a component with transaction deduplication
   /// Returns true if placement was successful, false if duplicate or invalid
@@ -100,6 +97,5 @@ class PlacementService {
 
 // Provider for PlacementService
 final placementServiceProvider = Provider<PlacementService>((ref) {
-  final commandStack = ref.watch(use_case_providers.commandStackProvider);
-  return PlacementService(commandStack);
+  return PlacementService();
 });

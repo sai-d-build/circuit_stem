@@ -3,7 +3,6 @@ import 'package:sparkcircuit/application/services/interfaces/game_interaction_se
 import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';
 import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
-import 'package:sparkcircuit/core/services/grid_service.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart'
     as orchestrator;
@@ -19,11 +18,8 @@ typedef ComponentPlacementSideEffect = orchestrator.ComponentPlacementSideEffect
 /// Implementation of the GameInteractionService
 /// Handles gesture processing and interaction state management
 class GameInteractionServiceImpl implements GameInteractionService {
-  final ComponentPlacementService _placementService;
 
-  GameInteractionServiceImpl({
-    required ComponentPlacementService placementService,
-  }) : _placementService = placementService;
+  GameInteractionServiceImpl();
 
   @override
   GestureProcessingResult processGesture(
@@ -54,11 +50,6 @@ class GameInteractionServiceImpl implements GameInteractionService {
           return _handleScaleUpdate(event, currentState);
         case GestureEventType.scaleEnd:
           return _handleScaleEnd(event, currentState);
-        default:
-          StructuredLogger.warning('Unknown gesture type', context: {
-            'gestureType': event.type.toString(),
-          });
-          return GestureProcessingResult.noChange(currentState);
       }
     } catch (e, stackTrace) {
       StructuredLogger.error('Gesture processing error', context: {
@@ -242,7 +233,6 @@ class GameInteractionServiceImpl implements GameInteractionService {
     if (currentState.interactionState.draggedComponentId != null &&
         dragStart != null && dragEnd != null) {
       // Component was dragged - create placement side effect
-      final componentId = currentState.interactionState.draggedComponentId!;
       // TODO: Convert GameCanvasState to GameState for component placement
       // For now, skip the side effect until proper conversion is implemented
       final moveSideEffect = ComponentPlacementSideEffect(

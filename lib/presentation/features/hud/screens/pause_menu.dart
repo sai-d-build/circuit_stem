@@ -5,6 +5,22 @@ import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/core/widgets/menu_button.dart';
 import 'package:sparkcircuit/presentation/state/hud_state.dart';
 
+// ✅ CLEAN ARCHITECTURE: HUD Service
+class HudService {
+  final dynamic hudNotifier;
+
+  HudService(this.hudNotifier);
+
+  void hideOverlay() {
+    hudNotifier.hideOverlay();
+  }
+}
+
+final hudServiceProvider = Provider.family<HudService, String>((ref, levelId) {
+  final hudNotifier = ref.watch(hudStateProvider(levelId).notifier);
+  return HudService(hudNotifier);
+});
+
 class PauseMenu extends ConsumerWidget {
   final String levelId;
 
@@ -14,6 +30,7 @@ class PauseMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>()!;
+    final hudService = ref.watch(hudServiceProvider(levelId));
     
     return Container(
       width: 320,
@@ -54,7 +71,7 @@ class PauseMenu extends ConsumerWidget {
             icon: Icons.play_arrow,
             isPrimary: true,
             onPressed: () {
-              ref.read(hudStateProvider(levelId).notifier).hideOverlay();
+              hudService.hideOverlay();
             },
           ),
           const SizedBox(height: 12),
@@ -62,7 +79,7 @@ class PauseMenu extends ConsumerWidget {
             text: 'Restart Level',
             icon: Icons.refresh,
             onPressed: () {
-              _showRestartConfirmation(context, ref);
+              _showRestartConfirmation(context, hudService);
             },
           ),
           const SizedBox(height: 12),
@@ -70,7 +87,7 @@ class PauseMenu extends ConsumerWidget {
             text: 'Settings',
             icon: Icons.settings,
             onPressed: () {
-              ref.read(hudStateProvider(levelId).notifier).hideOverlay();
+              hudService.hideOverlay();
               context.go('/settings');
             },
           ),
@@ -87,7 +104,7 @@ class PauseMenu extends ConsumerWidget {
     );
   }
 
-  void _showRestartConfirmation(BuildContext context, WidgetRef ref) {
+  void _showRestartConfirmation(BuildContext context, HudService hudService) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -101,7 +118,7 @@ class PauseMenu extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              ref.read(hudStateProvider(levelId).notifier).hideOverlay();
+              hudService.hideOverlay();
               // Reset level logic would go here
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Level restarted')),

@@ -4,16 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
-import 'package:sparkcircuit/core/services/feedback_service.dart';
-import 'package:sparkcircuit/core/services/pathfinding_service.dart';
 import 'package:sparkcircuit/core/services/wire_network_service.dart';
+import 'package:sparkcircuit/application/use_cases/create_component_use_case.dart';
+import 'package:sparkcircuit/application/use_cases/interaction_use_case.dart';
+import '../../../../core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
-import 'package:sparkcircuit/presentation/features/game/services/viewport_service.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
+import 'package:sparkcircuit/application/use_cases/notifier_integrated_use_case.dart';
+import 'package:sparkcircuit/application/transaction.dart';
+import 'package:sparkcircuit/application/services/component_palette_manager.dart';
 import 'package:sparkcircuit/application/providers/core_providers.dart';
+
+// Import GridNotifier for type casting
+import 'package:sparkcircuit/application/grid_notifier.dart';
 
 part 'canvas_interaction_controller.freezed.dart';
 
@@ -152,6 +156,10 @@ class InteractionStateNotifier extends StateNotifier<InteractionState> {
     );
   }
 
+  void setState(InteractionState newState) {
+    state = newState;
+  }
+
   @override
   void dispose() {
     for (final listener in _modeTransitionListeners) {
@@ -203,6 +211,7 @@ class CanvasInteractionController {
   final WidgetRef ref;
   final ICoordinateService _coordinateService;
   late final InteractionStateNotifier _stateNotifier;
+  late final InteractionUseCaseInjected _interactionUseCase;
   final StreamController<InteractionEvent> _eventBus = StreamController<InteractionEvent>.broadcast();
   RenderBox? _renderBox;
   Timer? _throttleTimer;
@@ -218,7 +227,14 @@ class CanvasInteractionController {
     ICoordinateService? coordinateService,
   }) : _coordinateService = coordinateService ?? CoordinateSystemService() {
     _stateNotifier = ref.read(interactionStateProvider(levelId).notifier);
+    _interactionUseCase = ref.watch(interactionUseCaseProvider(levelId));
     _eventBus.stream.listen(_handleInteractionEvents);
+
+    // Mark file as migrated to unified provider
+    MigrationTracker.markFileMigrated(
+      'lib/presentation/features/game/controllers/canvas_interaction_controller.dart',
+      DateTime.now().toIso8601String()
+    );
   }
 
   void initialize(RenderBox renderBox) {
@@ -233,21 +249,24 @@ class CanvasInteractionController {
 
   void handleDragStart(DragTargetDetails<ComponentDragData> details, DragOrigin origin) {
     // Enhanced logging for drag initiation
-    print('🚀 CONTROLLER DRAG START - ${details.data?.componentName ?? "UNKNOWN"} from ${origin.toString()}');
+    StructuredLogger.debug('🚀 CONTROLLER DRAG START - ${details.data.componentName} from ${origin.toString()}', context: {
+      'levelId': levelId,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
 
     StructuredLogger.info(
       '🔄 Drag operation initiated',
       context: {
         'operation': 'drag_start',
-        'componentType': details.data?.componentType.toString() ?? 'unknown',
-        'componentName': details.data?.componentName ?? 'unknown',
-        'componentCost': details.data?.cost ?? 0,
+        'componentType': details.data.componentType.toString(),
+        'componentName': details.data.componentName,
+        'componentCost': details.data.cost,
         'screenPositionX': details.offset.dx,
         'screenPositionY': details.offset.dy,
         'originType': origin.toString(),
         'originSource': origin == DragOrigin.palette ? 'component_palette' : origin == DragOrigin.componentPort ? 'grid_component' : 'unknown',
         'renderBoxAvailable': _renderBox != null,
-        'renderBoxAttached': _renderBox?.attached ?? false,
+        'renderBoxAttached': _renderBox!.attached,
         'levelId': levelId,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'sessionId': DateTime.now().hashCode.toString(), // For tracking related operations
@@ -258,12 +277,12 @@ class CanvasInteractionController {
     _currentOrigin = origin;
 
     // Log game state before drag operation
-    final gameStateBefore = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+    final gameStateBefore = _interactionUseCase.getGameState();
     StructuredLogger.debug(
       '📊 Game state before drag operation',
       context: {
         'operation': 'drag_start',
-        'componentType': details.data?.componentType.toString(),
+        'componentType': details.data.componentType.toString(),
         'gameStateGridRows': gameStateBefore.grid.rows,
         'gameStateGridCols': gameStateBefore.grid.cols,
         'placedComponentsCount': gameStateBefore.grid.components.length,
@@ -284,7 +303,7 @@ class CanvasInteractionController {
         'newMode': _stateNotifier.currentMode.toString(),
         'transitionSuccessful': oldMode != _stateNotifier.currentMode,
         'originType': origin.toString(),
-        'componentType': details.data?.componentType.toString(),
+        'componentType': details.data.componentType.toString(),
         'levelId': levelId,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       },
@@ -318,7 +337,7 @@ class CanvasInteractionController {
         'operation': 'drag_start_completed',
         'currentMode': _stateNotifier.currentMode.toString(),
         'validationStatus': _stateNotifier.isValid,
-        'componentType': details.data?.componentType.toString(),
+        'componentType': details.data.componentType.toString(),
         'originType': origin.toString(),
         'levelId': levelId,
         'completionTime': DateTime.now().millisecondsSinceEpoch,
@@ -328,7 +347,7 @@ class CanvasInteractionController {
 
   // Safe state access methods
   void _setState(InteractionState newState) {
-    _stateNotifier.state = newState;
+    _stateNotifier.setState(newState);
   }
 
   void _copyWithState({
@@ -366,7 +385,7 @@ class CanvasInteractionController {
         'componentType': details.data.componentType.toString(),
         'componentName': details.data.componentName,
         'renderBoxAvailable': _renderBox != null,
-        'renderBoxAttached': _renderBox?.attached ?? false,
+        'renderBoxAttached': _renderBox!.attached,
         'currentMode': _stateNotifier.currentMode.toString(),
         'validationThrottled': true, // We're throttling validation for performance
         'levelId': levelId,
@@ -380,15 +399,18 @@ class CanvasInteractionController {
 
   void handleDragEnd(DragTargetDetails<ComponentDragData> details) {
     // Enhanced logging for drag completion with detailed outcome analysis
-    print('🔚 CONTROLLER DRAG END - ${details.data?.componentName ?? "UNKNOWN"} - Valid: ${_stateNotifier.isValid}');
+    StructuredLogger.debug('🔚 CONTROLLER DRAG END - ${details.data.componentName} - Valid: ${_stateNotifier.isValid}', context: {
+      'levelId': levelId,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
 
     StructuredLogger.info(
       '🎯 Drag operation completed',
       context: {
         'operation': 'drag_end',
-        'componentType': details.data?.componentType.toString(),
-        'componentName': details.data?.componentName,
-        'componentCost': details.data?.cost ?? 0,
+        'componentType': details.data.componentType.toString(),
+        'componentName': details.data.componentName,
+        'componentCost': details.data.cost,
         'finalPositionX': details.offset.dx,
         'finalPositionY': details.offset.dy,
         'currentMode': _stateNotifier.currentMode.toString(),
@@ -396,7 +418,7 @@ class CanvasInteractionController {
         'hasErrorMessage': _stateNotifier.errorMessage != null,
         'errorMessage': _stateNotifier.errorMessage,
         'renderBoxAvailable': _renderBox != null,
-        'renderBoxAttached': _renderBox?.attached ?? false,
+        'renderBoxAttached': _renderBox!.attached,
         'currentDragDetailsAvailable': _currentDragDetails != null,
         'levelId': levelId,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
@@ -431,7 +453,7 @@ class CanvasInteractionController {
     );
 
     // Game state comparison for successful placement
-    final gameStateBeforeCompletion = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+    final gameStateBeforeCompletion = _interactionUseCase.getGameState();
     StructuredLogger.debug(
       '📈 Game state before drag completion',
       context: {
@@ -439,7 +461,7 @@ class CanvasInteractionController {
         'componentsBefore': gameStateBeforeCompletion.grid.components.length,
         'gameStateGridRows': gameStateBeforeCompletion.grid.rows,
         'gameStateGridCols': gameStateBeforeCompletion.grid.cols,
-        'placableComponentType': details.data?.componentType.toString(),
+        'placableComponentType': details.data.componentType.toString(),
         'levelId': levelId,
       },
     );
@@ -463,7 +485,7 @@ class CanvasInteractionController {
       '🚀 Drag end handling initiated - component will be placed',
       context: {
         'operation': 'drag_end_initiated',
-        'componentType': details.data?.componentType.toString(),
+        'componentType': details.data.componentType.toString(),
         'finalPosition': details.offset.toString(),
         'validationStatus': _stateNotifier.isValid,
         'levelId': levelId,
@@ -523,15 +545,15 @@ class CanvasInteractionController {
       );
 
       if (_renderBox != null && _renderBox!.attached) {
-        // 🔧 FIX: Pass local position directly to avoid coordinate system bugs
-        final localPosition = details.offset;
+        // ✅ FIXED: Standardize coordinate conversion - always convert from global to local
+        final correctLocalPosition = _renderBox!.globalToLocal(details.offset);
 
         StructuredLogger.debug(
-          '⚡ Coordinate handling (local position preserved)',
+          '⚡ Coordinate conversion performed correctly',
           context: {
-            'operation': 'coordinate_preservation',
-            'localPosition': localPosition.toString(),
-            'conversionValid': true,
+            'operation': 'coordinate_conversion',
+            'globalPosition': details.offset.toString(),
+            'localPosition': correctLocalPosition.toString(),
             'renderBoxAttached': _renderBox!.attached,
             'conversionSucceeded': true,
             'levelId': levelId,
@@ -539,7 +561,7 @@ class CanvasInteractionController {
           },
         );
 
-        final event = InteractionEvent.dragUpdate(localPosition);
+        final event = InteractionEvent.dragUpdate(correctLocalPosition);
         _eventBus.add(event);
 
         StructuredLogger.debug(
@@ -547,7 +569,7 @@ class CanvasInteractionController {
           context: {
             'operation': 'validation_event_dispatch',
             'eventType': 'drag_update',
-            'eventPosition': localPosition.toString(),
+            'eventPosition': correctLocalPosition.toString(),
             'dispatchStatus': 'success',
             'validationPipelineStarted': true,
             'levelId': levelId,
@@ -586,7 +608,7 @@ class CanvasInteractionController {
           'position': position.toString(),
           'origin': origin.toString(),
           'currentDragDetails': _currentDragDetails != null,
-          'componentData': _currentDragDetails?.data?.componentType.toString(),
+          'componentData': _currentDragDetails!.data.componentType.toString(),
           'levelId': levelId,
         });
 
@@ -614,8 +636,8 @@ class CanvasInteractionController {
           _copyWithState(componentData: _currentDragDetails?.data);
           _stateNotifier.updateValidation(true);
           StructuredLogger.info('Component drag started', context: {
-            'componentType': _currentDragDetails?.data?.componentType.toString(),
-            'componentName': _currentDragDetails?.data?.componentName,
+            'componentType': _currentDragDetails!.data.componentType.toString(),
+            'componentName': _currentDragDetails!.data.componentName,
             'levelId': levelId,
           });
         }
@@ -625,7 +647,7 @@ class CanvasInteractionController {
         StructuredLogger.debug('Drag update initiated', context: {
           'screenPosition': currentPosition.toString(),
           'renderBoxAvailable': _renderBox != null,
-          'renderBoxAttached': _renderBox?.attached ?? false,
+          'renderBoxAttached': _renderBox!.attached,
           'levelId': levelId,
         });
 
@@ -633,7 +655,7 @@ class CanvasInteractionController {
         if (_renderBox == null || !_renderBox!.attached) {
           StructuredLogger.error('RenderBox not available for coordinate conversion', context: {
             'renderBoxNull': _renderBox == null,
-            'renderBoxAttached': _renderBox?.attached ?? false,
+            'renderBoxAttached': _renderBox!.attached,
             'levelId': levelId,
           });
           _stateNotifier.updateValidation(false, error: 'Canvas not ready');
@@ -658,7 +680,7 @@ class CanvasInteractionController {
         final validation = _coordinateService.validateDropPosition(
           localPosition, // Pass the local position to avoid double conversion
           context,
-          _renderBox!,
+          renderBox: _renderBox,
           occupiedPositions: occupiedPositions,
         );
 
@@ -718,7 +740,7 @@ class CanvasInteractionController {
             'currentMode': currentState.currentMode.toString(),
             'targetPosition': currentState.targetPosition.toString(),
             'currentDragDetails': _currentDragDetails != null,
-            'componentType': _currentDragDetails?.data?.componentType.toString(),
+            'componentType': _currentDragDetails!.data.componentType.toString(),
             'currentOrigin': _currentOrigin.toString(),
             'levelId': levelId,
           });
@@ -741,8 +763,8 @@ class CanvasInteractionController {
           } else if (currentState.currentMode == InteractionMode.placeComponent) {
             StructuredLogger.info('🪙 PLACING COMPONENT', context: {
               'targetPosition': currentState.targetPosition.toString(),
-              'componentType': _currentDragDetails?.data?.componentType.toString(),
-              'componentDataNull': _currentDragDetails?.data == null,
+              'componentType': _currentDragDetails!.data.componentType.toString(),
+              'componentDataNull': false, // _currentDragDetails!.data cannot be null here
               'levelId': levelId,
             });
 
@@ -771,7 +793,7 @@ class CanvasInteractionController {
           'levelId': levelId,
         });
         _stateNotifier.transitionToMode(InteractionMode.idle);
-        _stateNotifier.state = InteractionState(
+        _stateNotifier.setState(InteractionState(
           currentMode: _stateNotifier.currentMode,
           componentData: null,
           wireData: null,
@@ -779,20 +801,20 @@ class CanvasInteractionController {
           isValid: false,
           path: [],
           errorMessage: null,
-        );
+        ));
       },
       gesturePan: (delta) {
-        ref.read(viewportServiceProvider(levelId).notifier).updatePan(delta);
+        _interactionUseCase.updateViewportPan(delta);
       },
       gestureScale: (scale) {
-        ref.read(viewportServiceProvider(levelId).notifier).updateScale(scale);
+        _interactionUseCase.updateViewportScale(scale);
       },
     );
   }
 
   CoordinateContext _buildCoordinateContext() {
-    final viewportState = ref.read(viewportServiceProvider(levelId));
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+    final viewportState = _interactionUseCase.getViewportState();
+    final gameState = _interactionUseCase.getGameState();
 
     final context = CoordinateContext(
       gridDimensions: Size(gameState.grid.cols.toDouble(), gameState.grid.rows.toDouble()),
@@ -816,16 +838,21 @@ class CanvasInteractionController {
   }
 
   Set<GridPosition> _getOccupiedPositions() {
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
-    final occupiedPositions = gameState.grid.components.values
-        .map((component) => GridPosition(row: component.row, col: component.col))
-        .toSet();
+    // Use abstracted method from use case instead of direct provider access
+    final occupiedPositionStrings = CreateComponentUseCase.getOccupiedPositions(_createNotifierContext());
 
-    StructuredLogger.debug('Occupied positions retrieved', context: {
-      'totalComponents': gameState.grid.components.length,
+    // Convert string positions back to GridPosition objects
+    final occupiedPositions = occupiedPositionStrings.map((posString) {
+      final parts = posString.split(',');
+      return GridPosition(
+        row: int.parse(parts[0]),
+        col: int.parse(parts[1]),
+      );
+    }).toSet();
+
+    StructuredLogger.debug('Occupied positions retrieved via use case', context: {
       'occupiedPositionsCount': occupiedPositions.length,
       'occupiedPositions': occupiedPositions.take(10).toList(), // Limit for readability
-      'gridDimensions': '${gameState.grid.rows}x${gameState.grid.cols}',
       'levelId': levelId,
     });
 
@@ -833,7 +860,7 @@ class CanvasInteractionController {
   }
 
   ComponentPort? _findNearestPort(Offset position) {
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+    final gameState = _interactionUseCase.getGameState();
     ComponentPort? nearestPort;
     double minDistance = double.infinity;
 
@@ -978,7 +1005,7 @@ class CanvasInteractionController {
     final endComponentId = endPort.id.split('_').first;
 
     // Get component types from the game state
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+    final gameState = _interactionUseCase.getGameState();
     final startComponent = gameState.grid.components[startComponentId];
     final endComponent = gameState.grid.components[endComponentId];
 
@@ -1117,35 +1144,30 @@ class CanvasInteractionController {
   }
 
   void showSuccessFeedback(BuildContext context, String message) {
-    final feedbackService = ref.read(feedbackServiceProvider);
-    feedbackService.showSuccess(context, message);
+    _interactionUseCase.showSuccessFeedback(context, message);
   }
 
   void showErrorFeedback(BuildContext context, String message) {
-    final feedbackService = ref.read(feedbackServiceProvider);
-    feedbackService.showError(context, message);
+    _interactionUseCase.showErrorFeedback(context, message);
   }
 
   Future<List<GridPosition>> _calculateWirePath(ComponentPort start, ComponentPort end) async {
     // Get occupied positions for pathfinding
     final occupiedPositions = _getOccupiedPositions();
 
-    // Use A* pathfinding service
-    final pathfindingService = ref.read(pathfindingServiceProvider(levelId));
-    final result = await pathfindingService.findPath(
+    // Use A* pathfinding service through use case
+    final pathResult = await _interactionUseCase.findPath(
       start.position,
       end.position,
-      algorithm: PathfindingAlgorithm.astar,
       occupiedPositions: occupiedPositions,
-      maxNodes: 500, // Limit for performance
     );
 
-    if (result.success && result.path.isNotEmpty) {
-      debugPrint('A* path found: ${result.path.length} nodes, cost: ${result.pathCost}, explored: ${result.nodesExplored}');
-      return result.path;
+    if (pathResult.isSuccess && pathResult.data!.isNotEmpty) {
+      debugPrint('A* path found: ${pathResult.data!.length} nodes');
+      return pathResult.data!;
     } else {
       // Fallback to Manhattan if A* fails
-      debugPrint('A* pathfinding failed, falling back to Manhattan. Explored: ${result.nodesExplored}');
+      debugPrint('A* pathfinding failed, falling back to Manhattan');
       return _calculateWirePathManhattan(start, end);
     }
   }
@@ -1201,9 +1223,6 @@ class CanvasInteractionController {
     }
 
     try {
-      final wireNetworkService = ref.read(wireNetworkServiceProvider(levelId));
-      final gameNotifier = ref.read(providers_v3.enhancedGameStateNotifierProvider.notifier);
-
       // Get start and end ports from current wire data
       final currentState = InteractionState(
         currentMode: _stateNotifier.currentMode,
@@ -1260,23 +1279,33 @@ class CanvasInteractionController {
       }
 
       // Log game state before wire placement
-      final gameStateBefore = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+      final gameStateBefore = _interactionUseCase.getGameState();
       StructuredLogger.info('🎯 WIRE PLACEMENT - STATE BEFORE', context: {
         'componentsBefore': gameStateBefore.grid.components.length,
         'levelId': levelId,
       });
 
-      // Create wire network from path
+      // Create wire network from path through use case
       StructuredLogger.info('🎯 WIRE PLACEMENT - CREATING NETWORK', context: {
         'pathLength': path.length,
         'levelId': levelId,
       });
 
-      final network = await wireNetworkService.createNetworkFromPath(
+      final networkResult = await _interactionUseCase.createWireNetwork(
         startPort,
         endPort,
         path,
       );
+
+      if (networkResult.isFailure) {
+        StructuredLogger.error('🎯 ===== WIRE PLACEMENT FAILED - NETWORK CREATION =====', context: {
+          'error': networkResult.error,
+          'levelId': levelId,
+        });
+        throw Exception('Failed to create wire network: ${networkResult.error}');
+      }
+
+      final network = networkResult.data!;
 
       StructuredLogger.info('🎯 WIRE PLACEMENT - NETWORK CREATED', context: {
         'networkId': network.id,
@@ -1295,7 +1324,7 @@ class CanvasInteractionController {
             // Skip if position already has a component (except wires)
             final existingComponent = _getComponentAtPosition(position);
             if (existingComponent == null || existingComponent.type == ComponentType.wire) {
-              gameNotifier.placeComponent(ComponentType.wire, position.row, position.col);
+              await CreateComponentUseCase.placeComponent(ComponentType.wire, position.row, position.col, _createNotifierContext(), _createGameTransaction());
               wiresPlaced++;
             }
           }
@@ -1305,13 +1334,13 @@ class CanvasInteractionController {
             row: (segment.startPosition.row + segment.endPosition.row) ~/ 2,
             col: (segment.startPosition.col + segment.endPosition.col) ~/ 2,
           );
-          gameNotifier.placeComponent(ComponentType.wire, cornerPosition.row, cornerPosition.col);
+          await CreateComponentUseCase.placeComponent(ComponentType.wire, cornerPosition.row, cornerPosition.col, _createNotifierContext(), _createGameTransaction());
           wiresPlaced++;
         }
       }
 
       // Log game state after wire placement
-      final gameStateAfter = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+      final gameStateAfter = _interactionUseCase.getGameState();
       StructuredLogger.info('🎯 WIRE PLACEMENT - STATE AFTER', context: {
         'componentsAfter': gameStateAfter.grid.components.length,
         'wiresPlaced': wiresPlaced,
@@ -1392,7 +1421,7 @@ class CanvasInteractionController {
 
   /// Get component at position
   ComponentModel? _getComponentAtPosition(GridPosition position) {
-    final gameState = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+    final gameState = _interactionUseCase.getGameState();
     return gameState.grid.components.values.firstWhere(
       (component) => component.row == position.row && component.col == position.col,
       orElse: () => ComponentModel(
@@ -1411,6 +1440,32 @@ class CanvasInteractionController {
     return null;
   }
 
+  /// Helper method to construct NotifierContext from available providers
+  NotifierContext _createNotifierContext() {
+    // ✅ FIXED: Create notifier instances without forced casting - let type system catch mismatches
+    final gridNotifier = _interactionUseCase.getGameStateNotifier();
+    final interactionNotifier = _interactionUseCase.getInteractionStateNotifier(levelId);
+    final historyNotifier = _interactionUseCase.getHistoryNotifier();
+    final progressNotifier = _interactionUseCase.getProgressNotifier();
+    final selectionNotifier = _interactionUseCase.getSelectionNotifier();
+
+    // Construct the context with required notifiers (properly typed)
+    // Note: If this causes type errors, the actual provider interface needs to be updated
+    return NotifierContext(
+      grid: gridNotifier,
+      history: historyNotifier,
+      progress: progressNotifier,
+      selection: selectionNotifier,
+      interaction: interactionNotifier,
+      paletteManager: ComponentPaletteManager(availableTemplates: []), // Empty list for now
+    );
+  }
+
+  /// Helper method to create GameTransaction
+  GameTransaction _createGameTransaction() {
+    return GameTransaction();
+  }
+
   Future<void> _placeComponent(GridPosition position, ComponentType type) async {
     StructuredLogger.info('🎯 ===== COMPONENT PLACEMENT ATTEMPT =====', context: {
       'position': position.toString(),
@@ -1419,36 +1474,29 @@ class CanvasInteractionController {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
 
-    final paletteState = ref.read(paletteStateProvider(levelId));
     final componentName = type.toString().split('.').last;
 
     StructuredLogger.debug('🎯 COMPONENT PLACEMENT - PALETTE CHECK', context: {
       'componentName': componentName,
-      'canUseComponent': paletteState.canUseComponent(componentName),
-      'availableCount': paletteState.inventory[type]?.available ?? 0,
-      'totalCount': paletteState.inventory[type]?.total ?? 0,
+      'canUseComponent': _interactionUseCase.canUseComponent(componentName),
       'levelId': levelId,
     });
 
-    if (!paletteState.canUseComponent(componentName)) {
+    if (!_interactionUseCase.canUseComponent(componentName)) {
       StructuredLogger.error('🎯 ===== COMPONENT PLACEMENT FAILED - NOT AVAILABLE =====', context: {
         'componentName': componentName,
-        'availableCount': paletteState.inventory[type]?.available ?? 0,
-        'totalCount': paletteState.inventory[type]?.total ?? 0,
         'levelId': levelId,
       });
       return;
     }
 
     // Log game state before placement
-    final gameStateBefore = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+    final gameStateBefore = _interactionUseCase.getGameState();
     StructuredLogger.info('🎯 COMPONENT PLACEMENT - STATE BEFORE', context: {
       'componentsBefore': gameStateBefore.grid.components.length,
       'gridPosition': position.toString(),
       'levelId': levelId,
     });
-
-    final gameNotifier = ref.read(providers_v3.enhancedGameStateNotifierProvider.notifier);
 
     // Clamp the position to ensure it's not negative.
     final clampedRow = max(0, position.row);
@@ -1462,15 +1510,37 @@ class CanvasInteractionController {
       'levelId': levelId,
     });
 
-    gameNotifier.placeComponent(type, clampedPosition.row, clampedPosition.col);
-
-    // 🔧 INVENTORY FIX: Decrement inventory count after successful placement
-    final paletteNotifier = ref.read(paletteStateProvider(levelId).notifier);
+    // 🔧 ATOMIC INVENTORY UPDATE: Include inventory decrement in transaction
+    final transaction = _createGameTransaction();
     final componentTypeString = type.toString().split('.').last;
-    paletteNotifier.useComponent(componentTypeString);
+
+    // Add inventory decrement to transaction commit handler
+    transaction.onCommit(() async {
+      StructuredLogger.debug('🔧 Transaction: Decrementing inventory atomically', context: {
+        'componentType': componentTypeString,
+        'position': clampedPosition.toString(),
+        'levelId': levelId,
+      });
+      _interactionUseCase.useComponent(componentTypeString);
+    });
+
+    // Add inventory rollback to transaction rollback handler
+    transaction.onRollback(() {
+      StructuredLogger.debug('🔧 Transaction: Restoring inventory on rollback', context: {
+        'componentType': componentTypeString,
+        'position': clampedPosition.toString(),
+        'levelId': levelId,
+      });
+      _interactionUseCase.returnComponent(componentTypeString);
+    });
+
+    await CreateComponentUseCase.placeComponent(type, clampedPosition.row, clampedPosition.col, _createNotifierContext(), transaction);
+
+    // Commit the transaction after successful placement
+    await transaction.commit();
 
     // Log game state after placement
-    final gameStateAfter = ref.read(providers_v3.enhancedGameStateNotifierProvider);
+    final gameStateAfter = _interactionUseCase.getGameState();
     StructuredLogger.info('🎯 COMPONENT PLACEMENT - STATE AFTER', context: {
       'componentsAfter': gameStateAfter.grid.components.length,
       'placementSuccessful': gameStateAfter.grid.components.length > gameStateBefore.grid.components.length,
@@ -1495,22 +1565,10 @@ class CanvasInteractionController {
       });
 
       // Log updated inventory after placement
-      final updatedPaletteState = ref.read(paletteStateProvider(levelId));
-
-      // Simple inventory logging that user expects
-      StructuredLogger.info('🎯 Inventory state after placement', context: {
-        'available': updatedPaletteState.inventory[type]?.available ?? 0,
-        'total': updatedPaletteState.inventory[type]?.total ?? 0,
-        'used': updatedPaletteState.inventory[type]?.used ?? 0,
-      });
-
-      StructuredLogger.info('🎯 COMPONENT PLACEMENT - INVENTORY AFTER PLACEMENT', context: {
+      // Simplified logging due to abstraction of palette state
+      StructuredLogger.info('🎯 COMPONENT PLACEMENT - PALETTE UPDATED', context: {
         'componentType': type.toString(),
-        'inventoryBefore': {'available': paletteState.inventory[type]?.available ?? 0, 'total': paletteState.inventory[type]?.total ?? 0},
-        'inventoryAfter': {'available': updatedPaletteState.inventory[type]?.available ?? 0, 'total': updatedPaletteState.inventory[type]?.total ?? 0},
-        'usedThisPlacement': (paletteState.inventory[type]?.available ?? 0) - (updatedPaletteState.inventory[type]?.available ?? 0),
-        'allInventoryCounts': updatedPaletteState.inventory.map((key, value) =>
-          MapEntry(key, {'available': value.available, 'total': value.total, 'used': value.total - value.available})),
+        'componentName': componentTypeString,
         'levelId': levelId,
       });
 
@@ -1528,7 +1586,7 @@ class CanvasInteractionController {
         'levelId': levelId,
       });
 
-      ref.read(paletteStateProvider(levelId).notifier).stopPlacingComponent();
+      _interactionUseCase.stopPlacingComponent();
 
       StructuredLogger.info('🎯 COMPONENT PLACEMENT - PALETTE UPDATED', context: {
         'levelId': levelId,

@@ -2,7 +2,9 @@
 // Simplified version without Freezed for compilation
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../common/feature_flags.dart';
+import '../../core/migration/migration_tracker.dart';
 
 // Simplified classes without Freezed
 class InteractiveMechanics {
@@ -746,6 +748,12 @@ class InteractionHistory {
 }
 
 enum InteractionType { drag, rotate, toggle, connect, disconnect, delete, create }
+
+// Provider for InteractiveMechanicsService
+final interactiveMechanicsServiceProvider = Provider<InteractiveMechanicsService>((ref) {
+  MigrationTracker.markFileMigrated('interactive_mechanics.dart', DateTime.now().toIso8601String());
+  return InteractiveMechanicsService();
+});
 
 // Simplified service class
 class InteractiveMechanicsService {

@@ -39,7 +39,7 @@ class HCAFeatureFlags {
     
     // Initialize performance monitoring
     if (anyFeaturesEnabled()) {
-      PerformanceMonitor.startMonitoring();
+      PerformanceMonitor.startStaticMonitoring();
     }
   }
 

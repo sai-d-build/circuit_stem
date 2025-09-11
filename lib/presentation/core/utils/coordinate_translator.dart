@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'dart:math' as math;
+import '../../../core/services/unified_coordinate_service.dart';
 
 /// Handles coordinate translation between screen coordinates and grid coordinates
 class CoordinateTranslator {
@@ -20,15 +21,14 @@ class CoordinateTranslator {
 
   /// Convert screen coordinates to grid coordinates
   Offset screenToGrid(Offset screenPos) {
-    // Reverse the pan and scale transformations
-    final adjustedX = (screenPos.dx - _panX) / _scale;
-    final adjustedY = (screenPos.dy - _panY) / _scale;
-    
-    // Convert to grid coordinates
-    final gridX = (adjustedX / _gridCellSize).floor();
-    final gridY = (adjustedY / _gridCellSize).floor();
-    
-    return Offset(gridX.toDouble(), gridY.toDouble());
+    final config = GridConfiguration(
+      rows: 6, // Default or passed
+      cols: 8,
+      cellSize: _gridCellSize,
+      scale: _scale,
+      panOffset: Offset(_panX, _panY),
+    );
+    return UnifiedCoordinateService().screenToGrid(screenPos, config);
   }
 
   /// Convert grid coordinates to screen coordinates
@@ -41,12 +41,14 @@ class CoordinateTranslator {
 
   /// Snap screen coordinates to the nearest grid cell center
   Offset snapToGrid(Offset screenPos) {
-    final gridPos = screenToGrid(screenPos);
-    final snappedGridPos = Offset(
-      gridPos.dx.round().toDouble(),
-      gridPos.dy.round().toDouble(),
+    final config = GridConfiguration(
+      rows: 6, // Default or passed
+      cols: 8,
+      cellSize: _gridCellSize,
+      scale: _scale,
+      panOffset: Offset(_panX, _panY),
     );
-    return gridToScreen(snappedGridPos);
+    return UnifiedCoordinateService().snapToGrid(screenPos, config);
   }
 
   /// Get the center position of a grid cell in screen coordinates
@@ -59,10 +61,14 @@ class CoordinateTranslator {
 
   /// Check if a point is within the grid bounds
   bool isInGridBounds(Offset gridPos, Size gridSize) {
-    return gridPos.dx >= 0 &&
-           gridPos.dy >= 0 &&
-           gridPos.dx < gridSize.width &&
-           gridPos.dy < gridSize.height;
+    final config = GridConfiguration(
+      rows: gridSize.height.toInt(),
+      cols: gridSize.width.toInt(),
+      cellSize: _gridCellSize,
+      scale: _scale,
+      panOffset: Offset(_panX, _panY),
+    );
+    return UnifiedCoordinateService().isInGridBounds(gridPos, config);
   }
 
   /// Calculate the distance between two grid positions
@@ -105,8 +111,15 @@ class CoordinateTranslator {
 
   /// Get the grid position that encompasses a screen area
   Rect getGridRect(Rect screenRect) {
-    final topLeft = screenToGrid(screenRect.topLeft);
-    final bottomRight = screenToGrid(screenRect.bottomRight);
+    final config = GridConfiguration(
+      rows: 6, // Default or passed
+      cols: 8,
+      cellSize: _gridCellSize,
+      scale: _scale,
+      panOffset: Offset(_panX, _panY),
+    );
+    final topLeft = UnifiedCoordinateService().screenToGrid(screenRect.topLeft, config);
+    final bottomRight = UnifiedCoordinateService().screenToGrid(screenRect.bottomRight, config);
     
     return Rect.fromPoints(
       Offset(topLeft.dx.floor().toDouble(), topLeft.dy.floor().toDouble()),

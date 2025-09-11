@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
@@ -34,16 +34,18 @@ class SelectionState {
     );
   }
 }
-
 final selectionServiceProvider = StateNotifierProvider.family<SelectionService, SelectionState, String>(
-  (ref, levelId) => SelectionService(ref: ref, levelId: levelId),
+  (ref, levelId) {
+    MigrationTracker.markFileMigrated('selection_service.dart', DateTime.now().toIso8601String());
+    return SelectionService(levelId: levelId);
+  },
 );
 
+
 class SelectionService extends StateNotifier<SelectionState> {
-  final Ref ref;
   final String levelId;
 
-  SelectionService({required this.ref, required this.levelId})
+  SelectionService({required this.levelId})
       : super(const SelectionState());
 
   void selectComponent(ComponentModel component) {

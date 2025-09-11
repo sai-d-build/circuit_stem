@@ -25,7 +25,6 @@ void main() {
     mockRenderingService = MockCanvasRenderingService();
 
     orchestrator = GameCanvasOrchestrator(
-      placementService: mockPlacementService,
       interactionService: mockInteractionService,
       renderingService: mockRenderingService,
     );

@@ -1,0 +1,42 @@
+{
+  "levelId": "tutorial_'${i}'",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "tutorial_'${i}'",
+    "title": "Tutorial Level '${i}'",
+    "description": "Continue building circuit knowledge",
+    "difficulty": "tutorial",
+    "estimatedTime": 120,
+    "learningObjectives": ["Basic circuit concepts"],
+    "tags": ["tutorial"],
+    "unlocksComponents": [],
+    "prerequisites": ["tutorial_'$(($i-1))'"
+  },
+  "grid": {"width": 8, "height": 6, "background": "circuit_board"},
+  "components": {
+    "available": [
+      {"type": "battery", "quantity": 1, "properties": {"voltage": 9.0}},
+      {"type": "led", "quantity": 1, "properties": {"forwardVoltage": 2.0, "color": "red"}},
+      {"type": "resistor", "quantity": 1, "properties": {"resistance": 470.0}},
+      {"type": "wire", "quantity": 4, "properties": {"resistance": 0.01}}
+    ],
+    "preplaced": []
+  },
+  "goals": [{
+    "id": "basic_circuit",
+    "type": "component_state",
+    "description": "Complete basic tutorial circuit",
+    "conditions": {"targetComponent": "led_1", "targetState": "on"}
+  }],
+  "validation": {
+    "circuitRules": ["no_short_circuits", "proper_component_connections"],
+    "successConditions": ["all_goals_completed"]
+  },
+  "tutorial": {"enabled": false, "steps": []},
+  "scoring": {
+    "maxScore": 1000,
+    "timeBonus": {"maxTime": 200, "bonusPerSecond": 2},
+    "efficiencyBonus": {"maxComponents": 7, "bonusPerUnusedComponent": 50},
+    "starThresholds": {"threeStars": 800, "twoStars": 600, "oneStar": 400}
+  }
+}

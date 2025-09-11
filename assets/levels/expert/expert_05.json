@@ -1,0 +1,42 @@
+{
+  "levelId": "expert_05",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "expert_05",
+    "title": "Expert Challenge 5",
+    "description": "Master-level circuit design and analysis",
+    "difficulty": "expert",
+    "estimatedTime": 900,
+    "learningObjectives": ["Expert circuit design", "Advanced analysis"],
+    "tags": ["expert"],
+    "unlocksComponents": [],
+    "prerequisites": ["expert_04"]
+  },
+  "grid": {"width": 20, "height": 16, "background": "circuit_board"},
+  "components": {
+    "available": [
+      {"type": "operational_amplifier", "quantity": 2, "properties": {"gain": 1.0}},
+      {"type": "resistor", "quantity": 6, "properties": {"resistance": 10000.0}},
+      {"type": "capacitor", "quantity": 3, "properties": {"capacitance": 100e-9}},
+      {"type": "wire", "quantity": 25, "properties": {"resistance": 0.01}}
+    ],
+    "preplaced": []
+  },
+  "goals": [{
+    "id": "expert_design",
+    "type": "circuit_analysis",
+    "description": "Design and analyze expert-level circuits",
+    "conditions": {"frequency_response": {"targetFrequency": 1000, "targetGain": 3.0}}
+  }],
+  "validation": {
+    "circuitRules": ["no_short_circuits", "proper_component_connections"],
+    "successConditions": ["all_goals_completed"]
+  },
+  "tutorial": {"enabled": false, "steps": []},
+  "scoring": {
+    "maxScore": 3000,
+    "timeBonus": {"maxTime": 1200, "bonusPerSecond": 1},
+    "efficiencyBonus": {"maxComponents": 36, "bonusPerUnusedComponent": 20},
+    "starThresholds": {"threeStars": 2400, "twoStars": 1800, "oneStar": 1200}
+  }
+}

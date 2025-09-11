@@ -1,0 +1,142 @@
+{
+  "levelId": "beginner_03",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "beginner_03",
+    "title": "Switch Control",
+    "description": "Learn to control circuits with switches",
+    "difficulty": "beginner",
+    "estimatedTime": 200,
+    "learningObjectives": ["Switch functionality", "Circuit control", "Series vs parallel"],
+    "tags": ["beginner", "switch", "control"],
+    "unlocksComponents": [],
+    "prerequisites": ["beginner_02"]
+  },
+  "grid": {
+    "width": 12,
+    "height": 8,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 9.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "led",
+        "quantity": 3,
+        "properties": {
+          "forwardVoltage": 2.0,
+          "color": "red",
+          "maxCurrent": 0.02
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 2,
+        "properties": {
+          "resistance": 470.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "switch",
+        "quantity": 2,
+        "properties": {
+          "initialState": "open"
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 12,
+        "properties": {
+          "resistance": 0.01
+        }
+      },
+      {
+        "type": "capacitor",
+        "quantity": 1,
+        "properties": {
+          "capacitance": 1000e-6,
+          "initialVoltage": 0.0
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "switch_circuit",
+      "type": "component_state",
+      "description": "Control LED brightness with switches",
+      "conditions": {
+        "targetComponent": "led_1",
+        "targetState": "on"
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Connect switches in series with LEDs to control brightness",
+          "trigger": "time_elapsed",
+          "triggerValue": 60
+        },
+        {
+          "id": "hint_2",
+          "text": "Use both switches and compare the brightness changes",
+          "trigger": "time_elapsed",
+          "triggerValue": 120
+        }
+      ]
+    },
+    {
+      "id": "current_measurement",
+      "type": "circuit_analysis",
+      "description": "Measure current through different switch configurations",
+      "conditions": {
+        "current_flow": {
+          "minValue": 0.01,
+          "maxValue": 0.03
+        }
+      }
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits",
+      "switch_configuration"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable",
+      "switch_functionality_verified"
+    ]
+  },
+  "tutorial": {
+    "enabled": false,
+    "steps": []
+  },
+  "scoring": {
+    "maxScore": 1300,
+    "timeBonus": {
+      "maxTime": 400,
+      "bonusPerSecond": 2
+    },
+    "efficiencyBonus": {
+      "maxComponents": 18,
+      "bonusPerUnusedComponent": 35
+    },
+    "starThresholds": {
+      "threeStars": 1000,
+      "twoStars": 800,
+      "oneStar": 600
+    }
+  }
+}

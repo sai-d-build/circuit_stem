@@ -17,15 +17,29 @@ import '../services/goal_checking_service.dart';
 
 // Game Engine V3 imports
 import '../game_engine/v3/game_engine_notifier_v3.dart';
+import '../enhanced_game_state_notifier.dart';
+import '../../application/use_cases/providers.dart' as use_case_providers;
+
+// Missing notifier providers
+import '../grid_notifier.dart';
+import '../history_notifier.dart';
+import '../game_progress_notifier.dart';
+import '../component_selection_notifier.dart';
+import '../interaction_state_notifier.dart';
 import '../../core/debug/structured_logger.dart';
+
+// Import notifier classes for provider definitions - Grid is already available via entities import above
+import '../history_notifier.dart' show HistoryNotifier, GameStateSnapshot;
+import '../game_progress_notifier.dart' show GameProgressNotifier, GameProgress;
+import '../component_selection_notifier.dart' show ComponentSelectionNotifier, ComponentSelectionState;
+import '../interaction_state_notifier.dart' show InteractionStateNotifier, InteractionState;
 
 // Domain entities
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../../application/states/game_state.dart';
 
 // Canvas and orchestrator imports
-import '../states/game_canvas_state.dart';
-import '../../presentation/features/game/controllers/game_canvas_orchestrator.dart';
+import '../../presentation/features/game/controllers/game_canvas_orchestrator.dart' hide InteractionState;
 import '../../presentation/features/game/controllers/canvas_interaction_controller.dart' as canvas_controller;
 import '../services/interfaces/component_placement_service.dart';
 import '../services/interfaces/game_interaction_service.dart';
@@ -35,7 +49,11 @@ import '../services/implementations/canvas_rendering_service_impl.dart';
 import '../services/implementations/component_placement_service_impl.dart';
 import '../services/implementations/component_inventory_service_impl.dart';
 import '../services/implementations/grid_validation_service_impl.dart';
+import '../services/implementations/canvas_business_service_impl.dart';
+import '../services/placement_service_adapter.dart';
 import '../../presentation/state/palette_state.dart';
+
+// Provider imports (moved from bottom) - consolidated with class imports above
 
 // ============================================================================
 // SIMULATION ENGINE PROVIDERS
@@ -67,8 +85,76 @@ final gameEngineNotifierV3Provider = StateNotifierProvider<GameEngineNotifierV3,
   return GameEngineNotifierV3();
 });
 
-// Enhanced Game State Provider (alias for V3)
-final enhancedGameStateNotifierProvider = gameEngineNotifierV3Provider;
+// Enhanced Game State Provider with full dependencies (for consolidation plan)
+final enhancedGameStateNotifierProvider = StateNotifierProvider<EnhancedGameStateNotifier, GameState>((ref) {
+  final simulationEngine = ref.watch(simulationEngineProvider);
+  final netlistBuilder = ref.watch(netlistBuilderProvider);
+  final storageService = ref.watch(storageServiceProvider);
+  final commandStack = ref.watch(use_case_providers.commandStackProvider);
+  final componentFactory = ref.watch(componentFactoryProvider);
+
+  return EnhancedGameStateNotifier(
+    simulationEngine: simulationEngine,
+    netlistBuilder: netlistBuilder,
+    storageService: storageService,
+    commandStack: commandStack,
+    componentFactory: componentFactory,
+  );
+});
+
+// ============================================================================
+// MISSING NOTIFIER PROVIDERS (for consolidation plan)
+// ============================================================================
+
+// Reference existing providers from respective notifier files
+// These providers are defined in their respective notifier files and must be exposed here for global access
+
+// Grid Notifier Provider reference
+// Provider is defined in lib/application/grid_notifier.dart line 63
+
+// History Notifier Provider reference
+// Provider is defined in lib/application/history_notifier.dart line 86
+
+// Game Progress Notifier Provider reference
+// Provider is defined in lib/application/game_progress_notifier.dart line 126
+
+// Component Selection Notifier Provider reference
+// Provider is defined in lib/application/component_selection_notifier.dart line 110
+
+// Interaction State Notifier Provider reference
+// Provider is defined in lib/application/interaction_state_notifier.dart line 191
+
+// ============================================================================
+// NOTIFIER PROVIDER DEFINITIONS (Imported from respective files)
+// ============================================================================
+
+// Grid Notifier Provider - Manages grid state
+final gridNotifierProvider = StateNotifierProvider<GridNotifier, Grid>((ref) {
+  return GridNotifier();
+});
+
+// History Notifier Provider - Manages undo/redo history
+final historyNotifierProvider = StateNotifierProvider<HistoryNotifier, List<GameStateSnapshot>>((ref) {
+  return HistoryNotifier();
+});
+
+// Game Progress Notifier Provider - Manages game progress state
+final gameProgressNotifierProvider = StateNotifierProvider<GameProgressNotifier, GameProgress>((ref) {
+  return GameProgressNotifier();
+});
+
+// Component Selection Notifier Provider - Manages component selection state
+final componentSelectionNotifierProvider = StateNotifierProvider<ComponentSelectionNotifier, ComponentSelectionState>((ref) {
+  return ComponentSelectionNotifier();
+});
+
+// Interaction State Notifier Provider - Manages interaction state
+final interactionStateNotifierProvider = StateNotifierProvider<InteractionStateNotifier, InteractionState>((ref) {
+  return InteractionStateNotifier();
+});
+
+// Alias for backward compatibility
+final interactionStateNotifierProviderAlias = interactionStateNotifierProvider;
 
 // ============================================================================
 // COMPONENT MANAGEMENT PROVIDERS
@@ -89,238 +175,10 @@ final componentPaletteManagerProvider = Provider((ref) {
 // User data, level progress, and settings persistence
 
 // Shared Preferences Storage Provider - User settings and data
-final storageServiceProvider = Provider((ref) => SharedPreferencesStorageService());
-
-// ============================================================================
-// LEVEL MANAGEMENT PROVIDERS
-// ============================================================================
-
-// Level Service Provider
-final levelServiceProvider = Provider<LevelService>((ref) {
-  return LevelService();
+final storageServiceProvider = Provider<SharedPreferencesStorageService>((ref) {
+  throw UnimplementedError('SharedPreferencesStorageService must be initialized in main.dart and overridden via ProviderScope');
 });
 
-// Level service implementation
-class LevelService {
-  Future<List<LevelDefinition>> loadAllLevels() async {
-    StructuredLogger.info('Starting level loading process', context: {
-      'operation': 'loadAllLevels',
-      'timestamp': DateTime.now().toIso8601String(),
-    });
-
-    final List<LevelDefinition> levels = [];
-
-    // Define level files to load
-    final levelFiles = [
-      'assets/levels/tutorial/tutorial_01.json',
-      'assets/levels/beginner/beginner_01.json',
-    ];
-
-    StructuredLogger.debug('Level paths to load', context: {
-      'levelPaths': levelFiles,
-      'totalPaths': levelFiles.length,
-    });
-
-    // First, try to load and log the AssetManifest to see what assets are available
-    try {
-      StructuredLogger.debug('Loading AssetManifest.json to check available assets', context: {
-        'manifestPath': 'AssetManifest.json',
-      });
-
-      final manifestContent = await rootBundle.loadString('AssetManifest.json');
-      final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-
-      StructuredLogger.debug('AssetManifest loaded successfully', context: {
-        'totalAssets': manifestMap.length,
-        'levelAssets': manifestMap.keys.where((key) => key.contains('levels')).toList(),
-        'jsonAssets': manifestMap.keys.where((key) => key.endsWith('.json')).toList(),
-      });
-
-      // Check if our expected level files are in the manifest
-      final expectedLevelAssets = levelFiles.where((path) => manifestMap.containsKey(path)).toList();
-      final missingLevelAssets = levelFiles.where((path) => !manifestMap.containsKey(path)).toList();
-
-      StructuredLogger.info('Asset manifest analysis', context: {
-        'expectedLevelFiles': levelFiles,
-        'foundInManifest': expectedLevelAssets,
-        'missingFromManifest': missingLevelAssets,
-        'manifestContainsLevels': manifestMap.keys.any((key) => key.contains('levels')),
-      });
-
-      if (missingLevelAssets.isNotEmpty) {
-        StructuredLogger.warning('Some expected level files are missing from AssetManifest', context: {
-          'missingFiles': missingLevelAssets,
-          'thisMayCauseLevelLoadingFailure': true,
-        });
-      }
-
-    } catch (e, stackTrace) {
-      StructuredLogger.error('Failed to load or parse AssetManifest.json', context: {
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-        'thisWillPreventLevelLoading': true,
-      }, error: e);
-    }
-
-    int successCount = 0;
-    int failureCount = 0;
-
-    for (final filePath in levelFiles) {
-      try {
-        StructuredLogger.debug('Starting load of individual level file', context: {
-          'levelPath': filePath,
-          'currentIndex': levelFiles.indexOf(filePath),
-          'totalPaths': levelFiles.length,
-        });
-
-        // Step 1: Load JSON string from assets
-        StructuredLogger.debug('Attempting to load JSON string from asset bundle', context: {
-          'levelPath': filePath,
-          'operation': 'rootBundle.loadString',
-          'fileIndex': levelFiles.indexOf(filePath),
-          'totalFiles': levelFiles.length,
-        });
-
-        final jsonString = await rootBundle.loadString(filePath);
-
-        StructuredLogger.debug('JSON string loaded successfully from assets', context: {
-          'levelPath': filePath,
-          'jsonLength': jsonString.length,
-          'firstChars': jsonString.substring(0, math.min(100, jsonString.length)),
-          'lastChars': jsonString.length > 100 ? jsonString.substring(jsonString.length - 50) : '',
-          'containsLevelId': jsonString.contains('"levelId"'),
-          'containsMetadata': jsonString.contains('"metadata"'),
-        });
-
-        // Step 2: Parse JSON
-        StructuredLogger.trace('Parsing JSON string', context: {
-          'levelPath': filePath,
-          'operation': 'json.decode',
-        });
-
-        final dynamic jsonData = json.decode(jsonString);
-
-        StructuredLogger.trace('JSON parsing completed', context: {
-          'levelPath': filePath,
-          'jsonType': jsonData.runtimeType.toString(),
-          'isMap': jsonData is Map<String, dynamic>,
-        });
-
-        // Step 3: Validate JSON structure
-        if (jsonData is! Map<String, dynamic>) {
-          StructuredLogger.warning('Invalid JSON structure - not a Map', context: {
-            'levelPath': filePath,
-            'jsonType': jsonData.runtimeType.toString(),
-            'expectedType': 'Map<String, dynamic>',
-            'jsonData': jsonData.toString(),
-          });
-          failureCount++;
-          continue;
-        }
-
-        // Step 4: Validate required fields
-        final requiredFields = ['levelId', 'metadata', 'grid', 'components', 'goals'];
-        final missingFields = requiredFields.where((field) => !jsonData.containsKey(field)).toList();
-
-        if (missingFields.isNotEmpty) {
-          StructuredLogger.warning('Missing required fields in level JSON', context: {
-            'levelPath': filePath,
-            'missingFields': missingFields,
-            'availableFields': jsonData.keys.toList(),
-          });
-          failureCount++;
-          continue;
-        }
-
-        StructuredLogger.trace('JSON structure validation passed', context: {
-          'levelPath': filePath,
-          'availableFields': jsonData.keys.toList(),
-        });
-
-        // Step 5: Deserialize to LevelDefinition
-        StructuredLogger.trace('Deserializing to LevelDefinition', context: {
-          'levelPath': filePath,
-          'operation': 'LevelDefinition.fromJson',
-        });
-
-        final level = LevelDefinition.fromJson(jsonData);
-        levels.add(level);
-        successCount++;
-
-        StructuredLogger.debug('Level successfully loaded and parsed', context: {
-          'levelId': level.levelId,
-          'levelPath': filePath,
-          'title': level.metadata.title,
-          'difficulty': level.metadata.difficulty,
-          'gridSize': '${level.grid.width}x${level.grid.height}',
-          'componentCount': level.components.available.length,
-          'goalCount': level.goals.length,
-        });
-
-      } catch (e, stackTrace) {
-        failureCount++;
-        StructuredLogger.error('Failed to load level file', context: {
-          'levelPath': filePath,
-          'error': e.toString(),
-          'errorType': e.runtimeType.toString(),
-          'stackTrace': stackTrace.toString(),
-          'levelsLoadedSoFar': levels.length,
-          'successCount': successCount,
-          'failureCount': failureCount,
-        }, error: e);
-        // Continue loading other levels even if one fails
-      }
-    }
-
-    StructuredLogger.info('Level loading batch completed', context: {
-      'totalLevelsLoaded': levels.length,
-      'successCount': successCount,
-      'failureCount': failureCount,
-      'totalPathsAttempted': levelFiles.length,
-      'levels': levels.map((level) => {
-        'id': level.levelId,
-        'title': level.metadata.title,
-        'difficulty': level.metadata.difficulty,
-      }).toList(),
-      'duration': DateTime.now().toIso8601String(),
-    });
-
-    if (levels.isEmpty) {
-      StructuredLogger.warning('No levels were successfully loaded', context: {
-        'totalPathsAttempted': levelFiles.length,
-        'failureCount': failureCount,
-        'levelPaths': levelFiles,
-      });
-    }
-
-    return levels;
-  }
-
-  Future<LevelDefinition?> loadLevel(String levelId) async {
-    final allLevels = await loadAllLevels();
-
-    // Map simple level IDs to actual level file names
-    final levelIdMapping = {
-      '1': 'tutorial_01',
-      '2': 'beginner_01',
-      // Add more mappings as needed
-    };
-
-    final mappedLevelId = levelIdMapping[levelId] ?? levelId;
-
-    try {
-      return allLevels.firstWhere((level) => level.levelId == mappedLevelId);
-    } catch (e) {
-      StructuredLogger.warning('Level search failed', context: {
-        'originalLevelId': levelId,
-        'mappedLevelId': mappedLevelId,
-        'availableLevels': allLevels.map((level) => level.levelId).toList(),
-        'error': e.toString(),
-      });
-      return null;
-    }
-  }
-}
 
 // ============================================================================
 // UI STATE PROVIDERS
@@ -379,7 +237,6 @@ final gameCanvasOrchestratorProvider = StateNotifierProvider.family<
   String  // levelId
 >((ref, levelId) {
   return GameCanvasOrchestrator(
-    placementService: ref.watch(componentPlacementServiceProvider(levelId)),
     interactionService: ref.watch(gameInteractionServiceProvider),
     renderingService: ref.watch(canvasRenderingServiceProvider),
   );
@@ -394,7 +251,7 @@ final componentPlacementServiceProvider = Provider.family<ComponentPlacementServ
     levelId: levelId,
   );
   final gridValidationService = DefaultGridValidationService();
-  final gameEngine = ref.watch(enhancedGameStateNotifierProvider.notifier);
+  final gameEngine = ref.watch(gameEngineNotifierV3Provider.notifier);
 
   return DefaultComponentPlacementService(
     inventoryService: inventoryService,
@@ -405,14 +262,30 @@ final componentPlacementServiceProvider = Provider.family<ComponentPlacementServ
 
 // Game Interaction Service Provider (from game_canvas_providers.dart)
 final gameInteractionServiceProvider = Provider<GameInteractionService>((ref) {
-  return GameInteractionServiceImpl(
-    placementService: ref.watch(componentPlacementServiceProvider('default')),
-  );
+  return GameInteractionServiceImpl();
 });
 
 // Canvas Rendering Service Provider (from game_canvas_providers.dart)
 final canvasRenderingServiceProvider = Provider<CanvasRenderingService>((ref) {
   return DefaultCanvasRenderingService();
+});
+
+// Placement Service Adapter Provider - Clean dependency injection
+final placementServiceAdapterProvider = Provider.family<PlacementServiceAdapter, String>((ref, levelId) {
+  return PlacementServiceAdapter(
+    gameStateNotifier: ref.watch(enhancedGameStateNotifierProvider.notifier),
+    paletteStateNotifier: ref.watch(paletteStateProvider(levelId).notifier),
+    componentPlacementService: ref.watch(componentPlacementServiceProvider(levelId)),
+    levelId: levelId,
+  );
+});
+
+// Canvas Business Service Provider - Clean dependency injection
+final canvasBusinessServiceProvider = Provider.family<CanvasBusinessServiceImpl, String>((ref, levelId) {
+  return CanvasBusinessServiceImpl(
+    paletteStateNotifier: ref.watch(paletteStateProvider(levelId).notifier),
+    componentPlacementService: ref.watch(componentPlacementServiceProvider(levelId)),
+  );
 });
 
 // ============================================================================

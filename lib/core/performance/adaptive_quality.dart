@@ -6,7 +6,7 @@ class AdaptiveQualityManager {
   static QualityLevel get currentLevel => _currentLevel;
 
   static void assessDeviceCapabilities() {
-    PerformanceMonitor.startMonitoring();
+    PerformanceMonitor.startStaticMonitoring();
 
     // Initial assessment based on device info
     // This would be expanded with actual device detection

@@ -31,8 +31,8 @@ class GameState {
 
   factory GameState.initial(LevelDefinition? level) => GameState(
         grid: Grid(
-          rows: level?.grid.height ?? 0,
-          cols: level?.grid.width ?? 0,
+          rows: level?.grid.height ?? 20,  // ✅ Fix: Use standard 20x20 grid instead of 0x0
+          cols: level?.grid.width ?? 20,   // ✅ Fix: Use standard 20x20 grid instead of 0x0
           components: {}, // Will be populated from level data
         ),
         isPaused: false,

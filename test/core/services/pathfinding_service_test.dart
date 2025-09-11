@@ -13,30 +13,13 @@ class MockProvidersV3 extends Mock {
 
 void main() {
   group('PathfindingService Tests', () {
-    late PathfindingService service;
-    late MockRef mockRef;
-
     setUp(() {
-      mockRef = MockRef();
       // Note: In a real test, you'd need to set up the provider container
       // For now, we'll test the basic functionality
     });
 
     group('Pathfinding Algorithms', () {
       test('Manhattan pathfinding works correctly', () {
-        final start = GridPosition(row: 0, col: 0);
-        final end = GridPosition(row: 2, col: 3);
-
-        // Expected Manhattan path: (0,0) -> (0,1) -> (0,2) -> (0,3) -> (1,3) -> (2,3)
-        final expectedPath = [
-          GridPosition(row: 0, col: 0),
-          GridPosition(row: 0, col: 1),
-          GridPosition(row: 0, col: 2),
-          GridPosition(row: 0, col: 3),
-          GridPosition(row: 1, col: 3),
-          GridPosition(row: 2, col: 3),
-        ];
-
         // This would require setting up the full provider container
         // For now, we'll just verify the algorithm structure exists
         expect(PathfindingAlgorithm.manhattan, isNotNull);

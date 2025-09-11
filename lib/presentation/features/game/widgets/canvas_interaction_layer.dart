@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
-import 'package:sparkcircuit/core/services/grid_service.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
+import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 
 /// CanvasInteractionLayer handles mouse interactions, hover states, and selection feedback.
 /// This layer extracts interaction logic from GameCanvas.
@@ -27,7 +27,8 @@ class _CanvasInteractionLayerState extends ConsumerState<CanvasInteractionLayer>
 
   @override
   Widget build(BuildContext context) {
-    final gameState = ref.watch(providers_v3.enhancedGameStateNotifierProvider);
+    MigrationTracker.markFileMigrated('canvas_interaction_layer.dart', DateTime.now().toIso8601String());
+    final gameState = ref.watch(unifiedGameStateProvider);
 
     return MouseRegion(
       onHover: (event) {
@@ -44,7 +45,8 @@ class _CanvasInteractionLayerState extends ConsumerState<CanvasInteractionLayer>
           panOffset: Offset.zero,
         );
 
-        final gridPos = GridService.screenToGrid(event.localPosition, gridConfig);
+        final unifiedService = UnifiedCoordinateService();
+        final gridPos = unifiedService.screenToGrid(event.localPosition, gridConfig);
         final component = _getComponentAtPosition(gridPos, gameState);
 
         if (component != null && component.id != _hoveredComponentId) {
@@ -142,7 +144,8 @@ class ComponentHoverPainter extends CustomPainter {
       panOffset: Offset.zero,
     );
 
-    final screenPos = GridService.gridToScreen(
+    final unifiedService = UnifiedCoordinateService();
+    final screenPos = unifiedService.gridToScreen(
       Offset(component.col.toDouble() + 0.5, component.row.toDouble() + 0.5),
       gridConfig,
     );

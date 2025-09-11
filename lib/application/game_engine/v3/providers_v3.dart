@@ -4,6 +4,7 @@ import './game_engine_notifier_v3.dart';
 import '../../../infrastructure/persistence/shared_preferences_storage_service.dart';
 import '../../states/game_state.dart';
 import '../../services/level_service.dart' as level_service;
+import '../../../core/debug/structured_logger.dart';
 
 // Storage Service Provider
 final storageServiceProvider = Provider<SharedPreferencesStorageService>((ref) {
@@ -23,5 +24,17 @@ final paletteDragActiveProvider = StateProvider<bool>((ref) => false);
 
 // Level Service Provider
 final levelServiceProvider = Provider<level_service.LevelService>((ref) {
-  return level_service.LevelService(rootBundle);
+  StructuredLogger.info('🏗️ CREATING LevelService provider', context: {
+    'timestamp': DateTime.now().toIso8601String(),
+    'rootBundleType': rootBundle.runtimeType.toString(),
+  });
+
+  final service = level_service.LevelService(rootBundle);
+
+  StructuredLogger.info('✅ LevelService provider created successfully', context: {
+    'serviceType': service.runtimeType.toString(),
+    'timestamp': DateTime.now().toIso8601String(),
+  });
+
+  return service;
 });

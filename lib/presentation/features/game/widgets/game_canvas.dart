@@ -2,9 +2,9 @@ import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import '../../../../application/game_engine/v3/providers_v3.dart' as providers_v3;
+
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_grid.dart';
-import 'package:sparkcircuit/application/providers/core_providers.dart' as core_providers;
 import 'package:sparkcircuit/application/providers/game_canvas_providers.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
 
@@ -13,8 +13,7 @@ import 'package:sparkcircuit/presentation/features/game/widgets/circuit_componen
 import 'canvas_interaction_widget.dart';
 import 'canvas_rendering_layer.dart';
 import 'canvas_wire_layer.dart';
-import 'package:sparkcircuit/presentation/features/game/services/viewport_service.dart';
-import 'package:sparkcircuit/presentation/features/game/controllers/canvas_interaction_controller.dart';
+import 'package:sparkcircuit/presentation/helpers/central_interaction_helper.dart';
 
 class GameCanvas extends ConsumerStatefulWidget {
   final String levelId;
@@ -37,40 +36,58 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
   }
 
   Future<void> _loadLevel() async {
-    print('🎮 GameCanvas: Starting level load process for ${widget.levelId}');
+    StructuredLogger.debug('🎮 GameCanvas: Starting level load process for ${widget.levelId}', context: {
+      'levelId': widget.levelId,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
     StructuredLogger.info('GameCanvas: Starting level load process', context: {
       'levelId': widget.levelId,
     });
 
     try {
-      final levelService = ref.read(providers_v3.levelServiceProvider);
-      print('🎮 GameCanvas: Got level service: $levelService');
+      final levelService = CentralInteractionHelper.getLevelService(ref);
+      StructuredLogger.debug('🎮 GameCanvas: Got level service: $levelService', context: {
+        'levelId': widget.levelId,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
       final level = await levelService.loadLevel(widget.levelId);
-      print('🎮 GameCanvas: Level loaded: ${level?.levelId ?? "NULL"}');
+      StructuredLogger.debug('🎮 GameCanvas: Level loaded: ${level?.levelId ?? "NULL"}', context: {
+        'levelId': widget.levelId,
+        'loadedLevelId': level?.levelId ?? "NULL",
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
 
       if (level != null) {
-        print('🎮 GameCanvas: Loading level into game state');
-        // Initialize game state with the loaded level
-        ref.read(providers_v3.enhancedGameStateNotifierProvider.notifier).loadLevel(level);
-
-        // Initialize orchestrator with level
-        StructuredLogger.debug('GameCanvas: Initializing orchestrator with level', context: {
+        StructuredLogger.debug('🎮 GameCanvas: Loading level into game state', context: {
           'levelId': widget.levelId,
-          'orchestrator_available': ref.read(gameCanvasOrchestratorProvider(widget.levelId).notifier) != null,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
         });
+        // Initialize game state with the loaded level using centralized helper
+        await CentralInteractionHelper.loadLevel(ref, widget.levelId, level);
 
-        ref.read(gameCanvasOrchestratorProvider(widget.levelId).notifier).initializeLevel(widget.levelId);
+        // Also initialize the orchestrator with the level
+        CentralInteractionHelper.initializeLevel(ref, widget.levelId);
 
         StructuredLogger.info('GameCanvas: Level load process completed successfully', context: {
           'levelId': level.levelId,
           'levelTitle': level.metadata.title,
         });
-        print('🎮 GameCanvas: Level load completed successfully');
+        StructuredLogger.debug('🎮 GameCanvas: Level load completed successfully', context: {
+          'levelId': level.levelId,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        });
       } else {
-        print('🎮 GameCanvas: Level is NULL - this is the problem!');
+        StructuredLogger.error('🎮 GameCanvas: Level is NULL - this is the problem!', context: {
+          'levelId': widget.levelId,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        });
       }
     } catch (e) {
-      print('🎮 GameCanvas: Error loading level: $e');
+      StructuredLogger.error('🎮 GameCanvas: Error loading level: $e', context: {
+        'levelId': widget.levelId,
+        'errorType': e.runtimeType.toString(),
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      }, error: e);
       StructuredLogger.error('GameCanvas: Error loading level', context: {
         'levelId': widget.levelId,
         'errorType': e.runtimeType.toString(),
@@ -81,10 +98,15 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
 
   @override
   Widget build(BuildContext context) {
-    print('🎮 GameCanvas: BUILD METHOD CALLED for level ${widget.levelId}');
-    print('🎮 GameCanvas: Building level ${widget.levelId}');
+    StructuredLogger.debug('🎮 GameCanvas: BUILD METHOD CALLED for level ${widget.levelId}', context: {
+      'levelId': widget.levelId,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+    StructuredLogger.debug('🎮 GameCanvas: Building level ${widget.levelId}', context: {
+      'levelId': widget.levelId,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
     StructuredLogger.trace('GameCanvas: Building - checking orchestrator state', context: {
-      'context_available': context != null,
       'levelId': widget.levelId,
     });
     StructuredLogger.debug('GameCanvas: Build started', context: {
@@ -105,7 +127,11 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          print('🎮 GameCanvas: Container constraints: ${constraints.toString()}');
+          StructuredLogger.debug('🎮 GameCanvas: Container constraints: ${constraints.toString()}', context: {
+            'levelId': widget.levelId,
+            'constraints': constraints.toString(),
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          });
           return ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Stack(
@@ -118,7 +144,6 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
                   builder: (context) {
                     StructuredLogger.debug('GameCanvas building CanvasInteractionWidget', context: {
                       'levelId': widget.levelId,
-                      'contextAvailable': context != null,
                       'widgetOrder': 'first_in_stack',
                       'hitTestingEnabled': true,
                     });
@@ -140,22 +165,17 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
               ),
   
               // Rendering layer - must allow touch pass-through
-              Consumer(
-                builder: (context, ref, child) {
-                  final gameState = ref.watch(providers_v3.enhancedGameStateNotifierProvider);
-                  return Positioned.fill(
-                    child: IgnorePointer(
-                      child: CanvasRenderingLayer(levelId: widget.levelId),
-                    ),
-                  );
-                },
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: CanvasRenderingLayer(levelId: widget.levelId),
+                ),
               ),
   
               // Component widgets - must allow touch pass-through
               // These need to be draggable themselves but shouldn't block the canvas
               Consumer(
                 builder: (context, ref, child) {
-                  final componentState = ref.watch(providers_v3.enhancedGameStateNotifierProvider.select((state) => state.grid.components));
+                  final componentState = ref.watch(unifiedGameStateProvider.select((state) => state.grid.components));
                   final canvasState = ref.watch(gameCanvasOrchestratorProvider(widget.levelId));
                   final cellSize = canvasState.viewportState.gridConfiguration.cellSize; // 🔧 FIX 5: Use dynamic cell size
 
@@ -181,6 +201,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
                               child: CircuitComponentWidget(
                                 key: ValueKey(component.id),
                                 component: component,
+                                levelId: widget.levelId,
                               )
                             ),
                           )
@@ -194,7 +215,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
             // Enhanced Debug Dashboard - comprehensive debugging information
             Consumer(
               builder: (context, ref, child) {
-                final gameState = ref.watch(providers_v3.enhancedGameStateNotifierProvider);
+                final gameState = ref.watch(unifiedGameStateProvider);
                 final interactionState = ref.watch(interactionStateProvider(widget.levelId));
                 final paletteState = ref.watch(paletteStateProvider(widget.levelId));
 
@@ -205,11 +226,67 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
                   componentsByType[typeKey] = (componentsByType[typeKey] ?? 0) + 1;
                 }
 
+                // Log GRID STATE metrics (controlled by debugDashboard flag)
+                if (StructuredLogger.debugDashboard) {
+                  StructuredLogger.gameCanvas('📊 GRID STATE metrics calculated', context: {
+                    'levelId': widget.levelId,
+                    'componentsCount': gameState.grid.components.length,
+                    'gridDimensions': '${gameState.grid.rows}x${gameState.grid.cols}',
+                    'occupiedCells': gameState.grid.components.length,
+                    'freeCells': (gameState.grid.rows * gameState.grid.cols) - gameState.grid.components.length,
+                    'componentsByType': componentsByType,
+                    'timestamp': DateTime.now().millisecondsSinceEpoch,
+                  });
+                }
+
                 // Calculate inventory summary
                 final totalAvailable = paletteState.inventory.values.fold<int>(
                   0, (sum, inv) => sum + inv.available);
                 final totalUsed = paletteState.inventory.values.fold<int>(
                   0, (sum, inv) => sum + (inv.total - inv.available));
+
+                final totalCapacity = totalAvailable + totalUsed;
+                final utilizationPercentage = totalUsed > 0 ? ((totalUsed / totalCapacity) * 100).round() : 0;
+
+                // Log INVENTORY SUMMARY metrics (controlled by debugDashboard flag)
+                if (StructuredLogger.debugDashboard) {
+                  StructuredLogger.gameCanvas('📦 INVENTORY SUMMARY metrics calculated', context: {
+                    'levelId': widget.levelId,
+                    'totalAvailable': totalAvailable,
+                    'totalUsed': totalUsed,
+                    'totalCapacity': totalCapacity,
+                    'utilizationPercentage': utilizationPercentage,
+                    'inventoryDetail': paletteState.inventory.entries.map((e) {
+                      final type = e.key.toString().split('.').last;
+                      final inv = e.value;
+                      return '${type}:${inv.available}/${inv.total}(${inv.total - inv.available}used)';
+                    }).toList(),
+                    'timestamp': DateTime.now().millisecondsSinceEpoch,
+                  });
+                }
+
+                // Additional logging for dashboard sections when populated
+                if (componentsByType.isNotEmpty && StructuredLogger.debugDashboard) {
+                  StructuredLogger.gameCanvas('🔧 COMPONENTS BY TYPE dashboard section updated', context: {
+                    'levelId': widget.levelId,
+                    'componentBreakdown': componentsByType,
+                    'totalTypes': componentsByType.length,
+                    'timestamp': DateTime.now().millisecondsSinceEpoch,
+                  });
+                }
+
+                if (paletteState.inventory.isNotEmpty && StructuredLogger.debugDashboard) {
+                  StructuredLogger.gameCanvas('📋 COMPONENT INVENTORY dashboard section updated', context: {
+                    'levelId': widget.levelId,
+                    'inventoryCount': paletteState.inventory.length,
+                    'detailedInventory': paletteState.inventory.entries.map((e) {
+                      final type = e.key.toString().split('.').last;
+                      final inv = e.value;
+                      return '${type}: ${inv.available}/${inv.total}(${inv.used}used)';
+                    }).toList(),
+                    'timestamp': DateTime.now().millisecondsSinceEpoch,
+                  });
+                }
 
                 return Positioned(
                   top: 10,
@@ -283,7 +360,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
                             'Total Available: $totalAvailable',
                             'Total Used: $totalUsed',
                             'Total Capacity: ${totalAvailable + totalUsed}',
-                            'Utilization: ${totalUsed > 0 ? (((totalUsed / (totalAvailable + totalUsed)) * 100).round()) : 0}%',
+                            'Utilization: $utilizationPercentage%',
                           ]),
 
                           const SizedBox(height: 8),
@@ -293,7 +370,7 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
                             paletteState.inventory.entries.map((e) {
                               final type = e.key.toString().split('.').last;
                               final inv = e.value;
-                              return '$type: ${inv.available}/${inv.total} (${inv.total - inv.available} used)';
+                              return '$type: ${inv.available}/${inv.total} (${inv.used} used)';
                             }).toList()
                           ),
 

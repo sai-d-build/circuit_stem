@@ -2,18 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sparkcircuit/presentation/features/game/widgets/game_canvas.dart';
-import 'package:sparkcircuit/presentation/features/game/screens/game_screen.dart';
-import 'package:sparkcircuit/application/providers/core_providers.dart' as core_providers;
-import 'package:sparkcircuit/application/providers/game_canvas_providers.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'package:sparkcircuit/application/services/component_factory.dart';
-import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
-import 'package:sparkcircuit/core/simulation/basic_simulation_engine.dart';
-import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
 import 'package:sparkcircuit/core/persistence/storage_service.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as v3_providers;
-import 'package:sparkcircuit/presentation/state/palette_state.dart' as palette_state;
 
 // Mock storage service for testing
 class MockStorageService extends Mock implements StorageService {

@@ -8,6 +8,22 @@ import 'package:sparkcircuit/presentation/core/utils/feedback_utils.dart';
 import 'package:sparkcircuit/presentation/state/hud_state.dart';
 import 'package:sparkcircuit/presentation/core/animations/glow_effect.dart';
 
+// ✅ CLEAN ARCHITECTURE: Reuse HudService from pause_menu.dart
+class HudService {
+  final dynamic hudNotifier;
+
+  HudService(this.hudNotifier);
+
+  void hideOverlay() {
+    hudNotifier.hideOverlay();
+  }
+}
+
+final hudServiceProvider = Provider.family<HudService, String>((ref, levelId) {
+  final hudNotifier = ref.watch(hudStateProvider(levelId).notifier);
+  return HudService(hudNotifier);
+});
+
 class WinScreen extends ConsumerStatefulWidget {
   final String levelId;
 
@@ -81,6 +97,7 @@ class _WinScreenState extends ConsumerState<WinScreen>
     final circuitColors = theme.extension<CircuitColorScheme>()!;
     final hudState = ref.watch(hudStateProvider(widget.levelId));
     final progress = hudState.progress;
+    final hudService = ref.watch(hudServiceProvider(widget.levelId));
     
     return AnimatedBuilder(
       animation: _celebrationController,
@@ -145,7 +162,7 @@ class _WinScreenState extends ConsumerState<WinScreen>
                 const SizedBox(height: 24),
                 _buildStatsGrid(theme, circuitColors, progress),
                 const SizedBox(height: 32),
-                _buildActionButtons(context),
+                _buildActionButtons(context, hudService),
               ],
             ),
           ),
@@ -301,7 +318,7 @@ class _WinScreenState extends ConsumerState<WinScreen>
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context, HudService hudService) {
     return Column(
       children: [
         Row(
@@ -322,7 +339,7 @@ class _WinScreenState extends ConsumerState<WinScreen>
               text: 'Replay',
               icon: Icons.replay,
               onPressed: () {
-                ref.read(hudStateProvider(widget.levelId).notifier).hideOverlay();
+                hudService.hideOverlay();
                 // Reset level logic would go here
               },
               width: 100,

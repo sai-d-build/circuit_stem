@@ -30,6 +30,17 @@ import '../providers.dart' show
   audioServiceProvider,
   animationSchedulerProvider;
 
+// Import missing providers
+import '../grid_notifier.dart' show gridNotifierProvider;
+import '../history_notifier.dart' show historyNotifierProvider;
+import '../game_progress_notifier.dart' show gameProgressNotifierProvider;
+import '../component_selection_notifier.dart' show componentSelectionNotifierProvider;
+import '../providers/core_providers.dart' show interactionStateProvider;
+import '../services/component_palette_manager.dart';
+
+// Import use case providers
+import '../use_cases/providers.dart' as use_case_providers;
+
 /// Engine version enum for future-proofing and better type safety
 enum GameEngineVersion {
   v1, // Current stable production engine
@@ -115,7 +126,22 @@ final gameEngineV1Provider = StateNotifierProvider<GameEngineNotifier, GameEngin
   return GameEngineNotifier(
     audioService: ref.watch(audioServiceProvider),
     animationScheduler: ref.watch(animationSchedulerProvider),
-    ref: ref,
+    gridNotifier: ref.watch(gridNotifierProvider.notifier),
+    historyNotifier: ref.watch(historyNotifierProvider.notifier),
+    progressNotifier: ref.watch(gameProgressNotifierProvider.notifier),
+    selectionNotifier: ref.watch(componentSelectionNotifierProvider.notifier),
+    interactionNotifier: ref.watch(interactionStateProvider('default').notifier),
+    paletteManager: const ComponentPaletteManager(availableTemplates: []),
+    loadLevelUseCase: ref.watch(use_case_providers.loadLevelUseCaseProvider),
+    createComponentUseCase: ref.watch(use_case_providers.createComponentUseCaseProvider),
+    rotateComponentUseCase: ref.watch(use_case_providers.rotateComponentUseCaseProvider),
+    moveComponentUseCase: ref.watch(use_case_providers.moveComponentUseCaseProvider),
+    tapComponentUseCase: ref.watch(use_case_providers.tapComponentUseCaseProvider),
+    updateComponentUseCase: ref.watch(use_case_providers.updateComponentUseCaseProvider),
+    restartLevelUseCase: ref.watch(use_case_providers.restartLevelUseCaseProvider),
+    selectPaletteComponentUseCase: ref.watch(use_case_providers.selectPaletteComponentUseCaseProvider),
+    togglePauseUseCase: ref.watch(use_case_providers.togglePauseUseCaseProvider),
+    undoUseCase: ref.watch(use_case_providers.undoUseCaseProvider),
   );
 });
 

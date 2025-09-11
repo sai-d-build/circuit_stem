@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../application/game_engine/v3/providers_v3.dart' as providers_v3;
+import '../../../../application/providers/unified_providers.dart';
+import '../../../../core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/painter_factory.dart';
 import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart' as drawing_models;
@@ -19,7 +20,8 @@ class CanvasRenderingLayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(providers_v3.enhancedGameStateNotifierProvider);
+    MigrationTracker.markFileMigrated('canvas_rendering_layer.dart', DateTime.now().toIso8601String());
+    final gameState = ref.watch(unifiedGameStateProvider);
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>() ?? _getDefaultCircuitColors();
 
@@ -40,7 +42,7 @@ class CanvasRenderingLayer extends ConsumerWidget {
             // Ensure each wire is added only once (e.g., A-B, not B-A)
             if (sourceId.hashCode < targetId.hashCode) {
               circuitWires.add(drawing_models.CircuitWire(
-                id: '${sourceId}_${targetId}',
+                id: '$sourceId\_$targetId',
                 startX: sourceComponent.col.toDouble(),
                 startY: sourceComponent.row.toDouble(),
                 endX: targetComponent.col.toDouble(),

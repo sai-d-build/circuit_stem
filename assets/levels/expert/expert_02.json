@@ -1,0 +1,120 @@
+{
+  "levelId": "expert_02",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "expert_02",
+    "title": "Phase-Locked Loop",
+    "description": "Design a phase-locked loop circuit",
+    "difficulty": "expert",
+    "estimatedTime": 1200,
+    "learningObjectives": [
+      "Advanced feedback systems",
+      "Phase detection and control",
+      "Stability analysis"
+    ],
+    "tags": ["expert", "pll", "feedback"],
+    "unlocksComponents": ["operational_amplifier", "comparator"],
+    "prerequisites": ["expert_01"]
+  },
+  "grid": {
+    "width": 20,
+    "height": 16,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 15.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "operational_amplifier",
+        "quantity": 2,
+        "properties": {
+          "gain": 1.0,
+          "inputImpedance": 1000000.0
+        }
+      },
+      {
+        "type": "capacitor",
+        "quantity": 3,
+        "properties": {
+          "capacitance": 1e-6,
+          "initialVoltage": 0.0
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 6,
+        "properties": {
+          "resistance": 10000.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 25,
+        "properties": {
+          "resistance": 0.01
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "phase_lock",
+      "type": "circuit_analysis",
+      "description": "Achieve phase lock between input and output",
+      "conditions": {
+        "phase_difference": {"target": 0, "tolerance": 10},
+        "frequency_lock": {"range": 10000, "tolerance": 100}
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Start with a basic phase detector configuration",
+          "trigger": "time_elapsed",
+          "triggerValue": 300
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits",
+      "feedback_stability"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": false,
+    "steps": []
+  },
+  "scoring": {
+    "maxScore": 5000,
+    "timeBonus": {
+      "maxTime": 1500,
+      "bonusPerSecond": 1
+    },
+    "efficiencyBonus": {
+      "maxComponents": 37,
+      "bonusPerUnusedComponent": 15
+    },
+    "starThresholds": {
+      "threeStars": 4000,
+      "twoStars": 3000,
+      "oneStar": 2000
+    }
+  }
+}

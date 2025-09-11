@@ -1,15 +1,18 @@
 import 'dart:ui';
-import 'dart:ui';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';
 import 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart';
 import 'package:sparkcircuit/application/services/interfaces/canvas_rendering_service.dart';
+import 'package:sparkcircuit/application/services/level_service.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 // Re-export for convenience
-export 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart' show GestureProcessingResult, SideEffect, ComponentPlacementSideEffect, ViewportUpdateSideEffect, FeedbackSideEffect, GestureInputEvent, GestureEventType, FeedbackType;
+export 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart' show GestureProcessingResult;
+// Export locally defined types
+export 'package:sparkcircuit/application/states/game_canvas_state.dart';
 
 // Note: Types like HitTestResult, GridPosition, GestureMode are available for import
 // without explicit export since they are defined in this file
@@ -18,20 +21,17 @@ export 'package:sparkcircuit/application/services/interfaces/game_interaction_se
 /// It follows the Orchestrator pattern, delegating work to specialized services
 /// while maintaining a unified state representation.
 class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
-  final ComponentPlacementService _placementService;
   final GameInteractionService _interactionService;
   final CanvasRenderingService _renderingService;
 
   GameCanvasOrchestrator({
-    required dynamic placementService,
     required dynamic interactionService,
     required dynamic renderingService,
-  }) : _placementService = placementService,
+  }) :
         _interactionService = interactionService,
         _renderingService = renderingService,
         super(GameCanvasState.initial()) {
     StructuredLogger.info('GameCanvasOrchestrator initialized', context: {
-      'placementService': placementService.runtimeType.toString(),
       'interactionService': interactionService.runtimeType.toString(),
       'renderingService': renderingService.runtimeType.toString(),
     });
@@ -59,6 +59,7 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
       if (level != null) {
         final renderingData = _renderingService.buildRenderingData(level);
 
+        // Keep original grid configuration (20x20 default)
         state = state.copyWith(
           currentLevel: level,
           renderingData: renderingData,
@@ -68,6 +69,8 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
         StructuredLogger.info('Level initialized successfully', context: {
           'levelId': level.levelId,
           'componentCount': level.components.available.length,
+          'levelGridDimensions': {'rows': level.grid.height, 'cols': level.grid.width},
+          'uiGridDimensions': {'rows': state.viewportState.gridConfiguration.rows, 'cols': state.viewportState.gridConfiguration.cols},
         });
       } else {
         state = state.copyWith(
@@ -191,15 +194,37 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
     // This would integrate with the feedback service
   }
 
-  /// Load level data (placeholder for now)
+  /// Load level data using LevelService
   Future<LevelDefinition?> _loadLevel(String levelId) async {
-    // TODO: Implement level loading through service
-    StructuredLogger.debug('Level loading placeholder', context: {
+    StructuredLogger.debug('Loading level through LevelService', context: {
       'levelId': levelId,
     });
 
-    // For now, return null to indicate level loading needs to be implemented
-    return null;
+    try {
+      final levelService = LevelService(rootBundle);
+      final level = await levelService.loadLevel(levelId);
+
+      if (level != null) {
+        StructuredLogger.info('Level loaded successfully', context: {
+          'levelId': level.levelId,
+          'gridDimensions': '${level.grid.height}x${level.grid.width}',
+          'availableComponents': level.components.available.length,
+        });
+      } else {
+        StructuredLogger.warning('Level not found', context: {
+          'levelId': levelId,
+        });
+      }
+
+      return level;
+    } catch (e, stackTrace) {
+      StructuredLogger.error('Failed to load level', context: {
+        'levelId': levelId,
+        'error': e.toString(),
+        'stackTrace': stackTrace.toString(),
+      }, error: e);
+      return null;
+    }
   }
 
   /// Get current canvas state for UI rendering

@@ -242,7 +242,7 @@ void main() {
 // Mock classes for testing
 class MockCoordinateService implements ICoordinateService {
   @override
-  GridPosition? screenToGrid(Offset screenPosition, CoordinateContext context, RenderBox renderBox) {
+  GridPosition? screenToGrid(Offset screenPosition, CoordinateContext context, {RenderBox? renderBox}) {
     // Simple mock implementation
     final gridX = (screenPosition.dx / context.cellSize).round();
     final gridY = (screenPosition.dy / context.cellSize).round();
@@ -252,12 +252,11 @@ class MockCoordinateService implements ICoordinateService {
   @override
   CoordinateValidationResult validateDropPosition(
     Offset screenPosition,
-    CoordinateContext context,
-    RenderBox renderBox, {
+    CoordinateContext context, {
     Set<GridPosition>? occupiedPositions,
-    bool requireEmptyCell = true,
+    RenderBox? renderBox,
   }) {
-    final gridPosition = screenToGrid(screenPosition, context, renderBox);
+    final gridPosition = screenToGrid(screenPosition, context, renderBox: renderBox);
     if (gridPosition == null) {
       return CoordinateValidationResult.failure(errorMessage: 'Invalid position');
     }
@@ -265,7 +264,7 @@ class MockCoordinateService implements ICoordinateService {
   }
 
   @override
-  Offset globalToLocal(Offset globalPosition, RenderBox renderBox) {
+  Offset globalToLocal(Offset globalPosition, {RenderBox? renderBox}) {
     return globalPosition; // Mock implementation
   }
 

@@ -1,0 +1,42 @@
+{
+  "levelId": "beginner_'${i}'",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "beginner_'${i}'",
+    "title": "Beginner Level '${i}'",
+    "description": "Practice core circuit principles",
+    "difficulty": "beginner",
+    "estimatedTime": 180,
+    "learningObjectives": ["Circuit connections", "Component interaction"],
+    "tags": ["beginner"],
+    "unlocksComponents": [],
+    "prerequisites": ["beginner_'$(($i-1))'"
+  },
+  "grid": {"width": 10, "height": 8, "background": "circuit_board"},
+  "components": {
+    "available": [
+      {"type": "battery", "quantity": 1, "properties": {"voltage": 9.0}},
+      {"type": "led", "quantity": 2, "properties": {"forwardVoltage": 2.0, "color": "red"}},
+      {"type": "resistor", "quantity": 2, "properties": {"resistance": 470.0}},
+      {"type": "wire", "quantity": 8, "properties": {"resistance": 0.01}}
+    ],
+    "preplaced": []
+  },
+  "goals": [{
+    "id": "circuit_complete",
+    "type": "component_state",
+    "description": "Complete the circuit challenge",
+    "conditions": {"targetComponent": "led_1", "targetState": "on"}
+  }],
+  "validation": {
+    "circuitRules": ["no_short_circuits", "proper_component_connections"],
+    "successConditions": ["all_goals_completed"]
+  },
+  "tutorial": {"enabled": false, "steps": []},
+  "scoring": {
+    "maxScore": 1200,
+    "timeBonus": {"maxTime": 300, "bonusPerSecond": 2},
+    "efficiencyBonus": {"maxComponents": 11, "bonusPerUnusedComponent": 40},
+    "starThresholds": {"threeStars": 900, "twoStars": 700, "oneStar": 500}
+  }
+}

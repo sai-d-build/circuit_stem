@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meta/meta.dart';
 import '../../common/logger.dart';
+import '../../common/assets.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'level_manager_state.dart';
 import '../rendering/asset_manager.dart';
@@ -35,7 +36,7 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
 
     try {
       final manifestString =
-          await _assetManager.loadString('assets/levels/level_manifest.json');
+          await _assetManager.loadString(AppAssets.levelManifest);
       Logger.log(
           'LevelManagerNotifier: Manifest string loaded: $manifestString');
 
@@ -100,7 +101,7 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
 
     try {
       final jsonString =
-          await _assetManager.loadString('assets/levels/${levelMeta.id}.json');
+          await _assetManager.loadString(AppAssets.levelPath(levelMeta.id));
       Logger.log(
           'LevelManagerNotifier: Loaded JSON string for ${levelMeta.id}: $jsonString'); // Add logger
       final decodedJson = json.decode(jsonString) as Map<String, dynamic>;

@@ -1,6 +1,6 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/enhanced_game_state.dart';
+import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/application/services/component_factory.dart';
 import 'package:sparkcircuit/core/commands/command_stack.dart';
 import 'package:sparkcircuit/core/commands/create_component_command.dart';

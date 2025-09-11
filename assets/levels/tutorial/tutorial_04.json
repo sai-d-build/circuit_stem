@@ -1,0 +1,155 @@
+{
+  "levelId": "tutorial_04",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "tutorial_04",
+    "title": "Components in Action",
+    "description": "Learn about different electronic components and their roles",
+    "difficulty": "tutorial",
+    "estimatedTime": 140,
+    "learningObjectives": ["Component interactions", "Circuit building fundamentals"],
+    "tags": ["tutorial", "components"],
+    "unlocksComponents": ["capacitor"],
+    "prerequisites": ["tutorial_03"]
+  },
+  "grid": {
+    "width": 8,
+    "height": 6,
+    "background": "circuit_board"
+  },
+  "components": {
+    "available": [
+      {
+        "type": "battery",
+        "quantity": 1,
+        "properties": {
+          "voltage": 9.0,
+          "internalResistance": 0.1
+        }
+      },
+      {
+        "type": "led",
+        "quantity": 1,
+        "properties": {
+          "forwardVoltage": 2.0,
+          "color": "red",
+          "maxCurrent": 0.02
+        }
+      },
+      {
+        "type": "resistor",
+        "quantity": 1,
+        "properties": {
+          "resistance": 470.0,
+          "tolerance": 0.05
+        }
+      },
+      {
+        "type": "capacitor",
+        "quantity": 1,
+        "properties": {
+          "capacitance": 1000e-6,
+          "initialVoltage": 0.0
+        }
+      },
+      {
+        "type": "wire",
+        "quantity": 6,
+        "properties": {
+          "resistance": 0.01
+        }
+      },
+      {
+        "type": "inductor",
+        "quantity": 1,
+        "properties": {
+          "inductance": 0.1
+        }
+      }
+    ],
+    "preplaced": []
+  },
+  "goals": [
+    {
+      "id": "component_circuit",
+      "type": "component_state",
+      "description": "Connect different components in a working circuit",
+      "conditions": {
+        "targetComponent": "led_1",
+        "targetState": "on"
+      },
+      "timeLimit": null,
+      "hints": [
+        {
+          "id": "hint_1",
+          "text": "Place the capacitor in parallel with other components",
+          "trigger": "time_elapsed",
+          "triggerValue": 45
+        },
+        {
+          "id": "hint_2",
+          "text": "Use the inductor in series with the LED",
+          "trigger": "time_elapsed",
+          "triggerValue": 90
+        }
+      ]
+    },
+    {
+      "id": "voltage_measurement",
+      "type": "circuit_analysis",
+      "description": "Verify voltage levels across components",
+      "conditions": {
+        "voltage_at_point": {
+          "target_voltage": 2.0,
+          "tolerance": 0.1
+        }
+      }
+    }
+  ],
+  "validation": {
+    "circuitRules": [
+      "no_short_circuits",
+      "proper_component_connections",
+      "current_within_limits"
+    ],
+    "successConditions": [
+      "all_goals_completed",
+      "circuit_stable"
+    ]
+  },
+  "tutorial": {
+    "enabled": true,
+    "steps": [
+      {
+        "id": "step_1",
+        "title": "Explore Components",
+        "description": "Get familiar with different electronic components",
+        "highlight": "component_palette",
+        "requiredAction": "explore_components"
+      },
+      {
+        "id": "step_2",
+        "title": "Build Circuit",
+        "description": "Connect components to create a working circuit",
+        "highlight": "grid_circuit",
+        "requiredAction": "build_circuit"
+      }
+    ]
+  },
+  "scoring": {
+    "maxScore": 1100,
+    "timeBonus": {
+      "maxTime": 300,
+      "bonusPerSecond": 2
+    },
+    "efficiencyBonus": {
+      "maxComponents": 10,
+      "bonusPerUnusedComponent": 40
+    },
+    "starThresholds": {
+      "threeStars": 900,
+      "twoStars": 700,
+      "oneStar": 500
+    }
+  }
+}

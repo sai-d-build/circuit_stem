@@ -149,7 +149,7 @@ abstract class CircuitComponent {
       canvas.save();
       canvas.translate(center.dx, center.dy);
       if (rotation != 0) {
-        canvas.rotate(rotation * (3.141592653589793 / 180.0));
+        canvas.rotate(rotation.toDouble() * (3.141592653589793 / 180.0));
       }
       canvas.translate(-center.dx, -center.dy);
 

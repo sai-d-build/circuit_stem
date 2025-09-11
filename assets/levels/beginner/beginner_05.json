@@ -1,0 +1,42 @@
+{
+  "levelId": "beginner_05",
+  "version": "1.0.0",
+  "metadata": {
+    "id": "beginner_05",
+    "title": "Beginner Practice 5",
+    "description": "Master core circuit building skills",
+    "difficulty": "beginner",
+    "estimatedTime": 220,
+    "learningObjectives": ["Circuit mastery", "Problem solving"],
+    "tags": ["beginner"],
+    "unlocksComponents": [],
+    "prerequisites": ["beginner_04"]
+  },
+  "grid": {"width": 12, "height": 10, "background": "circuit_board"},
+  "components": {
+    "available": [
+      {"type": "battery", "quantity": 2, "properties": {"voltage": 9.0}},
+      {"type": "resistor", "quantity": 3, "properties": {"resistance": 470.0}},
+      {"type": "capacitor", "quantity": 1, "properties": {"capacitance": 1000e-6}},
+      {"type": "wire", "quantity": 15, "properties": {"resistance": 0.01}}
+    ],
+    "preplaced": []
+  },
+  "goals": [{
+    "id": "circuit_mastery",
+    "type": "component_state",
+    "description": "Demonstrate circuit building mastery",
+    "conditions": {"targetComponent": "led_1", "targetState": "on"}
+  }],
+  "validation": {
+    "circuitRules": ["no_short_circuits", "proper_component_connections"],
+    "successConditions": ["all_goals_completed"]
+  },
+  "tutorial": {"enabled": false, "steps": []},
+  "scoring": {
+    "maxScore": 1400,
+    "timeBonus": {"maxTime": 400, "bonusPerSecond": 2},
+    "efficiencyBonus": {"maxComponents": 21, "bonusPerUnusedComponent": 30},
+    "starThresholds": {"threeStars": 1100, "twoStars": 900, "oneStar": 700}
+  }
+}

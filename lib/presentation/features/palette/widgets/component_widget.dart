@@ -282,7 +282,7 @@ class _ComponentWidgetState extends State<ComponentWidget>
         return Icon(Icons.battery_full, color: color, size: 20);
       case 'resistor':
         return Icon(Icons.linear_scale, color: color, size: 20);
-      case 'led':
+      case 'bulb':
         return Icon(Icons.lightbulb, color: color, size: 20);
       case 'wire':
         return Icon(Icons.horizontal_rule, color: color, size: 20);

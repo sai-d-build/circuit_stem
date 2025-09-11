@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/enhanced_game_state.dart';
 
 /// Abstraction layer to break circular dependencies between game state and UI components

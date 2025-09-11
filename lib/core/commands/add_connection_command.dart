@@ -1,5 +1,5 @@
 
-import '../../application/enhanced_game_state.dart';
+import '../../application/states/game_state.dart';
 import 'game_command.dart';
 
 /// A command to add a connection between two components.

@@ -65,7 +65,7 @@ void main() {
         );
 
         final screenPos = Offset(125, 175); // Center of grid cell (3,3) with rounding
-        final gridPos = service.screenToGrid(screenPos, context, mockRenderBox);
+        final gridPos = service.screenToGrid(screenPos, context, renderBox: mockRenderBox);
 
         expect(gridPos?.row, 4); // 175/50 = 3.5 rounds to 4
         expect(gridPos?.col, 3); // 125/50 = 2.5 rounds to 3
@@ -100,7 +100,7 @@ void main() {
 
         // Valid position
         final validResult = service.validateDropPosition(
-          Offset(75, 75), context, mockRenderBox
+          Offset(75, 75), context, renderBox: mockRenderBox
         );
 
         expect(validResult.isValid, true);
@@ -109,7 +109,7 @@ void main() {
 
         // Out of bounds position (clamped to canvas bounds)
         final clampedResult = service.validateDropPosition(
-          Offset(300, 300), context, mockRenderBox
+          Offset(300, 300), context, renderBox: mockRenderBox
         );
 
         expect(clampedResult.isValid, true); // Clamped to valid position
@@ -129,7 +129,7 @@ void main() {
         final occupiedPositions = {GridPosition(row: 2, col: 2)}; // Updated to match actual grid position
 
         final result = service.validateDropPosition(
-          Offset(75, 75), context, mockRenderBox,
+          Offset(75, 75), context, renderBox: mockRenderBox,
           occupiedPositions: occupiedPositions
         );
 
@@ -152,10 +152,10 @@ void main() {
         final screenPos = Offset(125, 175);
 
         // First call
-        final result1 = service.screenToGrid(screenPos, context, mockRenderBox);
+        final result1 = service.screenToGrid(screenPos, context, renderBox: mockRenderBox);
 
         // Second call with same parameters should use cache
-        final result2 = service.screenToGrid(screenPos, context, mockRenderBox);
+        final result2 = service.screenToGrid(screenPos, context, renderBox: mockRenderBox);
 
         expect(result1, equals(result2));
       });
@@ -173,13 +173,13 @@ void main() {
         final screenPos = Offset(125, 175);
 
         // Fill cache
-        service.screenToGrid(screenPos, context, mockRenderBox);
+        service.screenToGrid(screenPos, context, renderBox: mockRenderBox);
 
         // Clear cache
         service.clearCache();
 
         // Cache should be empty now
-        expect(service.screenToGrid(screenPos, context, mockRenderBox), isNotNull);
+        expect(service.screenToGrid(screenPos, context, renderBox: mockRenderBox), isNotNull);
       });
     });
 
@@ -196,7 +196,7 @@ void main() {
 
         // Test with extreme coordinates
         final result = service.validateDropPosition(
-          Offset(1000, -500), context, mockRenderBox
+          Offset(1000, -500), context, renderBox: mockRenderBox
         );
 
         // Should clamp to canvas bounds and still validate
@@ -213,7 +213,7 @@ void main() {
           devicePixelRatio: 1.0,
         );
 
-        final result = service.screenToGrid(Offset(75, 75), context, mockRenderBox);
+        final result = service.screenToGrid(Offset(75, 75), context, renderBox: mockRenderBox);
         expect(result, isNotNull);
       });
     });

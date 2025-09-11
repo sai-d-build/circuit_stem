@@ -21,7 +21,7 @@ void main() {
       );
 
       final mockRenderBox = MockRenderBox();
-      final result = service.screenToGrid(const Offset(60, 60), context, mockRenderBox);
+      final result = service.screenToGrid(const Offset(60, 60), context, renderBox: mockRenderBox);
 
       expect(result, isNotNull);
       expect(result!.row, 1);
@@ -42,7 +42,7 @@ void main() {
       final result = service.validateDropPosition(
         const Offset(60, 60),
         context,
-        mockRenderBox,
+        renderBox: mockRenderBox,
       );
 
       expect(result.isValid, true);
@@ -63,7 +63,7 @@ void main() {
       final result = service.validateDropPosition(
         const Offset(700, 700), // Outside canvas
         context,
-        mockRenderBox,
+        renderBox: mockRenderBox,
       );
 
       // New behavior: positions outside bounds are allowed but with warnings
@@ -100,7 +100,7 @@ void main() {
       );
 
       final mockRenderBox = MockRenderBox();
-      final result = service.screenToGrid(const Offset(120, 120), context, mockRenderBox);
+      final result = service.screenToGrid(const Offset(120, 120), context, renderBox: mockRenderBox);
 
       expect(result, isNotNull);
       expect(result!.row, 1);
@@ -118,7 +118,7 @@ void main() {
       );
 
       final mockRenderBox = MockRenderBox();
-      final result = service.screenToGrid(const Offset(90, 90), context, mockRenderBox);
+      final result = service.screenToGrid(const Offset(90, 90), context, renderBox: mockRenderBox);
 
       expect(result, isNotNull);
       expect(result!.row, 1);
@@ -139,9 +139,9 @@ void main() {
       final position = const Offset(60, 60);
 
       // First call
-      final result1 = service.screenToGrid(position, context, mockRenderBox);
+      final result1 = service.screenToGrid(position, context, renderBox: mockRenderBox);
       // Second call (should use cache)
-      final result2 = service.screenToGrid(position, context, mockRenderBox);
+      final result2 = service.screenToGrid(position, context, renderBox: mockRenderBox);
 
       expect(result1, equals(result2));
     });
@@ -160,11 +160,11 @@ void main() {
       final position = const Offset(60, 60);
 
       // First call
-      service.screenToGrid(position, context, mockRenderBox);
+      service.screenToGrid(position, context, renderBox: mockRenderBox);
       // Clear cache
       service.clearCache();
       // Third call (should not use cache)
-      final result3 = service.screenToGrid(position, context, mockRenderBox);
+      final result3 = service.screenToGrid(position, context, renderBox: mockRenderBox);
 
       expect(result3, isNotNull);
     });
