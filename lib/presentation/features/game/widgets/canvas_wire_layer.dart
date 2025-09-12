@@ -53,7 +53,7 @@ class CanvasWireLayer extends ConsumerWidget {
           if (targetComponent != null) {
             // Ensure each wire is added only once (e.g., A-B, not B-A)
             if (sourceId.hashCode < targetId.hashCode) {
-              final wireId = '$sourceId\_$targetId';
+              final wireId = '$sourceId-$targetId';
               wires.add(drawing_models.CircuitWire(
                 id: wireId,
                 startX: sourceComponent.col.toDouble(),
@@ -83,10 +83,10 @@ class CanvasWireLayer extends ConsumerWidget {
       if (sourceComponent != null && _isPowerSource(sourceComponent.type)) {
         for (final targetId in connectedIds) {
           if (sourceId.hashCode < targetId.hashCode) {
-            final wireId = '$sourceId\_$targetId';
+            final wireId = '$sourceId-$targetId';
             activityMap[wireId] = true;
           } else {
-            final wireId = '$targetId\_$sourceId';
+            final wireId = '$targetId-$sourceId';
             activityMap[wireId] = true;
           }
         }

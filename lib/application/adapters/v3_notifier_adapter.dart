@@ -4,9 +4,6 @@ import 'package:sparkcircuit/application/states/game_state.dart' as enhanced;
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
-// Import V3 GameState type
-import 'package:sparkcircuit/application/states/game_state.dart';
-
 /// Adapter for GameEngineNotifierV3 to implement IGameStateNotifier
 class V3NotifierAdapter extends IGameStateNotifier {
   final GameEngineNotifierV3 _v3;

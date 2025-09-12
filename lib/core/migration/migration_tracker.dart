@@ -9,12 +9,15 @@ class MigrationTracker {
     _migratedFiles.add(filePath);
     _migrationLog[filePath] = timestamp;
 
-    StructuredLogger.info('File migrated to unified provider', context: {
-      'file': filePath,
-      'timestamp': timestamp,
-      'totalMigrated': _migratedFiles.length,
-      'migrationPercentage': (_migratedFiles.length / 50 * 100).toInt(),
-    });
+    // Only log migration events if debug migration flag is enabled
+    if (StructuredLogger.debugMigration) {
+      StructuredLogger.migration('File migrated to unified provider', context: {
+        'file': filePath,
+        'timestamp': timestamp,
+        'totalMigrated': _migratedFiles.length,
+        'percentage': (_migratedFiles.length / 50 * 100).toInt(),
+      });
+    }
   }
 
   static MigrationStatus get status {

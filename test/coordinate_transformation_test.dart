@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 import 'package:sparkcircuit/core/services/secure_coordinate_validator.dart';

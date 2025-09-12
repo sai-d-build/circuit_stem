@@ -6,7 +6,6 @@ import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/application/providers/core_providers.dart';
-import 'package:sparkcircuit/presentation/helpers/central_interaction_helper.dart';
 
 // Performance optimization: Cached component filtering service
 class OptimizedComponentFilter {

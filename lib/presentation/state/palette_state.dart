@@ -7,6 +7,18 @@ import '../../core/persistence/storage_service.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/application/providers/core_providers.dart';
 
+/// Standalone function to get tutorial default quantities
+/// This is used by both the PaletteState class and inventory generation functions
+Map<String, int> _getTutorialDefaultsMap() {
+  return {
+    'resistor': 2,    // Essential for basic circuits
+    'switch': 1,      // Important control component
+    'capacitor': 1,   // Advanced but educational
+    'inductor': 1,    // Advanced component for learning
+    'transistor': 1,  // Semiconductor learning
+  };
+}
+
 class ComponentDefinition {
   final String type;
   final String name;
@@ -183,60 +195,78 @@ class PaletteState {
   }
 
   List<ComponentDefinition> get filteredComponents {
-    StructuredLogger.info('🎨 ===== COMPONENT FILTERING START =====', context: {
-      'totalAvailableComponents': availableComponents.length,
-      'availableComponentTypes': availableComponents.map((c) => c.type).toList(),
-      'availableComponentDetails': availableComponents.map((c) => '${c.type}:${c.isUnlocked}').toList(),
-      'inventoryItems': inventory.length,
-      'inventoryKeys': inventory.keys.toList(),
-      'inventoryDetails': inventory.entries.map((e) => '${e.key}:${e.value.available}/${e.value.total}').toList(),
-      'searchQuery': searchQuery,
-      'activeFilters': activeFilters,
-    });
+    // Only log main filtering info if debugFiltering flag is enabled
+    if (StructuredLogger.debugFiltering) {
+      StructuredLogger.filtering('🎨 ===== COMPONENT FILTERING START =====', context: {
+        'totalAvailableComponents': availableComponents.length,
+        'availableComponentTypes': availableComponents.map((c) => c.type).toList(),
+        'availableComponentDetails': availableComponents.map((c) => '${c.type}:${c.isUnlocked}').toList(),
+        'inventoryItems': inventory.length,
+        'inventoryKeys': inventory.keys.toList(),
+        'inventoryDetails': inventory.entries.map((e) => '${e.key}:${e.value.available}/${e.value.total}').toList(),
+        'searchQuery': searchQuery,
+        'activeFilters': activeFilters,
+      });
+    }
 
-    // Add simple debug logs for immediate visibility
-    StructuredLogger.debug('🎨 FILTER DEBUG: Total available: ${availableComponents.length}', context: {
-      'availableComponents': availableComponents.length,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
-    StructuredLogger.debug('🎨 FILTER DEBUG: Available types', context: {
-      'availableTypes': availableComponents.map((c) => c.type).toList(),
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
-    StructuredLogger.debug('🎨 FILTER DEBUG: Inventory keys', context: {
-      'inventoryKeys': inventory.keys.toList(),
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
-    StructuredLogger.debug('🎨 FILTER DEBUG: Unlocked components: ${availableComponents.where((c) => c.isUnlocked).length}', context: {
-      'unlockedComponents': availableComponents.where((c) => c.isUnlocked).length,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
+    // Add detailed step-by-step debug logs only if debugFilterDetails flag is enabled
+    if (StructuredLogger.debugFilterDetails) {
+      StructuredLogger.filtering('🎨 FILTER DETAILS: Total available', context: {
+        'availableComponents': availableComponents.length,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
+
+      StructuredLogger.filtering('🎨 FILTER DETAILS: Available types', context: {
+        'availableTypes': availableComponents.map((c) => c.type).toList(),
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
+
+      StructuredLogger.filtering('🎨 FILTER DETAILS: Inventory keys', context: {
+        'inventoryKeys': inventory.keys.toList(),
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
+
+      StructuredLogger.filtering('🎨 FILTER DETAILS: Unlocked components', context: {
+        'unlockedComponents': availableComponents.where((c) => c.isUnlocked).length,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
+    }
 
     var filtered = availableComponents.where((component) => component.isUnlocked);
 
-    StructuredLogger.info('🎨 After unlock filter', context: {
-      'count': filtered.length,
-      'components': filtered.map((c) => '${c.type}:${c.isUnlocked}').toList(),
-      'filteredOut': availableComponents.where((c) => !c.isUnlocked).map((c) => c.type).toList(),
-    });
+    if (StructuredLogger.debugFiltering) {
+      StructuredLogger.filtering('🎨 After unlock filter', context: {
+        'count': filtered.length,
+        'components': filtered.map((c) => '${c.type}:${c.isUnlocked}').toList(),
+        'filteredOut': availableComponents.where((c) => !c.isUnlocked).map((c) => c.type).toList(),
+      });
+    }
 
-    // Filter by inventory availability - only show components that exist in inventory
+    // ENHANCED FILTERING: Show components that are either in inventory OR have tutorial defaults
     final beforeInventoryFilter = filtered.length;
-    filtered = filtered.where((component) => inventory.containsKey(component.type));
-
-    StructuredLogger.info('🎨 After inventory filter', context: {
-      'before': beforeInventoryFilter,
-      'after': filtered.length,
-      'components': filtered.map((c) => c.type).toList(),
-      'missingFromInventory': availableComponents
-          .where((c) => c.isUnlocked && !inventory.containsKey(c.type))
-          .map((c) => '${c.type}:${c.isUnlocked}')
-          .toList(),
-      'inventoryLookupResults': availableComponents
-          .where((c) => c.isUnlocked)
-          .map((c) => '${c.type}:exists=${inventory.containsKey(c.type)}')
-          .toList(),
+    filtered = filtered.where((component) {
+      final inInventory = inventory.containsKey(component.type);
+      final hasTutorialDefault = _getTutorialDefaultQuantity(component.type) > 0;
+      return inInventory || hasTutorialDefault;
     });
+
+    if (StructuredLogger.debugFiltering) {
+      StructuredLogger.filtering('🎨 After enhanced inventory filter', context: {
+        'before': beforeInventoryFilter,
+        'after': filtered.length,
+        'components': filtered.map((c) => c.type).toList(),
+        'componentsWithInventory': filtered.where((c) => inventory.containsKey(c.type)).map((c) => c.type).toList(),
+        'componentsWithTutorialDefaults': filtered.where((c) => !inventory.containsKey(c.type) && _getTutorialDefaultQuantity(c.type) > 0).map((c) => c.type).toList(),
+        'missingFromInventory': availableComponents
+            .where((c) => c.isUnlocked && !inventory.containsKey(c.type) && _getTutorialDefaultQuantity(c.type) == 0)
+            .map((c) => '${c.type}:${c.isUnlocked}')
+            .toList(),
+        'inventoryLookupResults': availableComponents
+            .where((c) => c.isUnlocked)
+            .map((c) => '${c.type}:inventory=${inventory.containsKey(c.type)}:tutorial=${_getTutorialDefaultQuantity(c.type) > 0}')
+            .toList(),
+      });
+    }
 
     // Apply search filter
     if (searchQuery.isNotEmpty) {
@@ -246,11 +276,13 @@ class PaletteState {
         component.description.toLowerCase().contains(searchQuery.toLowerCase()) ||
         component.type.toLowerCase().contains(searchQuery.toLowerCase())
       );
-      StructuredLogger.trace('After search filter', context: {
-        'before': beforeSearch,
-        'after': filtered.length,
-        'query': searchQuery,
-      });
+      if (StructuredLogger.debugFilterDetails) {
+        StructuredLogger.filtering('After search filter', context: {
+          'before': beforeSearch,
+          'after': filtered.length,
+          'query': searchQuery,
+        });
+      }
     }
 
     // Apply category filters
@@ -259,18 +291,23 @@ class PaletteState {
       filtered = filtered.where((component) =>
         activeFilters.any((filter) => _componentMatchesFilter(component, filter))
       );
-      StructuredLogger.trace('After category filter', context: {
-        'before': beforeCategory,
-        'after': filtered.length,
-        'filters': activeFilters,
-      });
+      if (StructuredLogger.debugFilterDetails) {
+        StructuredLogger.filtering('After category filter', context: {
+          'before': beforeCategory,
+          'after': filtered.length,
+          'filters': activeFilters,
+        });
+      }
     }
 
     final result = filtered.toList();
-    StructuredLogger.info('Component filtering complete', context: {
-      'finalCount': result.length,
-      'filteredComponents': result.map((c) => '${c.type}:${inventory[c.type]?.available ?? 0}').toList(),
-    });
+
+    if (StructuredLogger.debugFiltering) {
+      StructuredLogger.filtering('Component filtering complete', context: {
+        'finalCount': result.length,
+        'filteredComponents': result.map((c) => '${c.type}:${inventory[c.type]?.available ?? 0}').toList(),
+      });
+    }
 
     return result;
   }
@@ -309,6 +346,23 @@ class PaletteState {
         return false;
     }
   }
+
+  /// Get tutorial default quantity for components that should be available for learning
+  /// even if not explicitly defined in the level configuration
+  int _getTutorialDefaultQuantity(String componentType) {
+    // Tutorial defaults for components that should be available for educational purposes
+    // These provide minimal quantities for learning without overwhelming beginners
+    const tutorialDefaults = {
+      'resistor': 2,    // Essential for basic circuits
+      'switch': 1,      // Important control component
+      'capacitor': 1,   // Advanced but educational
+      'inductor': 1,    // Advanced component for learning
+      'transistor': 1,  // Semiconductor learning
+    };
+
+    return tutorialDefaults[componentType] ?? 0;
+  }
+
 }
 
 // Providers
@@ -429,6 +483,11 @@ class PaletteStateNotifier extends StateNotifier<PaletteState> {
       'canUse': canUse,
     });
     return canUse;
+  }
+
+  // ✅ EXPOSED PUBLIC API: Get actual inventory state for inventory service
+  Map<String, ComponentInventory> getInventoryState() {
+    return Map.unmodifiable(state.inventory);
   }
 
   void useComponent(String componentType) {
@@ -772,6 +831,8 @@ Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefi
     'configComponentsCount': levelConfig?.components.preplaced.length ?? 0,
   });
 
+  final inventory = <String, ComponentInventory>{};
+
   // If we have a level config, use it as the source of truth
   if (levelConfig != null && levelConfig.components.available.isNotEmpty) {
     StructuredLogger.debug('Using level configuration for inventory', context: {
@@ -779,7 +840,6 @@ Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefi
       'components': levelConfig.components.available.map((c) => '${c.type}:${c.quantity}').toList(),
     });
 
-    final inventory = <String, ComponentInventory>{};
     // Create inventory based on available components with their specified quantities
     for (final componentAvailability in levelConfig.components.available) {
       final componentType = componentAvailability.type;
@@ -790,16 +850,42 @@ Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefi
         total: quantity,
       );
 
-      StructuredLogger.trace('Component inventory populated', context: {
+      StructuredLogger.trace('Component inventory populated from config', context: {
         'componentType': componentType,
         'available': quantity,
         'total': quantity,
       });
     }
 
-    StructuredLogger.info('Inventory generation complete from config', context: {
+    // ENHANCED: Add tutorial default quantities for components not in level config
+    // This ensures educational components are available even if not explicitly configured
+    final tutorialDefaults = _getTutorialDefaultsMap();
+    for (final entry in tutorialDefaults.entries) {
+      final componentType = entry.key;
+      final defaultQuantity = entry.value;
+
+      // Only add if not already in inventory from level config
+      if (!inventory.containsKey(componentType)) {
+        inventory[componentType] = ComponentInventory(
+          componentType: componentType,
+          available: defaultQuantity,
+          total: defaultQuantity,
+        );
+
+        StructuredLogger.trace('Component inventory populated from tutorial defaults', context: {
+          'componentType': componentType,
+          'available': defaultQuantity,
+          'total': defaultQuantity,
+          'source': 'tutorial_default',
+        });
+      }
+    }
+
+    StructuredLogger.info('Inventory generation complete from config + tutorial defaults', context: {
       'levelId': levelId,
       'inventoryItems': inventory.length,
+      'configComponents': levelConfig.components.available.length,
+      'tutorialDefaultsAdded': tutorialDefaults.length - levelConfig.components.available.length,
       'totalComponents': inventory.values.fold(0, (sum, item) => sum + item.total),
     });
     return inventory;

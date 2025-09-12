@@ -1,7 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'dart:convert';
-import 'dart:math' as math;
 
 // Core simulation and solver imports
 import '../../core/simulation/mna_solver.dart';
@@ -26,7 +23,6 @@ import '../history_notifier.dart';
 import '../game_progress_notifier.dart';
 import '../component_selection_notifier.dart';
 import '../interaction_state_notifier.dart';
-import '../../core/debug/structured_logger.dart';
 
 // Import notifier classes for provider definitions - Grid is already available via entities import above
 import '../history_notifier.dart' show HistoryNotifier, GameStateSnapshot;
@@ -37,6 +33,8 @@ import '../interaction_state_notifier.dart' show InteractionStateNotifier, Inter
 // Domain entities
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../../application/states/game_state.dart';
+
+import '../../presentation/state/palette_state.dart';
 
 // Canvas and orchestrator imports
 import '../../presentation/features/game/controllers/game_canvas_orchestrator.dart' hide InteractionState;
@@ -239,6 +237,7 @@ final gameCanvasOrchestratorProvider = StateNotifierProvider.family<
   return GameCanvasOrchestrator(
     interactionService: ref.watch(gameInteractionServiceProvider),
     renderingService: ref.watch(canvasRenderingServiceProvider),
+    paletteStateNotifier: ref.watch(paletteStateProvider(levelId).notifier),
   );
 });
 

@@ -5,18 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
-// Mock for structured logger testing
 class _TestStructuredLogger {
   static final List<String> _logs = [];
-  static bool _lastCondition = false;
 
   static void clearLogs() => _logs.clear();
-
-  static void log(String level, String message, {Map<String, dynamic>? context}) {
-    _logs.add('$level: $message' + (context != null ? ' | Context: $context' : ''));
-  }
-
-  static List<String> getLogs() => _logs;
 }
 
 void main() {
@@ -100,7 +92,7 @@ void main() {
       void expensiveLoadOperation() {
         expensiveOperationCount++;
         // Simulate expensive string building
-        final result = List.generate(1000, (i) => i).fold<String>('', (prev, i) => prev + i.toString());
+        List.generate(1000, (i) => i).fold<String>('', (prev, i) => prev + i.toString());
         // Don't return anything, just perform expensive operation
       }
 

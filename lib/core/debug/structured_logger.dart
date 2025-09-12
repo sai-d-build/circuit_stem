@@ -1,5 +1,23 @@
+// 🎯 COMPREHENSIVE DEBUG FLAGS FOR COMPONENT PLACEMENT INVESTIGATION
 import 'package:flutter/foundation.dart';
 export 'game_constants.dart';
+
+// 🔥 CRITICAL DEBUG FLAGS - Enable via --dart-define during flutter run
+const bool enableComponentTypeLogging = bool.fromEnvironment('DEBUG_COMPONENT_TYPES');
+const bool enableInventoryDetailed = bool.fromEnvironment('DEBUG_INVENTORY');
+const bool enableStateSyncLogging = bool.fromEnvironment('DEBUG_STATE_SYNC');
+const bool enableDragDropSequence = bool.fromEnvironment('DEBUG_DRAG_DROP');
+const bool enableCoordinateValidation = bool.fromEnvironment('DEBUG_COORDINATES');
+const bool enableGridStateChanges = bool.fromEnvironment('DEBUG_GRID_STATE');
+const bool enableLevelIntegrationDebug = bool.fromEnvironment('DEBUG_LEVEL_INTEGRATION');
+
+// 📊 EXISTING FLAGS (kept for compatibility)
+const bool enableDebugLogging = bool.fromEnvironment('ENABLE_GRID_SYNC_LOGS');
+const bool enableDropLogs = bool.fromEnvironment('ENABLE_DROP_LOGS');
+
+// 💻 PRODUCTION vs DEVELOPMENT detection
+const bool isProduction = bool.fromEnvironment('dart.vm.product');
+const bool isDevelopment = !isProduction && kDebugMode;
 
 /// Log levels for structured logging
 enum LogLevel {
@@ -65,9 +83,17 @@ class StructuredLogger {
   static bool debugDashboard = true;
   static bool debugInventory = true;
 
+  // Component filtering debugging flags
+  static bool debugFiltering = false;       // Main component filtering flow
+  static bool debugFilterDetails = false;   // Detailed filtering steps
+
+  // Migration and development flags
+  static bool debugMigration = false;       // Migration tracking
+
   static bool get hasAnyDebugEnabled => debugServices || debugGameCanvas ||
       debugPresentation || debugCritical || debugWeb || debugComponents ||
-      debugPerformance || debugDashboard || debugInventory;
+      debugPerformance || debugDashboard || debugInventory || debugFiltering ||
+      debugFilterDetails || debugMigration;
 
   static void debug(String message, {Map<String, dynamic>? context, Object? error}) {
     if (!LoggingConfig.shouldLog(LogLevel.debug)) return;
@@ -138,6 +164,15 @@ class StructuredLogger {
       case 'debugInventory':
         debugInventory = value;
         break;
+      case 'debugFiltering':
+        debugFiltering = value;
+        break;
+      case 'debugFilterDetails':
+        debugFilterDetails = value;
+        break;
+      case 'debugMigration':
+        debugMigration = value;
+        break;
     }
   }
 
@@ -161,6 +196,12 @@ class StructuredLogger {
         return debugDashboard;
       case 'debugInventory':
         return debugInventory;
+      case 'debugFiltering':
+        return debugFiltering;
+      case 'debugFilterDetails':
+        return debugFilterDetails;
+      case 'debugMigration':
+        return debugMigration;
       default:
         return defaultValue;
     }
@@ -208,6 +249,18 @@ class StructuredLogger {
     }
   }
 
+  static void filtering(String message, {Map<String, dynamic>? context}) {
+    if (debugFiltering && LoggingConfig.shouldLog(LogLevel.debug)) {
+      _log('🎨 FILTERING', message, context);
+    }
+  }
+
+  static void migration(String message, {Map<String, dynamic>? context}) {
+    if (debugMigration && LoggingConfig.shouldLog(LogLevel.info)) {
+      _log('🏗️ MIGRATION', message, context);
+    }
+  }
+
   static void _log(String level, String message, Map<String, dynamic>? context, {Object? error}) {
     final timestamp = DateTime.now().toIso8601String();
     final contextStr = context != null ? ' | Context: $context' : '';
@@ -231,6 +284,34 @@ class StructuredLogger {
       'environment': kReleaseMode ? 'release' : kProfileMode ? 'profile' : 'debug',
       'dashboard_debug': debugDashboard,
       'inventory_debug': debugInventory,
+      'filtering_debug': debugFiltering,
+      'migration_debug': debugMigration,
     });
+  }
+}
+
+/// Throttled logging utility to prevent excessive logging from performance-sensitive areas
+class ThrottledLogger {
+  static final Map<String, int> _lastLogTimes = {};
+
+  /// Check if logging is allowed for this key based on minimum interval
+  static bool canLog(String key, {int minIntervalMs = 1000}) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final lastLog = _lastLogTimes[key] ?? 0;
+    if (now - lastLog >= minIntervalMs) {
+      _lastLogTimes[key] = now;
+      return true;
+    }
+    return false;
+  }
+
+  /// Clear throttle for specific key
+  static void clearThrottle(String key) {
+    _lastLogTimes.remove(key);
+  }
+
+  /// Clear all throttles (useful for testing)
+  static void clearAllThrottles() {
+    _lastLogTimes.clear();
   }
 }

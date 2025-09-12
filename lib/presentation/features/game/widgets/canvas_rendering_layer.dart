@@ -42,7 +42,7 @@ class CanvasRenderingLayer extends ConsumerWidget {
             // Ensure each wire is added only once (e.g., A-B, not B-A)
             if (sourceId.hashCode < targetId.hashCode) {
               circuitWires.add(drawing_models.CircuitWire(
-                id: '$sourceId\_$targetId',
+                id: '$sourceId-$targetId',
                 startX: sourceComponent.col.toDouble(),
                 startY: sourceComponent.row.toDouble(),
                 endX: targetComponent.col.toDouble(),

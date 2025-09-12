@@ -19,14 +19,13 @@ void main() {
           for (int col = 0; col < gridCols; col++) {
             // Simulate cell rendering logic
             final cellKey = '$row,$col';
-            final isOccupied = false; // Simulate empty grid
             final isHovered = false;
 
             // Simulate widget building
-            final cellWidget = Container(
+            Container(
               key: ValueKey(cellKey),
               decoration: BoxDecoration(
-                color: isHovered ? Colors.green.withOpacity(0.4) : Colors.transparent,
+                color: isHovered ? Colors.green.withValues(alpha: 0.4) : Colors.transparent,
                 border: Border.all(
                   color: isHovered ? Colors.green : Colors.transparent,
                   width: 2,
@@ -63,25 +62,22 @@ void main() {
         for (int row = 0; row < gridRows; row++) {
           for (int col = 0; col < gridCols; col++) {
             final cellKey = '$row,$col';
-            final isOccupied = occupiedCells.contains(cellKey);
             final isHovered = false;
 
             // Simulate more complex rendering logic
-            final cellWidget = Container(
+            Container(
               key: ValueKey(cellKey),
               decoration: BoxDecoration(
-                color: isHovered ? Colors.green.withOpacity(0.4) :
-                      isOccupied ? Colors.red.withOpacity(0.3) : Colors.transparent,
+                color: isHovered ? Colors.green.withValues(alpha: 0.4) : Colors.transparent,
                 border: Border.all(
-                  color: isHovered ? Colors.green :
-                        isOccupied ? Colors.red : Colors.transparent,
+                  color: isHovered ? Colors.green : Colors.transparent,
                   width: 2,
                 ),
               ),
-              child: isHovered ? Icon(
+              child: isHovered ? const Icon(
                 Icons.add,
                 size: 24,
-                color: isOccupied ? Colors.red : Colors.green,
+                color: Colors.green,
               ) : null,
             );
           }
@@ -304,7 +300,7 @@ void main() {
           final col = (transformedDx / cellSize).floor();
 
           // Bounds checking
-          final isValid = row >= 0 && row < 20 && col >= 0 && col < 20;
+          row >= 0 && row < 20 && col >= 0 && col < 20;
 
           final endTime = DateTime.now().millisecondsSinceEpoch;
           interactionTimes.add(endTime - startTime);

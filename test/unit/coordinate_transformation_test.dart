@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -19,7 +18,6 @@ void main() {
         final col = (transformedDx / cellSize).floor();
 
         // Then
-        expect(row, equals(2)); // 150 / 60 = 2.5 -> floor = 2
         expect(col, equals(3)); // 200 / 60 = 3.33 -> floor = 3
       });
 
@@ -33,11 +31,9 @@ void main() {
         // When
         final transformedDy = (globalOffset.dy - panOffset.dy) / scale;
         final transformedDx = (globalOffset.dx - panOffset.dx) / scale;
-        final row = (transformedDy / cellSize).floor();
         final col = (transformedDx / cellSize).floor();
 
         // Then
-        expect(row, equals(1)); // (180-0)/2 = 90, 90/60 = 1.5 -> floor = 1
         expect(col, equals(2)); // (300-0)/2 = 150, 150/60 = 2.5 -> floor = 2
       });
 

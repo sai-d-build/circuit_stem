@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 
 import 'package:sparkcircuit/application/providers/unified_providers.dart';
+import 'package:sparkcircuit/application/states/game_canvas_state.dart' show GridConfiguration;
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_grid.dart';
 import 'package:sparkcircuit/application/providers/game_canvas_providers.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
+import 'package:sparkcircuit/application/interaction_engine.dart' as interaction_engine;
 
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_component_widget.dart';
 
@@ -65,6 +67,12 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
         // Initialize game state with the loaded level using centralized helper
         await CentralInteractionHelper.loadLevel(ref, widget.levelId, level);
 
+        // Also update the InteractionEngine with level data
+        final interactionEngine = ref.read(interaction_engine.interactionEngineProvider(widget.levelId).notifier);
+        if (interactionEngine is interaction_engine.InteractionEngine) {
+          interactionEngine.updateLevelState(level);
+        }
+
         // Also initialize the orchestrator with the level
         CentralInteractionHelper.initializeLevel(ref, widget.levelId);
 
@@ -114,6 +122,14 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
 
+    // ✅ FIXED: Synchronize with level configuration
+   final gameState = ref.watch(unifiedGameStateProvider);
+
+   // ✅ NEW: Get dimensions directly from the current level state
+   final level = gameState.currentLevel;
+   final gridRows = level?.grid.height ?? 20;  // Fallback for safety
+   final gridCols = level?.grid.width ?? 20;   // Fallback for safety
+
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>() ?? _getDefaultCircuitColors();
 
@@ -147,7 +163,12 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
                       'widgetOrder': 'first_in_stack',
                       'hitTestingEnabled': true,
                     });
-                    return CanvasInteractionWidget(levelId: widget.levelId);
+                    // 🎯 FIX: Allow drag events to pass through to CircuitGrid
+                    return IgnorePointer(
+                      // Allow drag events to pass through to lower layers
+                      ignoring: false,
+                      child: CanvasInteractionWidget(levelId: widget.levelId),
+                    );
                   },
                 ),
               ),
@@ -179,12 +200,17 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
                   final canvasState = ref.watch(gameCanvasOrchestratorProvider(widget.levelId));
                   final cellSize = canvasState.viewportState.gridConfiguration.cellSize; // 🔧 FIX 5: Use dynamic cell size
 
-                  StructuredLogger.debug('GameCanvas: Component positioning using dynamic cell size', context: {
-                    'dynamicCellSize': cellSize,
-                    'oldHardcodedSize': 60.0,
-                    'totalComponents': componentState.length,
-                    'scaleFactor': canvasState.viewportState.gridConfiguration.cellSize / 60.0,
-                  });
+                  if (enableGridStateChanges && isDevelopment) {
+                    StructuredLogger.info('🎨 RENDERING LAYER - Component Positioning', context: {
+                      'dynamicCellSize': cellSize,
+                      'oldHardcodedSize': 60.0,
+                      'totalComponents': componentState.length,
+                      'scaleFactor': canvasState.viewportState.gridConfiguration.cellSize / 60.0,
+                      'componentIds': componentState.keys.toList(),
+                      'levelId': widget.levelId,
+                      'componentTypes': componentState.values.map((c) => c.type.toString()).toList(),
+                    });
+                  }
 
                   return Positioned.fill(
                     child: IgnorePointer(
@@ -226,16 +252,12 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
                   componentsByType[typeKey] = (componentsByType[typeKey] ?? 0) + 1;
                 }
 
-                // Log GRID STATE metrics (controlled by debugDashboard flag)
+                // Simplified grid state logging
                 if (StructuredLogger.debugDashboard) {
-                  StructuredLogger.gameCanvas('📊 GRID STATE metrics calculated', context: {
+                  StructuredLogger.gameCanvas('📊 GRID STATE', context: {
                     'levelId': widget.levelId,
-                    'componentsCount': gameState.grid.components.length,
-                    'gridDimensions': '${gameState.grid.rows}x${gameState.grid.cols}',
-                    'occupiedCells': gameState.grid.components.length,
-                    'freeCells': (gameState.grid.rows * gameState.grid.cols) - gameState.grid.components.length,
-                    'componentsByType': componentsByType,
-                    'timestamp': DateTime.now().millisecondsSinceEpoch,
+                    'components': gameState.grid.components.length,
+                    'gridSize': '${gameState.grid.rows}x${gameState.grid.cols}',
                   });
                 }
 
@@ -248,44 +270,31 @@ class _GameCanvasState extends ConsumerState<GameCanvas> {
                 final totalCapacity = totalAvailable + totalUsed;
                 final utilizationPercentage = totalUsed > 0 ? ((totalUsed / totalCapacity) * 100).round() : 0;
 
-                // Log INVENTORY SUMMARY metrics (controlled by debugDashboard flag)
+                // Simplified inventory logging
                 if (StructuredLogger.debugDashboard) {
-                  StructuredLogger.gameCanvas('📦 INVENTORY SUMMARY metrics calculated', context: {
+                  StructuredLogger.gameCanvas('📦 INVENTORY STATUS', context: {
                     'levelId': widget.levelId,
-                    'totalAvailable': totalAvailable,
-                    'totalUsed': totalUsed,
-                    'totalCapacity': totalCapacity,
-                    'utilizationPercentage': utilizationPercentage,
-                    'inventoryDetail': paletteState.inventory.entries.map((e) {
-                      final type = e.key.toString().split('.').last;
-                      final inv = e.value;
-                      return '${type}:${inv.available}/${inv.total}(${inv.total - inv.available}used)';
-                    }).toList(),
-                    'timestamp': DateTime.now().millisecondsSinceEpoch,
+                    'available': totalAvailable,
+                    'used': totalUsed,
+                    'utilization': '$utilizationPercentage%',
                   });
                 }
 
-                // Additional logging for dashboard sections when populated
-                if (componentsByType.isNotEmpty && StructuredLogger.debugDashboard) {
-                  StructuredLogger.gameCanvas('🔧 COMPONENTS BY TYPE dashboard section updated', context: {
-                    'levelId': widget.levelId,
-                    'componentBreakdown': componentsByType,
-                    'totalTypes': componentsByType.length,
-                    'timestamp': DateTime.now().millisecondsSinceEpoch,
-                  });
-                }
+                // Simplified component type logging
+                if (StructuredLogger.debugDashboard) {
+                  if (componentsByType.isNotEmpty) {
+                    StructuredLogger.gameCanvas('🔧 COMPONENTS BY TYPE', context: {
+                      'levelId': widget.levelId,
+                      'types': componentsByType.length,
+                    });
+                  }
 
-                if (paletteState.inventory.isNotEmpty && StructuredLogger.debugDashboard) {
-                  StructuredLogger.gameCanvas('📋 COMPONENT INVENTORY dashboard section updated', context: {
-                    'levelId': widget.levelId,
-                    'inventoryCount': paletteState.inventory.length,
-                    'detailedInventory': paletteState.inventory.entries.map((e) {
-                      final type = e.key.toString().split('.').last;
-                      final inv = e.value;
-                      return '${type}: ${inv.available}/${inv.total}(${inv.used}used)';
-                    }).toList(),
-                    'timestamp': DateTime.now().millisecondsSinceEpoch,
-                  });
+                  if (paletteState.inventory.isNotEmpty) {
+                    StructuredLogger.gameCanvas('📋 COMPONENT INVENTORY', context: {
+                      'levelId': widget.levelId,
+                      'items': paletteState.inventory.length,
+                    });
+                  }
                 }
 
                 return Positioned(

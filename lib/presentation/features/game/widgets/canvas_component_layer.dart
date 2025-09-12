@@ -5,7 +5,6 @@ import 'package:sparkcircuit/application/providers/core_providers.dart';
 import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
-import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_component_widget.dart';
 

@@ -19,6 +19,11 @@ class GameState with _$GameState {
     @Default(false) bool isDebugOverlayVisible,
     required InteractionState interactionState,
     required HistoryState history,
+    String? error,
+    // ✅ ADDED: Fields needed for InteractionEngine
+    @Default([]) List<Wire> wires,
+    Offset? wireDrawStartPos,
+    @Default(false) bool isDrawingWire,
   }) = _GameState;
 
   factory GameState.initial(LevelDefinition? level) => GameState(
@@ -46,6 +51,7 @@ class GameState with _$GameState {
         isDebugOverlayVisible: false,
         interactionState: InteractionState.initial(),
         history: HistoryState.initial(),
+        error: null,
       );
 
   

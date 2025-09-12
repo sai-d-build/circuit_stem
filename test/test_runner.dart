@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 /// Comprehensive test runner for CircuitGrid debugging scenarios
 /// This file provides a centralized way to run all tests related to the
@@ -8,21 +9,33 @@ void main() {
     group('Unit Tests', () {
       test('Coordinate Transformation Tests', () {
         // Import and run coordinate transformation tests
-        print('Running coordinate transformation unit tests...');
+        StructuredLogger.info('Running coordinate transformation unit tests', context: {
+          'operation': 'test_runner_unit_test',
+          'test_type': 'coordinate_transformation',
+          'test_file': 'test/unit/coordinate_transformation_test.dart',
+        });
         // Tests are in test/unit/coordinate_transformation_test.dart
         expect(true, isTrue, reason: 'Coordinate transformation tests should be available');
       });
 
       test('Bounds Validation Tests', () {
         // Import and run bounds validation tests
-        print('Running bounds validation unit tests...');
+        StructuredLogger.info('Running bounds validation unit tests', context: {
+          'operation': 'test_runner_unit_test',
+          'test_type': 'bounds_validation',
+          'test_file': 'test/unit/bounds_validation_test.dart',
+        });
         // Tests are in test/unit/bounds_validation_test.dart
         expect(true, isTrue, reason: 'Bounds validation tests should be available');
       });
 
       test('Error Handling Tests', () {
         // Import and run error handling tests
-        print('Running error handling unit tests...');
+        StructuredLogger.info('Running error handling unit tests', context: {
+          'operation': 'test_runner_unit_test',
+          'test_type': 'error_handling',
+          'test_file': 'test/unit/error_handling_test.dart',
+        });
         // Tests are in test/unit/error_handling_test.dart
         expect(true, isTrue, reason: 'Error handling tests should be available');
       });
@@ -31,7 +44,11 @@ void main() {
     group('Integration Tests', () {
       test('Drag and Drop Integration Tests', () {
         // Import and run drag-drop integration tests
-        print('Running drag and drop integration tests...');
+        StructuredLogger.info('Running drag and drop integration tests', context: {
+          'operation': 'test_runner_integration_test',
+          'test_type': 'drag_drop_integration',
+          'test_file': 'test/integration/drag_drop_integration_test.dart',
+        });
         // Tests are in test/integration/drag_drop_integration_test.dart
         expect(true, isTrue, reason: 'Drag and drop integration tests should be available');
       });
@@ -40,7 +57,11 @@ void main() {
     group('Widget Tests', () {
       test('CircuitGrid Widget Tests', () {
         // Import and run widget tests
-        print('Running CircuitGrid widget tests...');
+        StructuredLogger.info('Running CircuitGrid widget tests', context: {
+          'operation': 'test_runner_widget_test',
+          'test_type': 'circuit_grid_widget',
+          'test_file': 'test/widget/circuit_grid_widget_test.dart',
+        });
         // Tests are in test/widget/circuit_grid_widget_test.dart
         expect(true, isTrue, reason: 'CircuitGrid widget tests should be available');
       });
@@ -49,7 +70,11 @@ void main() {
     group('Performance Tests', () {
       test('Grid Performance Tests', () {
         // Import and run performance tests
-        print('Running grid performance tests...');
+        StructuredLogger.info('Running grid performance tests', context: {
+          'operation': 'test_runner_performance_test',
+          'test_type': 'grid_performance',
+          'test_file': 'test/performance/grid_performance_test.dart',
+        });
         // Tests are in test/performance/grid_performance_test.dart
         expect(true, isTrue, reason: 'Grid performance tests should be available');
       });
@@ -100,8 +125,13 @@ void main() {
           'Grid Performance Tests',
         ];
 
-        print('RCA Scenarios: ${rcaScenarios.length}');
-        print('Test Coverage: ${testCoverage.length}');
+        StructuredLogger.info('Test coverage validation', context: {
+          'operation': 'test_coverage_validation',
+          'rca_scenarios_count': rcaScenarios.length,
+          'test_coverage_count': testCoverage.length,
+          'scenarios': rcaScenarios,
+          'coverage': testCoverage,
+        });
 
         // Ensure we have comprehensive test coverage
         expect(testCoverage.length, greaterThan(0),
@@ -198,44 +228,57 @@ class TestConfiguration {
   };
 
   static void printTestSummary() {
-    print('\n' + '=' * 60);
-    print('CIRCUITGRID COMPREHENSIVE TEST SUITE SUMMARY');
-    print('=' * 60);
-
     int totalScenarios = 0;
+    final scenarioDetails = <String, int>{};
+
     testScenarios.forEach((key, config) {
       final scenarios = config['scenarios'] as List;
       totalScenarios += scenarios.length;
-      print('${key.toUpperCase()}: ${scenarios.length} scenarios');
+      scenarioDetails[key] = scenarios.length;
     });
 
-    print('\nTOTAL TEST SCENARIOS: $totalScenarios');
-    print('TOTAL TEST FILES: ${testScenarios.length}');
-    print('COVERAGE: ${testScenarios.length} test files for comprehensive RCA analysis');
-    print('=' * 60);
+    StructuredLogger.info('CircuitGrid Comprehensive Test Suite Summary', context: {
+      'operation': 'test_suite_summary',
+      'total_test_scenarios': totalScenarios,
+      'total_test_files': testScenarios.length,
+      'scenario_breakdown': scenarioDetails,
+      'coverage_description': '${testScenarios.length} test files for comprehensive RCA analysis',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
   }
 }
 
 /// Test Execution Helper
 class TestExecutor {
   static Future<void> runAllTests() async {
-    print('Starting CircuitGrid Comprehensive Test Suite...');
+    StructuredLogger.info('Starting CircuitGrid Comprehensive Test Suite', context: {
+      'operation': 'test_suite_execution_start',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
 
     // Run unit tests
-    print('\n🔬 Running Unit Tests...');
+    StructuredLogger.info('Running Unit Tests', context: {
+      'operation': 'test_execution_unit_tests',
+    });
     await _runUnitTests();
 
     // Run integration tests
-    print('\n🔗 Running Integration Tests...');
+    StructuredLogger.info('Running Integration Tests', context: {
+      'operation': 'test_execution_integration_tests',
+    });
     await _runIntegrationTests();
 
     // Run widget tests
-    print('\n📱 Running Widget Tests...');
+    StructuredLogger.info('Running Widget Tests', context: {
+      'operation': 'test_execution_widget_tests',
+    });
     await _runWidgetTests();
 
     // Run performance tests
     if (TestConfiguration.enablePerformanceTests) {
-      print('\n⚡ Running Performance Tests...');
+      StructuredLogger.info('Running Performance Tests', context: {
+        'operation': 'test_execution_performance_tests',
+      });
       await _runPerformanceTests();
     }
 
@@ -244,28 +287,46 @@ class TestExecutor {
 
   static Future<void> _runUnitTests() async {
     // Coordinate transformation tests
-    print('  ✓ Coordinate transformation tests');
+    StructuredLogger.debug('Unit test completed: Coordinate transformation', context: {
+      'operation': 'unit_test_completion',
+      'test_type': 'coordinate_transformation',
+    });
 
     // Bounds validation tests
-    print('  ✓ Bounds validation tests');
+    StructuredLogger.debug('Unit test completed: Bounds validation', context: {
+      'operation': 'unit_test_completion',
+      'test_type': 'bounds_validation',
+    });
 
     // Error handling tests
-    print('  ✓ Error handling tests');
+    StructuredLogger.debug('Unit test completed: Error handling', context: {
+      'operation': 'unit_test_completion',
+      'test_type': 'error_handling',
+    });
   }
 
   static Future<void> _runIntegrationTests() async {
     // Drag and drop integration tests
-    print('  ✓ Drag and drop integration tests');
+    StructuredLogger.debug('Integration test completed: Drag and drop', context: {
+      'operation': 'integration_test_completion',
+      'test_type': 'drag_drop_integration',
+    });
   }
 
   static Future<void> _runWidgetTests() async {
     // CircuitGrid widget tests
-    print('  ✓ CircuitGrid widget tests');
+    StructuredLogger.debug('Widget test completed: CircuitGrid', context: {
+      'operation': 'widget_test_completion',
+      'test_type': 'circuit_grid_widget',
+    });
   }
 
   static Future<void> _runPerformanceTests() async {
     // Grid performance tests
-    print('  ✓ Grid performance tests');
+    StructuredLogger.debug('Performance test completed: Grid performance', context: {
+      'operation': 'performance_test_completion',
+      'test_type': 'grid_performance',
+    });
   }
 }
 
@@ -298,23 +359,30 @@ class RCAValidator {
   ];
 
   static void validateCoverage() {
-    print('\n🔍 RCA COVERAGE VALIDATION');
-    print('=' * 40);
-
     final coveredIssues = <String>[];
+    final missingIssues = <String>[];
 
     // Check which issues are covered by our tests
     for (final issue in identifiedIssues) {
       if (_isIssueCoveredByTests(issue)) {
         coveredIssues.add(issue);
-        print('✅ COVERED: $issue');
       } else {
-        print('❌ MISSING: $issue');
+        missingIssues.add(issue);
       }
     }
 
     final coverage = (coveredIssues.length / identifiedIssues.length * 100).round();
-    print('\nCOVERAGE: $coverage% (${coveredIssues.length}/${identifiedIssues.length} issues)');
+
+    StructuredLogger.info('RCA Coverage Validation', context: {
+      'operation': 'rca_coverage_validation',
+      'total_issues': identifiedIssues.length,
+      'covered_issues': coveredIssues.length,
+      'missing_issues': missingIssues.length,
+      'coverage_percentage': coverage,
+      'covered_list': coveredIssues,
+      'missing_list': missingIssues,
+      'timestamp': DateTime.now().toIso8601String(),
+    });
   }
 
   static bool _isIssueCoveredByTests(String issue) {

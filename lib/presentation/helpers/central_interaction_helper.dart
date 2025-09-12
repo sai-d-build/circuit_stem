@@ -25,6 +25,12 @@ class CentralInteractionService {
   // ✅ CLEAN BUSINESS METHODS - No ref.read() calls!
   Future<void> loadLevel(dynamic levelData) async {
     loadGameLevel(levelId, levelData);
+
+    // Also update InteractionEngine with level data
+    if (levelData != null) {
+      // Note: This requires access to ref, but we're keeping it clean by not using ref.read() in business methods
+      // The caller should handle updating the InteractionEngine separately
+    }
   }
 
   void initializeLevel() {

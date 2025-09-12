@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/application/services/gestures/gesture_state_machine.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart';
-import 'dart:ui';
 
 void main() {
   late GestureStateMachine stateMachine;

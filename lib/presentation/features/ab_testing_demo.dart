@@ -75,9 +75,11 @@ class _ABTestingDemoState extends ConsumerState<ABTestingDemo> {
       'timestamp': DateTime.now().toIso8601String(),
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Event tracked for theme: $_currentTheme')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Event tracked for theme: $_currentTheme')),
+      );
+    }
   }
 
   @override

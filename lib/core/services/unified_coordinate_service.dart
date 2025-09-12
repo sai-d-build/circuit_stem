@@ -4,6 +4,7 @@ import 'secure_coordinate_validator.dart';
 import '../../domain/entities/core/component.dart';
 import '../../../presentation/features/game/controllers/game_canvas_controller.dart';
 import '../migration/migration_tracker.dart';
+import '../../../core/debug/structured_logger.dart';
 
 // Cache entry classes for performance optimization
 class _CacheEntry {
@@ -117,29 +118,80 @@ class UnifiedCoordinateService {
   /// Coordinate translation: screen coordinates to grid coordinates
   /// Supports optional RenderBox for globalToLocal conversion (consolidated from coordinate_system_service)
   Offset screenToGrid(Offset screenPos, GridConfiguration config, {RenderBox? renderBox}) {
+    // 🎯 ENHANCED COORDINATE DEBUG LOGGING - Screen to Grid Conversion Start
+    StructuredLogger.info('🎯 ===== SCREEN TO GRID CONVERSION =====', context: {
+      'operation': 'screen_to_grid_conversion',
+      'inputScreenPosition': {'dx': screenPos.dx, 'dy': screenPos.dy},
+      'gridConfig': {
+        'rows': config.rows,
+        'cols': config.cols,
+        'cellSize': config.cellSize,
+        'scale': config.scale,
+        'panOffset': {'dx': config.panOffset.dx, 'dy': config.panOffset.dy},
+      },
+      'renderBoxProvided': renderBox != null,
+      'renderBoxSize': renderBox?.size.toString(),
+      'renderBoxAttached': renderBox?.attached,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+
     // Check cache first for performance
     final cacheKey = 'screenToGrid_${screenPos.dx}_${screenPos.dy}_${config.hashCode}';
     final cached = _coordinateCache[cacheKey];
     if (cached != null && DateTime.now().difference(cached.timestamp) < _cacheExpiration) {
+      StructuredLogger.debug('🎯 SCREEN TO GRID - Cache Hit', context: {
+        'operation': 'cache_hit',
+        'cachedResult': {'dx': (cached.value as Offset).dx, 'dy': (cached.value as Offset).dy},
+        'cacheAgeMs': DateTime.now().difference(cached.timestamp).inMilliseconds,
+      });
       return cached.value as Offset;
     }
 
-    // 🛡️ SECURITY: Sanitize input position
+    // 🎯 ENHANCED COORDINATE DEBUG LOGGING - Global to Local Conversion
     Offset localPos = screenPos;
     if (renderBox != null) {
       localPos = renderBox.globalToLocal(screenPos);
+      StructuredLogger.info('🎯 SCREEN TO GRID - Global to Local Conversion', context: {
+        'operation': 'global_to_local_conversion',
+        'globalPosition': {'dx': screenPos.dx, 'dy': screenPos.dy},
+        'localPosition': {'dx': localPos.dx, 'dy': localPos.dy},
+        'renderBoxSize': renderBox.size.toString(),
+        'conversionSuccessful': true,
+      });
     }
+
+    // 🛡️ SECURITY: Sanitize input position
     final sanitizedPos = SecureCoordinateValidator.sanitizePosition(localPos);
 
-    // Reverse pan and scale transformations
+    // 🎯 ENHANCED COORDINATE DEBUG LOGGING - Pan and Scale Transformations
     final adjustedX = (sanitizedPos.dx - config.panOffset.dx) / config.scale;
     final adjustedY = (sanitizedPos.dy - config.panOffset.dy) / config.scale;
+
+    StructuredLogger.info('🎯 SCREEN TO GRID - Pan/Scale Transformations', context: {
+      'operation': 'pan_scale_transformations',
+      'sanitizedPosition': {'dx': sanitizedPos.dx, 'dy': sanitizedPos.dy},
+      'panOffset': {'dx': config.panOffset.dx, 'dy': config.panOffset.dy},
+      'scale': config.scale,
+      'adjustedPosition': {'x': adjustedX, 'y': adjustedY},
+      'transformationsApplied': true,
+    });
 
     // Convert to grid coordinates
     final gridX = adjustedX / config.cellSize;
     final gridY = adjustedY / config.cellSize;
 
     final result = Offset(gridX, gridY);
+
+    // 🎯 ENHANCED COORDINATE DEBUG LOGGING - Final Grid Coordinates
+    StructuredLogger.info('🎯 SCREEN TO GRID - Final Grid Coordinates', context: {
+      'operation': 'final_grid_coordinates',
+      'adjustedPosition': {'x': adjustedX, 'y': adjustedY},
+      'cellSize': config.cellSize,
+      'finalGridPosition': {'dx': gridX, 'dy': gridY},
+      'gridBounds': {'rows': config.rows, 'cols': config.cols},
+      'withinBounds': gridX >= 0 && gridY >= 0 && gridX < config.cols && gridY < config.rows,
+      'conversionComplete': true,
+    });
 
     // Cache the result
     _coordinateCache[cacheKey] = _CacheEntry(result, DateTime.now());
@@ -171,12 +223,56 @@ class UnifiedCoordinateService {
 
   /// Snap screen coordinates to nearest grid cell center
   Offset snapToGrid(Offset screenPos, GridConfiguration config, {RenderBox? renderBox}) {
+    // 🎯 ENHANCED COORDINATE DEBUG LOGGING - Grid Snapping Start
+    StructuredLogger.info('🎯 ===== GRID SNAPPING OPERATION =====', context: {
+      'operation': 'grid_snapping',
+      'inputScreenPosition': {'dx': screenPos.dx, 'dy': screenPos.dy},
+      'gridConfig': {
+        'rows': config.rows,
+        'cols': config.cols,
+        'cellSize': config.cellSize,
+        'scale': config.scale,
+        'panOffset': {'dx': config.panOffset.dx, 'dy': config.panOffset.dy},
+      },
+      'renderBoxProvided': renderBox != null,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+
     final gridPos = screenToGrid(screenPos, config, renderBox: renderBox);
+
+    // 🎯 ENHANCED COORDINATE DEBUG LOGGING - Snapping Calculation
     final snappedGridPos = Offset(
       gridPos.dx.round().toDouble(),
       gridPos.dy.round().toDouble(),
     );
-    return gridToScreen(snappedGridPos, config); // Return screen coordinates
+
+    StructuredLogger.info('🎯 GRID SNAPPING - Snapping Calculation', context: {
+      'operation': 'snapping_calculation',
+      'rawGridPosition': {'dx': gridPos.dx, 'dy': gridPos.dy},
+      'snappedGridPosition': {'dx': snappedGridPos.dx, 'dy': snappedGridPos.dy},
+      'roundingApplied': {
+        'dxRounding': gridPos.dx.round() - gridPos.dx,
+        'dyRounding': gridPos.dy.round() - gridPos.dy,
+      },
+      'snappingSuccessful': true,
+    });
+
+    final screenResult = gridToScreen(snappedGridPos, config); // Return screen coordinates
+
+    // 🎯 ENHANCED COORDINATE DEBUG LOGGING - Final Screen Coordinates
+    StructuredLogger.info('🎯 GRID SNAPPING - Final Screen Coordinates', context: {
+      'operation': 'final_screen_coordinates',
+      'snappedGridPosition': {'dx': snappedGridPos.dx, 'dy': snappedGridPos.dy},
+      'finalScreenPosition': {'dx': screenResult.dx, 'dy': screenResult.dy},
+      'originalScreenPosition': {'dx': screenPos.dx, 'dy': screenPos.dy},
+      'snappingOffset': {
+        'dx': screenResult.dx - screenPos.dx,
+        'dy': screenResult.dy - screenPos.dy,
+      },
+      'snappingComplete': true,
+    });
+
+    return screenResult;
   }
 
   /// Get the center position of a grid cell in screen coordinates
@@ -226,16 +322,65 @@ class UnifiedCoordinateService {
   /// Get valid grid position from screen coordinates (returns null if out of bounds)
   /// Consolidated to use round() for consistency across implementations
   Offset? getValidGridPosition(Offset screenPosition, GridConfiguration config, {RenderBox? renderBox}) {
+    // 🎯 ENHANCED COORDINATE DEBUG LOGGING - Valid Grid Position Check Start
+    StructuredLogger.info('🎯 ===== VALID GRID POSITION CHECK =====', context: {
+      'operation': 'valid_grid_position_check',
+      'inputScreenPosition': {'dx': screenPosition.dx, 'dy': screenPosition.dy},
+      'gridConfig': {
+        'rows': config.rows,
+        'cols': config.cols,
+        'cellSize': config.cellSize,
+        'scale': config.scale,
+        'panOffset': {'dx': config.panOffset.dx, 'dy': config.panOffset.dy},
+      },
+      'renderBoxProvided': renderBox != null,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+
     final gridPos = screenToGrid(screenPosition, config, renderBox: renderBox);
     final snappedPos = Offset(
       gridPos.dx.round().toDouble(),  // Unified to round for nearest cell
       gridPos.dy.round().toDouble(),
     );
 
-    if (isInGridBounds(snappedPos, config)) {
+    // 🎯 ENHANCED COORDINATE DEBUG LOGGING - Bounds Validation
+    final isValid = isInGridBounds(snappedPos, config);
+
+    StructuredLogger.info('🎯 VALID GRID POSITION - Bounds Validation', context: {
+      'operation': 'bounds_validation',
+      'rawGridPosition': {'dx': gridPos.dx, 'dy': gridPos.dy},
+      'snappedGridPosition': {'dx': snappedPos.dx, 'dy': snappedPos.dy},
+      'gridBounds': {'rows': config.rows, 'cols': config.cols},
+      'isWithinBounds': isValid,
+      'validationDetails': {
+        'dxValid': snappedPos.dx >= 0 && snappedPos.dx < config.cols,
+        'dyValid': snappedPos.dy >= 0 && snappedPos.dy < config.rows,
+        'dxValue': snappedPos.dx,
+        'dyValue': snappedPos.dy,
+      },
+      'validationComplete': true,
+    });
+
+    if (isValid) {
+      // 🎯 ENHANCED COORDINATE DEBUG LOGGING - Valid Position Result
+      StructuredLogger.info('🎯 VALID GRID POSITION - Position Valid', context: {
+        'operation': 'position_valid',
+        'finalGridPosition': {'dx': snappedPos.dx, 'dy': snappedPos.dy},
+        'finalPlacementCoordinates': '${snappedPos.dx.toInt()}, ${snappedPos.dy.toInt()}',
+        'validationSuccessful': true,
+      });
       return snappedPos;
+    } else {
+      // 🎯 ENHANCED COORDINATE DEBUG LOGGING - Invalid Position Result
+      StructuredLogger.warning('🎯 VALID GRID POSITION - Position Invalid', context: {
+        'operation': 'position_invalid',
+        'invalidGridPosition': {'dx': snappedPos.dx, 'dy': snappedPos.dy},
+        'reason': 'out_of_bounds',
+        'gridBounds': {'rows': config.rows, 'cols': config.cols},
+        'validationFailed': true,
+      });
+      return null;
     }
-    return null;
   }
 
   /// Calculate distance between two grid positions

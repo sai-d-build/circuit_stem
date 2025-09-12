@@ -1,31 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mockito/mockito.dart';
+
+// Import Notifier CLASS DEFS ONLY to avoid provider name conflicts
+import 'package:sparkcircuit/application/component_selection_notifier.dart' show ComponentSelectionNotifier;
+import 'package:sparkcircuit/application/game_progress_notifier.dart' show GameProgressNotifier;
+import 'package:sparkcircuit/application/history_notifier.dart' show HistoryNotifier;
+import 'package:sparkcircuit/application/interaction_state_notifier.dart' show InteractionStateNotifier;
+
+// Import domain entities from correct paths
+import 'package:sparkcircuit/domain/entities/core/component.dart';
+import 'package:sparkcircuit/application/states/game_state.dart';
+
+// Import UI and other services
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_grid.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/interfaces/game_state_notifier_interface.dart';
+
+// Import PROVIDERS from the single source of truth
 import 'package:sparkcircuit/application/providers/unified_providers.dart';
 import 'package:sparkcircuit/application/providers/core_providers.dart';
-import 'package:sparkcircuit/application/states/game_canvas_state.dart';
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
+
+// Mock implementations for testing
+class MockGameStateNotifier extends Mock implements IGameStateNotifier {}
+class MockHistoryNotifier extends Mock implements HistoryNotifier {}
+class MockGameProgressNotifier extends Mock implements GameProgressNotifier {}
+class MockComponentSelectionNotifier extends Mock implements ComponentSelectionNotifier {}
+class MockInteractionStateNotifier extends Mock implements InteractionStateNotifier {}
 
 /// Integration tests for drag-and-drop functionality
 /// Tests the complete flow from palette to grid placement
 void main() {
   group('Drag and Drop Integration Tests', () {
     late ProviderContainer container;
+    late MockGameStateNotifier mockGameStateNotifier;
 
     setUp(() {
       // Disable logging for tests to reduce noise
       StructuredLogger.setEnabled(false);
 
+      mockGameStateNotifier = MockGameStateNotifier();
+      when(mockGameStateNotifier.state).thenReturn(GameState.initial(null));
+
       // Create a test container with mocked providers
       container = ProviderContainer(
         overrides: [
           // Mock the unified game state provider
-          unifiedGameStateProvider.overrideWith((ref) {
-            // Return a mock game state
-            return MockGameStateNotifier();
-          }),
+          unifiedGameStateProvider.overrideWith((ref) => mockGameStateNotifier),
 
           // Mock other required providers
           historyNotifierProvider.overrideWith((ref) => MockHistoryNotifier()),
@@ -69,6 +92,9 @@ void main() {
         final dragData = ComponentDragData(
           componentType: ComponentType.resistor,
           componentName: 'Resistor',
+          description: 'A test resistor',
+          defaultProperties: {},
+          cost: 1,
           icon: Icons.details,
         );
 
@@ -132,11 +158,23 @@ void main() {
         final isWithinBounds = row >= 0 && row < gridRows && col >= 0 && col < gridCols;
 
         // Document the result for analysis
-        print('Integration Test Result:');
-        print('  Input: global=($globalOffset), scale=$scale, pan=($panOffset)');
-        print('  Transformed: ($transformedDx, $transformedDy)');
-        print('  Grid position: ($row, $col)');
-        print('  Within bounds: $isWithinBounds');
+        StructuredLogger.info('Coordinate transformation integration test result', context: {
+          'operation': 'integration_test_coordinate_transformation',
+          'input': {
+            'global_offset': globalOffset.toString(),
+            'scale': scale,
+            'pan_offset': panOffset.toString(),
+          },
+          'transformed': {
+            'dx': transformedDx,
+            'dy': transformedDy,
+          },
+          'grid_position': {
+            'row': row,
+            'col': col,
+          },
+          'within_bounds': isWithinBounds,
+        });
 
         // The test passes as long as no exceptions are thrown
         expect(() {
@@ -187,7 +225,14 @@ void main() {
             return testRow >= 0 && testRow < gridRows && testCol >= 0 && testCol < gridCols;
           }, returnsNormally);
 
-          print('Edge Case Test: scale=${testCase.scale}, pan=${testCase.pan}, result=($row, $col), valid=$isWithinBounds');
+          StructuredLogger.debug('Edge case coordinate transformation test', context: {
+            'operation': 'edge_case_test',
+            'scale': testCase.scale,
+            'pan_offset': testCase.pan.toString(),
+            'result_row': row,
+            'result_col': col,
+            'within_bounds': isWithinBounds,
+          });
         }
       });
     });
@@ -260,56 +305,4 @@ void main() {
       });
     });
   });
-}
-
-// Mock implementations for testing
-
-class MockGameStateNotifier extends StateNotifier<GameState> {
-  MockGameStateNotifier() : super(GameState.initial());
-}
-
-class MockHistoryNotifier extends StateNotifier<List<GameStateSnapshot>> {
-  MockHistoryNotifier() : super([]);
-}
-
-class MockGameProgressNotifier extends StateNotifier<GameProgress> {
-  MockGameProgressNotifier() : super(GameProgress.initial());
-}
-
-class MockComponentSelectionNotifier extends StateNotifier<ComponentSelectionState> {
-  MockComponentSelectionNotifier() : super(ComponentSelectionState.initial());
-}
-
-class MockInteractionStateNotifier extends StateNotifier<InteractionState> {
-  MockInteractionStateNotifier() : super(InteractionState.initial());
-}
-
-// Mock data classes
-class GameState {
-  const GameState();
-  static GameState initial() => GameState();
-}
-
-class GameStateSnapshot {
-  const GameStateSnapshot();
-}
-
-class GameProgress {
-  const GameProgress();
-  static GameProgress initial() => GameProgress();
-}
-
-class ComponentSelectionState {
-  const ComponentSelectionState();
-  static ComponentSelectionState initial() => ComponentSelectionState();
-}
-
-class InteractionState {
-  const InteractionState();
-  static InteractionState initial() => InteractionState();
-}
-
-class ComponentType {
-  static const resistor = ComponentType._();
-  const ComponentType._();
 }

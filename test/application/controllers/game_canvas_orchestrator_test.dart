@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart';
 import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';
 import 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart';

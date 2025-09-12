@@ -1,7 +1,6 @@
 // lib/core/debug/debug_helpers.dart
 // Utility helpers for conditional debug logging
 
-import 'package:flutter/foundation.dart';
 import 'structured_logger.dart';
 
 /// Performance optimization guard - use this before expensive debug operations
@@ -100,7 +99,6 @@ class ComponentDebugHelpers {
   /// Placement validation tracking
   static void placementValidation(String componentType, Map<String, dynamic> position, bool valid, {String? reason}) {
     if (!StructuredLogger.debugComponents) return;
-    final level = valid ? 'INFO' : 'WARNING';
     StructuredLogger.components('Placement validation: $componentType', context: {
       'position': position,
       'valid': valid,

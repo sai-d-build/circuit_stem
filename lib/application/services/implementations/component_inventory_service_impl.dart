@@ -3,6 +3,7 @@
 
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import '../interfaces/component_inventory_service.dart';
 
 /// Default implementation of ComponentInventoryService
@@ -36,20 +37,36 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
     );
   }
 
-  // Helper method to get inventory without accessing state directly
+  // ✅ FIXED: Method to get actual inventory from PaletteStateNotifier
   ComponentInventory? _getInventoryForType(String componentTypeString) {
-    // This is a temporary workaround - in a real implementation,
-    // we'd need to expose this through the PaletteStateNotifier interface
     try {
-      // Use the public canUseComponent method to infer inventory state
-      final canUse = _paletteStateNotifier.canUseComponent(componentTypeString);
-      // For now, return a mock inventory - this needs to be fixed in PaletteStateNotifier
-      return ComponentInventory(
-        componentType: componentTypeString,
-        available: canUse ? 1 : 0,
-        total: 1,
-      );
+      // Get the actual inventory state from PaletteStateNotifier
+      final inventoryState = _paletteStateNotifier.getInventoryState();
+
+      // Look up the component in the actual inventory
+      final inventoryItem = inventoryState[componentTypeString];
+
+      if (inventoryItem != null) {
+        StructuredLogger.debug('🎯 ACTUAL INVENTORY FOUND', context: {
+          'componentType': componentTypeString,
+          'available': inventoryItem.available,
+          'total': inventoryItem.total,
+          'used': inventoryItem.used,
+          'canUse': inventoryItem.canUse,
+        });
+      } else {
+        StructuredLogger.warning('🎯 INVENTORY NOT FOUND', context: {
+          'componentType': componentTypeString,
+          'availableInventoryKeys': inventoryState.keys.toList(),
+        });
+      }
+
+      return inventoryItem;
     } catch (e) {
+      StructuredLogger.error('❌ FAILED TO GET INVENTORY', context: {
+        'componentType': componentTypeString,
+        'error': e.toString(),
+      });
       return null;
     }
   }
@@ -118,8 +135,18 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
     await _paletteStateNotifier.reset();
   }
 
-  /// Converts ComponentType enum to string representation
+  /// Converts ComponentType enum to inventory key representation
+  /// FIXED: Switch enum name `switch_` to inventory key `switch`
   String _componentTypeToString(ComponentType type) {
-    return type.toString().split('.').last;
+    final enumName = type.toString().split('.').last;
+
+    // Handle component type mapping inconsistencies
+    switch (enumName) {
+      case 'switch_':
+        return 'switch'; // Remove underscore for inventory key
+      // Add other special cases here if needed
+      default:
+        return enumName;
+    }
   }
 }

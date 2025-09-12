@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 

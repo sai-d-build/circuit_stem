@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sparkcircuit/core/services/input_sanitization_service.dart';
 import 'package:sparkcircuit/core/services/optimized_grid_manager.dart';

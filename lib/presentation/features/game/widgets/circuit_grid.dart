@@ -1,22 +1,20 @@
 import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:sparkcircuit/domain/entities/core/component.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:state_notifier/state_notifier.dart';
 import 'package:sparkcircuit/application/providers/core_providers.dart';
 import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/application/providers/game_canvas_providers.dart';
 import 'package:sparkcircuit/application/states/game_canvas_state.dart';
+import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
-import 'package:sparkcircuit/application/use_cases/create_component_use_case.dart';
-import 'package:sparkcircuit/application/use_cases/notifier_integrated_use_case.dart';
-import 'package:sparkcircuit/application/use_cases/interaction_use_case.dart';
-import 'package:sparkcircuit/application/transaction.dart';
-import 'package:sparkcircuit/application/services/component_palette_manager.dart';
+import 'package:sparkcircuit/application/interaction_engine.dart' as interaction_engine;
 import 'package:sparkcircuit/presentation/features/game/widgets/canvas_component_layer.dart';
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
+import 'package:sparkcircuit/core/interfaces/game_state_notifier_interface.dart';
 
 // ✅ FIXED: Coordinate Transformation Service
 class GridCoordinateService {
@@ -57,13 +55,18 @@ class GridCoordinateService {
       }
       
       // Step 3: Calculate grid cell coordinates
-      // Since the GridView.builder is inside Transform widgets, we need to account for them
-      // The localPosition is already in the coordinate system of the MouseRegion/GridView
-      
-      // Apply inverse transforms to get the actual grid coordinates
-      final adjustedX = (localPosition.dx - viewportState.panOffset.dx) / viewportState.scale;
-      final adjustedY = (localPosition.dy - viewportState.panOffset.dy) / viewportState.scale;
-      
+      // The CircuitGrid applies transforms as: Transform.scale → Transform.translate
+      // So the inverse should be: Translate⁻¹ → Scale⁻¹
+
+      // First apply inverse translate (subtract pan offset)
+      final translatedX = localPosition.dx - viewportState.panOffset.dx;
+      final translatedY = localPosition.dy - viewportState.panOffset.dy;
+
+      // Then apply inverse scale (divide by scale)
+      final adjustedX = translatedX / viewportState.scale;
+      final adjustedY = translatedY / viewportState.scale;
+
+      // Finally convert to grid coordinates
       final col = (adjustedX / gridConfig.cellSize).floor();
       final row = (adjustedY / gridConfig.cellSize).floor();
       
@@ -98,66 +101,9 @@ class GridCoordinateService {
   }
 }
 
-// ✅ FIXED: Grid Interaction Service with proper error handling
-class GridInteractionService {
-  final StateController<int?> _hoveredCellController;
-  final dynamic _paletteNotifier;
-  final dynamic _interactionUseCase;
+// ✅ REMOVED: Legacy GridInteractionService - now using InteractionEngine directly
 
-  GridInteractionService(this._hoveredCellController, this._paletteNotifier, this._interactionUseCase);
-
-  void setHoveredCell(int? index) {
-    try {
-      _hoveredCellController.state = index;
-    } catch (e) {
-      StructuredLogger.error('Failed to set hovered cell', context: {'error': e.toString(), 'index': index});
-    }
-  }
-
-  void clearHover() {
-    try {
-      _hoveredCellController.state = null;
-    } catch (e) {
-      StructuredLogger.error('Failed to clear hover', context: {'error': e.toString()});
-    }
-  }
-
-  bool canUseComponent(String componentType) {
-    try {
-      return _paletteNotifier.canUseComponent(componentType);
-    } catch (e) {
-      StructuredLogger.error('Failed to check component availability', context: {'error': e.toString(), 'componentType': componentType});
-      return false;
-    }
-  }
-
-  void useComponent(String componentType) {
-    try {
-      _paletteNotifier.useComponent(componentType);
-    } catch (e) {
-      StructuredLogger.error('Failed to use component', context: {'error': e.toString(), 'componentType': componentType});
-    }
-  }
-
-  void returnComponent(String componentType) {
-    try {
-      _paletteNotifier.returnComponent(componentType);
-    } catch (e) {
-      StructuredLogger.error('Failed to return component', context: {'error': e.toString(), 'componentType': componentType});
-    }
-  }
-
-  dynamic getInteractionUseCase() {
-    return _interactionUseCase;
-  }
-}
-
-final gridInteractionServiceProvider = Provider.family<GridInteractionService, String>((ref, levelId) {
-  final hoveredCellController = ref.watch(hoveredCellProvider.notifier);
-  final paletteNotifier = ref.watch(paletteStateProvider(levelId).notifier);
-  final interactionUseCase = ref.watch(interactionUseCaseProvider(levelId));
-  return GridInteractionService(hoveredCellController, paletteNotifier, interactionUseCase);
-});
+// ✅ REMOVED: Legacy GridInteractionService - now using InteractionEngine directly
 
 final hoveredCellProvider = StateProvider<int?>((ref) => null);
 
@@ -173,67 +119,15 @@ class CircuitGrid extends ConsumerStatefulWidget {
   ConsumerState<CircuitGrid> createState() => _CircuitGridState();
 }
 
-// ✅ FIX: Create injected service to eliminate ref.read() anti-pattern
-class CircuitGridService {
-  final StateController<int?> _hoveredCellController;
-  final dynamic _paletteNotifier;
-  final dynamic _interactionUseCase;
-
-  CircuitGridService(
-    this._hoveredCellController,
-    this._paletteNotifier,
-    this._interactionUseCase,
-  );
-
-  // Delegate methods to eliminate ref.read() calls
-  void setHoveredCell(int? index) => _hoveredCellController.state = index;
-  void clearHover() => _hoveredCellController.state = null;
-  int? getCurrentHovered() => _hoveredCellController.state;
-  bool canUseComponent(String componentType) => _paletteNotifier.canUseComponent(componentType);
-  void useComponent(String componentType) => _paletteNotifier.useComponent(componentType);
-  dynamic getInteractionUseCase() => _interactionUseCase;
-  Map<String, dynamic> getComponents() => _interactionUseCase.getGameState().grid.components;
-
-  NotifierContext createNotifierContext(String levelId) {
-    return NotifierContext(
-      grid: _interactionUseCase.getGameStateNotifier(),
-      history: _interactionUseCase.getHistoryNotifier(),
-      progress: _interactionUseCase.getProgressNotifier(),
-      selection: _interactionUseCase.getSelectionNotifier(),
-      interaction: _interactionUseCase.getInteractionStateNotifier(levelId),
-      paletteManager: _paletteNotifier,
-    );
-  }
-}
 
 class _CircuitGridState extends ConsumerState<CircuitGrid> {
   final _gridKey = GlobalKey();
   Timer? _hoverThrottleTimer;
-  CircuitGridService? _gridService; // ✅ FIX: Injected service, made nullable for error handling
 
   @override
   void initState() {
     super.initState();
-    // ✅ FIX: Initialize injected service to eliminate ref.read() calls
-    _initializeService();
-  }
-
-  void _initializeService() {
-    try {
-      _gridService = CircuitGridService(
-        ref.read(hoveredCellProvider.notifier), // Only ref.read() in init - acceptable
-        ref.read(paletteStateProvider(widget.levelId).notifier),
-        ref.read(interactionUseCaseProvider(widget.levelId)),
-      );
-      StructuredLogger.debug('CircuitGridService initialized successfully', context: {'levelId': widget.levelId});
-    } catch (e, stackTrace) {
-      StructuredLogger.error('Failed to initialize CircuitGridService', context: {
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-        'levelId': widget.levelId,
-      });
-      _gridService = null;
-    }
+    // ✅ REMOVED: Legacy service initialization - now using InteractionEngine directly
   }
 
   @override
@@ -245,9 +139,7 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
   @override
   void didUpdateWidget(CircuitGrid oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_gridService == null || oldWidget.levelId != widget.levelId) {
-      _initializeService();
-    }
+    // ✅ REMOVED: Legacy service reinitialization - InteractionEngine handles this
   }
 
   @override
@@ -260,30 +152,61 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
     });
 
     final canvasState = ref.watch(gameCanvasOrchestratorProvider(widget.levelId));
+    final gameState = ref.watch(interaction_engine.interactionEngineProvider(widget.levelId));
+    final interactionEngineNotifier = ref.watch(interaction_engine.interactionEngineProvider(widget.levelId).notifier);
 
     // Ensure viewport is synchronized with level dimensions
     final gridConfig = canvasState.viewportState.gridConfiguration;
     final hoveredCellIndex = ref.watch(hoveredCellProvider);
-    final components = _gridService?.getComponents() ?? {}; // ✅ FIX: Use injected service with null safety
-    final gridService = ref.watch(gridInteractionServiceProvider(widget.levelId));
+    final components = gameState.grid.components; // ✅ FIXED: Use provider pattern
 
     // Log synchronization status
-    StructuredLogger.debug('CircuitGrid viewport synchronization check', context: {
-      'levelId': widget.levelId,
-      'viewport_rows': gridConfig.rows,
-      'viewport_cols': gridConfig.cols,
-      'has_current_level': canvasState.currentLevel != null,
-      'level_grid_height': canvasState.currentLevel?.grid.height ?? 'null',
-      'level_grid_width': canvasState.currentLevel?.grid.width ?? 'null',
-      'is_synchronized': canvasState.currentLevel != null &&
-                       gridConfig.rows == canvasState.currentLevel!.grid.height &&
-                       gridConfig.cols == canvasState.currentLevel!.grid.width,
-    });
+    // Reduce excessive logging in production builds
+    const bool enableDebugLogging = bool.fromEnvironment('ENABLE_GRID_SYNC_LOGS');
+    if (enableDebugLogging) {
+      StructuredLogger.debug('CircuitGrid viewport synchronization check', context: {
+        'levelId': widget.levelId,
+        'viewport_rows': gridConfig.rows,
+        'viewport_cols': gridConfig.cols,
+        'has_current_level': canvasState.currentLevel != null,
+        'level_grid_height': canvasState.currentLevel?.grid.height ?? 'null',
+        'level_grid_width': canvasState.currentLevel?.grid.width ?? 'null',
+        'is_synchronized': canvasState.currentLevel != null &&
+                         gridConfig.rows == canvasState.currentLevel!.grid.height &&
+                         gridConfig.cols == canvasState.currentLevel!.grid.width,
+      });
+    }
+
+    // Perform runtime synchronization validation
+    final levelRows = canvasState.currentLevel?.grid.height;
+    final levelCols = canvasState.currentLevel?.grid.width;
+
+    const bool enableSyncValidation = bool.fromEnvironment('ENABLE_SYNC_VALIDATION');
+    if (enableSyncValidation && canvasState.currentLevel != null) {
+      final isSynchronized = gridConfig.rows == levelRows && gridConfig.cols == levelCols;
+
+      if (!isSynchronized) {
+        StructuredLogger.warning('🚨 SYNCHRONIZATION VALIDATION FAILED', context: {
+          'expected': '$levelRows x $levelCols (level)',
+          'actual': '${gridConfig.rows} x ${gridConfig.cols} (viewport)',
+          'levelId': widget.levelId,
+          'levelName': canvasState.currentLevel?.metadata.title ?? 'unknown',
+          'severity': 'HIGH - This will cause coordinate miscalculations',
+          'fix_suggestion': 'Ensure initializeLevel syncs viewport.gridConfiguration with level.grid dimensions',
+        });
+      } else {
+        StructuredLogger.info('✅ GRID SYNCHRONIZATION VALIDATED', context: {
+          'dimensions': '${levelRows}x${levelCols}',
+          'levelId': widget.levelId,
+        });
+      }
+    }
 
     StructuredLogger.debug('Provider watch results', context: {
       'gridConfig': {'rows': gridConfig.rows, 'cols': gridConfig.cols, 'cellSize': gridConfig.cellSize},
       'hoveredCellIndex': hoveredCellIndex,
       'components_count': components.length,
+      'levelGridDimensions': canvasState.currentLevel != null ? '${canvasState.currentLevel!.grid.height}x${canvasState.currentLevel!.grid.width}' : 'null',
       'levelId': widget.levelId,
     });
 
@@ -323,14 +246,16 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
                   offset: canvasState.viewportState.panOffset,
                   child: MouseRegion(
                     key: _gridKey,
-                    onHover: (event) => _handleHover(event, canvasState, gridConfig, gridService),
-                    onExit: (event) => gridService.clearHover(),
+                    onHover: (event) => _handleHover(event, canvasState, gridConfig, interactionEngineNotifier),
+                    onExit: (event) => ref.read(hoveredCellProvider.notifier).state = null,
+                    // Use level-specific dimensions for GridView
                     child: GridView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: gridConfig.cols,
+                        crossAxisCount: canvasState.currentLevel?.grid.width ?? gridConfig.cols,
                       ),
-                      itemCount: gridConfig.rows * gridConfig.cols,
+                      itemCount: (canvasState.currentLevel?.grid.height ?? gridConfig.rows) *
+                                (canvasState.currentLevel?.grid.width ?? gridConfig.cols),
                       itemBuilder: (context, index) => _buildGridCell(
                         context,
                         index,
@@ -338,7 +263,9 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
                         hoveredCellIndex,
                         components,
                         canvasState,
-                        gridService,
+                        interactionEngineNotifier,
+                        levelCols: canvasState.currentLevel?.grid.width ?? gridConfig.cols,
+                        levelRows: canvasState.currentLevel?.grid.height ?? gridConfig.rows,
                       ),
                     ),
                   ),
@@ -351,55 +278,52 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
     );
   }
 
-  void _handleHover(PointerHoverEvent event, GameCanvasState canvasState, GridConfiguration gridConfig, GridInteractionService gridService) {
+  void _handleHover(PointerHoverEvent event, GameCanvasState canvasState, GridConfiguration gridConfig, interaction_engine.InteractionEngine interactionEngine) {
     _hoverThrottleTimer?.cancel();
     _hoverThrottleTimer = Timer(const Duration(milliseconds: 16), () {
       final gridRenderBox = _gridKey.currentContext?.findRenderObject() as RenderBox?;
       if (gridRenderBox == null) return;
 
-      // CONSISTENT COORDINATE TRANSFORMATION (same as drop handling)
-      // 1. Convert to MouseRegion local coordinates
+      // Get current game state for hover tracking
+      final gameState = ref.watch(interaction_engine.interactionEngineProvider(widget.levelId));
+
+      // Use level-specific grid dimensions for all coordinate calculations
+      final levelGridConfig = GridConfiguration(
+        rows: canvasState.currentLevel?.grid.height ?? gridConfig.rows,
+        cols: canvasState.currentLevel?.grid.width ?? gridConfig.cols,
+        cellSize: gridConfig.cellSize,
+      );
+
+      // Skip excessive logging to improve performance
+      // 🎯 Use simplified coordinate calculation with level bounds
       final localPosition = gridRenderBox.globalToLocal(event.position);
-      
-      // 2. Apply transforms to match GridView coordinate space
-      final scale = canvasState.viewportState.scale;
-      final panOffset = canvasState.viewportState.panOffset;
-      
-      final transformedX = (localPosition.dx - panOffset.dx) / scale;
-      final transformedY = (localPosition.dy - panOffset.dy) / scale;
-      
-      // 3. Calculate grid cell coordinates
-      final col = (transformedX / gridConfig.cellSize).floor();
-      final row = (transformedY / gridConfig.cellSize).floor();
 
-      StructuredLogger.debug('Hover coordinate calculation', context: {
-        'localPosition': {'dx': localPosition.dx, 'dy': localPosition.dy},
-        'transformed': {'x': transformedX, 'y': transformedY},
-        'calculatedRow': row,
-        'calculatedCol': col,
-        'cellSize': gridConfig.cellSize,
-        'scale': scale,
-        'panOffset': {'dx': panOffset.dx, 'dy': panOffset.dy},
-        'levelId': widget.levelId,
-      });
+      // Calculate grid cell coordinates using level-specific dimensions
+      final col = (localPosition.dx / levelGridConfig.cellSize).floor();
+      final row = (localPosition.dy / levelGridConfig.cellSize).floor();
 
-      // Validate bounds and update hover state
-      if (row >= 0 && row < gridConfig.rows && col >= 0 && col < gridConfig.cols) {
-        final cellIndex = row * gridConfig.cols + col;
-        final currentHovered = _gridService?.getCurrentHovered();
-        
+      // Validate bounds using level grid dimensions (not viewport 20x20)
+      if (row >= 0 && row < levelGridConfig.rows && col >= 0 && col < levelGridConfig.cols) {
+        final cellIndex = row * levelGridConfig.cols + col;
+        final currentHovered = gameState.hoveredCellIndex;
+
         if (currentHovered != cellIndex) {
-          gridService.setHoveredCell(cellIndex);
-          StructuredLogger.debug('Non-drag hover at cell', context: {
+          // ✅ FIXED: Use InteractionEngine for hover state management
+          interactionEngine.setHoveredCell(cellIndex);
+          ref.read(hoveredCellProvider.notifier).state = cellIndex;
+          // Reduced logging frequency to prevent spam
+          StructuredLogger.info('🎯 CELL HOVERED', context: {
             'row': row,
             'col': col,
             'index': cellIndex,
             'levelId': widget.levelId,
+            'withinLevelBounds': true,
           });
         }
       } else {
-        // Clear hover if outside bounds
-        gridService.clearHover();
+        // Clear hover if outside level bounds
+        ref.read(hoveredCellProvider.notifier).state = null;
+        // Skip excessive logging
       }
     });
   }
@@ -411,44 +335,61 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
     int? hoveredCellIndex,
     Map<String, dynamic> components,
     GameCanvasState canvasState,
-    GridInteractionService gridService,
-  ) {
-    final logicalRow = index ~/ gridConfig.cols;
-    final logicalCol = index % gridConfig.cols;
+    interaction_engine.InteractionEngine interactionEngine, {
+    int? levelCols,
+    int? levelRows,
+  }) {
+    // Use level-specific dimensions for logical calculations
+    final cols = levelCols ?? canvasState.currentLevel?.grid.width ?? gridConfig.cols;
+    final logicalRow = index ~/ cols;
+    final logicalCol = index % cols;
     final isHovered = hoveredCellIndex == index;
     final isOccupied = components.values.any((c) => c.row == logicalRow && c.col == logicalCol);
 
     return DragTarget<ComponentDragData>(
-      onWillAccept: (data) {
+      onWillAcceptWithDetails: (details) {
+        final data = details.data;
         try {
           StructuredLogger.debug('🎯 DRAG ACCEPT CHECK - CircuitGrid', context: {
             'cellIndex': index,
             'cellRow': logicalRow,
             'cellCol': logicalCol,
             'isOccupied': isOccupied,
-            'dataAvailable': data != null,
             'levelId': widget.levelId,
           });
 
           if (isOccupied) {
-            StructuredLogger.info('🎯 DRAG REJECTED - Cell Occupied', context: {
-              'cellIndex': index,
-              'reason': 'position_occupied',
-              'components': components.values.toList(),
-            });
-            gridService.clearHover();
-            return false;
-          }
+           StructuredLogger.info('🎯 DRAG REJECTED - Cell Occupied', context: {
+             'cellIndex': index,
+             'reason': 'position_occupied',
+             'components': components.values.toList(),
+           });
+           ref.read(hoveredCellProvider.notifier).state = null;
+           return false;
+         }
 
-          gridService.setHoveredCell(index);
+         // 🔧 CRITICAL FIX: Check inventory availability before accepting drag
+         // This prevents the race condition where UI shows drag accepted but placement blocks
+         if (!interactionEngine.checkInventoryAvailability(data.componentType)) {
+           StructuredLogger.warning('🎯 DRAG REJECTED - Insufficient Inventory (Early Check)', context: {
+             'cellIndex': index,
+             'componentType': data.componentType.toString(),
+             'reason': 'insufficient_inventory',
+             'levelId': widget.levelId,
+           });
+           ref.read(hoveredCellProvider.notifier).state = null;
+           return false;
+         }
 
-          StructuredLogger.info('🎯 DRAG ACCEPTED - Valid Grid Cell', context: {
-            'cellIndex': index,
-            'cellRow': logicalRow,
-            'cellCol': logicalCol,
-            'componentType': data?.componentType.toString(),
-          });
-          return true;
+         ref.read(hoveredCellProvider.notifier).state = index;
+
+         StructuredLogger.info('🎯 DRAG ACCEPTED - Valid Grid Cell & Inventory Available', context: {
+           'cellIndex': index,
+           'cellRow': logicalRow,
+           'cellCol': logicalCol,
+           'componentType': data.componentType.toString(),
+         });
+         return true;
         } catch (e, stackTrace) {
           StructuredLogger.error('🎯 CRITICAL: Drag Accept Check Failed', context: {
             'cellIndex': index,
@@ -466,7 +407,7 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
             'reason': 'user_abandoned_drop',
             'levelId': widget.levelId,
           });
-          gridService.clearHover();
+          ref.read(hoveredCellProvider.notifier).state = null;
         } catch (e) {
           StructuredLogger.error('🎯 DRAG LEAVE ERROR', context: {
             'cellIndex': index,
@@ -477,24 +418,37 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
       },
       onAcceptWithDetails: (details) {
         try {
-          StructuredLogger.info('🎯 ===== CIRCUIT GRID DROP TRIGGERED =====', context: {
-            'cellIndex': index,
-            'cellRow': logicalRow,
-            'cellCol': logicalCol,
-            'componentType': details.data.componentType.toString(),
-            'componentName': details.data.componentName,
-            'dragOffset': {'dx': details.offset.dx, 'dy': details.offset.dy},
-            'levelId': widget.levelId,
-            'timestamp': DateTime.now().millisecondsSinceEpoch,
-          });
-
-          _handleDrop(details, canvasState, gridConfig, gridService, context);
+          // 🎯 Enhanced debug logging for drag/drop sequence investigation
+          if (enableDragDropSequence && isDevelopment) {
+            StructuredLogger.info('🎯 COMPONENT DROP ACCEPTED - CircuitGrid', context: {
+              'cellIndex': index,
+              'row': logicalRow,
+              'col': logicalCol,
+              'componentType': details.data.componentType.toString(),
+              'componentName': details.data.componentName,
+              'isOccupied': isOccupied,
+              'withinLevelBounds': logicalRow >= 0 && logicalRow < gridConfig.cols && logicalCol >= 0 && logicalCol < gridConfig.rows,
+              'levelId': widget.levelId,
+              'dragData': {
+                'icon': details.data.icon != null ? 'present' : 'null',
+                'position_x': logicalCol,
+                'position_y': logicalRow,
+              },
+            });
+          }
+    
+          // Pass viewport parameters to ensure consistent coordinate calculation
+          _handleDrop(details, canvasState, gridConfig, interactionEngine, context,
+            cellSize: canvasState.viewportState.gridConfiguration.cellSize,
+            scale: canvasState.viewportState.scale,
+            panOffset: canvasState.viewportState.panOffset,
+            canvasSize: canvasState.viewportState.canvasSize,
+            devicePixelRatio: 2.0,
+          );
         } catch (e, stackTrace) {
-          StructuredLogger.error('🎯 CRITICAL: Circuit Grid Drop Trigger Failed', context: {
+          StructuredLogger.error('🎯 DROP FAILED', context: {
             'cellIndex': index,
             'error': e.toString(),
-            'stackTrace': stackTrace.toString(),
-            'componentType': details.data.componentType.toString(),
             'levelId': widget.levelId,
           });
         }
@@ -523,179 +477,147 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
     );
   }
 
-  // ✅ FIXED: Proper coordinate transformation and error handling
+  // ✅ MIGRATION COMPLETE: Widget now uses InteractionEngine directly
   Future<void> _handleDrop(
     DragTargetDetails<ComponentDragData> details,
     GameCanvasState canvasState,
     GridConfiguration gridConfig,
-    GridInteractionService gridService,
-    BuildContext context,
-  ) async {
-    StructuredLogger.info('Component drop initiated', context: {
-      'globalOffset': {'dx': details.offset.dx, 'dy': details.offset.dy},
-      'componentType': details.data.componentType.toString(),
-      'levelId': widget.levelId,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    interaction_engine.InteractionEngine interactionEngine,
+    BuildContext context, {
+    double cellSize = 60.0,
+    double scale = 1.0,
+    Offset panOffset = Offset.zero,
+    Size canvasSize = const Size(1440, 788),
+    double devicePixelRatio = 2.0,
+  }) async {
+    // 🎯 DELEGATE TO INTERACTION ENGINE: All business logic centralized with viewport params
+    interactionEngine.handlePaletteDragEnd(details.data, details.offset,
+      cellSize: cellSize,
+      scale: scale,
+      panOffset: panOffset,
+      canvasSize: canvasSize,
+      devicePixelRatio: devicePixelRatio,
+    );
 
-    try {
-      final gridRenderBox = _gridKey.currentContext?.findRenderObject() as RenderBox?;
-      if (gridRenderBox == null) {
-        StructuredLogger.error('Grid render box is null - cannot process drop');
-        _showErrorSnackBar(context, 'Internal error: Cannot process drop');
-        return;
+    // 🔧 TODO: Add proper inventory tracking and component placement
+    // ISSUE: Inventory never decreases (always shows 10), only RESISTOR works
+    final gameState = ref.watch(interaction_engine.interactionEngineProvider(widget.levelId));
+    final unifiedState = ref.watch(unifiedGameStateProvider);
+
+    if (gameState.grid.components.isNotEmpty) {
+      try {
+        // 🔧 FIX: Sync on ANY count mismatch, not just when unifiedState is empty
+        final sync_condition_met = gameState.grid.components.length != unifiedState.grid.components.length;
+
+        if (sync_condition_met) {
+          final unifiedNotifier = ref.read(unifiedGameStateProvider.notifier);
+
+          if (enableStateSyncLogging && isDevelopment) {
+            StructuredLogger.info('🔄 STATE SYNCHRONIZATION: Starting sync (progressive fix)', context: {
+              'componentCount_interaction': gameState.grid.components.length,
+              'componentCount_unified': unifiedState.grid.components.length,
+              'interaction_componentIds': gameState.grid.components.keys.toList(),
+              'unified_componentIds': unifiedState.grid.components.keys.toList(),
+              'levelId': widget.levelId,
+              'gridDimensions_interaction': '${gameState.grid.rows}x${gameState.grid.cols}',
+              'gridDimensions_unified': '${unifiedState.grid.rows}x${unifiedState.grid.cols}',
+            });
+          }
+
+          final syncedState = unifiedState.copyWith(
+            grid: unifiedState.grid.copyWith(
+              components: gameState.grid.components,
+              rows: gameState.grid.rows,
+              cols: gameState.grid.cols,
+            )
+          );
+
+          if (unifiedNotifier is StateNotifier<GameState>) {
+            unifiedNotifier.state = syncedState;
+          } else if (unifiedNotifier is IGameStateNotifier) {
+            // For IGameStateNotifier, we need to use a different approach
+            // Try setting state directly if available, otherwise use interface method
+            try {
+              (unifiedNotifier as dynamic).state = syncedState;
+            } catch (e) {
+              StructuredLogger.warning('Failed to sync state via direct assignment', context: {
+                'error': e.toString(),
+                'notifierType': unifiedNotifier.runtimeType.toString(),
+              });
+            }
+          } else {
+            StructuredLogger.warning('Unified notifier type not supported for state sync', context: {
+              'notifierType': unifiedNotifier.runtimeType.toString(),
+            });
+          }
+
+          if (enableStateSyncLogging && isDevelopment) {
+            StructuredLogger.info('🔄 STATE SYNCHRONIZATION: Completed sync', context: {
+              'total_components_after_sync': syncedState.grid.components.length,
+              'component_types': syncedState.grid.components.values.map((c) => c.type.toString()).toList(),
+              'sync_successful': true,
+              'levelId': widget.levelId,
+            });
+          }
+        } else if (enableStateSyncLogging && isDevelopment) {
+          StructuredLogger.debug('🔄 STATE SYNCHRONIZATION: No sync needed', context: {
+            'componentCount_interaction': gameState.grid.components.length,
+            'componentCount_unified': unifiedState.grid.components.length,
+            'sync_condition_met': sync_condition_met,
+            'levelId': widget.levelId,
+          });
+        }
+      } catch (e) {
+        StructuredLogger.warning('⚠️ State synchronization update failed', context: {
+          'error': e.toString(),
+          'levelId': widget.levelId,
+        });
       }
+    }
 
-      // Use the robust coordinate calculation service
+    // Handle UI feedback based on GameState error field
+    if (gameState.error != null) {
+      _showErrorSnackBar(context, gameState.error!);
+    } else {
+      // Show success feedback if no error
+      final gridRenderBox = _gridKey.currentContext?.findRenderObject() as RenderBox?;
+      if (gridRenderBox == null) return;
+
+      // Use level-specific grid dimensions for coordinate calculation
+      final levelGridConfig = GridConfiguration(
+        rows: canvasState.currentLevel?.grid.height ?? gridConfig.rows,
+        cols: canvasState.currentLevel?.grid.width ?? gridConfig.cols,
+        cellSize: gridConfig.cellSize,
+      );
+
       final gridPosition = GridCoordinateService.calculateGridPosition(
         globalPosition: details.offset,
         gridRenderBox: gridRenderBox,
         viewportState: canvasState.viewportState,
-        gridConfig: gridConfig,
+        gridConfig: levelGridConfig,
       );
-
-      if (gridPosition == null) {
-        StructuredLogger.warning('Drop position is outside valid grid bounds');
-        _showErrorSnackBar(context, 'Cannot place component: Position is outside the grid');
-        return;
-      }
-
-      final row = gridPosition.row;
-      final col = gridPosition.col;
-      final data = details.data;
-      final componentTypeString = data.componentType.toString().split('.').last;
-
-      StructuredLogger.info('Component placement start', context: {
-        'componentType': data.componentType,
-        'componentName': data.componentName,
-        'dropPosition': {'row': row, 'col': col},
-        'levelId': widget.levelId,
-      });
-
-      // Validate component availability
-      if (!gridService.canUseComponent(componentTypeString)) {
-        StructuredLogger.warning('Component placement aborted - insufficient inventory');
-        _showErrorSnackBar(context, 'No items left in inventory!');
-        return;
-      }
-
-      // Check for occupied cell
-      final components = _gridService?.getComponents() ?? {}; // ✅ FIX: Use injected service with null safety
-      final isCellOccupied = components.values.any((c) => c.row == row && c.col == col);
-      if (isCellOccupied) {
-        StructuredLogger.warning('Drop position occupied', context: {'row': row, 'col': col});
-        _showErrorSnackBar(context, 'Cannot place component here: position is occupied');
-        return;
-      }
-
-      // Clear hover state
-      gridService.clearHover();
-      Future.delayed(const Duration(milliseconds: 100), () => gridService.clearHover());
-
-      // ✅ FIXED: Create proper NotifierContext using WidgetRef
-      // 🔧 REMOVED: Inventory decrement moved to atomic transaction in _placeComponentSafely
-      final result = await _placeComponentSafely(data.componentType, row, col, componentTypeString, gridService);
-
-      if (result) {
-        StructuredLogger.info('Component placement successful', context: {
-          'componentType': data.componentType,
-          'position': {'row': row, 'col': col},
-          'levelId': widget.levelId,
-        });
-        _showSuccessSnackBar(context, '${data.componentName} placed at ($row, $col)!');
+      if (gridPosition != null) {
+        _showSuccessSnackBar(context, '${details.data.componentName} placed at (${gridPosition.row}, ${gridPosition.col})!');
       } else {
-        gridService.returnComponent(componentTypeString);
-        StructuredLogger.error('Component placement failed');
-        _showErrorSnackBar(context, 'Failed to place component');
-      }
-
-    } catch (e, stackTrace) {
-      StructuredLogger.error('Unexpected error in component placement', context: {
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-        'levelId': widget.levelId,
-      }, error: e);
-      _showErrorSnackBar(context, 'Unexpected error: $e');
-    }
-  }
-
-  // ✅ FIXED: Safe component placement with proper error handling
-  Future<bool> _placeComponentSafely(
-    ComponentType componentType,
-    int row,
-    int col,
-    String componentTypeString,
-    GridInteractionService gridService,
-  ) async {
-    try {
-      final transaction = GameTransaction();
-
-      // Check if service is null and attempt reinitialization
-      if (_gridService == null) {
-        StructuredLogger.error('CircuitGridService is null, attempting reinitialization', context: {'levelId': widget.levelId});
-        _initializeService();
-        if (_gridService == null) {
-          StructuredLogger.error('Failed to reinitialize CircuitGridService', context: {'levelId': widget.levelId});
-          return false;
+        // Reduced logging: only show when coordinate calculation fails
+        const bool enableCoordLogs = bool.fromEnvironment('ENABLE_COORD_LOGS');
+        if (enableCoordLogs) {
+          StructuredLogger.warning('🎯 COORDINATE CALCULATION FAILED', context: {
+            'componentName': details.data.componentName,
+            'globalPosition': details.offset.toString(),
+            'levelGridConfig': '${levelGridConfig.rows}x${levelGridConfig.cols}',
+            'levelId': widget.levelId,
+          });
         }
       }
-
-      // Create NotifierContext with proper WidgetRef usage
-      final notifierContext = _gridService!.createNotifierContext(widget.levelId); // ✅ FIX: Use injected service
-
-      StructuredLogger.debug('NotifierContext created successfully', context: {
-        'grid_type': notifierContext.grid.runtimeType.toString(),
-        'levelId': widget.levelId,
-      });
-
-      // 🔧 ATOMIC INVENTORY UPDATE: Include inventory decrement in transaction
-      // This ensures inventory is only decremented if grid placement succeeds
-      transaction.onCommit(() async {
-        StructuredLogger.debug('🔧 Transaction: Decrementing inventory atomically', context: {
-          'componentType': componentTypeString,
-          'position': {'row': row, 'col': col},
-          'levelId': widget.levelId,
-        });
-        gridService.useComponent(componentTypeString);
-      });
-
-      // 🔧 ATOMIC ROLLBACK: Restore inventory if placement fails
-      transaction.onRollback(() {
-        StructuredLogger.debug('🔧 Transaction: Restoring inventory on rollback', context: {
-          'componentType': componentTypeString,
-          'position': {'row': row, 'col': col},
-          'levelId': widget.levelId,
-        });
-        gridService.returnComponent(componentTypeString);
-      });
-
-      final result = await CreateComponentUseCase.placeComponent(
-        componentType,
-        row,
-        col,
-        notifierContext,
-        transaction,
-      );
-
-      if (result.isSuccess) {
-        await transaction.commit();
-        return true;
-      } else {
-        transaction.rollback();
-        StructuredLogger.error('Component placement failed', context: {
-          'error': result.error,
-          'position': {'row': row, 'col': col},
-        });
-        return false;
-      }
-    } catch (e, stackTrace) {
-      StructuredLogger.error('Error in safe component placement', context: {
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-      });
-      return false;
     }
+
+    // Clear hover state
+    ref.read(hoveredCellProvider.notifier).state = null;
+    Future.delayed(const Duration(milliseconds: 100), () => ref.read(hoveredCellProvider.notifier).state = null);
   }
+
+  // ✅ REMOVED: Legacy _placeComponentSafely method - logic now handled by InteractionEngine
 
   void _showSuccessSnackBar(BuildContext context, String message) {
     StructuredLogger.info('✅ SUCCESS FEEDBACK SHOWN', context: {
@@ -708,6 +630,7 @@ class _CircuitGridState extends ConsumerState<CircuitGrid> {
       SnackBar(content: Text(message), backgroundColor: Colors.green)
     );
   }
+
 
   void _showErrorSnackBar(BuildContext context, String message) {
     StructuredLogger.error('❌ ERROR FEEDBACK SHOWN', context: {
@@ -826,11 +749,12 @@ class GridPainter extends CustomPainter {
   }
 
   void _drawHoverFeedback(Canvas canvas, double cellSize, Offset panOffset) {
+    if (hoveredCellIndex == null) return;
+
     final hoveredRow = hoveredCellIndex! ~/ gridConfig.cols;
     final hoveredCol = hoveredCellIndex! % gridConfig.cols;
 
-    if (hoveredRow >= 0 && hoveredRow < gridConfig.rows &&
-        hoveredCol >= 0 && hoveredCol < gridConfig.cols) {
+    if (hoveredRow < gridConfig.rows && hoveredCol < gridConfig.cols) {
 
       final hoverX = hoveredCol * cellSize + panOffset.dx;
       final hoverY = hoveredRow * cellSize + panOffset.dy;

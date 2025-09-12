@@ -1,5 +1,6 @@
 #!/usr/bin/env dart
 import 'dart:io';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 /// Automated Migration Status Checker
 /// Provides real-time metrics for Game State Notifier Consolidation
@@ -8,7 +9,10 @@ class AutomatedMigrationChecker {
 
   /// Main analysis function
   static Future<MigrationReport> analyze() async {
-    print('🔍 Starting Automated Migration Analysis...\n');
+    StructuredLogger.info('Starting Automated Migration Analysis', context: {
+      'operation': 'migration_analysis_start',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
 
     final report = MigrationReport();
 
@@ -240,31 +244,33 @@ class MigrationReport {
   int violationPercentage = 0;
 
   void printReport() {
-    print('📊 AUTOMATED MIGRATION REPORT');
-    print('=' * 50);
-    print('📁 File Statistics:');
-    print('  Total Dart files: $totalDartFiles');
-    print('  Migrated files: $migratedFiles');
-    print('  Migration completion: $migrationPercentage%');
-    print('');
-    print('🏗️ Provider Usage:');
-    print('  Files using unified provider: $filesUsingUnifiedProvider');
-    print('  Files using old providers: $filesUsingOldProviders');
-    print('');
-    print('🔍 ref.read() Analysis:');
-    print('  Total ref.read() calls: $totalRefReadCalls');
-    print('  Business logic violations: $businessLogicViolations ⚠️');
-    print('  Presentation layer (acceptable): $presentationLayerRefReads ✅');
-    print('  Provider factories (acceptable): $providerFactoryRefReads ✅');
-    print('  Violation rate: $violationPercentage%');
-    print('');
-    print('⚡ Code Quality:');
-    print('  Flutter analyze issues: $flutterAnalyzeIssues');
-    print('');
-    print('🎯 Summary:');
-    final remainingFiles = totalDartFiles - migratedFiles;
-    print('  Files remaining to migrate: $remainingFiles');
-    print('  Critical violations to fix: $businessLogicViolations');
+    StructuredLogger.info('AUTOMATED MIGRATION REPORT', context: {
+      'report_type': 'migration_status',
+      'file_statistics': {
+        'total_dart_files': totalDartFiles,
+        'migrated_files': migratedFiles,
+        'migration_completion_percentage': migrationPercentage,
+      },
+      'provider_usage': {
+        'files_using_unified_provider': filesUsingUnifiedProvider,
+        'files_using_old_providers': filesUsingOldProviders,
+      },
+      'ref_read_analysis': {
+        'total_ref_read_calls': totalRefReadCalls,
+        'business_logic_violations': businessLogicViolations,
+        'presentation_layer_acceptable': presentationLayerRefReads,
+        'provider_factories_acceptable': providerFactoryRefReads,
+        'violation_rate_percentage': violationPercentage,
+      },
+      'code_quality': {
+        'flutter_analyze_issues': flutterAnalyzeIssues,
+      },
+      'summary': {
+        'files_remaining_to_migrate': totalDartFiles - migratedFiles,
+        'critical_violations_to_fix': businessLogicViolations,
+      },
+      'timestamp': DateTime.now().toIso8601String(),
+    });
   }
 }
 
@@ -302,23 +308,36 @@ enum ViolationSeverity {
 /// Main execution
 void main() async {
   try {
-    print('🚀 Automated Migration Checker Starting...\n');
+    StructuredLogger.info('Automated Migration Checker Starting', context: {
+      'operation': 'migration_checker_start',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
 
     // Generate main report
     final report = await AutomatedMigrationChecker.analyze();
     report.printReport();
 
-    print('\n' + '=' * 50);
-    print('🔍 DETAILED VIOLATION ANALYSIS');
-    print('=' * 50);
+    StructuredLogger.info('DETAILED VIOLATION ANALYSIS', context: {
+      'operation': 'detailed_violation_analysis',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
 
     // Generate detailed violation report
     final violations = await AutomatedMigrationChecker.analyzeRefReadViolations();
 
     if (violations.isEmpty) {
-      print('✅ No ref.read() violations found!');
+      StructuredLogger.info('No ref.read() violations found', context: {
+        'operation': 'violation_analysis_complete',
+        'violations_found': 0,
+      });
     } else {
-      print('Found ${violations.length} ref.read() instances to analyze:\n');
+      StructuredLogger.info('Found ref.read() instances to analyze', context: {
+        'operation': 'violation_analysis_found',
+        'total_violations': violations.length,
+        'critical_count': violations.where((v) => v.severity == ViolationSeverity.critical).length,
+        'warning_count': violations.where((v) => v.severity == ViolationSeverity.warning).length,
+        'acceptable_count': violations.where((v) => v.severity == ViolationSeverity.acceptable).length,
+      });
 
       // Group by severity
       final critical = violations.where((v) => v.severity == ViolationSeverity.critical);
@@ -326,38 +345,62 @@ void main() async {
       final acceptable = violations.where((v) => v.severity == ViolationSeverity.acceptable);
 
       if (critical.isNotEmpty) {
-        print('🚨 CRITICAL VIOLATIONS (${critical.length}):');
-        for (final violation in critical) {
-          print(violation);
-        }
+        StructuredLogger.error('CRITICAL VIOLATIONS found', context: {
+          'operation': 'critical_violations_report',
+          'count': critical.length,
+          'violations': critical.map((v) => {
+            'file': v.filePath,
+            'line': v.lineNumber,
+            'code': v.code,
+            'recommendation': v.recommendation,
+          }).toList(),
+        });
       }
 
       if (warnings.isNotEmpty) {
-        print('⚠️ WARNINGS (${warnings.length}):');
-        for (final violation in warnings) {
-          print(violation);
-        }
+        StructuredLogger.warning('WARNINGS found', context: {
+          'operation': 'warning_violations_report',
+          'count': warnings.length,
+          'violations': warnings.map((v) => {
+            'file': v.filePath,
+            'line': v.lineNumber,
+            'code': v.code,
+            'recommendation': v.recommendation,
+          }).toList(),
+        });
       }
 
       if (acceptable.isNotEmpty) {
-        print('✅ ACCEPTABLE USAGE (${acceptable.length}):');
-        for (final violation in acceptable.take(5)) { // Show first 5
-          print(violation);
-        }
-        if (acceptable.length > 5) {
-          print('    ... and ${acceptable.length - 5} more acceptable instances');
-        }
+        StructuredLogger.info('ACCEPTABLE USAGE found', context: {
+          'operation': 'acceptable_violations_report',
+          'count': acceptable.length,
+          'sample_violations': acceptable.take(5).map((v) => {
+            'file': v.filePath,
+            'line': v.lineNumber,
+            'code': v.code,
+            'recommendation': v.recommendation,
+          }).toList(),
+          'additional_count': acceptable.length > 5 ? acceptable.length - 5 : 0,
+        });
       }
     }
 
-    print('\n🎯 RECOMMENDATIONS:');
-    print('1. Fix ${report.businessLogicViolations} critical violations in business logic');
-    print('2. Migrate ${report.totalDartFiles - report.migratedFiles} remaining files');
-    print('3. Update migration tracker with accurate counts');
-    print('4. Implement automated validation in CI/CD');
+    StructuredLogger.info('MIGRATION RECOMMENDATIONS', context: {
+      'operation': 'migration_recommendations',
+      'recommendations': [
+        'Fix ${report.businessLogicViolations} critical violations in business logic',
+        'Migrate ${report.totalDartFiles - report.migratedFiles} remaining files',
+        'Update migration tracker with accurate counts',
+        'Implement automated validation in CI/CD',
+      ],
+      'timestamp': DateTime.now().toIso8601String(),
+    });
 
   } catch (e) {
-    print('❌ Error running automated checker: $e');
+    StructuredLogger.error('Error running automated checker', context: {
+      'operation': 'migration_checker_error',
+      'error': e.toString(),
+    }, error: e);
     exit(1);
   }
 }

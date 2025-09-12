@@ -181,11 +181,11 @@ class LevelService {
         try {
           // Try to load a few common level files in each directory
           final possibleFiles = [
-            '${directory}/${directory}_01.json',
-            '${directory}/${directory}_02.json',
-            '${directory}/${directory}_03.json',
-            '${directory}/${directory}_04.json',
-            '${directory}/${directory}_05.json',
+            '$directory/${directory}_01.json',
+            '$directory/${directory}_02.json',
+            '$directory/${directory}_03.json',
+            '$directory/${directory}_04.json',
+            '$directory/${directory}_05.json',
           ];
 
           StructuredLogger.debug('📄 Checking possible files in directory', context: {

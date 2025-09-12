@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'dart:async';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 /// Test suite for error handling scenarios identified in RCA
 /// Tests all error conditions and edge cases
@@ -269,7 +270,11 @@ void main() {
             failingLogger('test message');
           } catch (e) {
             // Should handle logging failure without crashing
-            print('Logging failed, but app continues: $e');
+            StructuredLogger.warning('Logging failed but app continues', context: {
+              'operation': 'logging_error_handling_test',
+              'error': e.toString(),
+              'error_type': e.runtimeType.toString(),
+            });
           }
         }, returnsNormally);
       });

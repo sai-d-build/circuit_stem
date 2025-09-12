@@ -22,8 +22,8 @@ Grid _getGrid(dynamic notifier) {
     // Try different ways to get the grid based on notifier type
     if (notifier is IGameStateNotifier) {
       StructuredLogger.debug('🔍 USING IGameStateNotifier INTERFACE', context: {
-        'hasState': notifier.state != null,
-        'stateType': notifier.state?.runtimeType.toString(),
+        'hasState': true,
+        'stateType': notifier.state.runtimeType.toString(),
       });
       return notifier.state.grid;
     } else if (notifier.current != null) {
@@ -106,6 +106,7 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
         });
         return Failure('Unknown component type: ${action.templateId}');
       }
+
 
       // Validate position coordinates
       if (action.row < 0 || action.col < 0) {
@@ -209,13 +210,13 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
           bool placementSuccessful = false;
           try {
             await unifiedNotifier.placeComponentAsync(
-              componentType!,
+              componentType,
               action.row,
               action.col,
             );
             StructuredLogger.info('✅ COMPONENT PLACEMENT SUCCESSFUL (async)', context: {
               'templateId': action.templateId,
-              'componentType': componentType!.name,
+              'componentType': componentType.name,
               'position': {'row': action.row, 'col': action.col},
               'placement_method': 'async',
             });
@@ -224,20 +225,20 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
             StructuredLogger.warning('🔄 ASYNC PLACEMENT FAILED, TRYING SYNC FALLBACK', context: {
               'asyncError': asyncError.toString(),
               'templateId': action.templateId,
-              'componentType': componentType!.name,
+              'componentType': componentType.name,
               'fallback_attempted': true,
             });
 
             // Fallback to sync placement
             try {
               unifiedNotifier.placeComponent(
-                componentType!,
+                componentType,
                 action.row,
                 action.col,
               );
               StructuredLogger.info('✅ COMPONENT PLACEMENT SUCCESSFUL (sync fallback)', context: {
                 'templateId': action.templateId,
-                'componentType': componentType!.name,
+                'componentType': componentType.name,
                 'position': {'row': action.row, 'col': action.col},
                 'placement_method': 'sync_fallback',
               });
@@ -247,7 +248,7 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
                 'asyncError': asyncError.toString(),
                 'syncError': syncError.toString(),
                 'templateId': action.templateId,
-                'componentType': componentType!.name,
+                'componentType': componentType.name,
                 'position': {'row': action.row, 'col': action.col},
                 'placement_method': 'both_failed',
               });
@@ -256,7 +257,7 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
           }
 
           if (placementSuccessful) {
-            Logger.log('CreateComponent: successfully added ${componentType!.name} from template ${action.templateId} at (${action.row}, ${action.col})');
+            Logger.log('CreateComponent: successfully added ${componentType.name} from template ${action.templateId} at (${action.row}, ${action.col})');
           }
         } catch (e, stackTrace) {
           StructuredLogger.error('💥 COMPONENT PLACEMENT FAILED IN TRANSACTION', context: {

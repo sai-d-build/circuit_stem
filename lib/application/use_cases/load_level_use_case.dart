@@ -43,6 +43,11 @@ class LoadLevelUseCase extends NotifierIntegratedUseCase<LoadLevelAction> {
               notifiers.history.clearHistory();
               notifiers.selection.clearSelection();
               notifiers.interaction.resetToIdle();
+
+              // 🔥 CRITICAL FIX: Reset palette inventory when loading new level
+              // This ensures fresh inventory for new sessions and clears zombie components
+              Logger.log('🔄 LoadLevel: Resetting palette inventory for fresh level start');
+              await notifiers.paletteManager.reset();
             });
         
       Logger.log('LoadLevel: loaded level "${level.metadata.title}" (${level.levelId})');

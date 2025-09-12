@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/states/game_canvas_state.dart';
@@ -8,6 +7,7 @@ import 'package:sparkcircuit/application/services/interfaces/canvas_rendering_se
 import 'package:sparkcircuit/application/services/level_service.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/presentation/state/palette_state.dart';
 
 // Re-export for convenience
 export 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart' show GestureProcessingResult;
@@ -23,17 +23,21 @@ export 'package:sparkcircuit/application/states/game_canvas_state.dart';
 class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
   final GameInteractionService _interactionService;
   final CanvasRenderingService _renderingService;
+  final PaletteStateNotifier? _paletteStateNotifier;
 
   GameCanvasOrchestrator({
     required dynamic interactionService,
     required dynamic renderingService,
+    PaletteStateNotifier? paletteStateNotifier,
   }) :
         _interactionService = interactionService,
         _renderingService = renderingService,
+        _paletteStateNotifier = paletteStateNotifier,
         super(GameCanvasState.initial()) {
     StructuredLogger.info('GameCanvasOrchestrator initialized', context: {
       'interactionService': interactionService.runtimeType.toString(),
       'renderingService': renderingService.runtimeType.toString(),
+      'paletteStateNotifier': paletteStateNotifier?.runtimeType.toString() ?? 'none',
     });
   }
 
@@ -57,20 +61,53 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
       final level = await _loadLevel(levelId);
 
       if (level != null) {
+        // 🔥 CRITICAL FIX: Reset palette inventory when loading new level
+        // This clears zombie components and replenishes depleted inventory
+        StructuredLogger.debug('🔄 GameCanvasOrchestrator: Checking palette state notifier', context: {
+          'levelId': levelId,
+          'paletteStateNotifier': _paletteStateNotifier?.runtimeType.toString() ?? 'NULL',
+          'isNull': _paletteStateNotifier == null,
+        });
+
+        if (_paletteStateNotifier != null) {
+          StructuredLogger.info('🔄 GameCanvasOrchestrator: Resetting palette inventory for fresh level start');
+          await _paletteStateNotifier!.reset();
+          StructuredLogger.info('🔄 GameCanvasOrchestrator: Palette reset completed successfully');
+        } else {
+          StructuredLogger.error('🔄 GameCanvasOrchestrator: Cannot reset palette - notifier is NULL', context: {
+            'levelId': levelId,
+            'problem': 'PaletteStateNotifier was not injected into GameCanvasOrchestrator',
+            'solution': 'Check provider configuration in core_providers.dart',
+          });
+        }
+
         final renderingData = _renderingService.buildRenderingData(level);
 
-        // Keep original grid configuration (20x20 default)
+        // 🛠️ MAINTAIN VISUAL GRID AT 20x20 FOR DISPLAY
+        // While underlying logic uses level dimensions internally
+        final visualGridConfig = GridConfiguration(
+          rows: 20,  // Keep visual grid at 20x20 for display consistency
+          cols: 20,
+          cellSize: state.viewportState.gridConfiguration.cellSize,
+        );
+
+        final syncedViewport = state.viewportState.copyWith(
+          gridConfiguration: visualGridConfig,
+        );
+
         state = state.copyWith(
           currentLevel: level,
           renderingData: renderingData,
+          viewportState: syncedViewport,
           isLoading: false,
         );
 
-        StructuredLogger.info('Level initialized successfully', context: {
+        StructuredLogger.info('Level initialized with visual grid maintained', context: {
           'levelId': level.levelId,
           'componentCount': level.components.available.length,
           'levelGridDimensions': {'rows': level.grid.height, 'cols': level.grid.width},
-          'uiGridDimensions': {'rows': state.viewportState.gridConfiguration.rows, 'cols': state.viewportState.gridConfiguration.cols},
+          'visualGridDimensions': {'rows': 20, 'cols': 20, 'reason': 'maintained_for_display_consistency'},
+          'isSynchronized': true,
         });
       } else {
         state = state.copyWith(

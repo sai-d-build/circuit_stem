@@ -25,6 +25,11 @@ mixin _$GameState {
   bool get isDebugOverlayVisible => throw _privateConstructorUsedError;
   InteractionState get interactionState => throw _privateConstructorUsedError;
   HistoryState get history => throw _privateConstructorUsedError;
+  String? get error =>
+      throw _privateConstructorUsedError; // ✅ ADDED: Fields needed for InteractionEngine
+  List<Wire> get wires => throw _privateConstructorUsedError;
+  Offset? get wireDrawStartPos => throw _privateConstructorUsedError;
+  bool get isDrawingWire => throw _privateConstructorUsedError;
 
   /// Create a copy of GameState
   /// with the given fields replaced by the non-null parameter values.
@@ -47,7 +52,11 @@ abstract class $GameStateCopyWith<$Res> {
       DateTime lastUpdated,
       bool isDebugOverlayVisible,
       InteractionState interactionState,
-      HistoryState history});
+      HistoryState history,
+      String? error,
+      List<Wire> wires,
+      Offset? wireDrawStartPos,
+      bool isDrawingWire});
 
   $LevelDefinitionCopyWith<$Res>? get currentLevel;
   $SimulationResultCopyWith<$Res>? get simulationResult;
@@ -79,6 +88,10 @@ class _$GameStateCopyWithImpl<$Res, $Val extends GameState>
     Object? isDebugOverlayVisible = null,
     Object? interactionState = null,
     Object? history = null,
+    Object? error = freezed,
+    Object? wires = null,
+    Object? wireDrawStartPos = freezed,
+    Object? isDrawingWire = null,
   }) {
     return _then(_value.copyWith(
       grid: null == grid
@@ -117,6 +130,22 @@ class _$GameStateCopyWithImpl<$Res, $Val extends GameState>
           ? _value.history
           : history // ignore: cast_nullable_to_non_nullable
               as HistoryState,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
+      wires: null == wires
+          ? _value.wires
+          : wires // ignore: cast_nullable_to_non_nullable
+              as List<Wire>,
+      wireDrawStartPos: freezed == wireDrawStartPos
+          ? _value.wireDrawStartPos
+          : wireDrawStartPos // ignore: cast_nullable_to_non_nullable
+              as Offset?,
+      isDrawingWire: null == isDrawingWire
+          ? _value.isDrawingWire
+          : isDrawingWire // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
@@ -186,7 +215,11 @@ abstract class _$$GameStateImplCopyWith<$Res>
       DateTime lastUpdated,
       bool isDebugOverlayVisible,
       InteractionState interactionState,
-      HistoryState history});
+      HistoryState history,
+      String? error,
+      List<Wire> wires,
+      Offset? wireDrawStartPos,
+      bool isDrawingWire});
 
   @override
   $LevelDefinitionCopyWith<$Res>? get currentLevel;
@@ -220,6 +253,10 @@ class __$$GameStateImplCopyWithImpl<$Res>
     Object? isDebugOverlayVisible = null,
     Object? interactionState = null,
     Object? history = null,
+    Object? error = freezed,
+    Object? wires = null,
+    Object? wireDrawStartPos = freezed,
+    Object? isDrawingWire = null,
   }) {
     return _then(_$GameStateImpl(
       grid: null == grid
@@ -258,6 +295,22 @@ class __$$GameStateImplCopyWithImpl<$Res>
           ? _value.history
           : history // ignore: cast_nullable_to_non_nullable
               as HistoryState,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
+      wires: null == wires
+          ? _value._wires
+          : wires // ignore: cast_nullable_to_non_nullable
+              as List<Wire>,
+      wireDrawStartPos: freezed == wireDrawStartPos
+          ? _value.wireDrawStartPos
+          : wireDrawStartPos // ignore: cast_nullable_to_non_nullable
+              as Offset?,
+      isDrawingWire: null == isDrawingWire
+          ? _value.isDrawingWire
+          : isDrawingWire // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -274,7 +327,12 @@ class _$GameStateImpl implements _GameState {
       required this.lastUpdated,
       this.isDebugOverlayVisible = false,
       required this.interactionState,
-      required this.history});
+      required this.history,
+      this.error,
+      final List<Wire> wires = const [],
+      this.wireDrawStartPos,
+      this.isDrawingWire = false})
+      : _wires = wires;
 
   @override
   final Grid grid;
@@ -295,10 +353,28 @@ class _$GameStateImpl implements _GameState {
   final InteractionState interactionState;
   @override
   final HistoryState history;
+  @override
+  final String? error;
+// ✅ ADDED: Fields needed for InteractionEngine
+  final List<Wire> _wires;
+// ✅ ADDED: Fields needed for InteractionEngine
+  @override
+  @JsonKey()
+  List<Wire> get wires {
+    if (_wires is EqualUnmodifiableListView) return _wires;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_wires);
+  }
+
+  @override
+  final Offset? wireDrawStartPos;
+  @override
+  @JsonKey()
+  final bool isDrawingWire;
 
   @override
   String toString() {
-    return 'GameState(grid: $grid, isPaused: $isPaused, isWin: $isWin, currentLevel: $currentLevel, simulationResult: $simulationResult, lastUpdated: $lastUpdated, isDebugOverlayVisible: $isDebugOverlayVisible, interactionState: $interactionState, history: $history)';
+    return 'GameState(grid: $grid, isPaused: $isPaused, isWin: $isWin, currentLevel: $currentLevel, simulationResult: $simulationResult, lastUpdated: $lastUpdated, isDebugOverlayVisible: $isDebugOverlayVisible, interactionState: $interactionState, history: $history, error: $error, wires: $wires, wireDrawStartPos: $wireDrawStartPos, isDrawingWire: $isDrawingWire)';
   }
 
   @override
@@ -320,7 +396,13 @@ class _$GameStateImpl implements _GameState {
                 other.isDebugOverlayVisible == isDebugOverlayVisible) &&
             (identical(other.interactionState, interactionState) ||
                 other.interactionState == interactionState) &&
-            (identical(other.history, history) || other.history == history));
+            (identical(other.history, history) || other.history == history) &&
+            (identical(other.error, error) || other.error == error) &&
+            const DeepCollectionEquality().equals(other._wires, _wires) &&
+            (identical(other.wireDrawStartPos, wireDrawStartPos) ||
+                other.wireDrawStartPos == wireDrawStartPos) &&
+            (identical(other.isDrawingWire, isDrawingWire) ||
+                other.isDrawingWire == isDrawingWire));
   }
 
   @override
@@ -334,7 +416,11 @@ class _$GameStateImpl implements _GameState {
       lastUpdated,
       isDebugOverlayVisible,
       interactionState,
-      history);
+      history,
+      error,
+      const DeepCollectionEquality().hash(_wires),
+      wireDrawStartPos,
+      isDrawingWire);
 
   /// Create a copy of GameState
   /// with the given fields replaced by the non-null parameter values.
@@ -355,7 +441,11 @@ abstract class _GameState implements GameState {
       required final DateTime lastUpdated,
       final bool isDebugOverlayVisible,
       required final InteractionState interactionState,
-      required final HistoryState history}) = _$GameStateImpl;
+      required final HistoryState history,
+      final String? error,
+      final List<Wire> wires,
+      final Offset? wireDrawStartPos,
+      final bool isDrawingWire}) = _$GameStateImpl;
 
   @override
   Grid get grid;
@@ -375,6 +465,14 @@ abstract class _GameState implements GameState {
   InteractionState get interactionState;
   @override
   HistoryState get history;
+  @override
+  String? get error; // ✅ ADDED: Fields needed for InteractionEngine
+  @override
+  List<Wire> get wires;
+  @override
+  Offset? get wireDrawStartPos;
+  @override
+  bool get isDrawingWire;
 
   /// Create a copy of GameState
   /// with the given fields replaced by the non-null parameter values.

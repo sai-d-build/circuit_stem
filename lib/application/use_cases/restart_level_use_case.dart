@@ -58,13 +58,18 @@ class RestartLevelUseCase extends NotifierIntegratedUseCase<RestartLevelAction> 
       final simulatedGrid = _powerSimulationService.simulatePowerFlow(initialGrid);
 
             // Update notifiers within the transaction
-      transaction.onCommit(() async {
-        notifiers.grid.setState(simulatedGrid);
-        notifiers.progress.setWinState(false);
-        notifiers.history.clearHistory();
-        notifiers.selection.clearSelection();
-        notifiers.interaction.resetToIdle();
-      });
+           transaction.onCommit(() async {
+             notifiers.grid.setState(simulatedGrid);
+             notifiers.progress.setWinState(false);
+             notifiers.history.clearHistory();
+             notifiers.selection.clearSelection();
+             notifiers.interaction.resetToIdle();
+     
+             // 🔥 CRITICAL FIX: Reset palette inventory when restarting level
+             // This clears zombie components and replenishes depleted inventory
+             Logger.log('🔄 RestartLevel: Resetting palette inventory to fix zombie components');
+             await notifiers.paletteManager.reset();
+           });
 
       Logger.log('RestartLevel: committed restart for level ${currentLevel.levelId}');
       return const Success(null);

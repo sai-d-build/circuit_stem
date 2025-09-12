@@ -22,7 +22,6 @@ export '../enhanced_game_state_notifier.dart';
 
 // Use the existing NotifierMigrationController from the migration infrastructure
 
-import 'package:sparkcircuit/core/services/feature_flag_service.dart';
 
 /// Unified Game State Provider - Main Consolidation Point
 /// This replaces the direct usage of individual notifiers in the consolidation plan

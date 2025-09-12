@@ -99,24 +99,6 @@ Widget wrapWithTestProviders(Widget child) {
 
 /// Mock implementations for testing
 
-
-class _MockAudioService {
-  void play(String sound) {}
-  void stop() {}
-  void dispose() {}
-}
-
-class _MockAssetManager {
-  Future<void> loadAssets() async {}
-  void dispose() {}
-}
-
-class _MockLevelService {
-  Future<dynamic> loadLevel(String levelId) async {
-    return null; // Return null to simulate unloaded level
-  }
-}
-
 // Helper matcher for grid coordinate comparisons
 Matcher equalsOffset(Offset expected) {
   return predicate<Offset>(
