@@ -6,9 +6,10 @@ import 'secure_coordinate_validator.dart';
 /// Complete input sanitization service for all drag-and-drop operations
 /// Provides comprehensive validation and sanitization of user inputs
 class InputSanitizationService {
-  static final InputSanitizationService _instance = InputSanitizationService._();
+  static final InputSanitizationService _instance =
+      InputSanitizationService._(); // ignore: cascade_invocations
   factory InputSanitizationService() => _instance;
-  InputSanitizationService._();
+  InputSanitizationService._(); // ignore: cascade_invocations
 
   // Validation cache for performance
   final Map<String, _ValidationResult> _validationCache = {};
@@ -29,11 +30,13 @@ class InputSanitizationService {
 
       return result;
     } catch (e) {
-      StructuredLogger.error('InputSanitizationService: Drag data sanitization failed', context: {
-        'error': e.toString(),
-        'dragDataType': dragData.runtimeType.toString(),
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
+      StructuredLogger.error(
+          'InputSanitizationService: Drag data sanitization failed',
+          context: {
+            'error': e.toString(),
+            'dragDataType': dragData.runtimeType.toString(),
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          });
 
       return DragDataValidationResult.invalid('Sanitization failed: $e');
     }
@@ -69,7 +72,8 @@ class InputSanitizationService {
     // Sanitize component type
     final sanitizedType = _sanitizeComponentType(componentType);
     if (sanitizedType == null) {
-      return DragDataValidationResult.invalid('Invalid componentType: $componentType');
+      return DragDataValidationResult.invalid(
+          'Invalid componentType: $componentType');
     }
     sanitized['componentType'] = sanitizedType;
 
@@ -118,7 +122,9 @@ class InputSanitizationService {
         'componentType': 'unknown',
         'componentName': sanitizedName,
         'cost': 0,
-      }, warnings: ['Parsed as simple component name']);
+      }, warnings: [
+        'Parsed as simple component name'
+      ]);
     }
 
     return DragDataValidationResult.invalid('Cannot parse string drag data');
@@ -148,10 +154,12 @@ class InputSanitizationService {
       }
 
       if (sanitized.isEmpty) {
-        return DragDataValidationResult.invalid('No valid data extracted from drag object');
+        return DragDataValidationResult.invalid(
+            'No valid data extracted from drag object');
       }
 
-      return DragDataValidationResult.valid(sanitized, warnings: ['Extracted from generic object']);
+      return DragDataValidationResult.valid(sanitized,
+          warnings: ['Extracted from generic object']);
     } catch (e) {
       return DragDataValidationResult.invalid('Failed to extract data: $e');
     }
@@ -162,8 +170,16 @@ class InputSanitizationService {
       final lowerType = type.toLowerCase().trim();
       // Allow only known component types
       const validTypes = [
-        'resistor', 'capacitor', 'inductor', 'bulb', 'battery',
-        'switch', 'wire', 'buzzer', 'diode', 'transistor'
+        'resistor',
+        'capacitor',
+        'inductor',
+        'bulb',
+        'battery',
+        'switch',
+        'wire',
+        'buzzer',
+        'diode',
+        'transistor'
       ];
 
       if (validTypes.contains(lowerType)) {
@@ -224,7 +240,8 @@ class InputSanitizationService {
 
       // Sanitize different value types
       if (value is num) {
-        final sanitizedValue = _sanitizeNumeric(value, min: -1000000, max: 1000000);
+        final sanitizedValue =
+            _sanitizeNumeric(value, min: -1000000, max: 1000000);
         if (sanitizedValue != null) {
           sanitized[key] = sanitizedValue;
         }
@@ -304,7 +321,8 @@ class InputSanitizationService {
   }
 
   /// Validate gesture input
-  GestureValidationResult validateGesture(String gestureType, Map<String, dynamic> data) {
+  GestureValidationResult validateGesture(
+      String gestureType, Map<String, dynamic> data) {
     try {
       switch (gestureType.toLowerCase()) {
         case 'drag':
@@ -316,7 +334,8 @@ class InputSanitizationService {
         case 'tap':
           return _validateTapGesture(data);
         default:
-          return GestureValidationResult.invalid('Unknown gesture type: $gestureType');
+          return GestureValidationResult.invalid(
+              'Unknown gesture type: $gestureType');
       }
     } catch (e) {
       return GestureValidationResult.invalid('Gesture validation failed: $e');
@@ -336,7 +355,8 @@ class InputSanitizationService {
 
     // Check for suspicious drag patterns
     final distance = (sanitizedCurrent - sanitizedStart).distance;
-    if (distance > 10000) { // Unreasonably long drag
+    if (distance > 10000) {
+      // Unreasonably long drag
       return GestureValidationResult.invalid('Drag distance too large');
     }
 
@@ -391,7 +411,8 @@ class InputSanitizationService {
       final entries = _validationCache.entries.toList()
         ..sort((a, b) => a.value.timestamp.compareTo(b.value.timestamp));
 
-      final toRemove = entries.take(_validationCache.length - _maxCacheSize + 20);
+      final toRemove =
+          entries.take(_validationCache.length - _maxCacheSize + 20);
       for (final entry in toRemove) {
         _validationCache.remove(entry.key);
       }
@@ -417,7 +438,8 @@ class DragDataValidationResult {
     this.warnings = const [],
   });
 
-  factory DragDataValidationResult.valid(Map<String, dynamic> data, {List<String> warnings = const []}) {
+  factory DragDataValidationResult.valid(Map<String, dynamic> data,
+      {List<String> warnings = const []}) {
     return DragDataValidationResult._(
       isValid: true,
       sanitizedData: data,

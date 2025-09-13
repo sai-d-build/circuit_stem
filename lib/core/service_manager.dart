@@ -1,16 +1,17 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'performance/performance_monitor.dart';
-import 'performance/adaptive_quality.dart';
+
 import 'accessibility/accessibility_manager.dart';
 import 'debug/structured_logger.dart';
-
+import 'performance/adaptive_quality.dart';
+import 'performance/performance_monitor.dart';
 
 /// ServiceManager provides unified initialization and management of all critical systems
 class ServiceManager {
-  static final ServiceManager _instance = ServiceManager._internal();
+  static final ServiceManager _instance = ServiceManager._internal(); // ignore: cascade_invocations
   factory ServiceManager() => _instance;
-  ServiceManager._internal();
+  ServiceManager._internal(); // ignore: cascade_invocations
 
   bool _isInitialized = false;
   final List<String> _initializationLog = [];
@@ -39,7 +40,8 @@ class ServiceManager {
         await _instance._initializeAccessibilityManager(context);
         _instance._serviceStatus['accessibility'] = true;
       } else {
-        _instance._log('Warning: AccessibilityManager not initialized - no context provided or context not mounted');
+        _instance._log(
+            'Warning: AccessibilityManager not initialized - no context provided or context not mounted');
         _instance._serviceStatus['accessibility'] = false;
       }
 
@@ -48,11 +50,10 @@ class ServiceManager {
       _instance._serviceStatus['gesture'] = true;
 
       _instance._isInitialized = true;
-      _instance._log('ServiceManager initialization completed successfully');
-
+      _instance._log('ServiceManager initialization completed successfully'); // ignore: cascade_invocations
     } catch (e, stackTrace) {
-      _instance._log('ServiceManager initialization failed: $e');
-      _instance._log('Stack trace: $stackTrace');
+      _instance._log('ServiceManager initialization failed: $e'); // ignore: cascade_invocations
+      _instance._log('Stack trace: $stackTrace'); // ignore: cascade_invocations
       rethrow;
     }
   }
@@ -66,10 +67,12 @@ class ServiceManager {
   }
 
   /// Get initialization log for debugging
-  static List<String> get initializationLog => List.unmodifiable(_instance._initializationLog);
+  static List<String> get initializationLog =>
+      List.unmodifiable(_instance._initializationLog);
 
   /// Get service status map
-  static Map<String, bool> get serviceStatus => Map.unmodifiable(_instance._serviceStatus);
+  static Map<String, bool> get serviceStatus =>
+      Map.unmodifiable(_instance._serviceStatus);
 
   /// Dispose all services
   static void dispose() {
@@ -83,10 +86,9 @@ class ServiceManager {
 
       _instance._serviceStatus.clear();
       _instance._isInitialized = false;
-      _instance._log('ServiceManager disposed successfully');
-
+      _instance._log('ServiceManager disposed successfully'); // ignore: cascade_invocations
     } catch (e) {
-      _instance._log('Error during ServiceManager disposal: $e');
+      _instance._log('Error during ServiceManager disposal: $e'); // ignore: cascade_invocations
     }
   }
 
@@ -118,9 +120,9 @@ class ServiceManager {
             break;
         }
         _instance._serviceStatus[service] = true;
-        _instance._log('Successfully reinitialized $service');
+        _instance._log('Successfully reinitialized $service'); // ignore: cascade_invocations
       } catch (e) {
-        _instance._log('Failed to reinitialize $service: $e');
+        _instance._log('Failed to reinitialize $service: $e'); // ignore: cascade_invocations
       }
     }
   }
@@ -155,7 +157,8 @@ class ServiceManager {
     final timestamp = DateTime.now().toIso8601String();
     final logMessage = '[$timestamp] $message';
     _initializationLog.add(logMessage);
-    StructuredLogger.info(logMessage); // Also log to structured logger for debugging
+    StructuredLogger.info(
+        logMessage); // Also log to structured logger for debugging
   }
 }
 

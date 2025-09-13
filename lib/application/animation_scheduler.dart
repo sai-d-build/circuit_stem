@@ -1,8 +1,9 @@
-import 'package:flutter/scheduler.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/scheduler.dart';
+
 class AnimationState {
-  double _elapsedTime = 0.0;
+  double _elapsedTime = 0;
   bool _isActive = true;
   final List<AnimationCallback> _callbacks = [];
 

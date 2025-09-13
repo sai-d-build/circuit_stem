@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../common/logger.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
+
+import '../common/logger.dart';
 
 /// Represents game progress data
 class GameProgress {
@@ -22,11 +23,10 @@ class GameProgress {
     this.totalScore = 0,
     this.level,
     this.isWinConditionMet = false,
-  }) :
-    completedLevels = completedLevels ?? {},
-    levelStars = levelStars ?? {},
-    levelTimes = levelTimes ?? {},
-    lastPlayed = lastPlayed ?? DateTime.now();
+  })  : completedLevels = completedLevels ?? {},
+        levelStars = levelStars ?? {},
+        levelTimes = levelTimes ?? {},
+        lastPlayed = lastPlayed ?? DateTime.now();
 
   GameProgress copyWith({
     int? currentLevel,
@@ -57,7 +57,10 @@ class GameProgressNotifier extends StateNotifier<GameProgress> {
 
   /// Update current level
   void setCurrentLevel(int level, LevelDefinition levelDefinition) {
-    state = state.copyWith(currentLevel: level, level: levelDefinition, lastPlayed: DateTime.now());
+    state = state.copyWith(
+        currentLevel: level,
+        level: levelDefinition,
+        lastPlayed: DateTime.now());
     Logger.log('Progress: Set current level to $level');
   }
 
@@ -76,7 +79,8 @@ class GameProgressNotifier extends StateNotifier<GameProgress> {
       lastPlayed: DateTime.now(),
     );
 
-    Logger.log('Progress: Completed level $level with $stars stars in ${time.inSeconds}s');
+    Logger.log(
+        'Progress: Completed level $level with $stars stars in ${time.inSeconds}s');
   }
 
   /// Check if level is completed
@@ -87,13 +91,13 @@ class GameProgressNotifier extends StateNotifier<GameProgress> {
 
   /// Get completion percentage
   double getCompletionPercentage(int totalLevels) {
-    if (totalLevels == 0) return 0.0;
+    if (totalLevels == 0) return 0;
     return (state.completedLevels.length / totalLevels) * 100.0;
   }
 
   /// Reset progress
   void resetProgress() {
-        state = GameProgress();
+    state = GameProgress();
     Logger.log('Progress: Reset all progress');
   }
 
@@ -123,6 +127,7 @@ class GameProgressNotifier extends StateNotifier<GameProgress> {
 }
 
 // Provider for GameProgressNotifier
-final gameProgressNotifierProvider = StateNotifierProvider<GameProgressNotifier, GameProgress>((ref) {
+final gameProgressNotifierProvider =
+    StateNotifierProvider<GameProgressNotifier, GameProgress>((ref) {
   return GameProgressNotifier();
 });

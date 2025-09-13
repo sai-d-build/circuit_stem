@@ -1,7 +1,8 @@
-import 'dart:ui';
 import 'dart:math' as math;
-import '../../domain/entities/core/grid.dart';
+import 'dart:ui';
+
 import '../../domain/entities/core/component.dart';
+import '../../domain/entities/core/grid.dart';
 import 'unified_coordinate_service.dart';
 
 // Re-export GridConfiguration from unified_coordinate_service for backward compatibility
@@ -37,38 +38,47 @@ class GridService {
 
   /// Coordinate translation: grid coordinates to screen coordinates
   static Offset gridToScreen(Offset gridPos, GridConfiguration config) {
-    final screenX = (gridPos.dx * config.cellSize * config.scale) + config.panOffset.dx;
-    final screenY = (gridPos.dy * config.cellSize * config.scale) + config.panOffset.dy;
+    final screenX =
+        (gridPos.dx * config.cellSize * config.scale) + config.panOffset.dx;
+    final screenY =
+        (gridPos.dy * config.cellSize * config.scale) + config.panOffset.dy;
 
     return Offset(screenX, screenY);
   }
 
   /// Snap screen coordinates to nearest grid cell center
   static Offset snapToGrid(Offset screenPos, GridConfiguration config) {
-    return UnifiedCoordinateService().snapToGrid(screenPos, config); // Returns screen coordinates as per original implementation
+    return UnifiedCoordinateService().snapToGrid(screenPos,
+        config); // Returns screen coordinates as per original implementation
   }
 
   /// Get the center position of a grid cell in screen coordinates
-  static Offset getGridCellCenter(int gridX, int gridY, GridConfiguration config) {
-    return gridToScreen(Offset(gridX.toDouble() + 0.5, gridY.toDouble() + 0.5), config);
+  static Offset getGridCellCenter(
+      int gridX, int gridY, GridConfiguration config) {
+    return gridToScreen(
+        Offset(gridX.toDouble() + 0.5, gridY.toDouble() + 0.5), config);
   }
 
   /// Check if a grid position is within grid bounds
   static bool isInGridBounds(Offset gridPos, GridConfiguration config) {
     return gridPos.dx >= 0 &&
-           gridPos.dy >= 0 &&
-           gridPos.dx < config.cols &&
-           gridPos.dy < config.rows;
+        gridPos.dy >= 0 &&
+        gridPos.dx < config.cols &&
+        gridPos.dy < config.rows;
   }
 
   /// Check if screen coordinates are within visible grid bounds
-  static bool isWithinGridBounds(Offset screenPosition, GridConfiguration config) {
-    return UnifiedCoordinateService().isWithinGridBounds(screenPosition, config);
+  static bool isWithinGridBounds(
+      Offset screenPosition, GridConfiguration config) {
+    return UnifiedCoordinateService()
+        .isWithinGridBounds(screenPosition, config);
   }
 
   /// Get valid grid position from screen coordinates (returns null if out of bounds)
-  static Offset? getValidGridPosition(Offset screenPosition, GridConfiguration config) {
-    return UnifiedCoordinateService().getValidGridPosition(screenPosition, config);
+  static Offset? getValidGridPosition(
+      Offset screenPosition, GridConfiguration config) {
+    return UnifiedCoordinateService()
+        .getValidGridPosition(screenPosition, config);
   }
 
   /// Calculate distance between two grid positions
@@ -84,12 +94,14 @@ class GridService {
   }
 
   /// Check if a component can be moved to a new position
-  static bool canMoveComponent(ComponentModel component, int newRow, int newCol, Grid grid) {
+  static bool canMoveComponent(
+      ComponentModel component, int newRow, int newCol, Grid grid) {
     return grid.canPlaceComponent(newRow, newCol);
   }
 
   /// Get the bounding box of a component in screen coordinates
-  static Rect getComponentBounds(Offset gridPos, Size componentSize, GridConfiguration config) {
+  static Rect getComponentBounds(
+      Offset gridPos, Size componentSize, GridConfiguration config) {
     final screenPos = gridToScreen(gridPos, config);
     final scaledSize = Size(
       componentSize.width * config.scale,
@@ -109,18 +121,19 @@ class GridService {
   }
 
   /// Find all valid grid positions in a screen area
-  static List<Offset> getGridPositionsInScreenRect(Rect screenRect, GridConfiguration config) {
+  static List<Offset> getGridPositionsInScreenRect(
+      Rect screenRect, GridConfiguration config) {
     final topLeft = screenToGrid(screenRect.topLeft, config);
     final bottomRight = screenToGrid(screenRect.bottomRight, config);
 
-    final startRow = topLeft.dy.floor();
-    final endRow = bottomRight.dy.ceil();
-    final startCol = topLeft.dx.floor();
-    final endCol = bottomRight.dx.ceil();
+    final startRow = topLeft.dy.floor(); // ignore: cascade_invocations
+    final endRow = bottomRight.dy.ceil(); // ignore: cascade_invocations
+    final startCol = topLeft.dx.floor(); // ignore: cascade_invocations
+    final endCol = bottomRight.dx.ceil(); // ignore: cascade_invocations
 
     final positions = <Offset>[];
-    for (int row = startRow; row <= endRow; row++) {
-      for (int col = startCol; col <= endCol; col++) {
+    for (var row = startRow; row <= endRow; row++) {
+      for (var col = startCol; col <= endCol; col++) {
         final gridPos = Offset(col.toDouble(), row.toDouble());
         if (isInGridBounds(gridPos, config)) {
           positions.add(gridPos);
@@ -151,10 +164,13 @@ class GridService {
     final scaledCellSize = getScaledCellSize(config);
 
     // Draw vertical lines
-    for (int i = 0; i <= config.cols; i++) {
+    for (var i = 0; i <= config.cols; i++) {
       final x = i * scaledCellSize + config.panOffset.dx;
-      if (x >= -renderConfig.strokeWidth && x <= size.width + renderConfig.strokeWidth) {
-        final paint = (i % renderConfig.majorGridInterval == 0) ? majorPaint : regularPaint;
+      if (x >= -renderConfig.strokeWidth &&
+          x <= size.width + renderConfig.strokeWidth) {
+        final paint = (i % renderConfig.majorGridInterval == 0)
+            ? majorPaint
+            : regularPaint;
         canvas.drawLine(
           Offset(x, 0),
           Offset(x, size.height),
@@ -164,10 +180,13 @@ class GridService {
     }
 
     // Draw horizontal lines
-    for (int i = 0; i <= config.rows; i++) {
+    for (var i = 0; i <= config.rows; i++) {
       final y = i * scaledCellSize + config.panOffset.dy;
-      if (y >= -renderConfig.strokeWidth && y <= size.height + renderConfig.strokeWidth) {
-        final paint = (i % renderConfig.majorGridInterval == 0) ? majorPaint : regularPaint;
+      if (y >= -renderConfig.strokeWidth &&
+          y <= size.height + renderConfig.strokeWidth) {
+        final paint = (i % renderConfig.majorGridInterval == 0)
+            ? majorPaint
+            : regularPaint;
         canvas.drawLine(
           Offset(0, y),
           Offset(size.width, y),
@@ -186,9 +205,10 @@ class GridService {
     final originX = config.panOffset.dx;
     final originY = config.panOffset.dy;
 
-    if (originX >= -20 && originX <= size.width + 20 &&
-        originY >= -20 && originY <= size.height + 20) {
-
+    if (originX >= -20 &&
+        originX <= size.width + 20 &&
+        originY >= -20 &&
+        originY <= size.height + 20) {
       final originPaint = Paint()
         ..color = const Color(0xFFFF0000).withValues(alpha: 0.8)
         ..strokeWidth = 2.0
@@ -217,12 +237,15 @@ class GridService {
   }
 
   /// Calculate visible grid bounds based on screen size
-  static Rect calculateVisibleGridBounds(GridConfiguration config, Size screenSize) {
-    return UnifiedCoordinateService().calculateVisibleGridBounds(config, screenSize);
+  static Rect calculateVisibleGridBounds(
+      GridConfiguration config, Size screenSize) {
+    return UnifiedCoordinateService()
+        .calculateVisibleGridBounds(config, screenSize);
   }
 
   /// Check if a grid position is visible on screen
-  static bool isGridPositionVisible(Offset gridPosition, GridConfiguration config, Size screenSize) {
+  static bool isGridPositionVisible(
+      Offset gridPosition, GridConfiguration config, Size screenSize) {
     final visibleBounds = calculateVisibleGridBounds(config, screenSize);
     return visibleBounds.contains(gridPosition);
   }
@@ -233,11 +256,11 @@ class GridService {
 
 /// Constants used throughout grid operations
 class GridConstants {
-  static const double defaultCellSize = 60.0;
-  static const double minCellSize = 20.0;
-  static const double maxCellSize = 100.0;
+  static const double defaultCellSize = 60;
+  static const double minCellSize = 20;
+  static const double maxCellSize = 100;
   static const double minScale = 0.5;
-  static const double maxScale = 3.0;
+  static const double maxScale = 3;
   static const int defaultMajorGridInterval = 5;
   static const Color defaultGridLineColor = Color(0xFFE0E0E0);
   static const Color defaultMajorGridLineColor = Color(0xFFBBBBBB);

@@ -3,7 +3,8 @@ import '../../../core/debug/structured_logger.dart';
 /// Base command interface for undo/redo functionality
 abstract class Command {
   /// Unique identifier for the command
-  String get id => '${runtimeType.toString()}_${DateTime.now().millisecondsSinceEpoch}';
+  String get id =>
+      '${runtimeType.toString()}_${DateTime.now().millisecondsSinceEpoch}';
 
   /// Human-readable description of the command
   String get description;
@@ -25,13 +26,13 @@ abstract class Command {
 
   /// Get command metadata for serialization
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'type': runtimeType.toString(),
-    'description': description,
-    'timestamp': timestamp.toIso8601String(),
-    'canUndo': canUndo,
-    'canRedo': canRedo,
-  };
+        'id': id,
+        'type': runtimeType.toString(),
+        'description': description,
+        'timestamp': timestamp.toIso8601String(),
+        'canUndo': canUndo,
+        'canRedo': canRedo,
+      };
 
   /// Create command from JSON (for persistence)
   static Command? fromJson(Map<String, dynamic> json) {
@@ -57,29 +58,31 @@ class CommandResult {
   factory CommandResult.success({
     Map<String, dynamic>? data,
     CommandResultType type = CommandResultType.success,
-  }) => CommandResult._(
-    success: true,
-    data: data,
-    type: type,
-  );
+  }) =>
+      CommandResult._(
+        success: true,
+        data: data,
+        type: type,
+      );
 
   factory CommandResult.failure({
     required String errorMessage,
     Map<String, dynamic>? data,
     CommandResultType type = CommandResultType.error,
-  }) => CommandResult._(
-    success: false,
-    errorMessage: errorMessage,
-    data: data,
-    type: type,
-  );
+  }) =>
+      CommandResult._(
+        success: false,
+        errorMessage: errorMessage,
+        data: data,
+        type: type,
+      );
 
   Map<String, dynamic> toJson() => {
-    'success': success,
-    'errorMessage': errorMessage,
-    'data': data,
-    'type': type.toString(),
-  };
+        'success': success,
+        'errorMessage': errorMessage,
+        'data': data,
+        'type': type.toString(),
+      };
 }
 
 /// Types of command results
@@ -288,8 +291,12 @@ class CommandManager {
       'redoStackSize': _redoStack.length,
       'maxHistorySize': _maxHistorySize,
       'commandTypes': commandTypes,
-      'oldestCommand': _undoStack.isNotEmpty ? _undoStack.first.timestamp.toIso8601String() : null,
-      'newestCommand': _undoStack.isNotEmpty ? _undoStack.last.timestamp.toIso8601String() : null,
+      'oldestCommand': _undoStack.isNotEmpty
+          ? _undoStack.first.timestamp.toIso8601String()
+          : null,
+      'newestCommand': _undoStack.isNotEmpty
+          ? _undoStack.last.timestamp.toIso8601String()
+          : null,
     };
   }
 }

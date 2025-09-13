@@ -11,7 +11,7 @@ class SvgProcessor implements SvgProcessorBase {
     Logger.log(
         'SvgProcessor: Starting SVG processing for ${assetPaths.length} assets...');
     Logger.log('SvgProcessor: Asset paths: $assetPaths');
-    final Map<String, ui.Image> images = {};
+    final images = <String, ui.Image>{};
     for (final path in assetPaths) {
       try {
         final svgString = await rootBundle.loadString(path);

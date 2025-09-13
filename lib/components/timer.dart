@@ -1,13 +1,14 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
+
+import '../application/services/component_factory.dart';
+import '../common/logger.dart';
+import '../common/theme.dart';
 import '../domain/behaviors/drawing_behavior.dart';
 import '../domain/behaviors/logic_behavior.dart';
-import '../application/services/component_factory.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../infrastructure/rendering/asset_manager.dart';
-import '../common/theme.dart';
-import '../common/logger.dart';
 
 // --- Timer --- //
 
@@ -37,25 +38,31 @@ class TimerDrawingBehavior implements DrawingBehavior {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 3;
     final rotationAngle = (component.rotation % 360) * (math.pi / 180);
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(rotationAngle);
-    canvas.translate(-center.dx, -center.dy);
+    canvas
+      ..translate(center.dx, center.dy)
+      ..rotate(rotationAngle)
+      ..translate(-center.dx, -center.dy);
 
     // Draw clock face
-    canvas.drawCircle(center, radius, fillPaint);
-    canvas.drawCircle(center, radius, paint);
+    canvas.drawCircle( // ignore: cascade_invocations
+        center, radius, fillPaint);
+    canvas.drawCircle( // ignore: cascade_invocations
+        center, radius, paint);
 
     // Draw clock hands (simplified)
     paint.strokeWidth = 2.0;
-    canvas.drawLine(center, Offset(center.dx, center.dy - radius * 0.6),
+    canvas.drawLine( // ignore: cascade_invocations
+        center, Offset(center.dx, center.dy - radius * 0.6),
         paint); // Minute hand
-    canvas.drawLine(center, Offset(center.dx + radius * 0.4, center.dy),
+    canvas.drawLine( // ignore: cascade_invocations
+        center, Offset(center.dx + radius * 0.4, center.dy),
         paint); // Hour hand
 
     // Draw center dot
-    canvas.drawCircle(center, 2, paint..style = PaintingStyle.fill);
+    canvas.drawCircle( // ignore: cascade_invocations
+        center, 2, paint..style = PaintingStyle.fill);
 
-    canvas.restore();
+    canvas.restore(); // ignore: cascade_invocations
   }
 }
 
@@ -74,16 +81,15 @@ class TimerLogicBehavior extends BaseLogicBehavior {
 
 void registerTimer(ComponentFactory factory) {
   Logger.log('registerTimer() called.');
-  factory.registerBehavior<TimerDrawingBehavior>(() => const TimerDrawingBehavior());
-  factory.registerBehavior<TimerLogicBehavior>(() => TimerLogicBehavior());
-  // Note: MoveBehavior is abstract and can't be instantiated directly
-  // factory.registerBehavior<MoveBehavior>(() => MoveBehavior());
-
-  factory.register(
-    type: 'Component.Timer',
-    displayName: 'Timer',
-    behaviors: [TimerDrawingBehavior, TimerLogicBehavior],
-    isDraggable: true,
-  );
+  factory
+    ..registerBehavior<TimerDrawingBehavior>(
+        () => const TimerDrawingBehavior())
+    ..registerBehavior<TimerLogicBehavior>(TimerLogicBehavior.new)
+    ..register(
+      type: 'Component.Timer',
+      displayName: 'Timer',
+      behaviors: [TimerDrawingBehavior, TimerLogicBehavior],
+      isDraggable: true,
+    );
   Logger.log('registerTimer() completed.');
 }

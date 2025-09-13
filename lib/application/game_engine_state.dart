@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-
 // Domain entities
 import 'package:sparkcircuit/domain/entities/entities.dart';
 
+import 'render_state.dart';
 // Application services
 import 'services/component_palette_manager.dart';
-import 'render_state.dart';
 
 part 'game_engine_state.freezed.dart';
 
 @freezed
 class GameEngineState with _$GameEngineState {
-  const GameEngineState._(); // Add this line
+  // Add this line
 
   const factory GameEngineState({
     required Grid grid,
@@ -31,6 +30,7 @@ class GameEngineState with _$GameEngineState {
     required DateTime lastUpdated,
     @Default(false) bool isDebugOverlayVisible,
   }) = _GameEngineState;
+  const GameEngineState._();
 
   factory GameEngineState.initial(LevelDefinition? level) => GameEngineState(
         grid: Grid(
@@ -45,22 +45,27 @@ class GameEngineState with _$GameEngineState {
         draggedComponentId: null,
         selectedComponentId: null,
         dragPosition: null,
-        paletteComponents:
-            (level?.components.available ?? []).map((availability) => ComponentModel(
-              id: availability.toString(), // Convert ComponentAvailability to string ID
-              type: _mapAvailabilityToComponentType(availability),
-              row: -1, // Placeholder for palette components
-              col: -1, // Placeholder for palette components
-              properties: {},
-            )).toList(),
+        paletteComponents: (level?.components.available ?? [])
+            .map((availability) => ComponentModel(
+                  id: availability
+                      .toString(), // Convert ComponentAvailability to string ID
+                  type: _mapAvailabilityToComponentType(availability),
+                  row: -1, // Placeholder for palette components
+                  col: -1, // Placeholder for palette components
+                  properties: {},
+                ))
+            .toList(),
         paletteManager: ComponentPaletteManager(
-          availableTemplates: (level?.components.available ?? []).map((availability) => ComponentModel(
-                id: availability.toString(), // Convert ComponentAvailability to string ID
-                type: _mapAvailabilityToComponentType(availability),
-                row: -1, // Placeholder for palette components
-                col: -1, // Placeholder for palette components
-                properties: {},
-              )).toList(),
+          availableTemplates: (level?.components.available ?? [])
+              .map((availability) => ComponentModel(
+                    id: availability
+                        .toString(), // Convert ComponentAvailability to string ID
+                    type: _mapAvailabilityToComponentType(availability),
+                    row: -1, // Placeholder for palette components
+                    col: -1, // Placeholder for palette components
+                    properties: {},
+                  ))
+              .toList(),
         ),
         poweredBuzzerIds: const {},
         history: const [],
@@ -89,7 +94,8 @@ class GameEngineState with _$GameEngineState {
   bool isValidState() {
     // Check grid bounds
     if (currentLevel != null) {
-      if (grid.rows != currentLevel!.grid.height || grid.cols != currentLevel!.grid.width) {
+      if (grid.rows != currentLevel!.grid.height ||
+          grid.cols != currentLevel!.grid.width) {
         return false;
       }
 
@@ -134,7 +140,8 @@ class GameEngineState with _$GameEngineState {
     // Compare power states for components with same IDs
     for (final entry in grid.components.entries) {
       final otherComponent = other.grid.components[entry.key];
-      if (otherComponent == null || entry.value.isPowered != otherComponent.isPowered) {
+      if (otherComponent == null ||
+          entry.value.isPowered != otherComponent.isPowered) {
         return true;
       }
     }
@@ -149,7 +156,8 @@ class GameEngineState with _$GameEngineState {
   String? get currentLevelId => currentLevel?.levelId;
   String get gridDimensions => '${grid.rows}x${grid.cols}';
 
-  static ComponentType _mapAvailabilityToComponentType(ComponentAvailability availability) {
+  static ComponentType _mapAvailabilityToComponentType(
+      ComponentAvailability availability) {
     // Map ComponentAvailability.type string to ComponentType
     switch (availability.type) {
       case 'wire':

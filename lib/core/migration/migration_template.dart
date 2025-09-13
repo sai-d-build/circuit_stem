@@ -15,9 +15,9 @@ import 'package:sparkcircuit/application/providers/core_providers.dart';
 class SomeWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.watch(gameEngineNotifierV3Provider.notifier);
+    final notifier = ref.watch(gameEngineNotifierV3Provider.notifier); // ignore: cascade_invocations
     // OR
-    final enhancedNotifier = ref.watch(enhancedGameStateNotifierProvider.notifier);
+    final enhancedNotifier = ref.watch(enhancedGameStateNotifierProvider.notifier); // ignore: cascade_invocations
 
     return Container();
   }
@@ -149,13 +149,14 @@ class ComponentPaletteController {
   static bool validateMigration(String filePath, String content) {
     // Check if file uses old providers
     final usesOldProviders = content.contains('gameEngineNotifierV3Provider') ||
-                            content.contains('enhancedGameStateNotifierProvider');
+        content.contains('enhancedGameStateNotifierProvider');
 
     // Check if file uses new unified provider
     final usesUnifiedProvider = content.contains('unifiedGameStateProvider');
 
     // Check if migration tracking is added
-    final hasMigrationTracking = content.contains('MigrationTracker.markFileMigrated');
+    final hasMigrationTracking =
+        content.contains('MigrationTracker.markFileMigrated');
 
     return !usesOldProviders && usesUnifiedProvider && hasMigrationTracking;
   }
@@ -189,7 +190,7 @@ class MigrationHelper {
   /// Check if a file needs migration
   static bool needsMigration(String content) {
     return content.contains('gameEngineNotifierV3Provider') ||
-           content.contains('enhancedGameStateNotifierProvider');
+        content.contains('enhancedGameStateNotifierProvider');
   }
 
   /// Get list of files that need migration
@@ -206,7 +207,8 @@ class MigrationHelper {
   }
 
   /// Generate migration report
-  static Map<String, dynamic> generateMigrationReport(List<String> migratedFiles) {
+  static Map<String, dynamic> generateMigrationReport(
+      List<String> migratedFiles) {
     return {
       'total_files_migrated': migratedFiles.length,
       'migration_percentage': (migratedFiles.length / 50 * 100).round(),

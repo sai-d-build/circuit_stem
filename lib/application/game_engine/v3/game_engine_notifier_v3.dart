@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:state_notifier/state_notifier.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
+import 'package:state_notifier/state_notifier.dart';
+
 import '../../../core/debug/structured_logger.dart';
 import '../../states/game_state.dart';
 
@@ -15,20 +16,23 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
 
   /// Place a component on the grid
   ComponentModel placeComponent(ComponentType componentType, int row, int col) {
-    final componentId = '${componentType.toString().split('.').last}_${DateTime.now().millisecondsSinceEpoch}';
+    final componentId =
+        '${componentType.toString().split('.').last}_${DateTime.now().millisecondsSinceEpoch}';
 
-    StructuredLogger.info('🎯 GameEngineNotifierV3: Placing component', context: {
-      'componentId': componentId,
-      'componentType': componentType.toString(),
-      'targetPosition': {'row': row, 'col': col},
-      'currentGridComponents': state.grid.components.length,
-      'currentGridRows': state.grid.rows,
-      'currentGridCols': state.grid.cols,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    StructuredLogger.info('🎯 GameEngineNotifierV3: Placing component',
+        context: {
+          'componentId': componentId,
+          'componentType': componentType.toString(),
+          'targetPosition': {'row': row, 'col': col},
+          'currentGridComponents': state.grid.components.length,
+          'currentGridRows': state.grid.rows,
+          'currentGridCols': state.grid.cols,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
 
     // 🔍 STEP 1: Check if position is valid relative to grid boundaries
-    final isValidPosition = row >= 0 && row < state.grid.rows && col >= 0 && col < state.grid.cols;
+    final isValidPosition =
+        row >= 0 && row < state.grid.rows && col >= 0 && col < state.grid.cols;
     StructuredLogger.debug('🔍 GameEngine: Position boundary check', context: {
       'isValidPosition': isValidPosition,
       'positionCheck': {
@@ -38,21 +42,24 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
     });
 
     if (!isValidPosition) {
-      StructuredLogger.error('🚫 GameEngine: Invalid position for component placement', context: {
-        'componentId': componentId,
-        'invalidPosition': {'row': row, 'col': col},
-        'gridBoundaries': {
-          'rows': state.grid.rows,
-          'cols': state.grid.cols,
-        },
-        'boundaryViolations': {
-          'rowTooLow': row < 0,
-          'rowTooHigh': row >= state.grid.rows,
-          'colTooLow': col < 0,
-          'colTooHigh': col >= state.grid.cols,
-        },
-      });
-      throw Exception('Position out of bounds: row=$row, col=$col, grid=${state.grid.rows}x${state.grid.cols}');
+      StructuredLogger.error(
+          '🚫 GameEngine: Invalid position for component placement',
+          context: {
+            'componentId': componentId,
+            'invalidPosition': {'row': row, 'col': col},
+            'gridBoundaries': {
+              'rows': state.grid.rows,
+              'cols': state.grid.cols,
+            },
+            'boundaryViolations': {
+              'rowTooLow': row < 0,
+              'rowTooHigh': row >= state.grid.rows,
+              'colTooLow': col < 0,
+              'colTooHigh': col >= state.grid.cols,
+            },
+          });
+      throw Exception(
+          'Position out of bounds: row=$row, col=$col, grid=${state.grid.rows}x${state.grid.cols}');
     }
 
     // 🔍 STEP 2: Check for position occupation
@@ -65,15 +72,17 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
     });
 
     if (isOccupied) {
-      StructuredLogger.warning('⚠️ GameEngine: Position already occupied', context: {
-        'componentId': componentId,
-        'attemptedPosition': {'row': row, 'col': col},
-        'existingComponent': {
-          'id': existingComponent.id,
-          'type': existingComponent.type.toString(),
-        },
-      });
-      throw Exception('Position ($row, $col) is already occupied by component ${existingComponent.id}');
+      StructuredLogger.warning('⚠️ GameEngine: Position already occupied',
+          context: {
+            'componentId': componentId,
+            'attemptedPosition': {'row': row, 'col': col},
+            'existingComponent': {
+              'id': existingComponent.id,
+              'type': existingComponent.type.toString(),
+            },
+          });
+      throw Exception(
+          'Position ($row, $col) is already occupied by component ${existingComponent.id}');
     }
 
     // 🔍 STEP 3: Create ComponentModel for grid storage
@@ -117,13 +126,15 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
       lastUpdated: DateTime.now(),
     );
 
-    StructuredLogger.info('✅ GameEngineNotifierV3: Component placed successfully', context: {
-      'componentId': componentId,
-      'componentType': componentType.toString(),
-      'finalPosition': {'row': row, 'col': col},
-      'gridUpdatedComponents': updatedGrid.components.length,
-      'operationTimestamp': DateTime.now().toIso8601String(),
-    });
+    StructuredLogger.info(
+        '✅ GameEngineNotifierV3: Component placed successfully',
+        context: {
+          'componentId': componentId,
+          'componentType': componentType.toString(),
+          'finalPosition': {'row': row, 'col': col},
+          'gridUpdatedComponents': updatedGrid.components.length,
+          'operationTimestamp': DateTime.now().toIso8601String(),
+        });
 
     return componentModel;
   }
@@ -140,7 +151,8 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
 
   /// Remove a component
   void removeComponent(String componentId) {
-    final updatedComponents = Map<String, ComponentModel>.from(state.grid.components);
+    final updatedComponents =
+        Map<String, ComponentModel>.from(state.grid.components);
     updatedComponents.remove(componentId);
 
     final updatedGrid = state.grid.copyWith(components: updatedComponents);
@@ -153,10 +165,14 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
 
   /// Add a connection between components
   void addConnection(String fromComponentId, String toComponentId) {
-    final updatedConnections = Map<String, List<String>>.from(state.grid.connections);
+    final updatedConnections =
+        Map<String, List<String>>.from(state.grid.connections);
     final existingConnections = updatedConnections[fromComponentId] ?? [];
     if (!existingConnections.contains(toComponentId)) {
-      updatedConnections[fromComponentId] = [...existingConnections, toComponentId];
+      updatedConnections[fromComponentId] = [
+        ...existingConnections,
+        toComponentId
+      ];
     }
 
     final updatedGrid = state.grid.copyWith(connections: updatedConnections);
@@ -169,9 +185,11 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
 
   /// Remove a connection between components
   void removeConnection(String fromComponentId, String toComponentId) {
-    final updatedConnections = Map<String, List<String>>.from(state.grid.connections);
+    final updatedConnections =
+        Map<String, List<String>>.from(state.grid.connections);
     final existingConnections = updatedConnections[fromComponentId] ?? [];
-    updatedConnections[fromComponentId] = existingConnections.where((id) => id != toComponentId).toList();
+    updatedConnections[fromComponentId] =
+        existingConnections.where((id) => id != toComponentId).toList();
 
     final updatedGrid = state.grid.copyWith(connections: updatedConnections);
 
@@ -214,7 +232,7 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
   /// Get CircuitComponent representation for UI
   List<CircuitComponent> getCircuitComponents() {
     return state.grid.components.values
-        .map((component) => CircuitComponent.fromComponentModel(component))
+        .map(CircuitComponent.fromComponentModel)
         .toList();
   }
 
@@ -222,7 +240,8 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
   CircuitComponent? getSelectedCircuitComponent() {
     if (state.interactionState.selectedComponentId == null) return null;
 
-    final componentModel = state.grid.components[state.interactionState.selectedComponentId];
+    final componentModel =
+        state.grid.components[state.interactionState.selectedComponentId];
     return componentModel != null
         ? CircuitComponent.fromComponentModel(componentModel)
         : null;
@@ -288,8 +307,10 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
   void endDragging() {
     StructuredLogger.info('🏁 GAME ENGINE: END DRAGGING', context: {
       'draggedComponentId': state.interactionState.draggedComponentId,
-      'dragStartPosition': state.interactionState.dragStartLocalPosition?.toString(),
-      'finalPosition': state.interactionState.dragUpdateLocalPosition?.toString(),
+      'dragStartPosition':
+          state.interactionState.dragStartLocalPosition?.toString(),
+      'finalPosition':
+          state.interactionState.dragUpdateLocalPosition?.toString(),
       'isDragging': state.interactionState.isDragging,
       'timestamp': DateTime.now().toIso8601String(),
     });
@@ -324,46 +345,52 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
 
     final component = state.grid.components[componentId];
     if (component == null) {
-      StructuredLogger.warning('⚠️ GAME ENGINE: Component not found for move', context: {
-        'componentId': componentId,
-        'availableComponents': state.grid.components.keys.toList(),
-        'timestamp': DateTime.now().toIso8601String(),
-      });
+      StructuredLogger.warning('⚠️ GAME ENGINE: Component not found for move',
+          context: {
+            'componentId': componentId,
+            'availableComponents': state.grid.components.keys.toList(),
+            'timestamp': DateTime.now().toIso8601String(),
+          });
       return;
     }
 
-    StructuredLogger.debug('🔍 GAME ENGINE: Checking position occupation', context: {
-      'componentId': componentId,
-      'targetPosition': {'row': newRow, 'col': newCol},
-      'currentPosition': {'row': component.row, 'col': component.col},
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    StructuredLogger.debug('🔍 GAME ENGINE: Checking position occupation',
+        context: {
+          'componentId': componentId,
+          'targetPosition': {'row': newRow, 'col': newCol},
+          'currentPosition': {'row': component.row, 'col': component.col},
+          'timestamp': DateTime.now().toIso8601String(),
+        });
 
     // Check if new position is occupied
     final existingComponent = state.grid.components.values.firstWhere(
       (c) => c.row == newRow && c.col == newCol && c.id != componentId,
-      orElse: () => ComponentModel(id: '', type: ComponentType.wire, row: -1, col: -1),
+      orElse: () =>
+          ComponentModel(id: '', type: ComponentType.wire, row: -1, col: -1),
     );
 
     if (existingComponent.id.isNotEmpty) {
-      StructuredLogger.warning('🚫 GAME ENGINE: Position occupied, cannot move', context: {
-        'componentId': componentId,
-        'targetPosition': {'row': newRow, 'col': newCol},
-        'occupyingComponent': {
-          'id': existingComponent.id,
-          'type': existingComponent.type.toString(),
-        },
-        'timestamp': DateTime.now().toIso8601String(),
-      });
+      StructuredLogger.warning('🚫 GAME ENGINE: Position occupied, cannot move',
+          context: {
+            'componentId': componentId,
+            'targetPosition': {'row': newRow, 'col': newCol},
+            'occupyingComponent': {
+              'id': existingComponent.id,
+              'type': existingComponent.type.toString(),
+            },
+            'timestamp': DateTime.now().toIso8601String(),
+          });
       return;
     }
 
-    StructuredLogger.debug('✅ GAME ENGINE: Position available, moving component', context: {
-      'componentId': componentId,
-      'fromPosition': {'row': component.row, 'col': component.col},
-      'toPosition': {'row': newRow, 'col': newCol},
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    StructuredLogger.debug(
+        '✅ GAME ENGINE: Position available, moving component',
+        context: {
+          'componentId': componentId,
+          'fromPosition': {'row': component.row, 'col': component.col},
+          'toPosition': {'row': newRow, 'col': newCol},
+          'timestamp': DateTime.now().toIso8601String(),
+        });
 
     // Update component position
     final updatedComponent = component.copyWith(
@@ -371,7 +398,8 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
       col: newCol,
     );
 
-    final updatedComponents = Map<String, ComponentModel>.from(state.grid.components);
+    final updatedComponents =
+        Map<String, ComponentModel>.from(state.grid.components);
     updatedComponents[componentId] = updatedComponent;
 
     final updatedGrid = state.grid.copyWith(components: updatedComponents);
@@ -381,12 +409,13 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
       lastUpdated: DateTime.now(),
     );
 
-    StructuredLogger.info('✅ GAME ENGINE: Component moved successfully', context: {
-      'componentId': componentId,
-      'finalPosition': {'row': newRow, 'col': newCol},
-      'totalComponents': updatedGrid.components.length,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    StructuredLogger.info('✅ GAME ENGINE: Component moved successfully',
+        context: {
+          'componentId': componentId,
+          'finalPosition': {'row': newRow, 'col': newCol},
+          'totalComponents': updatedGrid.components.length,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
   }
 
   /// Rotate a component by 90 degrees clockwise
@@ -399,7 +428,8 @@ class GameEngineNotifierV3 extends StateNotifier<GameState> {
 
     final updatedComponent = component.copyWith(rotation: newRotation);
 
-    final updatedComponents = Map<String, ComponentModel>.from(state.grid.components);
+    final updatedComponents =
+        Map<String, ComponentModel>.from(state.grid.components);
     updatedComponents[componentId] = updatedComponent;
 
     final updatedGrid = state.grid.copyWith(components: updatedComponents);

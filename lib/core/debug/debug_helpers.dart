@@ -5,13 +5,16 @@ import 'structured_logger.dart';
 
 /// Performance optimization guard - use this before expensive debug operations
 bool debugEnabled([String flagName = '']) {
-  return StructuredLogger.isEnabled && (flagName.isEmpty || StructuredLogger.getRuntimeFlag(flagName, defaultValue: true));
+  return StructuredLogger.isEnabled &&
+      (flagName.isEmpty ||
+          StructuredLogger.getRuntimeFlag(flagName, defaultValue: true));
 }
 
 /// 🔧 SERVICES DEBUG HELPERS
 class ServicesDebugHelers {
   /// Service operation performance timing
-  static void timeOperation(String operationName, Map<String, dynamic> context, Future<void> Function() operation) async {
+  static void timeOperation(String operationName, Map<String, dynamic> context,
+      Future<void> Function() operation) async {
     if (!StructuredLogger.debugServices) return;
 
     final start = DateTime.now();
@@ -36,7 +39,8 @@ class ServicesDebugHelers {
   }
 
   /// Asset loading tracking
-  static void logAssetLoad(String assetPath, {String? assetType, Map<String, dynamic>? metadata}) {
+  static void logAssetLoad(String assetPath,
+      {String? assetType, Map<String, dynamic>? metadata}) {
     if (!StructuredLogger.debugServices) return;
     StructuredLogger.services('Asset load initiated', context: {
       'path': assetPath,
@@ -50,7 +54,8 @@ class ServicesDebugHelers {
 /// 🎮 GAME CANVAS DEBUG HELPERS
 class GameCanvasDebugHelpers {
   /// Grid operation tracking
-  static void gridOperation(String operation, Map<String, dynamic> position, {String? status}) {
+  static void gridOperation(String operation, Map<String, dynamic> position,
+      {String? status}) {
     if (!StructuredLogger.debugGameCanvas) return;
     StructuredLogger.gameCanvas('Grid operation: $operation', context: {
       'position': position,
@@ -62,7 +67,8 @@ class GameCanvasDebugHelpers {
   /// Viewport change tracking
   static void viewportChange(String changeType, Map<String, dynamic> changes) {
     if (!StructuredLogger.debugGameCanvas) return;
-    StructuredLogger.gameCanvas('Viewport change: $changeType', context: changes);
+    StructuredLogger.gameCanvas('Viewport change: $changeType',
+        context: changes);
   }
 }
 
@@ -78,7 +84,8 @@ class PresentationDebugHelpers {
   }
 
   /// Navigation tracking
-  static void navigation(String route, {String? fromRoute, Map<String, dynamic>? metadata}) {
+  static void navigation(String route,
+      {String? fromRoute, Map<String, dynamic>? metadata}) {
     if (!StructuredLogger.debugPresentation) return;
     StructuredLogger.presentation('Navigation: $route', context: {
       if (fromRoute != null) 'from': fromRoute,
@@ -91,20 +98,25 @@ class PresentationDebugHelpers {
 /// 🎯 COMPONENT DEBUG HELPERS
 class ComponentDebugHelpers {
   /// Drag operation tracking
-  static void dragOperation(String operation, String componentType, Map<String, dynamic> context) {
+  static void dragOperation(
+      String operation, String componentType, Map<String, dynamic> context) {
     if (!StructuredLogger.debugComponents) return;
-    StructuredLogger.components('Drag operation: $operation for $componentType', context: context);
+    StructuredLogger.components('Drag operation: $operation for $componentType',
+        context: context);
   }
 
   /// Placement validation tracking
-  static void placementValidation(String componentType, Map<String, dynamic> position, bool valid, {String? reason}) {
+  static void placementValidation(
+      String componentType, Map<String, dynamic> position, bool valid,
+      {String? reason}) {
     if (!StructuredLogger.debugComponents) return;
-    StructuredLogger.components('Placement validation: $componentType', context: {
-      'position': position,
-      'valid': valid,
-      if (reason != null) 'reason': reason,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
+    StructuredLogger.components('Placement validation: $componentType',
+        context: {
+          'position': position,
+          'valid': valid,
+          if (reason != null) 'reason': reason,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        });
   }
 }
 
@@ -113,10 +125,11 @@ class PerformanceDebugHelpers {
   /// Frame rate monitoring
   static void frameRate(double fps, {String? context}) {
     if (!StructuredLogger.debugPerformance) return;
-    StructuredLogger.performance('Frame rate: ${fps.toStringAsFixed(1)} FPS', context: {
-      if (context != null) 'context': context,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
+    StructuredLogger.performance('Frame rate: ${fps.toStringAsFixed(1)} FPS',
+        context: {
+          if (context != null) 'context': context,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        });
   }
 
   /// Memory usage monitoring
@@ -131,32 +144,39 @@ class PerformanceDebugHelpers {
   }
 
   /// Cache operation tracking
-  static void cacheOperation(String operation, String key, bool hit, {Map<String, dynamic>? metadata}) {
+  static void cacheOperation(String operation, String key, bool hit,
+      {Map<String, dynamic>? metadata}) {
     if (!StructuredLogger.debugPerformance) return;
-    StructuredLogger.performance('Cache $operation: $key (${hit ? "HIT" : "MISS"})', context: {
-      'operation': operation,
-      'key': key,
-      'hit': hit,
-      ...?metadata,
-    });
+    StructuredLogger.performance(
+        'Cache $operation: $key (${hit ? "HIT" : "MISS"})',
+        context: {
+          'operation': operation,
+          'key': key,
+          'hit': hit,
+          ...?metadata,
+        });
   }
 }
 
 /// 🌐 WEB SPECIFIC DEBUG HELPERS
 class WebDebugHelpers {
   /// Asset loading in web environment
-  static void webAssetLoad(String assetPath, {bool success = true, String? error}) {
+  static void webAssetLoad(String assetPath,
+      {bool success = true, String? error}) {
     if (!StructuredLogger.debugWeb) return;
-    StructuredLogger.web('Web asset load: $assetPath (${success ? "SUCCESS" : "FAILED"})', context: {
-      'assetPath': assetPath,
-      'success': success,
-      if (error != null) 'error': error,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
+    StructuredLogger.web(
+        'Web asset load: $assetPath (${success ? "SUCCESS" : "FAILED"})',
+        context: {
+          'assetPath': assetPath,
+          'success': success,
+          if (error != null) 'error': error,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        });
   }
 
   /// Browser compatibility issues
-  static void browserCompatibility(String issue, {String? workaround, Map<String, dynamic>? details}) {
+  static void browserCompatibility(String issue,
+      {String? workaround, Map<String, dynamic>? details}) {
     if (!StructuredLogger.debugWeb) return;
     StructuredLogger.web('Browser compatibility issue: $issue', context: {
       if (workaround != null) 'workaround': workaround,
@@ -169,7 +189,8 @@ class WebDebugHelpers {
 /// 🔥 CRITICAL DEBUG HELPERS
 class CriticalDebugHelpers {
   /// System health monitoring
-  static void systemHealthCheck(String component, bool healthy, {String? error}) {
+  static void systemHealthCheck(String component, bool healthy,
+      {String? error}) {
     if (!StructuredLogger.debugCritical) return;
     final status = healthy ? 'HEALTHY' : 'UNHEALTHY';
     StructuredLogger.critical('Health check: $component is $status', context: {
@@ -181,13 +202,16 @@ class CriticalDebugHelpers {
   }
 
   /// Error escalation
-  static void escalateError(String error, String component, {String? context, StackTrace? stackTrace}) {
-    StructuredLogger.critical('ERROR ESCALATION: $error in $component', error: error, context: {
-      if (context != null) 'context': context,
-      'component': component,
-      'requiresImmediateAttention': true,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
+  static void escalateError(String error, String component,
+      {String? context, StackTrace? stackTrace}) {
+    StructuredLogger.critical('ERROR ESCALATION: $error in $component',
+        error: error,
+        context: {
+          if (context != null) 'context': context,
+          'component': component,
+          'requiresImmediateAttention': true,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        });
   }
 }
 

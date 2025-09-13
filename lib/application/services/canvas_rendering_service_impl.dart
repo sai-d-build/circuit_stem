@@ -12,7 +12,7 @@ class DefaultCanvasRenderingService implements CanvasRenderingService {
       gridConfiguration: GridConfiguration(
         rows: level.grid.height,
         cols: level.grid.width,
-        cellSize: 60.0,
+        cellSize: 60,
       ),
       effectsData: {
         'tutorialMode': level.tutorial?.enabled ?? false,
@@ -22,20 +22,24 @@ class DefaultCanvasRenderingService implements CanvasRenderingService {
   }
 
   @override
-  List<CanvasCircuitComponent> convertComponentsForPainter(List<ComponentModel> components) {
-    return components.map((component) => CanvasCircuitComponent(
-      id: component.id,
-      type: component.type,
-      row: component.row,
-      col: component.col,
-      properties: component.properties,
-      isSelected: component.isSelected,
-      isHighlighted: false,
-    )).toList();
+  List<CanvasCircuitComponent> convertComponentsForPainter(
+      List<ComponentModel> components) {
+    return components
+        .map((component) => CanvasCircuitComponent(
+              id: component.id,
+              type: component.type,
+              row: component.row,
+              col: component.col,
+              properties: component.properties,
+              isSelected: component.isSelected,
+              isHighlighted: false,
+            ))
+        .toList();
   }
 
   @override
-  List<CircuitWire> convertConnectionsForPainter(Map<String, Set<String>> connections) {
+  List<CircuitWire> convertConnectionsForPainter(
+      Map<String, Set<String>> connections) {
     final wires = <CircuitWire>[];
 
     connections.forEach((sourceId, connectedIds) {

@@ -57,7 +57,8 @@ class SocialLoginButton extends StatelessWidget {
               width: 20,
               height: 20,
               decoration: BoxDecoration(
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
+                color:
+                    theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Icon(
@@ -86,7 +87,8 @@ class SocialLoginButton extends StatelessWidget {
       return Icons.apple; // Apple icon
     } else if (label.toLowerCase().contains('facebook')) {
       return Icons.facebook; // Facebook icon
-    } else if (label.toLowerCase().contains('twitter') || label.toLowerCase().contains('x')) {
+    } else if (label.toLowerCase().contains('twitter') ||
+        label.toLowerCase().contains('x')) {
       return Icons.alternate_email; // Twitter/X icon
     } else {
       return Icons.account_circle; // Generic social icon

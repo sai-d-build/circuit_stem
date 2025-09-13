@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/core/animations/glow_effect.dart';
+import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 
 class LevelCard extends StatefulWidget {
   final String levelId;
@@ -41,18 +41,18 @@ class _LevelCardState extends State<LevelCard>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
-      begin: 1.0,
+      begin: 1,
       end: 0.98,
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _glowAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
@@ -70,7 +70,7 @@ class _LevelCardState extends State<LevelCard>
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>()!;
     final canPlay = !widget.isLocked && widget.onTap != null;
-    
+
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
@@ -84,7 +84,8 @@ class _LevelCardState extends State<LevelCard>
               elevation: widget.isCompleted ? 6 : 4,
               child: InkWell(
                 onTap: canPlay ? widget.onTap : null,
-                onTapDown: canPlay ? (_) => _animationController.forward() : null,
+                onTapDown:
+                    canPlay ? (_) => _animationController.forward() : null,
                 onTapUp: canPlay ? (_) => _animationController.reverse() : null,
                 onTapCancel: () => _animationController.reverse(),
                 borderRadius: BorderRadius.circular(12),
@@ -95,7 +96,8 @@ class _LevelCardState extends State<LevelCard>
                     gradient: _getCardGradient(circuitColors),
                     border: widget.isCompleted
                         ? Border.all(
-                            color: circuitColors.secondary.withValues(alpha: 0.5),
+                            color:
+                                circuitColors.secondary.withValues(alpha: 0.5),
                             width: 1,
                           )
                         : null,

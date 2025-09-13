@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/providers/unified_providers.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'package:sparkcircuit/presentation/features/game/painters/component_painter.dart';
-import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/application/use_cases/component_interaction_use_case.dart';
-import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
+import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+import 'package:sparkcircuit/presentation/features/game/painters/component_painter.dart';
 
 // ✅ CLEAN ARCHITECTURE: Component Interaction Service
 class ComponentInteractionService {
@@ -31,7 +31,8 @@ class ComponentInteractionService {
   }
 }
 
-final componentInteractionServiceProvider = Provider.family<ComponentInteractionService, String>((ref, levelId) {
+final componentInteractionServiceProvider =
+    Provider.family<ComponentInteractionService, String>((ref, levelId) {
   final useCase = ref.watch(componentInteractionUseCaseProvider(levelId));
   return ComponentInteractionService(useCase);
 });
@@ -48,15 +49,16 @@ class CircuitComponentWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedComponentId = ref.watch(unifiedGameStateProvider.select((state) => state.interactionState.selectedComponentId));
+    final selectedComponentId = ref.watch(unifiedGameStateProvider
+        .select((state) => state.interactionState.selectedComponentId));
     final isSelected = selectedComponentId == component.id;
-    final interactionService = ref.watch(componentInteractionServiceProvider(levelId));
+    final interactionService =
+        ref.watch(componentInteractionServiceProvider(levelId));
 
     // Mark file as migrated to unified provider
     MigrationTracker.markFileMigrated(
-      'lib/presentation/features/game/widgets/circuit_component_widget.dart',
-      DateTime.now().toIso8601String()
-    );
+        'lib/presentation/features/game/widgets/circuit_component_widget.dart',
+        DateTime.now().toIso8601String());
 
     // The Positioned widget was removed from here.
     // The parent (GameCanvas) is now responsible for positioning this widget in the Stack.

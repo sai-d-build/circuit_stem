@@ -12,7 +12,6 @@ import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 /// Test Helper Class for Provider Testing
 class ProviderTestHelper {
-
   /// Creates a test container with optional overrides
   static ProviderContainer createTestContainer({
     List<Override> overrides = const [],
@@ -21,9 +20,11 @@ class ProviderTestHelper {
     return ProviderContainer(
       overrides: overrides,
       // Ensure tests run in debug mode by default for feature flag testing
-      observers: debugMode ? [
-        _TestContainerObserver(),
-      ] : null,
+      observers: debugMode
+          ? [
+              _TestContainerObserver(),
+            ]
+          : null,
     );
   }
 
@@ -51,7 +52,8 @@ class ProviderTestHelper {
   }
 
   /// Validates that a container has no unresolved dependencies
-  static void validateContainer(ProviderContainer container, {
+  static void validateContainer(
+    ProviderContainer container, {
     List<String> expectedProviders = const [],
   }) {
     // Basic validation that container was created successfully
@@ -66,7 +68,8 @@ class ProviderTestHelper {
   }
 
   /// Helper for feature flag testing
-  static void expectFeatureFlag(ProviderContainer container, bool expectedFlag) {
+  static void expectFeatureFlag(
+      ProviderContainer container, bool expectedFlag) {
     // Implementation will check the feature flag state
     expect(expectedFlag, expectedFlag); // Placeholder
   }
@@ -74,22 +77,24 @@ class ProviderTestHelper {
 
 class _TestContainerObserver extends ProviderObserver {
   @override
-  void didAddProvider(ProviderBase<Object?> provider, Object? value, ProviderContainer container) {
+  void didAddProvider(ProviderBase<Object?> provider, Object? value,
+      ProviderContainer container) {
     StructuredLogger.debug('Provider added: ${provider.name ?? 'unnamed'}',
-      context: {'provider_type': provider.runtimeType.toString()});
+        context: {'provider_type': provider.runtimeType.toString()});
   }
 
   @override
   void providerDidFail(ProviderBase<Object?> provider, Object error,
       StackTrace? stackTrace, ProviderContainer container) {
     StructuredLogger.error('Provider failed: ${provider.name ?? 'unnamed'}',
-      error: error, context: {'stack_trace': stackTrace.toString()});
+        error: error, context: {'stack_trace': stackTrace.toString()});
   }
 
   @override
-  void didDisposeProvider(ProviderBase<Object?> provider, ProviderContainer container) {
+  void didDisposeProvider(
+      ProviderBase<Object?> provider, ProviderContainer container) {
     StructuredLogger.debug('Provider disposed: ${provider.name ?? 'unnamed'}',
-      context: {'provider_type': provider.runtimeType.toString()});
+        context: {'provider_type': provider.runtimeType.toString()});
   }
 }
 
@@ -100,11 +105,11 @@ class _IntegrationTestObserver extends ProviderObserver {
     // Integration provider update logging
     if (provider.name?.isNotEmpty ?? false) {
       StructuredLogger.debug('Integration provider updated: ${provider.name}',
-        context: {
-          'previous_value': previousValue.toString(),
-          'new_value': newValue.toString(),
-          'provider_type': provider.runtimeType.toString()
-        });
+          context: {
+            'previous_value': previousValue.toString(),
+            'new_value': newValue.toString(),
+            'provider_type': provider.runtimeType.toString()
+          });
     }
   }
 }

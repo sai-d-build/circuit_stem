@@ -18,10 +18,10 @@ abstract class DomainEvent {
 
   /// Convert event to JSON for serialization
   Map<String, dynamic> toJson() => {
-    'eventId': eventId,
-    'eventType': eventType,
-    'timestamp': timestamp.toIso8601String(),
-  };
+        'eventId': eventId,
+        'eventType': eventType,
+        'timestamp': timestamp.toIso8601String(),
+      };
 
   @override
   String toString() => '$eventType(eventId: $eventId, timestamp: $timestamp)';
@@ -230,17 +230,18 @@ class DomainEventBus {
   /// Publish an event to all subscribers
   void publish(DomainEvent event) {
     // Add to history
-    _eventHistory.add(event);
+    _eventHistory.add(event); // ignore: cascade_invocations
     if (_eventHistory.length > _maxHistorySize) {
-      _eventHistory.removeAt(0);
+      _eventHistory.removeAt(0); // ignore: cascade_invocations
     }
 
     // Log the event
-    StructuredLogger.info('DomainEventBus: Publishing ${event.eventType}', context: {
-      'eventId': event.eventId,
-      'eventType': event.eventType,
-      'timestamp': event.timestamp.toIso8601String(),
-    });
+    StructuredLogger.info('DomainEventBus: Publishing ${event.eventType}',
+        context: {
+          'eventId': event.eventId,
+          'eventType': event.eventType,
+          'timestamp': event.timestamp.toIso8601String(),
+        });
 
     // Notify subscribers
     final eventType = event.runtimeType;
@@ -249,10 +250,11 @@ class DomainEventBus {
         try {
           handler(event);
         } catch (e) {
-          StructuredLogger.error('DomainEventBus: Error in event handler', context: {
-            'eventType': event.eventType,
-            'error': e.toString(),
-          });
+          StructuredLogger.error('DomainEventBus: Error in event handler',
+              context: {
+                'eventType': event.eventType,
+                'error': e.toString(),
+              });
         }
       }
     }
@@ -298,8 +300,12 @@ class DomainEventBus {
       'totalEvents': _eventHistory.length,
       'eventCountsByType': eventCounts,
       'subscriberCountsByType': subscriberCounts,
-      'oldestEvent': _eventHistory.isNotEmpty ? _eventHistory.first.timestamp.toIso8601String() : null,
-      'newestEvent': _eventHistory.isNotEmpty ? _eventHistory.last.timestamp.toIso8601String() : null,
+      'oldestEvent': _eventHistory.isNotEmpty
+          ? _eventHistory.first.timestamp.toIso8601String()
+          : null,
+      'newestEvent': _eventHistory.isNotEmpty
+          ? _eventHistory.last.timestamp.toIso8601String()
+          : null,
     };
   }
 }

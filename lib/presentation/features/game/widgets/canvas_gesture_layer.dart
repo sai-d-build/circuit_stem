@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/providers/unified_providers.dart';
 import 'package:sparkcircuit/application/providers/game_canvas_providers.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
-import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart' as orchestrator;
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
 import 'package:sparkcircuit/core/migration/migration_tracker.dart';
+import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart'
+    as orchestrator;
+import 'package:sparkcircuit/presentation/state/palette_state.dart';
 
 // ✅ CLEAN ARCHITECTURE: Canvas Gesture Service
 class CanvasGestureService {
@@ -59,8 +60,10 @@ class CanvasGestureService {
   }
 }
 
-final canvasGestureServiceProvider = Provider.family<CanvasGestureService, String>((ref, levelId) {
-  final orchestrator = ref.watch(gameCanvasOrchestratorProvider(levelId).notifier);
+final canvasGestureServiceProvider =
+    Provider.family<CanvasGestureService, String>((ref, levelId) {
+  final orchestrator =
+      ref.watch(gameCanvasOrchestratorProvider(levelId).notifier);
   return CanvasGestureService(orchestrator);
 });
 
@@ -84,46 +87,57 @@ class CanvasGestureLayer extends ConsumerWidget {
 
     // Mark file as migrated to unified provider
     MigrationTracker.markFileMigrated(
-      'lib/presentation/features/game/widgets/canvas_gesture_layer.dart',
-      DateTime.now().toIso8601String()
-    );
+        'lib/presentation/features/game/widgets/canvas_gesture_layer.dart',
+        DateTime.now().toIso8601String());
 
     return GestureDetector(
-      onTapDown: (details) => _handleTapDown(details, gameState, gestureService),
-      onLongPressStart: (details) => _handleLongPressStart(details, gameState, gestureService),
+      onTapDown: (details) =>
+          _handleTapDown(details, gameState, gestureService),
+      onLongPressStart: (details) =>
+          _handleLongPressStart(details, gameState, gestureService),
       onScaleStart: (details) => _handleScaleStart(details, gestureService),
-      onScaleUpdate: (details) => _handleScaleUpdate(details, gameState, paletteState, gestureService),
-      onScaleEnd: (details) => _handleScaleEnd(details, gameState, paletteState, gestureService),
+      onScaleUpdate: (details) =>
+          _handleScaleUpdate(details, gameState, paletteState, gestureService),
+      onScaleEnd: (details) =>
+          _handleScaleEnd(details, gameState, paletteState, gestureService),
       child: child,
     );
   }
 
-  void _handleTapDown(TapDownDetails details, dynamic gameState, CanvasGestureService gestureService) {
+  void _handleTapDown(TapDownDetails details, dynamic gameState,
+      CanvasGestureService gestureService) {
     // Delegate to service
     gestureService.handleTap(details.localPosition);
   }
 
-  void _handleLongPressStart(LongPressStartDetails details, dynamic gameState, CanvasGestureService gestureService) {
+  void _handleLongPressStart(LongPressStartDetails details, dynamic gameState,
+      CanvasGestureService gestureService) {
     // Delegate to service
     gestureService.handleLongPress(details.localPosition);
   }
 
-  void _handleScaleStart(ScaleStartDetails details, CanvasGestureService gestureService) {
+  void _handleScaleStart(
+      ScaleStartDetails details, CanvasGestureService gestureService) {
     // Delegate to service
-    gestureService.handleScaleStart(details.localFocalPoint, details.pointerCount);
+    gestureService.handleScaleStart(
+        details.localFocalPoint, details.pointerCount);
   }
 
-  void _handleScaleUpdate(ScaleUpdateDetails details, dynamic gameState, dynamic paletteState, CanvasGestureService gestureService) {
+  void _handleScaleUpdate(ScaleUpdateDetails details, dynamic gameState,
+      dynamic paletteState, CanvasGestureService gestureService) {
     if (details.pointerCount > 1) {
       // Multi-touch: handle scaling
-      gestureService.handleScaleUpdate(details.localFocalPoint, details.scale, details.pointerCount);
+      gestureService.handleScaleUpdate(
+          details.localFocalPoint, details.scale, details.pointerCount);
     } else {
       // Single-touch: handle panning/dragging
-      gestureService.handleDragUpdate(details.localFocalPoint, details.focalPointDelta);
+      gestureService.handleDragUpdate(
+          details.localFocalPoint, details.focalPointDelta);
     }
   }
 
-  void _handleScaleEnd(ScaleEndDetails details, dynamic gameState, dynamic paletteState, CanvasGestureService gestureService) {
+  void _handleScaleEnd(ScaleEndDetails details, dynamic gameState,
+      dynamic paletteState, CanvasGestureService gestureService) {
     // Delegate to service
     gestureService.handleScaleEnd(details.pointerCount);
   }

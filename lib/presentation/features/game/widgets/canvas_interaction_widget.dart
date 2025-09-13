@@ -1,15 +1,14 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
-import 'package:sparkcircuit/domain/entities/core/component.dart';
-import 'package:sparkcircuit/presentation/features/game/controllers/canvas_interaction_controller.dart' as canvas_controller;
-import 'package:sparkcircuit/presentation/models/drag_models.dart';
-import 'package:sparkcircuit/presentation/helpers/central_interaction_helper.dart';
-
 // Import interactionStateProvider
 import 'package:sparkcircuit/application/providers/core_providers.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
+import 'package:sparkcircuit/presentation/features/game/controllers/canvas_interaction_controller.dart'
+    as canvas_controller;
+import 'package:sparkcircuit/presentation/helpers/central_interaction_helper.dart';
 
 class CanvasInteractionWidget extends ConsumerStatefulWidget {
   final String levelId;
@@ -20,10 +19,12 @@ class CanvasInteractionWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CanvasInteractionWidget> createState() => _CanvasInteractionWidgetState();
+  ConsumerState<CanvasInteractionWidget> createState() =>
+      _CanvasInteractionWidgetState();
 }
 
-class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidget> {
+class _CanvasInteractionWidgetState
+    extends ConsumerState<CanvasInteractionWidget> {
   canvas_controller.CanvasInteractionController? _controller;
   Timer? _throttleTimer;
   bool _isControllerInitialized = false;
@@ -49,21 +50,25 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
       levelId: widget.levelId,
     );
     _isControllerInitialized = true;
-    StructuredLogger.info('CanvasInteractionController initialized successfully', context: {
-      'levelId': widget.levelId,
-    });
+    StructuredLogger.info(
+        'CanvasInteractionController initialized successfully',
+        context: {
+          'levelId': widget.levelId,
+        });
   }
 
   @override
   void dispose() {
-    StructuredLogger.debug('CanvasInteractionWidget: Disposing resources', context: {
-      'levelId': widget.levelId,
-    });
+    StructuredLogger.debug('CanvasInteractionWidget: Disposing resources',
+        context: {
+          'levelId': widget.levelId,
+        });
     _throttleTimer?.cancel();
     _controller?.dispose();
-    StructuredLogger.debug('CanvasInteractionWidget: Resources disposed', context: {
-      'levelId': widget.levelId,
-    });
+    StructuredLogger.debug('CanvasInteractionWidget: Resources disposed',
+        context: {
+          'levelId': widget.levelId,
+        });
     super.dispose();
   }
 
@@ -73,11 +78,13 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
     try {
       interactionState = ref.watch(interactionStateProvider(widget.levelId));
     } catch (e) {
-      StructuredLogger.error('Failed to watch interactionStateProvider', context: {
-        'levelId': widget.levelId,
-        'error': e.toString(),
-      });
-      interactionState = const canvas_controller.InteractionState(currentMode: canvas_controller.InteractionMode.idle, isValid: false);
+      StructuredLogger.error('Failed to watch interactionStateProvider',
+          context: {
+            'levelId': widget.levelId,
+            'error': e.toString(),
+          });
+      interactionState = const canvas_controller.InteractionState(
+          currentMode: canvas_controller.InteractionMode.idle, isValid: false);
     }
 
     // 🔧 RCA: Add logging for canvas re-rendering analysis
@@ -118,7 +125,8 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
               child: Stack(
                 children: [
                   // Wire preview layer
-                  if (interactionState.currentMode == canvas_controller.InteractionMode.drawWire)
+                  if (interactionState.currentMode ==
+                      canvas_controller.InteractionMode.drawWire)
                     _buildWirePreview(interactionState),
 
                   // Component preview layer - DISABLED to prevent ghost duplication
@@ -130,7 +138,8 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
                   //   _buildComponentPreview(interactionState),
 
                   // Validation feedback
-                  if (!interactionState.isValid && interactionState.errorMessage != null)
+                  if (!interactionState.isValid &&
+                      interactionState.errorMessage != null)
                     _buildErrorFeedback(interactionState),
                 ],
               ),
@@ -140,8 +149,6 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
       },
     );
   }
-
-
 
   void _handleScaleStart(ScaleStartDetails details) {
     // Handle scale gestures for pan/zoom
@@ -161,15 +168,6 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
     // Handle scale end
   }
 
-
-
-
-
-
-
-
-
-
   Widget _buildWirePreview(canvas_controller.InteractionState state) {
     if (state.path.isEmpty) return const SizedBox.shrink();
 
@@ -182,7 +180,6 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
     );
   }
 
-
   Widget _buildErrorFeedback(canvas_controller.InteractionState state) {
     return Center(
       child: Container(
@@ -193,18 +190,21 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
         ),
         child: Text(
           state.errorMessage!,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style:
+              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
   CoordinateContext _buildCoordinateContext() {
-    final viewportState = CentralInteractionHelper.getViewportState(ref, widget.levelId);
+    final viewportState =
+        CentralInteractionHelper.getViewportState(ref, widget.levelId);
     final gameState = CentralInteractionHelper.getGameState(ref);
 
     return CoordinateContext(
-      gridDimensions: Size(gameState.grid.cols.toDouble(), gameState.grid.rows.toDouble()),
+      gridDimensions:
+          Size(gameState.grid.cols.toDouble(), gameState.grid.rows.toDouble()),
       cellSize: viewportState.cellSize,
       scale: viewportState.scale,
       panOffset: viewportState.panOffset,
@@ -212,7 +212,6 @@ class _CanvasInteractionWidgetState extends ConsumerState<CanvasInteractionWidge
       devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
     );
   }
-
 }
 
 class WirePreviewPainter extends CustomPainter {
@@ -236,14 +235,15 @@ class WirePreviewPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    final pathPoints = path.map((pos) => coordinateService.gridToLocal(pos, context)).toList();
+    final pathPoints =
+        path.map((pos) => coordinateService.gridToLocal(pos, context)).toList();
 
     if (pathPoints.length >= 2) {
       final path = Path();
-      path.moveTo(pathPoints[0].dx, pathPoints[0].dy);
+      path.moveTo(pathPoints[0].dx, pathPoints[0].dy); // ignore: cascade_invocations
 
-      for (int i = 1; i < pathPoints.length; i++) {
-        path.lineTo(pathPoints[i].dx, pathPoints[i].dy);
+      for (var i = 1; i < pathPoints.length; i++) {
+        path.lineTo(pathPoints[i].dx, pathPoints[i].dy); // ignore: cascade_invocations
       }
 
       canvas.drawPath(path, paint);
@@ -255,10 +255,11 @@ class WirePreviewPainter extends CustomPainter {
     // 🔧 RCA: Add debugging for wire preview repaints
     final shouldRepaint = path != oldDelegate.path;
     if (shouldRepaint) {
-      StructuredLogger.trace('WirePreviewPainter repainting due to path change', context: {
-        'newPathLength': path.length,
-        'oldPathLength': oldDelegate.path.length,
-      });
+      StructuredLogger.trace('WirePreviewPainter repainting due to path change',
+          context: {
+            'newPathLength': path.length,
+            'oldPathLength': oldDelegate.path.length,
+          });
     }
     return shouldRepaint;
   }

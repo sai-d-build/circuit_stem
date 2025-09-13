@@ -1,13 +1,13 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sparkcircuit/application/game_engine/v3/game_engine_notifier_v3.dart';
 import 'package:sparkcircuit/application/providers.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/application/services/component_factory.dart';
 import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
 import 'package:sparkcircuit/core/simulation/basic_simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
-import 'package:sparkcircuit/application/game_engine/v3/game_engine_notifier_v3.dart';
 
 void main() {
   group('GameEngineNotifierV3 Tests', () {
@@ -25,7 +25,8 @@ void main() {
         storageServiceProvider.overrideWithValue(storageService),
         componentFactoryProvider.overrideWithValue(ComponentFactory()),
       ]);
-      gameStateNotifier = container.read(enhancedGameStateNotifierProvider.notifier);
+      gameStateNotifier =
+          container.read(enhancedGameStateNotifierProvider.notifier);
     });
 
     tearDown(() {
@@ -42,7 +43,8 @@ void main() {
     test('placeComponent should add the component to the grid', () {
       gameStateNotifier.placeComponent(ComponentType.battery, 0, 0);
       expect(gameStateNotifier.state.grid.getComponentCount(), 1);
-      expect(gameStateNotifier.state.grid.getComponentAt(0, 0)?.type, ComponentType.battery);
+      expect(gameStateNotifier.state.grid.getComponentAt(0, 0)?.type,
+          ComponentType.battery);
     });
 
     test('addConnection should add a connection between components', () {
@@ -54,8 +56,10 @@ void main() {
       final wire = components[1];
 
       gameStateNotifier.addConnection(battery.id, wire.id);
-      expect(gameStateNotifier.state.grid.getConnections(battery.id), contains(wire.id));
-      expect(gameStateNotifier.state.grid.getConnections(wire.id), contains(battery.id));
+      expect(gameStateNotifier.state.grid.getConnections(battery.id),
+          contains(wire.id));
+      expect(gameStateNotifier.state.grid.getConnections(wire.id),
+          contains(battery.id));
     });
 
     test('togglePause should change the pause state', () {
@@ -67,11 +71,14 @@ void main() {
     });
 
     test('selectComponent should update the selected component ID', () {
-      expect(gameStateNotifier.state.interactionState.selectedComponentId, isNull);
+      expect(
+          gameStateNotifier.state.interactionState.selectedComponentId, isNull);
       gameStateNotifier.selectComponent('test_id');
-      expect(gameStateNotifier.state.interactionState.selectedComponentId, 'test_id');
+      expect(gameStateNotifier.state.interactionState.selectedComponentId,
+          'test_id');
       gameStateNotifier.selectComponent(null);
-      expect(gameStateNotifier.state.interactionState.selectedComponentId, isNull);
+      expect(
+          gameStateNotifier.state.interactionState.selectedComponentId, isNull);
     });
 
     test('resetLevel should clear the state', () {

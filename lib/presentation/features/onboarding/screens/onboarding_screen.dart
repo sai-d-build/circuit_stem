@@ -3,8 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_theme.dart';
+
 import '../../../../application/game_engine/v3/providers_v3.dart';
+import '../../../core/theme/app_theme.dart';
 
 // ✅ CLEAN ARCHITECTURE: Storage Service
 class StorageService {
@@ -12,7 +13,8 @@ class StorageService {
 
   StorageService(this.storage);
 
-  Future<void> saveData<T>(String key, T value) => storage.saveData<T>(key, value);
+  Future<void> saveData<T>(String key, T value) =>
+      storage.saveData<T>(key, value);
 }
 
 final storageServiceProviderWrapper = Provider<StorageService>((ref) {
@@ -34,22 +36,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final List<OnboardingPageData> _pages = [
     OnboardingPageData(
       title: 'Welcome to SparkCircuit!',
-      description: 'Learn electronics through interactive circuit puzzles and challenges.',
+      description:
+          'Learn electronics through interactive circuit puzzles and challenges.',
       icon: Icons.lightbulb,
     ),
     OnboardingPageData(
       title: 'Build Circuits',
-      description: 'Drag and drop components like batteries, bulbs, switches, and wires to create working circuits.',
+      description:
+          'Drag and drop components like batteries, bulbs, switches, and wires to create working circuits.',
       icon: Icons.build,
     ),
     OnboardingPageData(
       title: 'Solve Puzzles',
-      description: 'Complete increasingly challenging levels that teach you about circuit design and electrical principles.',
+      description:
+          'Complete increasingly challenging levels that teach you about circuit design and electrical principles.',
       icon: Icons.extension,
     ),
     OnboardingPageData(
       title: 'Learn by Doing',
-      description: 'Get instant feedback on your circuit designs and learn from your mistakes.',
+      description:
+          'Get instant feedback on your circuit designs and learn from your mistakes.',
       icon: Icons.school,
     ),
   ];
@@ -80,7 +86,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildPage(OnboardingPageData page) {
     return Padding(
-      padding: const EdgeInsets.all(32.0),
+      padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -117,7 +123,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
               _pages.length,
-              (index) => _buildDot(index),
+              _buildDot,
             ),
           ),
           const SizedBox(height: 32),
@@ -142,7 +148,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 )
               else
                 const SizedBox(width: 80),
-
               ElevatedButton(
                 onPressed: () {
                   if (_currentPage < _pages.length - 1) {

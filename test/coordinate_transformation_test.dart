@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 import 'package:sparkcircuit/core/services/secure_coordinate_validator.dart';
+import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 
 void main() {
   group('UnifiedCoordinateService Tests', () {
@@ -9,11 +9,11 @@ void main() {
 
     setUp(() {
       coordinateService = UnifiedCoordinateService();
-      testConfig = GridConfiguration(
+      testConfig = const GridConfiguration(
         rows: 10,
         cols: 10,
-        cellSize: 50.0,
-        scale: 1.0,
+        cellSize: 50,
+        scale: 1,
         panOffset: Offset.zero,
       );
     });
@@ -24,7 +24,7 @@ void main() {
 
     group('Coordinate Transformations', () {
       test('screenToGrid basic transformation', () {
-        final screenPos = Offset(100, 150);
+        const screenPos = Offset(100, 150);
         final gridPos = coordinateService.screenToGrid(screenPos, testConfig);
 
         // With cellSize=50, scale=1, panOffset=0
@@ -34,7 +34,7 @@ void main() {
       });
 
       test('gridToScreen basic transformation', () {
-        final gridPos = Offset(2, 3);
+        const gridPos = Offset(2, 3);
         final screenPos = coordinateService.gridToScreen(gridPos, testConfig);
 
         // With cellSize=50, scale=1, panOffset=0
@@ -44,9 +44,11 @@ void main() {
       });
 
       test('round-trip transformation accuracy', () {
-        final originalScreen = Offset(123.45, 67.89);
-        final gridPos = coordinateService.screenToGrid(originalScreen, testConfig);
-        final backToScreen = coordinateService.gridToScreen(gridPos, testConfig);
+        const originalScreen = Offset(123.45, 67.89);
+        final gridPos =
+            coordinateService.screenToGrid(originalScreen, testConfig);
+        final backToScreen =
+            coordinateService.gridToScreen(gridPos, testConfig);
 
         // Should be very close (within 1 pixel due to rounding)
         expect(backToScreen.dx, closeTo(originalScreen.dx, 1.0));
@@ -54,8 +56,8 @@ void main() {
       });
 
       test('transformation with scale', () {
-        final scaledConfig = testConfig.copyWith(scale: 2.0);
-        final screenPos = Offset(100, 150);
+        final scaledConfig = testConfig.copyWith(scale: 2);
+        const screenPos = Offset(100, 150);
         final gridPos = coordinateService.screenToGrid(screenPos, scaledConfig);
 
         // With scale=2, the grid position should be half
@@ -64,8 +66,9 @@ void main() {
       });
 
       test('transformation with pan offset', () {
-        final pannedConfig = testConfig.copyWith(panOffset: Offset(50, 75));
-        final screenPos = Offset(100, 150);
+        final pannedConfig =
+            testConfig.copyWith(panOffset: const Offset(50, 75));
+        const screenPos = Offset(100, 150);
         final gridPos = coordinateService.screenToGrid(screenPos, pannedConfig);
 
         // Pan offset affects the transformation
@@ -76,7 +79,7 @@ void main() {
 
     group('Snapping Functionality', () {
       test('snapToGrid basic snapping', () {
-        final screenPos = Offset(125, 175); // Not aligned to grid
+        const screenPos = Offset(125, 175); // Not aligned to grid
         final snappedPos = coordinateService.snapToGrid(screenPos, testConfig);
 
         // Should snap to nearest grid center: (150, 200) with cellSize=50
@@ -85,16 +88,17 @@ void main() {
       });
 
       test('snapToGrid with bounds checking', () {
-        final config = GridConfiguration(
+        const config = GridConfiguration(
           rows: 5,
           cols: 5,
-          cellSize: 50.0,
-          scale: 1.0,
+          cellSize: 50,
+          scale: 1,
           panOffset: Offset.zero,
         );
 
         // Position that would snap outside bounds
-        final screenPos = Offset(275, 275); // Would snap to (250, 250) but clamped to (200, 200)
+        const screenPos = Offset(
+            275, 275); // Would snap to (250, 250) but clamped to (200, 200)
         final snappedPos = coordinateService.snapToGrid(screenPos, config);
 
         // Should be clamped to grid bounds
@@ -105,23 +109,26 @@ void main() {
 
     group('Bounds Checking', () {
       test('isInGridBounds within bounds', () {
-        final gridPos = Offset(3, 4);
+        const gridPos = Offset(3, 4);
         expect(coordinateService.isInGridBounds(gridPos, testConfig), isTrue);
       });
 
       test('isInGridBounds outside bounds', () {
-        final gridPos = Offset(15, 4); // x=15 >= cols=10
+        const gridPos = Offset(15, 4); // x=15 >= cols=10
         expect(coordinateService.isInGridBounds(gridPos, testConfig), isFalse);
       });
 
       test('isWithinGridBounds screen coordinates', () {
-        final screenPos = Offset(250, 300); // Within 10x10 grid with cellSize=50
-        expect(coordinateService.isWithinGridBounds(screenPos, testConfig), isTrue);
+        const screenPos =
+            Offset(250, 300); // Within 10x10 grid with cellSize=50
+        expect(coordinateService.isWithinGridBounds(screenPos, testConfig),
+            isTrue);
       });
 
       test('getValidGridPosition within bounds', () {
-        final screenPos = Offset(125, 175);
-        final validPos = coordinateService.getValidGridPosition(screenPos, testConfig);
+        const screenPos = Offset(125, 175);
+        final validPos =
+            coordinateService.getValidGridPosition(screenPos, testConfig);
 
         expect(validPos, isNotNull);
         expect(validPos!.dx, closeTo(2.0, 0.001)); // 125/50 = 2.5 -> 2
@@ -129,8 +136,9 @@ void main() {
       });
 
       test('getValidGridPosition outside bounds', () {
-        final screenPos = Offset(600, 600); // Outside 10x10 grid
-        final validPos = coordinateService.getValidGridPosition(screenPos, testConfig);
+        const screenPos = Offset(600, 600); // Outside 10x10 grid
+        final validPos =
+            coordinateService.getValidGridPosition(screenPos, testConfig);
 
         expect(validPos, isNull);
       });
@@ -138,7 +146,7 @@ void main() {
 
     group('Performance and Caching', () {
       test('caching improves performance', () {
-        final screenPos = Offset(100, 150);
+        const screenPos = Offset(100, 150);
 
         // First call should cache
         final startTime1 = DateTime.now();
@@ -159,7 +167,8 @@ void main() {
         final duration2 = endTime2.difference(startTime2);
 
         // At minimum, cached call shouldn't be significantly slower
-        expect(duration2.inMicroseconds, lessThan(duration1.inMicroseconds * 10));
+        expect(
+            duration2.inMicroseconds, lessThan(duration1.inMicroseconds * 10));
       });
 
       test('cache expiration works', () {
@@ -176,9 +185,11 @@ void main() {
 
     group('Edge Cases', () {
       test('handles zero scale gracefully', () {
-        final zeroScaleConfig = testConfig.copyWith(scale: 0.1); // Minimum allowed
-        final screenPos = Offset(100, 150);
-        final gridPos = coordinateService.screenToGrid(screenPos, zeroScaleConfig);
+        final zeroScaleConfig =
+            testConfig.copyWith(scale: 0.1); // Minimum allowed
+        const screenPos = Offset(100, 150);
+        final gridPos =
+            coordinateService.screenToGrid(screenPos, zeroScaleConfig);
 
         expect(gridPos.dx, isNot(double.nan));
         expect(gridPos.dy, isNot(double.nan));
@@ -187,8 +198,9 @@ void main() {
       });
 
       test('handles large coordinates', () {
-        final largePos = Offset(1000000, 1000000);
-        final sanitizedPos = SecureCoordinateValidator.sanitizePosition(largePos);
+        const largePos = Offset(1000000, 1000000);
+        final sanitizedPos =
+            SecureCoordinateValidator.sanitizePosition(largePos);
 
         // Should be clamped to reasonable bounds
         expect(sanitizedPos.dx, lessThan(10000));
@@ -196,8 +208,9 @@ void main() {
       });
 
       test('handles negative coordinates', () {
-        final negativePos = Offset(-100, -150);
-        final sanitizedPos = SecureCoordinateValidator.sanitizePosition(negativePos);
+        const negativePos = Offset(-100, -150);
+        final sanitizedPos =
+            SecureCoordinateValidator.sanitizePosition(negativePos);
 
         // Should be clamped to non-negative
         expect(sanitizedPos.dx, greaterThanOrEqualTo(0));
@@ -208,7 +221,7 @@ void main() {
 
   group('SecureCoordinateValidator Tests', () {
     test('sanitizes normal coordinates', () {
-      final normalPos = Offset(100, 200);
+      const normalPos = Offset(100, 200);
       final sanitized = SecureCoordinateValidator.sanitizePosition(normalPos);
 
       expect(sanitized.dx, closeTo(100, 0.001));
@@ -216,7 +229,7 @@ void main() {
     });
 
     test('sanitizes out-of-bounds coordinates', () {
-      final largePos = Offset(100000, -50000);
+      const largePos = Offset(100000, -50000);
       final sanitized = SecureCoordinateValidator.sanitizePosition(largePos);
 
       expect(sanitized.dx, greaterThanOrEqualTo(0));
@@ -226,7 +239,7 @@ void main() {
     });
 
     test('handles NaN and infinite values', () {
-      final nanPos = Offset(double.nan, double.infinity);
+      const nanPos = Offset(double.nan, double.infinity);
       final sanitized = SecureCoordinateValidator.sanitizePosition(nanPos);
 
       expect(sanitized.dx, isNot(double.nan));
@@ -236,9 +249,11 @@ void main() {
     });
 
     test('sanitizes scale values', () {
-      expect(SecureCoordinateValidator.sanitizeScale(2.0), closeTo(2.0, 0.001));
-      expect(SecureCoordinateValidator.sanitizeScale(15.0), closeTo(10.0, 0.001)); // Clamped
-      expect(SecureCoordinateValidator.sanitizeScale(0.05), closeTo(0.1, 0.001)); // Clamped
+      expect(SecureCoordinateValidator.sanitizeScale(2), closeTo(2.0, 0.001));
+      expect(SecureCoordinateValidator.sanitizeScale(15),
+          closeTo(10.0, 0.001)); // Clamped
+      expect(SecureCoordinateValidator.sanitizeScale(0.05),
+          closeTo(0.1, 0.001)); // Clamped
     });
   });
 }

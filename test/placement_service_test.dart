@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'package:sparkcircuit/application/states/game_state.dart';
-import 'package:sparkcircuit/application/states/interaction_state.dart';
-import 'package:sparkcircuit/application/states/history_state.dart';
 import 'package:sparkcircuit/application/services/placement_service.dart';
+import 'package:sparkcircuit/application/states/game_state.dart';
+import 'package:sparkcircuit/application/states/history_state.dart';
+import 'package:sparkcircuit/application/states/interaction_state.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 void main() {
   group('PlacementService', () {

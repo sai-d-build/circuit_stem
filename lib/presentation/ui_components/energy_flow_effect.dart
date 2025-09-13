@@ -24,7 +24,8 @@ class EnergyFlowEffect extends StatefulWidget {
   State<EnergyFlowEffect> createState() => _EnergyFlowEffectState();
 }
 
-class _EnergyFlowEffectState extends State<EnergyFlowEffect> with SingleTickerProviderStateMixin {
+class _EnergyFlowEffectState extends State<EnergyFlowEffect>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _flowAnimation;
 
@@ -37,8 +38,8 @@ class _EnergyFlowEffectState extends State<EnergyFlowEffect> with SingleTickerPr
     );
 
     _flowAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.linear,
@@ -126,13 +127,14 @@ class _EnergyFlowPainter extends CustomPainter {
     final particleSpacing = thickness * 3;
     final numParticles = (lineLength / particleSpacing).floor();
 
-    for (int i = 0; i < numParticles; i++) {
+    for (var i = 0; i < numParticles; i++) {
       final particleProgress = (flowProgress + i / numParticles) % 1.0;
       final particlePosition = start + lineVector * particleProgress;
 
       // Particle glow
       final glowPaint = Paint()
-        ..color = flowColor.withValues(alpha: 0.8 * (1 - particleProgress.abs()))
+        ..color =
+            flowColor.withValues(alpha: 0.8 * (1 - particleProgress.abs()))
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, thickness * 2);
 
       canvas.drawCircle(particlePosition, thickness * 1.5, glowPaint);
@@ -154,12 +156,13 @@ class _EnergyFlowPainter extends CustomPainter {
 
     final path = Path();
     final waveAmplitude = thickness * 0.5;
-    final waveFrequency = 4;
+    const waveFrequency = 4;
 
     for (double t = 0; t <= 1; t += 0.01) {
       final basePoint = start + lineVector * t;
       final perpendicular = Offset(-lineDirection.dy, lineDirection.dx);
-      final waveOffset = sin((t + flowProgress) * waveFrequency * 2 * pi) * waveAmplitude;
+      final waveOffset =
+          sin((t + flowProgress) * waveFrequency * 2 * pi) * waveAmplitude;
 
       final wavePoint = basePoint + perpendicular * waveOffset;
 
@@ -176,10 +179,10 @@ class _EnergyFlowPainter extends CustomPainter {
   @override
   bool shouldRepaint(_EnergyFlowPainter oldDelegate) {
     return oldDelegate.flowProgress != flowProgress ||
-           oldDelegate.start != start ||
-           oldDelegate.end != end ||
-           oldDelegate.flowColor != flowColor ||
-           oldDelegate.thickness != thickness;
+        oldDelegate.start != start ||
+        oldDelegate.end != end ||
+        oldDelegate.flowColor != flowColor ||
+        oldDelegate.thickness != thickness;
   }
 }
 
@@ -278,7 +281,7 @@ class _WireGlowPainter extends CustomPainter {
       ..color = glowColor.withValues(alpha: 0.4)
       ..strokeWidth = 8.0
       ..strokeCap = StrokeCap.round
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4.0);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
 
     canvas.drawLine(start, end, glowPaint);
   }

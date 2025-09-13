@@ -26,14 +26,18 @@ class MigrationTracker {
       totalFiles: totalFiles,
       migratedFiles: _migratedFiles.length,
       remainingFiles: totalFiles - _migratedFiles.length,
-      percentage: totalFiles > 0 ? (_migratedFiles.length / totalFiles * 100).toInt() : 0,
+      percentage: totalFiles > 0
+          ? (_migratedFiles.length / totalFiles * 100).toInt()
+          : 0,
     );
   }
 
   /// Get the actual completion percentage based on current migration state
   static int get actualCompletionPercentage {
     final totalFiles = _getTotalDartFiles();
-    return totalFiles > 0 ? (_migratedFiles.length / totalFiles * 100).toInt() : 0;
+    return totalFiles > 0
+        ? (_migratedFiles.length / totalFiles * 100).toInt()
+        : 0;
   }
 
   /// Get the number of files that are actually migrated
@@ -48,9 +52,10 @@ class MigrationTracker {
     return 354; // Keeping the known count for now
   }
 
-  static bool isFileMigrated(String filePath) => _migratedFiles.contains(filePath);
+  static bool isFileMigrated(String filePath) =>
+      _migratedFiles.contains(filePath); // ignore: cascade_invocations
 
-  static List<String> getMigratedFiles() => _migratedFiles.toList();
+  static List<String> getMigratedFiles() => _migratedFiles.toList(); // ignore: cascade_invocations
 
   static Map<String, String> getMigrationLog() => Map.from(_migrationLog);
 }
@@ -70,13 +75,13 @@ class MigrationStatus {
   });
 
   Map<String, dynamic> toJson() => {
-    'totalFiles': totalFiles,
-    'migratedFiles': migratedFiles,
-    'remainingFiles': remainingFiles,
-    'percentage': percentage,
-  };
+        'totalFiles': totalFiles,
+        'migratedFiles': migratedFiles,
+        'remainingFiles': remainingFiles,
+        'percentage': percentage,
+      };
 
   @override
   String toString() =>
-    'MigrationStatus(total: $totalFiles, migrated: $migratedFiles, remaining: $remainingFiles, percentage: $percentage%)';
+      'MigrationStatus(total: $totalFiles, migrated: $migratedFiles, remaining: $remainingFiles, percentage: $percentage%)';
 }

@@ -1,6 +1,7 @@
 import 'dart:math' show exp;
-import '../core/component.dart';
+
 import '../../../core/debug/structured_logger.dart';
+import '../core/component.dart';
 import 'circuit_component.dart';
 
 /// Capacitor component with charge storing capability
@@ -13,15 +14,24 @@ class Capacitor extends CircuitComponent {
     Map<String, dynamic>? properties,
     super.rotation,
   }) : super(
-    type: ComponentType.capacitor,
-    properties: {
-      ...?properties,
-      'capacitance': properties?.containsKey('capacitance') == true ? properties!['capacitance'] : 0.001,
-      'voltageRating': properties?.containsKey('voltageRating') == true ? properties!['voltageRating'] : 25.0,
-      'currentCharge': properties?.containsKey('currentCharge') == true ? properties!['currentCharge'] : 0.0,
-      'leakageResistance': properties?.containsKey('leakageResistance') == true ? properties!['leakageResistance'] : 1000000.0,
-    },
-  ) {
+          type: ComponentType.capacitor,
+          properties: {
+            ...?properties,
+            'capacitance': properties?.containsKey('capacitance') == true
+                ? properties!['capacitance']
+                : 0.001,
+            'voltageRating': properties?.containsKey('voltageRating') == true
+                ? properties!['voltageRating']
+                : 25.0,
+            'currentCharge': properties?.containsKey('currentCharge') == true
+                ? properties!['currentCharge']
+                : 0.0,
+            'leakageResistance':
+                properties?.containsKey('leakageResistance') == true
+                    ? properties!['leakageResistance']
+                    : 1000000.0,
+          },
+        ) {
     // Validate component properties on creation
     _validateCapacitance(capacity);
     _validateVoltageRating(maxVoltage);
@@ -32,13 +42,14 @@ class Capacitor extends CircuitComponent {
   double get capacity => getProperty<double>('capacitance', 0.001);
 
   /// Operating voltage rating in volts
-  double get maxVoltage => getProperty<double>('voltageRating', 25.0);
+  double get maxVoltage => getProperty<double>('voltageRating', 25);
 
   /// Current charge stored in coulombs
-  double get currentCharge => getProperty<double>('currentCharge', 0.0);
+  double get currentCharge => getProperty<double>('currentCharge', 0);
 
   /// Leakage resistance in ohms (simulates real-world capacitor behavior)
-  double get leakageResistance => getProperty<double>('leakageResistance', 1000000.0);
+  double get leakageResistance =>
+      getProperty<double>('leakageResistance', 1000000);
 
   /// Current stored energy in joules (0.5 * C * V²)
   double get storedEnergy => 0.5 * capacity * voltage * voltage;
@@ -47,6 +58,7 @@ class Capacitor extends CircuitComponent {
   double get voltage => currentCharge / capacity;
 
   /// Calculate current through capacitor (I = C * dV/dt)
+  @override
   double calculateCurrent(double dVoltageDt) => capacity * dVoltageDt;
 
   /// Calculate charge stored given voltage
@@ -67,7 +79,8 @@ class Capacitor extends CircuitComponent {
   /// Simulate capacitor charging (returns new charge level)
   double charge(double voltageSource, double resistance, double timeStep) {
     final timeConstant = timeStep / (resistance * capacity);
-    final newVoltage = voltage + (voltageSource - voltage) * (1 - exp(-timeConstant));
+    final newVoltage =
+        voltage + (voltageSource - voltage) * (1 - exp(-timeConstant));
     final newCharge = calculateCharge(newVoltage);
 
     setProperty('currentCharge', newCharge);
@@ -87,7 +100,8 @@ class Capacitor extends CircuitComponent {
   /// Set current charge level
   void setCharge(double charge) {
     if (charge.abs() > maxChargeRating()) {
-      final warning = 'Charge ${charge.toStringAsFixed(6)}C exceeds rating ${maxChargeRating().toStringAsFixed(6)}C';
+      final warning =
+          'Charge ${charge.toStringAsFixed(6)}C exceeds rating ${maxChargeRating().toStringAsFixed(6)}C';
       StructuredLogger.warning('⚠️ CAPACITOR WARNING: $warning');
       setProperty('overCharged', true);
       setProperty('error', 'overload');
@@ -108,21 +122,24 @@ class Capacitor extends CircuitComponent {
   List<String> get requiredConnections => ['anode', 'cathode'];
 
   @override
+  double get resistance => leakageResistance;
+
+  @override
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'type': type.toString(),
-    'row': row,
-    'col': col,
-    'state': state.toString(),
-    'properties': properties,
-    'rotation': rotation,
-    'capacitance': capacity,
-    'voltageRating': maxVoltage,
-    'currentCharge': currentCharge,
-    'leakageResistance': leakageResistance,
-    'storedEnergy': storedEnergy,
-    'isWithinRating': isChargeWithinRating(),
-  };
+        'id': id,
+        'type': type.toString(),
+        'row': row,
+        'col': col,
+        'state': state.toString(),
+        'properties': properties,
+        'rotation': rotation,
+        'capacitance': capacity,
+        'voltageRating': maxVoltage,
+        'currentCharge': currentCharge,
+        'leakageResistance': leakageResistance,
+        'storedEnergy': storedEnergy,
+        'isWithinRating': isChargeWithinRating(),
+      };
 
   @override
   CircuitComponent copyWith({
@@ -134,7 +151,8 @@ class Capacitor extends CircuitComponent {
     Map<String, dynamic>? properties,
     int? rotation,
   }) {
-    final newProperties = properties ?? Map<String, dynamic>.from(this.properties);
+    final newProperties =
+        properties ?? Map<String, dynamic>.from(this.properties);
 
     if (row != null || col != null) {
       _validatePosition(row ?? this.row, col ?? this.col);
@@ -161,20 +179,22 @@ class Capacitor extends CircuitComponent {
         rotation: model.rotation,
       );
     } catch (e) {
-      StructuredLogger.error('❌ Capacitor.fromComponentModel failed for component ${model.id}: $e');
+      StructuredLogger.error(
+          '❌ Capacitor.fromComponentModel failed for component ${model.id}: $e');
       StructuredLogger.error('   Stack trace: ${StackTrace.current}');
 
       // EMERGENCY FALLBACK - Create component with safe defaults
-      StructuredLogger.warning('🛡️ Creating fallback capacitor for ${model.id}');
+      StructuredLogger.warning(
+          '🛡️ Creating fallback capacitor for ${model.id}');
       return Capacitor(
         id: model.id,
         row: model.row,
         col: model.col,
         state: ComponentState.error,
         properties: {
-          'capacitance': 0.001,           // 1µF default
-          'voltageRating': 25.0,          // 25V default
-          'currentCharge': 0.0,           // No charge initially
+          'capacitance': 0.001, // 1µF default
+          'voltageRating': 25.0, // 25V default
+          'currentCharge': 0.0, // No charge initially
           'error': e.toString(),
           'fallback_created': DateTime.now().toIso8601String(),
         },
@@ -187,7 +207,8 @@ class Capacitor extends CircuitComponent {
     if (value <= 0) {
       throw ArgumentError('Capacitance must be positive: $value F');
     }
-    if (value > 1000) { // 1000µF reasonable upper limit
+    if (value > 1000) {
+      // 1000µF reasonable upper limit
       throw ArgumentError('Capacitance too high (max 1000µF): $value F');
     }
   }
@@ -196,22 +217,24 @@ class Capacitor extends CircuitComponent {
     if (value <= 0) {
       throw ArgumentError('Voltage rating must be positive: $value V');
     }
-    if (value > 1000) { // 1000V reasonable upper limit
+    if (value > 1000) {
+      // 1000V reasonable upper limit
       throw ArgumentError('Voltage rating too high (max 1000V): $value V');
     }
   }
 
   void _validatePosition(int row, int col) {
     if (row < 0 || col < 0) {
-      throw ArgumentError('Component position must be non-negative: ($row, $col)');
+      throw ArgumentError(
+          'Component position must be non-negative: ($row, $col)');
     }
   }
 
   @override
   String toString() {
     return 'Capacitor(id: $id, C: ${capacity.toStringAsFixed(6)}F, '
-           'V: ${voltage.toStringAsFixed(2)}V/${maxVoltage.toStringAsFixed(1)}V MAX, '
-           'Q: ${currentCharge.toStringAsFixed(6)}C, E: ${storedEnergy.toStringAsFixed(6)}J, '
-           'state: $state)';
+        'V: ${voltage.toStringAsFixed(2)}V/${maxVoltage.toStringAsFixed(1)}V MAX, '
+        'Q: ${currentCharge.toStringAsFixed(6)}C, E: ${storedEnergy.toStringAsFixed(6)}J, '
+        'state: $state)';
   }
 }

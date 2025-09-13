@@ -16,7 +16,8 @@ class ViewportState with _$ViewportState {
   }) = _ViewportState;
 }
 
-final viewportServiceProvider = StateNotifierProvider.family<ViewportService, ViewportState, String>(
+final viewportServiceProvider =
+    StateNotifierProvider.family<ViewportService, ViewportState, String>(
   (ref, levelId) => ViewportService(
     initialState: const ViewportState(),
   ),
@@ -43,7 +44,6 @@ class ViewportService extends StateNotifier<ViewportState> {
     state = const ViewportState();
   }
 
-
   /// Calculate visible grid bounds for optimization
   /// Calculate visible grid bounds for optimization
   Rect getVisibleGridBounds() {
@@ -55,11 +55,13 @@ class ViewportService extends StateNotifier<ViewportState> {
       panOffset: state.panOffset,
     );
 
-    final topLeft = const Offset(0, 0);
+    const topLeft = Offset(0, 0);
     final bottomRight = Offset(state.canvasSize.width, state.canvasSize.height);
 
-    final topLeftGrid = UnifiedCoordinateService().screenToGrid(topLeft, gridConfig);
-    final bottomRightGrid = UnifiedCoordinateService().screenToGrid(bottomRight, gridConfig);
+    final topLeftGrid =
+        UnifiedCoordinateService().screenToGrid(topLeft, gridConfig);
+    final bottomRightGrid =
+        UnifiedCoordinateService().screenToGrid(bottomRight, gridConfig);
 
     return Rect.fromPoints(topLeftGrid, bottomRightGrid);
   }

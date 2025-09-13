@@ -12,26 +12,39 @@ void main() {
 
         // Test valid positions
         final validPositions = [
-          [0, 0], [2, 3], [4, 4], [0, 4], [4, 0]
+          [0, 0],
+          [2, 3],
+          [4, 4],
+          [0, 4],
+          [4, 0]
         ];
 
         for (final pos in validPositions) {
-          final row = pos[0] as int;
-          final col = pos[1] as int;
+          final row = pos[0];
+          final col = pos[1];
           final isValid = row >= 0 && row < rows && col >= 0 && col < cols;
-          expect(isValid, isTrue, reason: 'Position ($row, $col) should be valid in ${rows}x${cols} grid');
+          expect(isValid, isTrue,
+              reason:
+                  'Position ($row, $col) should be valid in ${rows}x$cols grid');
         }
 
         // Test invalid positions
         final invalidPositions = [
-          [-1, 0], [0, -1], [5, 0], [0, 5], [5, 5], [-1, -1]
+          [-1, 0],
+          [0, -1],
+          [5, 0],
+          [0, 5],
+          [5, 5],
+          [-1, -1]
         ];
 
         for (final pos in invalidPositions) {
-          final row = pos[0] as int;
-          final col = pos[1] as int;
+          final row = pos[0];
+          final col = pos[1];
           final isValid = row >= 0 && row < rows && col >= 0 && col < cols;
-          expect(isValid, isFalse, reason: 'Position ($row, $col) should be invalid in ${rows}x${cols} grid');
+          expect(isValid, isFalse,
+              reason:
+                  'Position ($row, $col) should be invalid in ${rows}x$cols grid');
         }
       });
 
@@ -41,10 +54,14 @@ void main() {
         const cols = 20;
 
         // Test edge cases
-        expect(0 >= 0 && 0 < rows && 0 >= 0 && 0 < cols, isTrue, reason: 'Top-left corner should be valid');
-        expect(9 >= 0 && 9 < rows && 19 >= 0 && 19 < cols, isTrue, reason: 'Bottom-right corner should be valid');
-        expect(10 >= 0 && 10 < rows && 0 >= 0 && 0 < cols, isFalse, reason: 'Row 10 should be invalid');
-        expect(0 >= 0 && 0 < rows && 20 >= 0 && 20 < cols, isFalse, reason: 'Col 20 should be invalid');
+        expect(0 >= 0 && 0 < rows && 0 >= 0 && 0 < cols, isTrue,
+            reason: 'Top-left corner should be valid');
+        expect(9 >= 0 && 9 < rows && 19 >= 0 && 19 < cols, isTrue,
+            reason: 'Bottom-right corner should be valid');
+        expect(10 >= 0 && 10 < rows && 0 >= 0 && 0 < cols, isFalse,
+            reason: 'Row 10 should be invalid');
+        expect(0 >= 0 && 0 < rows && 20 >= 0 && 20 < cols, isFalse,
+            reason: 'Col 20 should be invalid');
       });
 
       test('should validate 20x10 grid bounds correctly', () {
@@ -54,9 +71,9 @@ void main() {
 
         // Test various positions
         final testCases = [
-          [0, 0, true],   // Valid: top-left
-          [19, 9, true],  // Valid: bottom-right
-          [10, 5, true],  // Valid: middle
+          [0, 0, true], // Valid: top-left
+          [19, 9, true], // Valid: bottom-right
+          [10, 5, true], // Valid: middle
           [20, 0, false], // Invalid: row out of bounds
           [0, 10, false], // Invalid: col out of bounds
           [-1, 5, false], // Invalid: negative row
@@ -70,7 +87,8 @@ void main() {
 
           final isValid = row >= 0 && row < rows && col >= 0 && col < cols;
           expect(isValid, equals(expected),
-                 reason: 'Position ($row, $col) validation should be $expected in ${rows}x${cols} grid');
+              reason:
+                  'Position ($row, $col) validation should be $expected in ${rows}x$cols grid');
         }
       });
 
@@ -80,18 +98,25 @@ void main() {
         const cols = 1;
 
         // Only (0,0) should be valid
-        expect(0 >= 0 && 0 < rows && 0 >= 0 && 0 < cols, isTrue, reason: 'Position (0,0) should be valid in 1x1 grid');
+        expect(0 >= 0 && 0 < rows && 0 >= 0 && 0 < cols, isTrue,
+            reason: 'Position (0,0) should be valid in 1x1 grid');
 
         // All other positions should be invalid
         final invalidPositions = [
-          [1, 0], [0, 1], [1, 1], [-1, 0], [0, -1], [-1, -1]
+          [1, 0],
+          [0, 1],
+          [1, 1],
+          [-1, 0],
+          [0, -1],
+          [-1, -1]
         ];
 
         for (final pos in invalidPositions) {
-          final row = pos[0] as int;
-          final col = pos[1] as int;
+          final row = pos[0];
+          final col = pos[1];
           final isValid = row >= 0 && row < rows && col >= 0 && col < cols;
-          expect(isValid, isFalse, reason: 'Position ($row, $col) should be invalid in 1x1 grid');
+          expect(isValid, isFalse,
+              reason: 'Position ($row, $col) should be invalid in 1x1 grid');
         }
       });
 
@@ -101,16 +126,22 @@ void main() {
         const cols = 100;
 
         // Test corners
-        expect(0 >= 0 && 0 < rows && 0 >= 0 && 0 < cols, isTrue, reason: 'Top-left corner should be valid');
-        expect(99 >= 0 && 99 < rows && 99 >= 0 && 99 < cols, isTrue, reason: 'Bottom-right corner should be valid');
+        expect(0 >= 0 && 0 < rows && 0 >= 0 && 0 < cols, isTrue,
+            reason: 'Top-left corner should be valid');
+        expect(99 >= 0 && 99 < rows && 99 >= 0 && 99 < cols, isTrue,
+            reason: 'Bottom-right corner should be valid');
 
         // Test out of bounds
-        expect(100 >= 0 && 100 < rows && 0 >= 0 && 0 < cols, isFalse, reason: 'Row 100 should be invalid');
-        expect(0 >= 0 && 0 < rows && 100 >= 0 && 100 < cols, isFalse, reason: 'Col 100 should be invalid');
+        expect(100 >= 0 && 100 < rows && 0 >= 0 && 0 < cols, isFalse,
+            reason: 'Row 100 should be invalid');
+        expect(0 >= 0 && 0 < rows && 100 >= 0 && 100 < cols, isFalse,
+            reason: 'Col 100 should be invalid');
 
         // Test negative values
-        expect((-1) >= 0 && (-1) < rows && 0 >= 0 && 0 < cols, isFalse, reason: 'Negative row should be invalid');
-        expect(0 >= 0 && 0 < rows && (-1) >= 0 && (-1) < cols, isFalse, reason: 'Negative col should be invalid');
+        expect((-1) >= 0 && (-1) < rows && 0 >= 0 && 0 < cols, isFalse,
+            reason: 'Negative row should be invalid');
+        expect(0 >= 0 && 0 < rows && (-1) >= 0 && (-1) < cols, isFalse,
+            reason: 'Negative col should be invalid');
       });
     });
 
@@ -122,14 +153,18 @@ void main() {
 
         // All positions should be invalid with zero rows
         final testPositions = [
-          [0, 0], [-1, 0], [0, 4], [0, 5]
+          [0, 0],
+          [-1, 0],
+          [0, 4],
+          [0, 5]
         ];
 
         for (final pos in testPositions) {
-          final row = pos[0] as int;
-          final col = pos[1] as int;
+          final row = pos[0];
+          final col = pos[1];
           final isValid = row >= 0 && row < rows && col >= 0 && col < cols;
-          expect(isValid, isFalse, reason: 'All positions should be invalid with zero rows');
+          expect(isValid, isFalse,
+              reason: 'All positions should be invalid with zero rows');
         }
       });
 
@@ -140,14 +175,18 @@ void main() {
 
         // All positions should be invalid with zero cols
         final testPositions = [
-          [0, 0], [0, -1], [4, 0], [5, 0]
+          [0, 0],
+          [0, -1],
+          [4, 0],
+          [5, 0]
         ];
 
         for (final pos in testPositions) {
-          final row = pos[0] as int;
-          final col = pos[1] as int;
+          final row = pos[0];
+          final col = pos[1];
           final isValid = row >= 0 && row < rows && col >= 0 && col < cols;
-          expect(isValid, isFalse, reason: 'All positions should be invalid with zero cols');
+          expect(isValid, isFalse,
+              reason: 'All positions should be invalid with zero cols');
         }
       });
 
@@ -158,14 +197,18 @@ void main() {
 
         // All positions should be invalid with negative dimensions
         final testPositions = [
-          [0, 0], [-1, -1], [0, 0]
+          [0, 0],
+          [-1, -1],
+          [0, 0]
         ];
 
         for (final pos in testPositions) {
-          final row = pos[0] as int;
-          final col = pos[1] as int;
+          final row = pos[0];
+          final col = pos[1];
           final isValid = row >= 0 && row < rows && col >= 0 && col < cols;
-          expect(isValid, isFalse, reason: 'All positions should be invalid with negative dimensions');
+          expect(isValid, isFalse,
+              reason:
+                  'All positions should be invalid with negative dimensions');
         }
       });
     });
@@ -175,7 +218,10 @@ void main() {
         // Given
         const gridRows = 8;
         const gridCols = 10;
-        final occupiedPositions = <String>{'2,3', '5,7'}; // Some occupied positions
+        final occupiedPositions = <String>{
+          '2,3',
+          '5,7'
+        }; // Some occupied positions
 
         final placementAttempts = [
           // [row, col, shouldBeValid, reason]
@@ -197,7 +243,8 @@ void main() {
           final reason = attempt[3] as String;
 
           // Check bounds
-          final withinBounds = row >= 0 && row < gridRows && col >= 0 && col < gridCols;
+          final withinBounds =
+              row >= 0 && row < gridRows && col >= 0 && col < gridCols;
 
           // Check if occupied
           final positionKey = '$row,$col';
@@ -235,7 +282,8 @@ void main() {
           final description = scenario[3] as String;
 
           // Multi-step validation
-          final withinBounds = row >= 0 && row < gridRows && col >= 0 && col < gridCols;
+          final withinBounds =
+              row >= 0 && row < gridRows && col >= 0 && col < gridCols;
           final positionKey = '$row,$col';
           final isOccupied = occupiedPositions.contains(positionKey);
           final isReserved = reservedPositions.contains(positionKey);
@@ -243,7 +291,7 @@ void main() {
           final isValid = withinBounds && !isOccupied && !isReserved;
 
           expect(isValid, equals(expectedValid),
-                 reason: '$description - Position ($row,$col) validation');
+              reason: '$description - Position ($row,$col) validation');
         }
       });
     });
@@ -268,7 +316,7 @@ void main() {
           final expected = pos[2] as bool;
           final isValid = row >= 0 && row < rows && col >= 0 && col < cols;
           expect(isValid, equals(expected),
-                 reason: 'Large grid validation should work correctly');
+              reason: 'Large grid validation should work correctly');
         }
       });
 
@@ -295,9 +343,9 @@ void main() {
           final actualCol = (pixelX / cellSize).floor();
 
           expect(actualRow, equals(expectedRow),
-                 reason: 'Row calculation should handle floating point precision');
+              reason: 'Row calculation should handle floating point precision');
           expect(actualCol, equals(expectedCol),
-                 reason: 'Col calculation should handle floating point precision');
+              reason: 'Col calculation should handle floating point precision');
         }
       });
 
@@ -308,18 +356,20 @@ void main() {
         final validationRequests = <List<int>>[];
 
         // Generate many validation requests
-        for (int i = 0; i < 1000; i++) {
-          validationRequests.add([i % 25, i % 35]); // Mix of valid and invalid positions
+        for (var i = 0; i < 1000; i++) {
+          validationRequests
+              .add([i % 25, i % 35]); // Mix of valid and invalid positions
         }
 
         // When - process all requests
-        int validCount = 0;
-        int invalidCount = 0;
+        var validCount = 0;
+        var invalidCount = 0;
 
         for (final request in validationRequests) {
-          final row = request[0] as int;
-          final col = request[1] as int;
-          final isValid = row >= 0 && row < gridRows && col >= 0 && col < gridCols;
+          final row = request[0];
+          final col = request[1];
+          final isValid =
+              row >= 0 && row < gridRows && col >= 0 && col < gridCols;
 
           if (isValid) {
             validCount++;
@@ -330,9 +380,11 @@ void main() {
 
         // Then - verify results
         expect(validCount + invalidCount, equals(validationRequests.length),
-               reason: 'All requests should be processed');
-        expect(validCount, greaterThan(0), reason: 'Should have some valid positions');
-        expect(invalidCount, greaterThan(0), reason: 'Should have some invalid positions');
+            reason: 'All requests should be processed');
+        expect(validCount, greaterThan(0),
+            reason: 'Should have some valid positions');
+        expect(invalidCount, greaterThan(0),
+            reason: 'Should have some invalid positions');
       });
     });
   });

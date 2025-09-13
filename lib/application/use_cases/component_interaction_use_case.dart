@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/unified_providers.dart';
+
+import '../../core/debug/structured_logger.dart';
 import '../../core/migration/migration_tracker.dart';
 import '../../presentation/state/palette_state.dart';
-import '../providers/game_canvas_providers.dart' as canvas_providers;
-import '../providers/core_providers.dart';
 import '../core/result.dart';
-import '../../core/debug/structured_logger.dart';
+import '../providers/core_providers.dart';
+import '../providers/game_canvas_providers.dart' as canvas_providers;
+import '../providers/unified_providers.dart';
 
 // ✅ CLEAN ARCHITECTURE: Proper use case with dependency injection
 class ComponentInteractionUseCase {
-  final dynamic gameNotifier;          // ✅ Injected
-  final dynamic interactionNotifier;   // ✅ Injected
-  final dynamic paletteNotifier;       // ✅ Injected
-  final dynamic gestureNotifier;       // ✅ Injected
+  final dynamic gameNotifier; // ✅ Injected
+  final dynamic interactionNotifier; // ✅ Injected
+  final dynamic paletteNotifier; // ✅ Injected
+  final dynamic gestureNotifier; // ✅ Injected
   final String levelId;
 
   ComponentInteractionUseCase({
@@ -52,14 +53,16 @@ class ComponentInteractionUseCase {
       });
       return const Success(null);
     } catch (e, stackTrace) {
-      StructuredLogger.error('💥 USE CASE: DRAG START FAILED', context: {
-        'componentId': componentId,
-        'position': position.toString(),
-        'levelId': levelId,
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-        'timestamp': DateTime.now().toIso8601String(),
-      }, error: e);
+      StructuredLogger.error('💥 USE CASE: DRAG START FAILED',
+          context: {
+            'componentId': componentId,
+            'position': position.toString(),
+            'levelId': levelId,
+            'error': e.toString(),
+            'stackTrace': stackTrace.toString(),
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+          error: e);
       return Failure('Drag start failed: $e');
     }
   }
@@ -75,13 +78,15 @@ class ComponentInteractionUseCase {
       gameNotifier.dragUpdate(position);
       return const Success(null);
     } catch (e, stackTrace) {
-      StructuredLogger.error('💥 USE CASE: DRAG UPDATE FAILED', context: {
-        'position': position.toString(),
-        'levelId': levelId,
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-        'timestamp': DateTime.now().toIso8601String(),
-      }, error: e);
+      StructuredLogger.error('💥 USE CASE: DRAG UPDATE FAILED',
+          context: {
+            'position': position.toString(),
+            'levelId': levelId,
+            'error': e.toString(),
+            'stackTrace': stackTrace.toString(),
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+          error: e);
       return Failure('Drag update failed: $e');
     }
   }
@@ -100,12 +105,14 @@ class ComponentInteractionUseCase {
       });
       return const Success(null);
     } catch (e, stackTrace) {
-      StructuredLogger.error('💥 USE CASE: DRAG END FAILED', context: {
-        'levelId': levelId,
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-        'timestamp': DateTime.now().toIso8601String(),
-      }, error: e);
+      StructuredLogger.error('💥 USE CASE: DRAG END FAILED',
+          context: {
+            'levelId': levelId,
+            'error': e.toString(),
+            'stackTrace': stackTrace.toString(),
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+          error: e);
       return Failure('Drag end failed: $e');
     }
   }
@@ -131,18 +138,21 @@ class ComponentInteractionUseCase {
 }
 
 // ✅ DEPENDENCY INJECTION PROVIDER
-final componentInteractionUseCaseProvider = Provider.family<ComponentInteractionUseCase, String>(
+final componentInteractionUseCaseProvider =
+    Provider.family<ComponentInteractionUseCase, String>(
   (ref, levelId) {
-    MigrationTracker.markFileMigrated('component_interaction_use_case.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated('component_interaction_use_case.dart',
+        DateTime.now().toIso8601String());
     return ComponentInteractionUseCase(
       gameNotifier: ref.read(unifiedGameStateProvider.notifier),
       interactionNotifier: ref.read(interactionStateProvider(levelId).notifier),
       paletteNotifier: ref.read(paletteStateProvider(levelId).notifier),
-      gestureNotifier: ref.read(canvas_providers.gameCanvasOrchestratorProvider(levelId).notifier),
+      gestureNotifier: ref.read(
+          canvas_providers.gameCanvasOrchestratorProvider(levelId).notifier),
       levelId: levelId,
     );
   },
 );
 
-  // TODO: Migrate callers to ComponentInteractionUseCase instance - remove static helpers to eliminate ref.read() anti-pattern
-  // Previous backward compatibility classes (ComponentInteractionHelper, PaletteManagementHelper, GestureManagementHelper) removed
+// TODO: Migrate callers to ComponentInteractionUseCase instance - remove static helpers to eliminate ref.read() anti-pattern
+// Previous backward compatibility classes (ComponentInteractionHelper, PaletteManagementHelper, GestureManagementHelper) removed

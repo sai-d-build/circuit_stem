@@ -1,10 +1,11 @@
+import 'package:sparkcircuit/core/services/coordinate_service.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+import 'package:sparkcircuit/presentation/features/game/painters/circuit_components_painter.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/component_painter.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/wire_painter.dart';
-import 'package:sparkcircuit/presentation/features/game/painters/circuit_components_painter.dart';
-import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart' as drawing_models;
-import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'package:sparkcircuit/core/services/coordinate_service.dart';
+import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart'
+    as drawing_models;
 
 /// Factory class for creating painter instances
 /// Provides a centralized way to instantiate painters with proper dependencies

@@ -23,7 +23,8 @@ class NeonSlider extends StatefulWidget {
   State<NeonSlider> createState() => _NeonSliderState();
 }
 
-class _NeonSliderState extends State<NeonSlider> with SingleTickerProviderStateMixin {
+class _NeonSliderState extends State<NeonSlider>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _glowAnimation;
 
@@ -35,7 +36,7 @@ class _NeonSliderState extends State<NeonSlider> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    _glowAnimation = Tween(begin: 0.5, end: 1.0).animate(
+    _glowAnimation = Tween<double>(begin: 0.5, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -48,36 +49,37 @@ class _NeonSliderState extends State<NeonSlider> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<CircuitColorScheme>() ?? const CircuitColorScheme(
-      primary: Color(0xFF1E88E5),
-      onPrimary: Color(0xFFFFFFFF),
-      primaryContainer: Color(0xFFE3F2FD),
-      onPrimaryContainer: Color(0xFF0D47A1),
-      secondary: Color(0xFF43A047),
-      onSecondary: Color(0xFFFFFFFF),
-      tertiary: Color(0xFFFF8F00),
-      onTertiary: Color(0xFFFFFFFF),
-      error: Color(0xFFD32F2F),
-      onError: Color(0xFFFFFFFF),
-      errorContainer: Color(0xFFFFEBEE),
-      onErrorContainer: Color(0xFFB71C1C),
-      surface: Color(0xFFFAFAFA),
-      onSurface: Color(0xFF1C1C1C),
-      surfaceContainer: Color(0xFFEFEFEF),
-      onSurfaceVariant: Color(0xFF424242),
-      shadow: Color(0xFF000000),
-      outline: Color(0xFFBDBDBD),
-      wireActive: Color(0xFF00E676),
-      wireInactive: Color(0xFF616161),
-      componentBase: Color(0xFF2196F3),
-      gridLine: Color(0xFFE0E0E0),
-      glowEffect: Color(0xFF00E5FF),
-      neonPrimary: Color(0xFF00FFFF),
-      neonAccent: Color(0xFFFF00FF),
-      errorGlow: Color(0xFFFF0040),
-      energyPulse: Color(0xFF39FF14),
-      highlightAccent: Color(0xFFFFFF00),
-    );
+    final colors = Theme.of(context).extension<CircuitColorScheme>() ??
+        const CircuitColorScheme(
+          primary: Color(0xFF1E88E5),
+          onPrimary: Color(0xFFFFFFFF),
+          primaryContainer: Color(0xFFE3F2FD),
+          onPrimaryContainer: Color(0xFF0D47A1),
+          secondary: Color(0xFF43A047),
+          onSecondary: Color(0xFFFFFFFF),
+          tertiary: Color(0xFFFF8F00),
+          onTertiary: Color(0xFFFFFFFF),
+          error: Color(0xFFD32F2F),
+          onError: Color(0xFFFFFFFF),
+          errorContainer: Color(0xFFFFEBEE),
+          onErrorContainer: Color(0xFFB71C1C),
+          surface: Color(0xFFFAFAFA),
+          onSurface: Color(0xFF1C1C1C),
+          surfaceContainer: Color(0xFFEFEFEF),
+          onSurfaceVariant: Color(0xFF424242),
+          shadow: Color(0xFF000000),
+          outline: Color(0xFFBDBDBD),
+          wireActive: Color(0xFF00E676),
+          wireInactive: Color(0xFF616161),
+          componentBase: Color(0xFF2196F3),
+          gridLine: Color(0xFFE0E0E0),
+          glowEffect: Color(0xFF00E5FF),
+          neonPrimary: Color(0xFF00FFFF),
+          neonAccent: Color(0xFFFF00FF),
+          errorGlow: Color(0xFFFF0040),
+          energyPulse: Color(0xFF39FF14),
+          highlightAccent: Color(0xFFFFFF00),
+        );
     final textTheme = Theme.of(context).textTheme;
 
     return AnimatedBuilder(
@@ -94,7 +96,7 @@ class _NeonSliderState extends State<NeonSlider> with SingleTickerProviderStateM
                   shadows: [
                     BoxShadow(
                       color: colors.neonPrimary.withValues(alpha: 0.3),
-                      blurRadius: 4.0,
+                      blurRadius: 4,
                     ),
                   ],
                 ),
@@ -105,9 +107,10 @@ class _NeonSliderState extends State<NeonSlider> with SingleTickerProviderStateM
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: colors.neonPrimary.withValues(alpha: _glowAnimation.value * 0.4),
-                    blurRadius: 8.0,
-                    spreadRadius: 1.0,
+                    color: colors.neonPrimary
+                        .withValues(alpha: _glowAnimation.value * 0.4),
+                    blurRadius: 8,
+                    spreadRadius: 1,
                   ),
                 ],
               ),
@@ -118,11 +121,12 @@ class _NeonSliderState extends State<NeonSlider> with SingleTickerProviderStateM
                   thumbColor: colors.surface,
                   overlayColor: colors.neonPrimary.withValues(alpha: 0.2),
                   thumbShape: const RoundSliderThumbShape(
-                    enabledThumbRadius: 12.0,
-                    elevation: 4.0,
+                    enabledThumbRadius: 12,
+                    elevation: 4,
                   ),
-                  trackHeight: 4.0,
-                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 20.0),
+                  trackHeight: 4,
+                  overlayShape:
+                      const RoundSliderOverlayShape(overlayRadius: 20),
                   valueIndicatorColor: colors.neonPrimary,
                   valueIndicatorTextStyle: textTheme.bodyMedium?.copyWith(
                     color: colors.onPrimary,

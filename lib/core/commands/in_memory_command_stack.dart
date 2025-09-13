@@ -1,4 +1,3 @@
-
 import 'package:sparkcircuit/core/commands/command_stack.dart';
 import 'package:sparkcircuit/core/commands/game_command.dart';
 
@@ -10,9 +9,9 @@ class InMemoryCommandStack implements CommandStack {
   void push(GameCommand command) {
     // Remove any commands after the current index (redo history)
     if (_currentIndex < _history.length - 1) {
-      _history.removeRange(_currentIndex + 1, _history.length);
+      _history.removeRange(_currentIndex + 1, _history.length); // ignore: cascade_invocations
     }
-    _history.add(command);
+    _history.add(command); // ignore: cascade_invocations
     _currentIndex = _history.length - 1;
   }
 

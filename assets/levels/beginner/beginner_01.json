@@ -19,7 +19,33 @@
   "grid": {
     "width": 10,
     "height": 8,
-    "background": "circuit_board"
+    "background": "circuit_board",
+    "boundaries": {
+      "playableArea": {
+        "width": 20,
+        "height": 20,
+        "description": "Large circuit building area for beginners"
+      },
+      "visualArea": {
+        "width": 25,
+        "height": 25,
+        "description": "Extended visual area for component exploration"
+      },
+      "style": "solid",
+      "behavior": "expanding",
+      "settings": {
+        "showHints": false,
+        "highlightBoundaries": true,
+        "tutorialMode": false,
+        "boundaryColor": "#FF9800",
+        "boundaryWidth": 3.0,
+        "showGridLines": true,
+        "snapToGrid": true,
+        "progressiveExpansion": true,
+        "expansionRate": 0.1,
+        "initialExpansionDelay": 30
+      }
+    }
   },
   "components": {
     "available": [

@@ -6,7 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Canvas Accessibility Tests', () {
-    testWidgets('Canvas provides semantic labels for screen readers', (WidgetTester tester) async {
+    testWidgets('Canvas provides semantic labels for screen readers',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -25,7 +26,8 @@ void main() {
       debugPrint('✅ Accessibility test: Basic semantic structure verified');
     });
 
-    testWidgets('Focus management with keyboard navigation', (WidgetTester tester) async {
+    testWidgets('Focus management with keyboard navigation',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -49,7 +51,8 @@ void main() {
       debugPrint('✅ Accessibility test: Focus management verified');
     });
 
-    testWidgets('Color contrast meets accessibility standards', (WidgetTester tester) async {
+    testWidgets('Color contrast meets accessibility standards',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -71,7 +74,8 @@ void main() {
       // Test with high contrast theme
       expect(find.byType(Scaffold), findsOneWidget);
 
-      debugPrint('✅ Accessibility test: Color contrast verification placeholder');
+      debugPrint(
+          '✅ Accessibility test: Color contrast verification placeholder');
     });
   });
 }

@@ -10,8 +10,8 @@ void main() {
       config = const GridConfiguration(
         rows: 10,
         cols: 10,
-        cellSize: 60.0,
-        scale: 1.0,
+        cellSize: 60,
+        scale: 1,
         panOffset: Offset.zero,
       );
     });
@@ -20,14 +20,15 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       // Perform 1000 coordinate conversions
-      for (int i = 0; i < 1000; i++) {
+      for (var i = 0; i < 1000; i++) {
         final screenPos = Offset(i % 600, (i ~/ 600) * 60.0);
         GridService.screenToGrid(screenPos, config);
       }
 
       stopwatch.stop();
 
-      debugPrint('🔍 Performance test: 1000 coordinate conversions took ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint(
+          '🔍 Performance test: 1000 coordinate conversions took ${stopwatch.elapsedMilliseconds}ms');
       expect(stopwatch.elapsedMilliseconds, lessThan(1000));
     });
 
@@ -35,8 +36,8 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       // Test coordinate validation for 100 positions
-      int validCount = 0;
-      for (int i = 0; i < 100; i++) {
+      var validCount = 0;
+      for (var i = 0; i < 100; i++) {
         final gridPos = Offset(i % 10, (i ~/ 10) % 10);
         if (GridService.isInGridBounds(gridPos, config)) {
           validCount++;
@@ -45,7 +46,8 @@ void main() {
 
       stopwatch.stop();
 
-      debugPrint('🔍 Performance test: 100 coordinate validations took ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint(
+          '🔍 Performance test: 100 coordinate validations took ${stopwatch.elapsedMilliseconds}ms');
       expect(stopwatch.elapsedMilliseconds, lessThan(500));
       expect(validCount, equals(100)); // All should be valid in our 10x10 grid
     });
@@ -54,38 +56,40 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       // Test snapping 500 positions
-      for (int i = 0; i < 500; i++) {
+      for (var i = 0; i < 500; i++) {
         final screenPos = Offset(i * 1.2, i * 1.2);
         GridService.snapToGrid(screenPos, config);
       }
 
       stopwatch.stop();
 
-      debugPrint('🔍 Performance test: 500 snap operations took ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint(
+          '🔍 Performance test: 500 snap operations took ${stopwatch.elapsedMilliseconds}ms');
       expect(stopwatch.elapsedMilliseconds, lessThan(500));
     });
 
     test('Complex grid operations scale factor handling', () {
       final testConfigs = [
         config.copyWith(scale: 0.5),
-        config.copyWith(scale: 1.0),
-        config.copyWith(scale: 2.0),
-        config.copyWith(scale: 5.0),
+        config.copyWith(scale: 1),
+        config.copyWith(scale: 2),
+        config.copyWith(scale: 5),
       ];
 
       final stopwatch = Stopwatch()..start();
 
       // Test with different scales
       for (final testConfig in testConfigs) {
-        for (int i = 0; i < 100; i++) {
-          final screenPos = const Offset(300, 300);
+        for (var i = 0; i < 100; i++) {
+          const screenPos = Offset(300, 300);
           GridService.screenToGrid(screenPos, testConfig);
         }
       }
 
       stopwatch.stop();
 
-      debugPrint('🔍 Performance test: Scale factor operations took ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint(
+          '🔍 Performance test: Scale factor operations took ${stopwatch.elapsedMilliseconds}ms');
       expect(stopwatch.elapsedMilliseconds, lessThan(1000));
     });
 
@@ -99,7 +103,7 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       for (final panConfig in panConfigs) {
-        for (int i = 0; i < 200; i++) {
+        for (var i = 0; i < 200; i++) {
           final screenPos = Offset(200.0 + i, 200.0 + i);
           GridService.screenToGrid(screenPos, panConfig);
         }
@@ -107,30 +111,32 @@ void main() {
 
       stopwatch.stop();
 
-      debugPrint('🔍 Performance test: Pan offset operations took ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint(
+          '🔍 Performance test: Pan offset operations took ${stopwatch.elapsedMilliseconds}ms');
       expect(stopwatch.elapsedMilliseconds, lessThan(1000));
     });
 
     test('Edge case performance: boundary checking at scale', () {
-      final extremeConfig = const GridConfiguration(
+      const extremeConfig = GridConfiguration(
         rows: 1000,
         cols: 1000,
-        cellSize: 60.0,
-        scale: 10.0,
+        cellSize: 60,
+        scale: 10,
         panOffset: Offset(50000, 50000),
       );
 
       final stopwatch = Stopwatch()..start();
 
       // Test boundary operations on large grid
-      for (int i = 0; i < 100; i++) {
+      for (var i = 0; i < 100; i++) {
         final testPos = Offset(i * 100, i * 100);
         GridService.getValidGridPosition(testPos, extremeConfig);
       }
 
       stopwatch.stop();
 
-      debugPrint('🔍 Performance test: Large grid boundary check took ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint(
+          '🔍 Performance test: Large grid boundary check took ${stopwatch.elapsedMilliseconds}ms');
       expect(stopwatch.elapsedMilliseconds, lessThan(1000));
     });
 
@@ -138,7 +144,7 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       // Create 1000 configuration objects
-      for (int i = 0; i < 1000; i++) {
+      for (var i = 0; i < 1000; i++) {
         final testConfig = GridConfiguration(
           rows: 10 + (i % 10),
           cols: 10 + (i % 10),
@@ -148,13 +154,14 @@ void main() {
         );
 
         // Perform operation with new config
-        final testPos = const Offset(100, 100);
+        const testPos = Offset(100, 100);
         GridService.screenToGrid(testPos, testConfig);
       }
 
       stopwatch.stop();
 
-      debugPrint('🔍 Performance test: 1000 config creations took ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint(
+          '🔍 Performance test: 1000 config creations took ${stopwatch.elapsedMilliseconds}ms');
       expect(stopwatch.elapsedMilliseconds, lessThan(2000));
     });
 
@@ -164,9 +171,9 @@ void main() {
       // Simulate concurrent operations
       final futures = <Future>[];
 
-      for (int i = 0; i < 50; i++) {
+      for (var i = 0; i < 50; i++) {
         futures.add(Future(() {
-          for (int j = 0; j < 20; j++) {
+          for (var j = 0; j < 20; j++) {
             final screenPos = Offset(j * 10, j * 10);
             GridService.screenToGrid(screenPos, config);
           }
@@ -176,7 +183,8 @@ void main() {
       // Wait for all operations to complete
       Future.wait(futures).then((_) {
         stopwatch.stop();
-        debugPrint('🔍 Performance test: Concurrent operations took ${stopwatch.elapsedMilliseconds}ms');
+        debugPrint(
+            '🔍 Performance test: Concurrent operations took ${stopwatch.elapsedMilliseconds}ms');
         expect(stopwatch.elapsedMilliseconds, lessThan(10000));
       });
     });

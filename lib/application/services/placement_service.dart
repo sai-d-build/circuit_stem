@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
+
 import '../../core/commands/create_component_command.dart';
-import '../states/game_state.dart';
 import '../../core/debug/structured_logger.dart';
+import '../states/game_state.dart';
 
 /// Service for centralized component placement with transaction deduplication
 class PlacementService {
@@ -52,7 +53,8 @@ class PlacementService {
     }
 
     // Create component
-    final componentId = '${componentType.toString().split('.').last}_${DateTime.now().millisecondsSinceEpoch}';
+    final componentId =
+        '${componentType.toString().split('.').last}_${DateTime.now().millisecondsSinceEpoch}';
     final component = ComponentModel(
       id: componentId,
       type: componentType,

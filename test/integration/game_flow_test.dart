@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:sparkcircuit/core/persistence/storage_service.dart';
 
@@ -54,13 +54,13 @@ void main() {
   group('Game Flow Integration Tests', () {
     testWidgets('Game flow test framework is operational', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
-              body: Container(
+              body: SizedBox(
                 width: 400,
                 height: 400,
-                child: const Text('Game Flow Integration Test - Basic Framework'),
+                child: Text('Game Flow Integration Test - Basic Framework'),
               ),
             ),
           ),
@@ -69,19 +69,20 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('Game Flow Integration Test - Basic Framework'), findsOneWidget);
+      expect(find.text('Game Flow Integration Test - Basic Framework'),
+          findsOneWidget);
       expect(find.text('Exception'), findsNothing);
     });
 
     testWidgets('Mock storage service integration', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
-              body: Container(
+              body: SizedBox(
                 width: 400,
                 height: 400,
-                child: const Text('Storage Service Test'),
+                child: Text('Storage Service Test'),
               ),
             ),
           ),
@@ -91,8 +92,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Test that mock storage service is working
-      final testKey = 'test_key';
-      final testValue = 'test_value';
+      const testKey = 'test_key';
+      const testValue = 'test_value';
 
       await mockStorageService.saveData(testKey, testValue);
       final retrievedValue = mockStorageService.readData<String>(testKey);
@@ -102,13 +103,13 @@ void main() {
 
     testWidgets('Component placement service integration test', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
-              body: Container(
+              body: SizedBox(
                 width: 400,
                 height: 400,
-                child: const Text('Component Placement Service Test'),
+                child: Text('Component Placement Service Test'),
               ),
             ),
           ),

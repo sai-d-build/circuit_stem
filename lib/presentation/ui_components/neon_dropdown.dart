@@ -21,7 +21,8 @@ class NeonDropdown<T> extends StatefulWidget {
   State<NeonDropdown<T>> createState() => _NeonDropdownState<T>();
 }
 
-class _NeonDropdownState<T> extends State<NeonDropdown<T>> with SingleTickerProviderStateMixin {
+class _NeonDropdownState<T> extends State<NeonDropdown<T>>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _glowAnimation;
   final bool _isOpen = false;
@@ -47,36 +48,37 @@ class _NeonDropdownState<T> extends State<NeonDropdown<T>> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<CircuitColorScheme>() ?? const CircuitColorScheme(
-      primary: Color(0xFF1E88E5),
-      onPrimary: Color(0xFFFFFFFF),
-      primaryContainer: Color(0xFFE3F2FD),
-      onPrimaryContainer: Color(0xFF0D47A1),
-      secondary: Color(0xFF43A047),
-      onSecondary: Color(0xFFFFFFFF),
-      tertiary: Color(0xFFFF8F00),
-      onTertiary: Color(0xFFFFFFFF),
-      error: Color(0xFFD32F2F),
-      onError: Color(0xFFFFFFFF),
-      errorContainer: Color(0xFFFFEBEE),
-      onErrorContainer: Color(0xFFB71C1C),
-      surface: Color(0xFFFAFAFA),
-      onSurface: Color(0xFF1C1C1C),
-      surfaceContainer: Color(0xFFEFEFEF),
-      onSurfaceVariant: Color(0xFF424242),
-      shadow: Color(0xFF000000),
-      outline: Color(0xFFBDBDBD),
-      wireActive: Color(0xFF00E676),
-      wireInactive: Color(0xFF616161),
-      componentBase: Color(0xFF2196F3),
-      gridLine: Color(0xFFE0E0E0),
-      glowEffect: Color(0xFF00E5FF),
-      neonPrimary: Color(0xFF00FFFF),
-      neonAccent: Color(0xFFFF00FF),
-      errorGlow: Color(0xFFFF0040),
-      energyPulse: Color(0xFF39FF14),
-      highlightAccent: Color(0xFFFFFF00),
-    );
+    final colors = Theme.of(context).extension<CircuitColorScheme>() ??
+        const CircuitColorScheme(
+          primary: Color(0xFF1E88E5),
+          onPrimary: Color(0xFFFFFFFF),
+          primaryContainer: Color(0xFFE3F2FD),
+          onPrimaryContainer: Color(0xFF0D47A1),
+          secondary: Color(0xFF43A047),
+          onSecondary: Color(0xFFFFFFFF),
+          tertiary: Color(0xFFFF8F00),
+          onTertiary: Color(0xFFFFFFFF),
+          error: Color(0xFFD32F2F),
+          onError: Color(0xFFFFFFFF),
+          errorContainer: Color(0xFFFFEBEE),
+          onErrorContainer: Color(0xFFB71C1C),
+          surface: Color(0xFFFAFAFA),
+          onSurface: Color(0xFF1C1C1C),
+          surfaceContainer: Color(0xFFEFEFEF),
+          onSurfaceVariant: Color(0xFF424242),
+          shadow: Color(0xFF000000),
+          outline: Color(0xFFBDBDBD),
+          wireActive: Color(0xFF00E676),
+          wireInactive: Color(0xFF616161),
+          componentBase: Color(0xFF2196F3),
+          gridLine: Color(0xFFE0E0E0),
+          glowEffect: Color(0xFF00E5FF),
+          neonPrimary: Color(0xFF00FFFF),
+          neonAccent: Color(0xFFFF00FF),
+          errorGlow: Color(0xFFFF0040),
+          energyPulse: Color(0xFF39FF14),
+          highlightAccent: Color(0xFFFFFF00),
+        );
     final textTheme = Theme.of(context).textTheme;
 
     return AnimatedBuilder(
@@ -93,7 +95,7 @@ class _NeonDropdownState<T> extends State<NeonDropdown<T>> with SingleTickerProv
                   shadows: [
                     BoxShadow(
                       color: colors.neonPrimary.withValues(alpha: 0.3),
-                      blurRadius: 4.0,
+                      blurRadius: 4,
                     ),
                   ],
                 ),
@@ -102,16 +104,17 @@ class _NeonDropdownState<T> extends State<NeonDropdown<T>> with SingleTickerProv
             ],
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: colors.neonPrimary.withValues(alpha: 0.6),
-                  width: 2.0,
+                  width: 2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: colors.neonPrimary.withValues(alpha: _glowAnimation.value * 0.4),
-                    blurRadius: 12.0,
-                    spreadRadius: 1.0,
+                    color: colors.neonPrimary
+                        .withValues(alpha: _glowAnimation.value * 0.4),
+                    blurRadius: 12,
+                    spreadRadius: 1,
                   ),
                 ],
                 color: colors.surface.withValues(alpha: 0.1),
@@ -134,7 +137,8 @@ class _NeonDropdownState<T> extends State<NeonDropdown<T>> with SingleTickerProv
                           )
                         : null,
                     isExpanded: true,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     style: textTheme.bodyLarge?.copyWith(
                       color: colors.onSurface,
                     ),
@@ -148,7 +152,7 @@ class _NeonDropdownState<T> extends State<NeonDropdown<T>> with SingleTickerProv
                         size: 24,
                       ),
                     ),
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(8),
                     elevation: 8,
                   ),
                 ),

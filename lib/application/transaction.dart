@@ -12,11 +12,13 @@ class GameTransaction {
   /// Register a handler to be called when the transaction commits
   void onCommit(Future<void> Function() handler) {
     if (_isCommitted || _isRolledBack) {
-      StructuredLogger.error('💥 Transaction: Cannot add commit handler to completed transaction', context: {
-        'isCommitted': _isCommitted,
-        'isRolledBack': _isRolledBack,
-        'timestamp': DateTime.now().toIso8601String(),
-      });
+      StructuredLogger.error(
+          '💥 Transaction: Cannot add commit handler to completed transaction',
+          context: {
+            'isCommitted': _isCommitted,
+            'isRolledBack': _isRolledBack,
+            'timestamp': DateTime.now().toIso8601String(),
+          });
       throw StateError('Cannot add handlers to a completed transaction');
     }
     _commitHandlers.add(handler);
@@ -34,11 +36,13 @@ class GameTransaction {
   /// Register a handler to be called when the transaction rolls back
   void onRollback(VoidCallback handler) {
     if (_isCommitted || _isRolledBack) {
-      StructuredLogger.error('💥 Transaction: Cannot add rollback handler to completed transaction', context: {
-        'isCommitted': _isCommitted,
-        'isRolledBack': _isRolledBack,
-        'timestamp': DateTime.now().toIso8601String(),
-      });
+      StructuredLogger.error(
+          '💥 Transaction: Cannot add rollback handler to completed transaction',
+          context: {
+            'isCommitted': _isCommitted,
+            'isRolledBack': _isRolledBack,
+            'timestamp': DateTime.now().toIso8601String(),
+          });
       throw StateError('Cannot add handlers to a completed transaction');
     }
     _rollbackHandlers.add(handler);
@@ -57,9 +61,11 @@ class GameTransaction {
       return;
     }
     if (_isRolledBack) {
-      StructuredLogger.error('💥 Transaction: Cannot commit rolled back transaction', context: {
-        'timestamp': DateTime.now().toIso8601String(),
-      });
+      StructuredLogger.error(
+          '💥 Transaction: Cannot commit rolled back transaction',
+          context: {
+            'timestamp': DateTime.now().toIso8601String(),
+          });
       throw StateError('Cannot commit a rolled back transaction');
     }
 
@@ -77,20 +83,23 @@ class GameTransaction {
         await _commitHandlers[i]();
         final handlerDuration = DateTime.now().difference(handlerStart);
         successCount++;
-        StructuredLogger.debug('✅ Transaction: Commit handler ${i+1}/${_commitHandlers.length} completed', context: {
-          'handlerIndex': i,
-          'executionTimeMs': handlerDuration.inMilliseconds,
-          'timestamp': DateTime.now().toIso8601String(),
-        });
+        StructuredLogger.debug(
+            '✅ Transaction: Commit handler ${i + 1}/${_commitHandlers.length} completed',
+            context: {
+              'handlerIndex': i,
+              'executionTimeMs': handlerDuration.inMilliseconds,
+              'timestamp': DateTime.now().toIso8601String(),
+            });
       } catch (e, stack) {
         final handlerDuration = DateTime.now().difference(handlerStart);
-        StructuredLogger.error('💥 Transaction: Commit handler ${i+1} failed', context: {
-          'handlerIndex': i,
-          'error': e.toString(),
-          'executionTimeMs': handlerDuration.inMilliseconds,
-          'timestamp': DateTime.now().toIso8601String(),
-          'stackTrace': stack.toString(),
-        });
+        StructuredLogger.error('💥 Transaction: Commit handler ${i + 1} failed',
+            context: {
+              'handlerIndex': i,
+              'error': e.toString(),
+              'executionTimeMs': handlerDuration.inMilliseconds,
+              'timestamp': DateTime.now().toIso8601String(),
+              'stackTrace': stack.toString(),
+            });
         // Continue with other handlers even if one fails
       }
     }
@@ -115,18 +124,21 @@ class GameTransaction {
       return;
     }
     if (_isCommitted) {
-      StructuredLogger.error('💥 Transaction: Cannot rollback committed transaction', context: {
-        'timestamp': DateTime.now().toIso8601String(),
-      });
+      StructuredLogger.error(
+          '💥 Transaction: Cannot rollback committed transaction',
+          context: {
+            'timestamp': DateTime.now().toIso8601String(),
+          });
       throw StateError('Cannot rollback a committed transaction');
     }
 
     _isRolledBack = true;
-    StructuredLogger.info('↩️ Transaction: Starting rollback execution', context: {
-      'rollbackHandlerCount': _rollbackHandlers.length,
-      'commitHandlersCount': _commitHandlers.length,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    StructuredLogger.info('↩️ Transaction: Starting rollback execution',
+        context: {
+          'rollbackHandlerCount': _rollbackHandlers.length,
+          'commitHandlersCount': _commitHandlers.length,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
 
     var successCount = 0;
     for (var i = 0; i < _rollbackHandlers.length; i++) {
@@ -135,20 +147,24 @@ class GameTransaction {
         _rollbackHandlers[i]();
         final handlerDuration = DateTime.now().difference(handlerStart);
         successCount++;
-        StructuredLogger.debug('✅ Transaction: Rollback handler ${i+1}/${_rollbackHandlers.length} completed', context: {
-          'handlerIndex': i,
-          'executionTimeMs': handlerDuration.inMilliseconds,
-          'timestamp': DateTime.now().toIso8601String(),
-        });
+        StructuredLogger.debug(
+            '✅ Transaction: Rollback handler ${i + 1}/${_rollbackHandlers.length} completed',
+            context: {
+              'handlerIndex': i,
+              'executionTimeMs': handlerDuration.inMilliseconds,
+              'timestamp': DateTime.now().toIso8601String(),
+            });
       } catch (e, stack) {
         final handlerDuration = DateTime.now().difference(handlerStart);
-        StructuredLogger.error('💥 Transaction: Rollback handler ${i+1} failed', context: {
-          'handlerIndex': i,
-          'error': e.toString(),
-          'executionTimeMs': handlerDuration.inMilliseconds,
-          'timestamp': DateTime.now().toIso8601String(),
-          'stackTrace': stack.toString(),
-        });
+        StructuredLogger.error(
+            '💥 Transaction: Rollback handler ${i + 1} failed',
+            context: {
+              'handlerIndex': i,
+              'error': e.toString(),
+              'executionTimeMs': handlerDuration.inMilliseconds,
+              'timestamp': DateTime.now().toIso8601String(),
+              'stackTrace': stack.toString(),
+            });
         // Continue with other handlers even if one fails
       }
     }
@@ -159,7 +175,8 @@ class GameTransaction {
     StructuredLogger.info('🎯 Transaction: Rollback completed', context: {
       'totalHandlers': _rollbackHandlers.length + successCount,
       'successfulHandlers': successCount,
-      'failedHandlers': (_rollbackHandlers.length + successCount) - successCount,
+      'failedHandlers':
+          (_rollbackHandlers.length + successCount) - successCount,
       'timestamp': DateTime.now().toIso8601String(),
     });
   }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart'; // For Offset
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/simulation/simulation_result.dart';
-import 'interaction_state.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
+
 import 'history_state.dart';
+import 'interaction_state.dart';
 
 part 'game_state.freezed.dart';
 
@@ -19,11 +20,11 @@ class GameState with _$GameState {
     @Default(false) bool isDebugOverlayVisible,
     required InteractionState interactionState,
     required HistoryState history,
-    String? error,                    // ✅ REQUIRED: Error handling
-    @Default([]) List<Wire> wires,    // ✅ REQUIRED: Wire management
-    Offset? wireDrawStartPos,         // ✅ REQUIRED: Wire drawing state
+    String? error, // ✅ REQUIRED: Error handling
+    @Default([]) List<Wire> wires, // ✅ REQUIRED: Wire management
+    Offset? wireDrawStartPos, // ✅ REQUIRED: Wire drawing state
     @Default(false) bool isDrawingWire, // ✅ REQUIRED: Wire interaction
-    int? hoveredCellIndex,           // 🆕 Hover state management
+    int? hoveredCellIndex, // 🆕 Hover state management
   }) = _GameState;
 
   factory GameState.initial(LevelDefinition? level) => GameState(

@@ -1,4 +1,3 @@
-
 class NotifierContext {
   final dynamic grid;
   final dynamic history;

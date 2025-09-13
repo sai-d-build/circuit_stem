@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/game_canvas.dart';
-import 'package:sparkcircuit/core/persistence/storage_service.dart';
 
 void main() {
   // Test setup placeholders - expand as test coverage increases

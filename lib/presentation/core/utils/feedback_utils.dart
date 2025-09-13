@@ -62,7 +62,8 @@ class FeedbackUtils {
       case FeedbackType.success:
         // Custom success feedback - light then medium
         HapticFeedback.lightImpact();
-        Future.delayed(const Duration(milliseconds: 50), HapticFeedback.mediumImpact);
+        Future.delayed(
+            const Duration(milliseconds: 50), HapticFeedback.mediumImpact);
         break;
       case FeedbackType.error:
         // Custom error feedback - heavy impact
@@ -143,7 +144,7 @@ class _FeedbackInkWellState extends State<FeedbackInkWell>
     );
 
     _scaleAnimation = Tween<double>(
-      begin: 1.0,
+      begin: 1,
       end: widget.scaleFactor,
     ).animate(
       CurvedAnimation(
@@ -262,7 +263,7 @@ class _HoverEffectState extends State<HoverEffect>
     );
 
     _scaleAnimation = Tween<double>(
-      begin: 1.0,
+      begin: 1,
       end: widget.hoverScale,
     ).animate(
       CurvedAnimation(
@@ -272,7 +273,7 @@ class _HoverEffectState extends State<HoverEffect>
     );
 
     _opacityAnimation = Tween<double>(
-      begin: 1.0,
+      begin: 1,
       end: widget.hoverOpacity,
     ).animate(
       CurvedAnimation(
@@ -313,10 +314,14 @@ class _HoverEffectState extends State<HoverEffect>
             child: Transform.scale(
               scale: _scaleAnimation.value,
               child: Container(
-                decoration: _isHovered ? BoxDecoration(
-                  color: widget.hoverColor,
-                  boxShadow: widget.hoverShadow != null ? [widget.hoverShadow!] : null,
-                ) : null,
+                decoration: _isHovered
+                    ? BoxDecoration(
+                        color: widget.hoverColor,
+                        boxShadow: widget.hoverShadow != null
+                            ? [widget.hoverShadow!]
+                            : null,
+                      )
+                    : null,
                 child: child,
               ),
             ),
@@ -369,7 +374,7 @@ class _FocusEffectState extends State<FocusEffect>
     );
 
     _borderAnimation = Tween<double>(
-      begin: 0.0,
+      begin: 0,
       end: widget.focusBorderWidth,
     ).animate(
       CurvedAnimation(
@@ -405,10 +410,12 @@ class _FocusEffectState extends State<FocusEffect>
         builder: (context, child) {
           return Container(
             decoration: BoxDecoration(
-              border: _isFocused ? Border.all(
-                color: widget.focusColor,
-                width: _borderAnimation.value,
-              ) : null,
+              border: _isFocused
+                  ? Border.all(
+                      color: widget.focusColor,
+                      width: _borderAnimation.value,
+                    )
+                  : null,
               borderRadius: widget.borderRadius,
             ),
             child: child,
@@ -483,7 +490,7 @@ class InteractiveFeedback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget result = child;
+    var result = child;
 
     // Add ripple effect
     if (enableRipple) {
@@ -496,7 +503,8 @@ class InteractiveFeedback extends StatelessWidget {
     }
 
     // Add hover effect (desktop only)
-    if (enableHover && Theme.of(context).platform != TargetPlatform.android &&
+    if (enableHover &&
+        Theme.of(context).platform != TargetPlatform.android &&
         Theme.of(context).platform != TargetPlatform.iOS) {
       result = HoverEffect(
         hoverColor: hoverColor,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_grid.dart';
 
 /// Widget tests for CircuitGrid component
@@ -9,7 +8,8 @@ void main() {
   group('CircuitGrid Widget Tests', () {
     const testLevelId = 'test_level_01';
 
-    testWidgets('should render CircuitGrid widget', (WidgetTester tester) async {
+    testWidgets('should render CircuitGrid widget',
+        (WidgetTester tester) async {
       // Given
       await tester.pumpWidget(
         const MaterialApp(
@@ -23,7 +23,8 @@ void main() {
       expect(find.byType(CircuitGrid), findsOneWidget);
     });
 
-    testWidgets('should contain Stack layout for layering', (WidgetTester tester) async {
+    testWidgets('should contain Stack layout for layering',
+        (WidgetTester tester) async {
       // Given
       await tester.pumpWidget(
         const MaterialApp(
@@ -40,7 +41,8 @@ void main() {
       expect(find.byType(Stack), findsWidgets);
     });
 
-    testWidgets('should contain CustomPaint for grid rendering', (WidgetTester tester) async {
+    testWidgets('should contain CustomPaint for grid rendering',
+        (WidgetTester tester) async {
       // Given
       await tester.pumpWidget(
         const MaterialApp(
@@ -57,7 +59,8 @@ void main() {
       expect(find.byType(CustomPaint), findsWidgets);
     });
 
-    testWidgets('should contain GridView for interactive cells', (WidgetTester tester) async {
+    testWidgets('should contain GridView for interactive cells',
+        (WidgetTester tester) async {
       // Given
       await tester.pumpWidget(
         const MaterialApp(
@@ -74,7 +77,8 @@ void main() {
       expect(find.byType(GridView), findsWidgets);
     });
 
-    testWidgets('should handle different level IDs', (WidgetTester tester) async {
+    testWidgets('should handle different level IDs',
+        (WidgetTester tester) async {
       // Test with different level IDs
       const levelIds = ['tutorial_01', 'beginner_01', 'intermediate_01'];
 
@@ -93,11 +97,12 @@ void main() {
 
         // Then
         expect(find.byType(CircuitGrid), findsOneWidget,
-               reason: 'Should render for level: $levelId');
+            reason: 'Should render for level: $levelId');
       }
     });
 
-    testWidgets('should have proper accessibility', (WidgetTester tester) async {
+    testWidgets('should have proper accessibility',
+        (WidgetTester tester) async {
       // Given
       await tester.pumpWidget(
         const MaterialApp(
@@ -114,7 +119,8 @@ void main() {
       expect(find.bySemanticsLabel('Circuit Grid'), findsWidgets);
     });
 
-    testWidgets('should handle screen size changes', (WidgetTester tester) async {
+    testWidgets('should handle screen size changes',
+        (WidgetTester tester) async {
       // Given
       await tester.pumpWidget(
         const MaterialApp(
@@ -133,7 +139,8 @@ void main() {
       expect(find.byType(CircuitGrid), findsOneWidget);
     });
 
-    testWidgets('should handle orientation changes', (WidgetTester tester) async {
+    testWidgets('should handle orientation changes',
+        (WidgetTester tester) async {
       // Given
       await tester.pumpWidget(
         const MaterialApp(
@@ -152,7 +159,8 @@ void main() {
       expect(find.byType(CircuitGrid), findsOneWidget);
     });
 
-    testWidgets('should render within LayoutBuilder constraints', (WidgetTester tester) async {
+    testWidgets('should render within LayoutBuilder constraints',
+        (WidgetTester tester) async {
       // Given
       await tester.pumpWidget(
         MaterialApp(
@@ -180,7 +188,8 @@ void main() {
   });
 
   group('CircuitGrid Error Handling Tests', () {
-    testWidgets('should handle empty level ID gracefully', (WidgetTester tester) async {
+    testWidgets('should handle empty level ID gracefully',
+        (WidgetTester tester) async {
       // Given
       await tester.pumpWidget(
         const MaterialApp(
@@ -197,9 +206,12 @@ void main() {
       expect(find.byType(CircuitGrid), findsOneWidget);
     });
 
-    testWidgets('should handle very long level ID', (WidgetTester tester) async {
+    testWidgets('should handle very long level ID',
+        (WidgetTester tester) async {
       // Given
-      final veryLongLevelId = 'very_long_level_id_that_might_cause_issues_with_string_handling_and_ui_layout_' * 5;
+      final veryLongLevelId =
+          'very_long_level_id_that_might_cause_issues_with_string_handling_and_ui_layout_' *
+              5;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -216,7 +228,8 @@ void main() {
       expect(find.byType(CircuitGrid), findsOneWidget);
     });
 
-    testWidgets('should handle special characters in level ID', (WidgetTester tester) async {
+    testWidgets('should handle special characters in level ID',
+        (WidgetTester tester) async {
       // Given
       const specialLevelId = 'level_01_special_chars_test';
 
@@ -255,7 +268,7 @@ void main() {
 
       // Then - should render within reasonable time (less than 100ms)
       expect(stopwatch.elapsedMilliseconds, lessThan(100),
-             reason: 'CircuitGrid should render quickly for good UX');
+          reason: 'CircuitGrid should render quickly for good UX');
     });
 
     testWidgets('should handle rapid rebuilds', (WidgetTester tester) async {
@@ -269,7 +282,7 @@ void main() {
       );
 
       // When - trigger multiple rebuilds
-      for (int i = 0; i < 10; i++) {
+      for (var i = 0; i < 10; i++) {
         await tester.pump();
       }
 

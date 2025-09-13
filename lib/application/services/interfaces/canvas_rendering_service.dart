@@ -7,10 +7,12 @@ abstract class CanvasRenderingService {
   CanvasRenderingData buildRenderingData(LevelDefinition level);
 
   /// Convert domain components to rendering components
-  List<CanvasCircuitComponent> convertComponentsForPainter(List<ComponentModel> components);
+  List<CanvasCircuitComponent> convertComponentsForPainter(
+      List<ComponentModel> components);
 
   /// Convert domain connections to rendering wires
-  List<CircuitWire> convertConnectionsForPainter(Map<String, Set<String>> connections);
+  List<CircuitWire> convertConnectionsForPainter(
+      Map<String, Set<String>> connections);
 }
 
 /// Rendering-specific circuit component (to avoid naming conflicts)

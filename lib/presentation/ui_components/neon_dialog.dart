@@ -21,7 +21,8 @@ class NeonDialog extends StatefulWidget {
   State<NeonDialog> createState() => _NeonDialogState();
 }
 
-class _NeonDialogState extends State<NeonDialog> with SingleTickerProviderStateMixin {
+class _NeonDialogState extends State<NeonDialog>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _glowAnimation;
@@ -36,15 +37,15 @@ class _NeonDialogState extends State<NeonDialog> with SingleTickerProviderStateM
 
     _scaleAnimation = Tween<double>(
       begin: 0.8,
-      end: 1.0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.elasticOut,
     ));
 
     _glowAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOut,
@@ -76,22 +77,24 @@ class _NeonDialogState extends State<NeonDialog> with SingleTickerProviderStateM
               width: widget.width ?? MediaQuery.of(context).size.width * 0.8,
               height: widget.height,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.0),
+                borderRadius: BorderRadius.circular(16),
                 color: colors.surface.withValues(alpha: 0.95),
                 border: Border.all(
                   color: colors.neonPrimary.withValues(alpha: 0.8),
-                  width: 2.0,
+                  width: 2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: colors.neonPrimary.withValues(alpha: _glowAnimation.value * 0.6),
-                    blurRadius: 20.0,
-                    spreadRadius: 4.0,
+                    color: colors.neonPrimary
+                        .withValues(alpha: _glowAnimation.value * 0.6),
+                    blurRadius: 20,
+                    spreadRadius: 4,
                   ),
                   BoxShadow(
-                    color: colors.neonAccent.withValues(alpha: _glowAnimation.value * 0.3),
-                    blurRadius: 30.0,
-                    spreadRadius: 2.0,
+                    color: colors.neonAccent
+                        .withValues(alpha: _glowAnimation.value * 0.3),
+                    blurRadius: 30,
+                    spreadRadius: 2,
                   ),
                 ],
               ),
@@ -100,11 +103,11 @@ class _NeonDialogState extends State<NeonDialog> with SingleTickerProviderStateM
                 children: [
                   if (widget.title != null) ...[
                     Container(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(14.0),
-                          topRight: Radius.circular(14.0),
+                          topLeft: Radius.circular(14),
+                          topRight: Radius.circular(14),
                         ),
                         gradient: LinearGradient(
                           colors: [
@@ -123,8 +126,9 @@ class _NeonDialogState extends State<NeonDialog> with SingleTickerProviderStateM
                             fontWeight: FontWeight.bold,
                             shadows: [
                               BoxShadow(
-                                color: colors.neonPrimary.withValues(alpha: 0.5),
-                                blurRadius: 8.0,
+                                color:
+                                    colors.neonPrimary.withValues(alpha: 0.5),
+                                blurRadius: 8,
                               ),
                             ],
                           ),
@@ -133,24 +137,24 @@ class _NeonDialogState extends State<NeonDialog> with SingleTickerProviderStateM
                     ),
                     Divider(
                       color: colors.neonPrimary.withAlpha((255 * 0.3).round()),
-                      thickness: 1.0,
-                      height: 1.0,
+                      thickness: 1,
+                      height: 1,
                     ),
                   ],
                   Flexible(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.all(20),
                       child: widget.content,
                     ),
                   ),
                   if (widget.actions.isNotEmpty) ...[
                     Divider(
                       color: colors.neonPrimary.withAlpha((255 * 0.3).round()),
-                      thickness: 1.0,
-                      height: 1.0,
+                      thickness: 1,
+                      height: 1,
                     ),
                     Container(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: widget.actions,

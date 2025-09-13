@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:ui';
+
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flame_audio/flame_audio.dart';
-import '../../common/logger.dart';
+
 import '../../common/assets.dart';
+import '../../common/logger.dart';
 import 'asset_manager_state.dart';
 
 class AssetManagerNotifier extends StateNotifier<AssetState> {

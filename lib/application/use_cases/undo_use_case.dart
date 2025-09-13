@@ -1,18 +1,18 @@
 import '../core/result.dart';
+import '../transaction.dart';
 import 'component_action.dart';
 import 'notifier_integrated_use_case.dart';
-import '../transaction.dart';
 
 class UndoUseCase extends NotifierIntegratedUseCase<UndoAction> {
   UndoUseCase();
 
   @override
-    Future<Result<void>> executeWithNotifiers(
+  Future<Result<void>> executeWithNotifiers(
     UndoAction action,
     NotifierContext notifiers,
     GameTransaction transaction,
   ) async {
-        if (!notifiers.history.canUndo) {
+    if (!notifiers.history.canUndo) {
       return const Failure('No actions to undo');
     }
 

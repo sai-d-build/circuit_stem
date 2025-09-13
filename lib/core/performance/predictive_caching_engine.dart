@@ -2,17 +2,19 @@
 // Phase 2: AI-Driven Predictive Caching Engine
 
 import 'dart:collection';
-import 'package:sparkcircuit/domain/entities/entities.dart';
+
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/core/performance/hca_feature_flags.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 /// Advanced predictive caching engine with AI-driven optimization
 /// Phase 2: Learns user patterns to predict and pre-cache components
 class PredictiveCachingEngine {
   // Singleton instance
-  static final PredictiveCachingEngine _instance = PredictiveCachingEngine._internal();
+  static final PredictiveCachingEngine _instance =
+      PredictiveCachingEngine._internal(); // ignore: cascade_invocations
   factory PredictiveCachingEngine() => _instance;
-  PredictiveCachingEngine._internal();
+  PredictiveCachingEngine._internal(); // ignore: cascade_invocations
 
   // Usage pattern analytics
   final _usagePatterns = <String, ComponentUsagePattern>{};
@@ -20,7 +22,7 @@ class PredictiveCachingEngine {
   static const _maxHistorySize = 1000;
 
   // Prediction thresholds and limits
-  static const _usageThreshold = 0.3;  // 30% of total accesses
+  static const _usageThreshold = 0.3; // 30% of total accesses
   static const _maxPredictionBatchSize = 10;
   static const _predictionLookAhead = Duration(seconds: 2);
 
@@ -45,11 +47,13 @@ class PredictiveCachingEngine {
     // Load historical data if available
     await _loadHistoricalPatterns();
 
-    StructuredLogger.info('Predictive Caching Engine ready for AI-driven optimization');
+    StructuredLogger.info(
+        'Predictive Caching Engine ready for AI-driven optimization');
   }
 
   /// Analyze current circuit state and predict needed components
-  Future<List<ComponentPrediction>> predictNextComponents(CircuitState currentState) async {
+  Future<List<ComponentPrediction>> predictNextComponents(
+      CircuitState currentState) async {
     if (!HCAFeatureFlags.predictiveCaching) return [];
 
     final predictions = <ComponentPrediction>[];
@@ -63,31 +67,35 @@ class PredictiveCachingEngine {
 
     // Predict components likely to be accessed next
     final userIntent = await _inferUserIntent(currentState);
-    final probableAccesses = await _predictComponentAccess(userIntent, currentState);
+    final probableAccesses =
+        await _predictComponentAccess(userIntent, currentState);
 
     for (final prediction in probableAccesses.take(_maxPredictionBatchSize)) {
       predictions.add(ComponentPrediction(
-        componentId: prediction.componentId,
-        probability: prediction.probability,
-        confidence: prediction.confidence,
-        predictedAccessTime: now.add(_predictionLookAhead),
-        reason: prediction.reason
-      ));
+          componentId: prediction.componentId,
+          probability: prediction.probability,
+          confidence: prediction.confidence,
+          predictedAccessTime: now.add(_predictionLookAhead),
+          reason: prediction.reason));
     }
 
     if (predictions.isNotEmpty) {
-      StructuredLogger.debug('Generated predictive cache recommendations', context: {
-        'predictions': predictions.length,
-        'averageProbability': predictions.map((p) => p.probability).reduce((a, b) => a + b) / predictions.length,
-        'userIntent': userIntent.toString()
-      });
+      StructuredLogger.debug('Generated predictive cache recommendations',
+          context: {
+            'predictions': predictions.length,
+            'averageProbability':
+                predictions.map((p) => p.probability).reduce((a, b) => a + b) /
+                    predictions.length,
+            'userIntent': userIntent.toString()
+          });
     }
 
     return predictions;
   }
 
   /// Start pre-rendering high-probability components
-  Future<int> preRenderPredictedComponents(List<ComponentPrediction> predictions) async {
+  Future<int> preRenderPredictedComponents(
+      List<ComponentPrediction> predictions) async {
     if (_isWarmingCache) {
       StructuredLogger.debug('Cache warming already in progress, skipping');
       return 0;
@@ -96,7 +104,7 @@ class PredictiveCachingEngine {
     _isWarmingCache = true;
 
     try {
-      int preRenderedCount = 0;
+      var preRenderedCount = 0;
 
       // Sort by probability and confidence
       final highPriorityPredictions = predictions
@@ -117,7 +125,7 @@ class PredictiveCachingEngine {
           });
 
           // Throttle to prevent blocking UI thread
-          await Future.delayed(Duration(milliseconds: 10));
+          await Future.delayed(const Duration(milliseconds: 10));
         } catch (e) {
           StructuredLogger.warning('Failed to pre-render component', context: {
             'componentId': prediction.componentId,
@@ -138,15 +146,15 @@ class PredictiveCachingEngine {
   }
 
   /// Update usage patterns with new component access
-  void recordComponentAccess(String componentId, String accessContext, String? gridPosition) {
+  void recordComponentAccess(
+      String componentId, String accessContext, String? gridPosition) {
     if (!HCAFeatureFlags.predictiveCaching) return;
 
     final record = ComponentAccessRecord(
-      componentId: componentId,
-      accessTime: DateTime.now(),
-      accessContext: accessContext,
-      gridPosition: gridPosition
-    );
+        componentId: componentId,
+        accessTime: DateTime.now(),
+        accessContext: accessContext,
+        gridPosition: gridPosition);
 
     // Add to recent history
     _recentAccessHistory.addFirst(record);
@@ -177,13 +185,15 @@ class PredictiveCachingEngine {
 
     // Top frequently accessed components
     final popularComponents = _usagePatterns.entries
-        .where((entry) => entry.value.accessCount > _usageThreshold * _maxHistorySize)
+        .where((entry) =>
+            entry.value.accessCount > _usageThreshold * _maxHistorySize)
         .map((entry) => {
-          'componentType': entry.key,
-          'accessCount': entry.value.accessCount,
-          'averagePosition': entry.value.averagePosition,
-          'preRenderRecommended': entry.value.accessCount > _usageThreshold * _maxHistorySize * 0.8
-        })
+              'componentType': entry.key,
+              'accessCount': entry.value.accessCount,
+              'averagePosition': entry.value.averagePosition,
+              'preRenderRecommended': entry.value.accessCount >
+                  _usageThreshold * _maxHistorySize * 0.8
+            })
         .toList();
 
     insights['popularComponents'] = popularComponents;
@@ -193,7 +203,8 @@ class PredictiveCachingEngine {
     insights['predictionStats'] = predictionStats;
 
     // Recommendations
-    insights['recommendations'] = _generateOptimizationRecommendations(insights);
+    insights['recommendations'] =
+        _generateOptimizationRecommendations(insights);
 
     return insights;
   }
@@ -216,9 +227,8 @@ class PredictiveCachingEngine {
   Future<void> _loadHistoricalPatterns() async {
     // Load from persistent storage if available
     // For now, start with clean slate
-    StructuredLogger.debug('Loaded historical usage patterns', context: {
-      'patternsLoaded': _usagePatterns.length
-    });
+    StructuredLogger.debug('Loaded historical usage patterns',
+        context: {'patternsLoaded': _usagePatterns.length});
   }
 
   Future<void> _analyzeRecentPatterns() async {
@@ -262,7 +272,8 @@ class PredictiveCachingEngine {
     return UserIntent.exploring;
   }
 
-  Future<List<ComponentAccessPrediction>> _predictComponentAccess(UserIntent intent, CircuitState state) async {
+  Future<List<ComponentAccessPrediction>> _predictComponentAccess(
+      UserIntent intent, CircuitState state) async {
     final predictions = <ComponentAccessPrediction>[];
 
     switch (intent) {
@@ -286,26 +297,28 @@ class PredictiveCachingEngine {
     return predictions..sort((a, b) => b.probability.compareTo(a.probability));
   }
 
-  Future<List<ComponentAccessPrediction>> _predictConnectionComponents(CircuitState state) async {
+  Future<List<ComponentAccessPrediction>> _predictConnectionComponents(
+      CircuitState state) async {
     final predictions = <ComponentAccessPrediction>[];
 
     // Find unconnected components that are close together
     for (final component in state.components) {
-      final nearbyComponents = _findNearbyUnconnectedComponents(component, state);
+      final nearbyComponents =
+          _findNearbyUnconnectedComponents(component, state);
       for (final nearby in nearbyComponents.take(3)) {
         predictions.add(ComponentAccessPrediction(
-          componentId: nearby,
-          probability: 0.8,
-          confidence: 0.7,
-          reason: 'Nearby unconnected component - likely connection target'
-        ));
+            componentId: nearby,
+            probability: 0.8,
+            confidence: 0.7,
+            reason: 'Nearby unconnected component - likely connection target'));
       }
     }
 
     return predictions;
   }
 
-  Future<List<ComponentAccessPrediction>> _predictFocusedAreaComponents(CircuitState state) async {
+  Future<List<ComponentAccessPrediction>> _predictFocusedAreaComponents(
+      CircuitState state) async {
     final predictions = <ComponentAccessPrediction>[];
 
     if (_recentAccessHistory.isNotEmpty) {
@@ -313,13 +326,14 @@ class PredictiveCachingEngine {
       if (focusPosition != null) {
         // Find components within 2-grid distance of focus area
         for (final component in state.components) {
-          if (_calculateGridDistance(focusPosition, '${component.row},${component.col}') <= 2) {
+          if (_calculateGridDistance(
+                  focusPosition, '${component.row},${component.col}') <=
+              2) {
             predictions.add(ComponentAccessPrediction(
-              componentId: component.id,
-              probability: 0.6,
-              confidence: 0.8,
-              reason: 'Within focus area - likely to be accessed'
-            ));
+                componentId: component.id,
+                probability: 0.6,
+                confidence: 0.8,
+                reason: 'Within focus area - likely to be accessed'));
           }
         }
       }
@@ -328,26 +342,28 @@ class PredictiveCachingEngine {
     return predictions;
   }
 
-  Future<List<ComponentAccessPrediction>> _predictTestingComponents(CircuitState state) async {
+  Future<List<ComponentAccessPrediction>> _predictTestingComponents(
+      CircuitState state) async {
     final predictions = <ComponentAccessPrediction>[];
 
     // Predict components likely needed for circuit testing
     for (final component in state.components) {
-      if (component.type == ComponentType.battery || component.type == ComponentType.bulb ||
+      if (component.type == ComponentType.battery ||
+          component.type == ComponentType.bulb ||
           component.type == ComponentType.switch_) {
         predictions.add(ComponentAccessPrediction(
-          componentId: component.id,
-          probability: 0.7,
-          confidence: 0.6,
-          reason: 'Essential for circuit testing and powering'
-        ));
+            componentId: component.id,
+            probability: 0.7,
+            confidence: 0.6,
+            reason: 'Essential for circuit testing and powering'));
       }
     }
 
     return predictions;
   }
 
-  Future<List<ComponentAccessPrediction>> _predictOptimizedComponents(CircuitState state) async {
+  Future<List<ComponentAccessPrediction>> _predictOptimizedComponents(
+      CircuitState state) async {
     final predictions = <ComponentAccessPrediction>[];
 
     // Predict components that would benefit from optimization
@@ -355,34 +371,36 @@ class PredictiveCachingEngine {
       // Focus on components that are frequently accessed but have high rendering cost
       if ((_usagePatterns[component.type.toString()]?.accessCount ?? 0) > 20) {
         predictions.add(ComponentAccessPrediction(
-          componentId: component.id as String,
-          probability: 0.9,
-          confidence: 0.8,
-          reason: 'High-frequency component requiring optimization'
-        ));
+            componentId: component.id as String,
+            probability: 0.9,
+            confidence: 0.8,
+            reason: 'High-frequency component requiring optimization'));
       }
     }
 
     return predictions;
   }
 
-  Future<List<ComponentAccessPrediction>> _predictExplorationComponents(CircuitState state) async {
+  Future<List<ComponentAccessPrediction>> _predictExplorationComponents(
+      CircuitState state) async {
     final predictions = <ComponentAccessPrediction>[];
 
     // Predict based on usage patterns
     for (final pattern in _usagePatterns.values) {
-      if (pattern.accessCount > _maxHistorySize * 0.1) { // Top 10% most used
+      if (pattern.accessCount > _maxHistorySize * 0.1) {
+        // Top 10% most used
         final matchingComponents = state.components
-            .where((c) => c.type.toString().contains(pattern.componentType.toLowerCase()))
+            .where((c) =>
+                c.type.toString().contains(pattern.componentType.toLowerCase()))
             .toList();
 
         for (final component in matchingComponents) {
           predictions.add(ComponentAccessPrediction(
-            componentId: component.id,
-            probability: 0.5,
-            confidence: pattern.accessCount / _maxHistorySize.toDouble(),
-            reason: 'Frequently used component type based on usage patterns'
-          ));
+              componentId: component.id,
+              probability: 0.5,
+              confidence: pattern.accessCount / _maxHistorySize.toDouble(),
+              reason:
+                  'Frequently used component type based on usage patterns'));
         }
       }
     }
@@ -393,7 +411,8 @@ class PredictiveCachingEngine {
   Future<void> _simulatePreRender(ComponentPrediction prediction) async {
     // Simulate costly rendering operation without actually doing it
     // In real implementation, this would trigger ComponentCacheManager
-    await Future.delayed(Duration(milliseconds: 15)); // Simulate Picture creation time
+    await Future.delayed(
+        const Duration(milliseconds: 15)); // Simulate Picture creation time
 
     // Record pre-rendering in analytics
     final key = 'pre_rendered_${prediction.componentId}';
@@ -409,10 +428,9 @@ class PredictiveCachingEngine {
 
     if (!_usagePatterns.containsKey(patternKey)) {
       _usagePatterns[patternKey] = ComponentUsagePattern(
-        componentType: patternKey,
-        accessCount: 0,
-        lastAccessed: DateTime.now()
-      );
+          componentType: patternKey,
+          accessCount: 0,
+          lastAccessed: DateTime.now());
     }
 
     final pattern = _usagePatterns[patternKey]!;
@@ -451,12 +469,14 @@ class PredictiveCachingEngine {
     };
   }
 
-  List<String> _generateOptimizationRecommendations(Map<String, dynamic> insights) {
+  List<String> _generateOptimizationRecommendations(
+      Map<String, dynamic> insights) {
     final recommendations = <String>[];
 
     final popularComponents = List.from(insights['popularComponents'] ?? []);
     if (popularComponents.length > 3) {
-      recommendations.add('Consider prioritizing ${popularComponents.length} popular components');
+      recommendations.add(
+          'Consider prioritizing ${popularComponents.length} popular components');
     }
 
     final predictionStats = Map.from(insights['predictionStats'] ?? {});
@@ -467,22 +487,26 @@ class PredictiveCachingEngine {
     return recommendations;
   }
 
-  PositionCluster _clusterAccessesByPosition(List<ComponentAccessRecord> accesses) {
+  PositionCluster _clusterAccessesByPosition(
+      List<ComponentAccessRecord> accesses) {
     // Simple clustering by grid proximity
-    final positions = accesses.map((a) => a.gridPosition ?? '').where((p) => p.isNotEmpty).toSet();
+    final positions = accesses
+        .map((a) => a.gridPosition ?? '')
+        .where((p) => p.isNotEmpty)
+        .toSet();
     return PositionCluster(positionStrings: positions.toList());
   }
 
-  ConnectionPattern _analyzeConnectionPatterns(List<ComponentAccessRecord> accesses) {
+  ConnectionPattern _analyzeConnectionPatterns(
+      List<ComponentAccessRecord> accesses) {
     // Check if recent accesses show connection patterns
     final connectionIndicators = ['connect', 'linking', 'joining', 'circuit'];
-    final connectionMatches = accesses.where((a) =>
-        connectionIndicators.any((indicator) => a.accessContext.contains(indicator)));
+    final connectionMatches = accesses.where((a) => connectionIndicators
+        .any((indicator) => a.accessContext.contains(indicator)));
 
     return ConnectionPattern(
-      isConnectionActivity: connectionMatches.length >= accesses.length * 0.3,
-      connectionCount: connectionMatches.length
-    );
+        isConnectionActivity: connectionMatches.length >= accesses.length * 0.3,
+        connectionCount: connectionMatches.length);
   }
 
   TestPattern _analyzeTestPatterns(List<ComponentAccessRecord> accesses) {
@@ -492,12 +516,12 @@ class PredictiveCachingEngine {
         testIndicators.any((indicator) => a.accessContext.contains(indicator)));
 
     return TestPattern(
-      isLikelyTesting: testMatches.length >= accesses.length * 0.4,
-      testActionCount: testMatches.length
-    );
+        isLikelyTesting: testMatches.length >= accesses.length * 0.4,
+        testActionCount: testMatches.length);
   }
 
-  List<String> _findNearbyUnconnectedComponents(dynamic component, CircuitState state) {
+  List<String> _findNearbyUnconnectedComponents(
+      dynamic component, CircuitState state) {
     return []; // Placeholder for nearby component finding logic
   }
 
@@ -505,8 +529,8 @@ class PredictiveCachingEngine {
     try {
       final parts1 = pos1.split(',');
       final parts2 = pos2.split(',');
-      final diffRow = int.parse(parts1[0]) - int.parse(parts2[0]);
-      final diffCol = int.parse(parts1[1]) - int.parse(parts2[1]);
+      final diffRow = int.parse(parts1[0]) - int.parse(parts2[0]); // ignore: cascade_invocations
+      final diffCol = int.parse(parts1[1]) - int.parse(parts2[1]); // ignore: cascade_invocations
       return (diffRow * diffRow + diffCol * diffCol).toDouble().sqrt();
     } catch (e) {
       return double.maxFinite;
@@ -514,7 +538,7 @@ class PredictiveCachingEngine {
   }
 
   double _calculatePatternStability(List<ComponentAccessRecord> accesses) {
-    if (accesses.isEmpty) return 0.0;
+    if (accesses.isEmpty) return 0;
 
     // Calculate consistency of access patterns
     final typeFrequency = <String, int>{};
@@ -526,7 +550,10 @@ class PredictiveCachingEngine {
     // Calculate coefficient of variation as stability measure
     final frequencies = typeFrequency.values.toList();
     final mean = frequencies.reduce((a, b) => a + b) / frequencies.length;
-    final variance = frequencies.map((f) => (f - mean) * (f - mean)).reduce((a, b) => a + b) / frequencies.length;
+    final variance = frequencies
+            .map((f) => (f - mean) * (f - mean))
+            .reduce((a, b) => a + b) /
+        frequencies.length;
     final stdDev = variance.sqrt();
 
     return mean > 0 ? stdDev / mean : 0.0;
@@ -537,20 +564,20 @@ class PredictiveCachingEngine {
 
 /// User intent inference
 enum UserIntent {
-  exploring,    // Free exploration mode
-  focusing,     // Working on specific area
-  connecting,   // Building connections
-  testing,      // Executing and testing circuits
-  optimizing    // Performance optimization
+  exploring, // Free exploration mode
+  focusing, // Working on specific area
+  connecting, // Building connections
+  testing, // Executing and testing circuits
+  optimizing // Performance optimization
 }
 
 /// Component prediction data
 class ComponentPrediction {
   final String componentId;
-  final double probability;    // 0.0 to 1.0
-  final double confidence;     // 0.0 to 1.0
+  final double probability; // 0.0 to 1.0
+  final double confidence; // 0.0 to 1.0
   final DateTime predictedAccessTime;
-  final String reason;         // Explanation for AI decision
+  final String reason; // Explanation for AI decision
 
   ComponentPrediction({
     required this.componentId,
@@ -649,7 +676,8 @@ class TestPattern {
 
 /// Circuit state representation
 class CircuitState {
-  final List<dynamic> components; // Type would be CircuitComponent in real implementation
+  final List<dynamic>
+      components; // Type would be CircuitComponent in real implementation
 
   CircuitState({required this.components});
 }
@@ -662,8 +690,8 @@ extension DoubleExtensions on double {
     if (x < 0) return double.nan;
     if (x == 0) return 0;
 
-    double guess = x / 2;
-    for (int i = 0; i < iterations; i++) {
+    var guess = x / 2;
+    for (var i = 0; i < iterations; i++) {
       guess = (guess + x / guess) / 2;
     }
     return guess;

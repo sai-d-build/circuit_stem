@@ -14,19 +14,23 @@ class DefaultCanvasRenderingService implements CanvasRenderingService {
   }
 
   @override
-  List<CanvasCircuitComponent> convertComponentsForPainter(List<ComponentModel> components) {
+  List<CanvasCircuitComponent> convertComponentsForPainter(
+      List<ComponentModel> components) {
     // Simple stub implementation
-    return components.map((component) => CanvasCircuitComponent(
-      id: component.id,
-      type: component.type,
-      row: component.row,
-      col: component.col,
-      properties: component.properties,
-    )).toList();
+    return components
+        .map((component) => CanvasCircuitComponent(
+              id: component.id,
+              type: component.type,
+              row: component.row,
+              col: component.col,
+              properties: component.properties,
+            ))
+        .toList();
   }
 
   @override
-  List<CircuitWire> convertConnectionsForPainter(Map<String, Set<String>> connections) {
+  List<CircuitWire> convertConnectionsForPainter(
+      Map<String, Set<String>> connections) {
     // Simple stub implementation
     return [];
   }

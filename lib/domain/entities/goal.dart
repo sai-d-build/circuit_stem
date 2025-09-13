@@ -11,6 +11,5 @@ class Goal with _$Goal {
     String? targetId,
   }) = _Goal;
 
-  factory Goal.fromJson(Map<String, dynamic> json) =>
-      _$GoalFromJson(json);
+  factory Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
 }

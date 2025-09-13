@@ -10,11 +10,11 @@ final gridServiceProvider = Provider<GridService>((ref) {
 /// Provider for creating GridConfiguration from various contexts
 final gridConfigurationProvider = Provider<GridConfiguration>((ref) {
   // Default configuration - should be overridden in specific contexts
-  return GridConfiguration(
+  return const GridConfiguration(
     rows: 10,
     cols: 15,
     cellSize: GridConstants.defaultCellSize,
-    scale: 1.0,
+    scale: 1,
     panOffset: Offset.zero,
   );
 });

@@ -8,7 +8,8 @@ class LearningAnalytics {
   LearningAnalytics(this._prefs);
 
   /// Track user interaction
-  Future<void> trackInteraction(String interactionType, Map<String, dynamic> data) async {
+  Future<void> trackInteraction(
+      String interactionType, Map<String, dynamic> data) async {
     Logger.log('LearningAnalytics: Tracking interaction $interactionType');
 
     // Store interaction data (simplified implementation)
@@ -24,12 +25,15 @@ class LearningAnalytics {
   }
 
   /// Track level completion
-  Future<void> trackLevelCompletion(String levelId, Duration timeSpent, bool success) async {
-    Logger.log('LearningAnalytics: Level $levelId completed in ${timeSpent.inSeconds}s, success: $success');
+  Future<void> trackLevelCompletion(
+      String levelId, Duration timeSpent, bool success) async {
+    Logger.log(
+        'LearningAnalytics: Level $levelId completed in ${timeSpent.inSeconds}s, success: $success');
 
     // Store completion data
     final completions = _prefs.getStringList('level_completions') ?? [];
-    completions.add('$levelId:${timeSpent.inSeconds}:$success:${DateTime.now().toIso8601String()}');
+    completions.add(
+        '$levelId:${timeSpent.inSeconds}:$success:${DateTime.now().toIso8601String()}');
 
     await _prefs.setStringList('level_completions', completions);
   }
@@ -57,9 +61,9 @@ class LearningAnalytics {
   }
 
   double _calculateAverageSessionTime(List<String> completions) {
-    if (completions.isEmpty) return 0.0;
+    if (completions.isEmpty) return 0;
 
-    int totalTime = 0;
+    var totalTime = 0;
     for (final completion in completions) {
       final parts = completion.split(':');
       if (parts.length >= 2) {
@@ -71,9 +75,9 @@ class LearningAnalytics {
   }
 
   double _calculateSuccessRate(List<String> completions) {
-    if (completions.isEmpty) return 0.0;
+    if (completions.isEmpty) return 0;
 
-    int successful = 0;
+    var successful = 0;
     for (final completion in completions) {
       final parts = completion.split(':');
       if (parts.length >= 3 && parts[2] == 'true') {

@@ -1,16 +1,14 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-import '../domain/behaviors/drawing_behavior.dart';
-import '../domain/behaviors/logic_behavior.dart';
-
+import 'package:flutter/material.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 import '../application/services/component_factory.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
-import '../infrastructure/rendering/asset_manager.dart';
-import '../common/theme.dart';
-
 import '../common/logger.dart';
+import '../common/theme.dart';
+import '../domain/behaviors/drawing_behavior.dart';
+import '../domain/behaviors/logic_behavior.dart';
+import '../infrastructure/rendering/asset_manager.dart';
 
 // --- Straight Wire --- //
 
@@ -68,7 +66,7 @@ void registerWireStraight(ComponentFactory factory) {
   factory.registerBehavior<WireStraightDrawingBehavior>(
       () => const WireStraightDrawingBehavior());
   factory.registerBehavior<WireLogicBehavior>(
-      () => WireLogicBehavior()); // Can be shared
+      WireLogicBehavior.new); // Can be shared
   // Note: MoveBehavior is abstract and can't be instantiated directly
   // factory.registerBehavior<MoveBehavior>(() => MoveBehavior());
 
@@ -175,7 +173,8 @@ class WireTDrawingBehavior implements DrawingBehavior {
 
 void registerWireT(ComponentFactory factory) {
   Logger.log('registerWireT() called.');
-  factory.registerBehavior<WireTDrawingBehavior>(() => const WireTDrawingBehavior());
+  factory.registerBehavior<WireTDrawingBehavior>(
+      () => const WireTDrawingBehavior());
   // Note: MoveBehavior is abstract and can't be instantiated directly
   // factory.registerBehavior<MoveBehavior>(() => MoveBehavior());
 

@@ -1,7 +1,6 @@
 import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/core/simulation/circuit_netlist.dart';
 
-
 class NetlistBuilder {
   CircuitNetlist buildNetlist(GameState gameState) {
     final components = <SimComponent>[];
@@ -48,12 +47,16 @@ class NetlistBuilder {
         if (!processedConnections.contains(uniqueConnectionId)) {
           // Assuming a direct connection between component centers for now.
           // In a real circuit, connections are between specific terminals/pins.
-          final sourceComponent = gameState.grid.getComponentById(sourceComponentId);
-          final targetComponent = gameState.grid.getComponentById(targetComponentId);
+          final sourceComponent =
+              gameState.grid.getComponentById(sourceComponentId); // ignore: cascade_invocations
+          final targetComponent =
+              gameState.grid.getComponentById(targetComponentId); // ignore: cascade_invocations
 
           if (sourceComponent != null && targetComponent != null) {
-            final node1Id = getNodeKey(sourceComponent.row, sourceComponent.col);
-            final node2Id = getNodeKey(targetComponent.row, targetComponent.col);
+            final node1Id =
+                getNodeKey(sourceComponent.row, sourceComponent.col);
+            final node2Id =
+                getNodeKey(targetComponent.row, targetComponent.col);
 
             connections.add(SimConnection(
               id: uniqueConnectionId,
@@ -62,8 +65,12 @@ class NetlistBuilder {
             ));
 
             // Update connectedNodes for SimComponents (this is a simplification)
-            final simSource = components.firstWhere((c) => c.id == sourceComponentId, orElse: () => throw Exception('SimComponent not found'));
-            final simTarget = components.firstWhere((c) => c.id == targetComponentId, orElse: () => throw Exception('SimComponent not found'));
+            final simSource = components.firstWhere(
+                (c) => c.id == sourceComponentId,
+                orElse: () => throw Exception('SimComponent not found'));
+            final simTarget = components.firstWhere(
+                (c) => c.id == targetComponentId,
+                orElse: () => throw Exception('SimComponent not found'));
             if (!simSource.connectedNodes.contains(node2Id)) {
               simSource.connectedNodes.add(node2Id);
             }

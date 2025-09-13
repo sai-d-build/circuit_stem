@@ -1,9 +1,12 @@
-import 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart';
-import 'package:sparkcircuit/application/services/gestures/gesture_state_machine.dart';
-import 'package:sparkcircuit/application/states/game_canvas_state.dart' as gc;
-import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart' as orchestrator;
-import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart' show HitTestResult;
 import 'dart:ui';
+
+import 'package:sparkcircuit/application/services/gestures/gesture_state_machine.dart';
+import 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart';
+import 'package:sparkcircuit/application/states/game_canvas_state.dart' as gc;
+import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart'
+    as orchestrator;
+import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart'
+    show HitTestResult;
 
 /// Default implementation of GameInteractionService
 class DefaultGameInteractionService implements GameInteractionService {
@@ -39,7 +42,8 @@ class DefaultGameInteractionService implements GameInteractionService {
   }
 
   /// Convert screen position to grid position
-  gc.GridPosition? _convertToGridPosition(Offset screenPosition, gc.GameCanvasState state) {
+  gc.GridPosition? _convertToGridPosition(
+      Offset screenPosition, gc.GameCanvasState state) {
     if (state.currentLevel == null) return null;
 
     final gridLevel = state.currentLevel!.grid;
@@ -62,7 +66,10 @@ class DefaultGameInteractionService implements GameInteractionService {
     final gridY = (transformedPosition.dy / gridConfig.cellSize).floor();
 
     // Check bounds
-    if (gridX >= 0 && gridX < gridConfig.cols && gridY >= 0 && gridY < gridConfig.rows) {
+    if (gridX >= 0 &&
+        gridX < gridConfig.cols &&
+        gridY >= 0 &&
+        gridY < gridConfig.rows) {
       return gc.GridPosition(row: gridY, col: gridX);
     }
 
@@ -70,14 +77,16 @@ class DefaultGameInteractionService implements GameInteractionService {
   }
 
   /// Perform hit testing to determine what component (if any) was touched
-  HitTestResult _performHitTest(gc.GridPosition? gridPosition, gc.GameCanvasState state) {
+  HitTestResult _performHitTest(
+      gc.GridPosition? gridPosition, gc.GameCanvasState state) {
     if (gridPosition == null || state.currentLevel == null) {
       return HitTestResult.empty();
     }
 
     // Check if there's a component at the grid position
     // GameCanvasState doesn't have direct grid access, components are in currentLevel or separate state
-    final componentId = 'component_at_${gridPosition.row}_${gridPosition.col}'; // Both gridPosition and currentLevel are validated above
+    final componentId =
+        'component_at_${gridPosition.row}_${gridPosition.col}'; // Both gridPosition and currentLevel are validated above
 
     return HitTestResult.component(componentId);
   }

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sparkcircuit/core/services/coordinate_system_service.dart' as coord_service;
+import 'package:sparkcircuit/core/services/coordinate_system_service.dart'
+    as coord_service;
 
 void main() {
   group('CoordinateSystemService Tests', () {

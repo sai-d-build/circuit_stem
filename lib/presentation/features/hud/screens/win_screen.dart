@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-
-import 'package:sparkcircuit/presentation/core/widgets/menu_button.dart';
-import 'package:sparkcircuit/presentation/core/utils/feedback_utils.dart';
-import 'package:sparkcircuit/presentation/state/hud_state.dart';
 import 'package:sparkcircuit/presentation/core/animations/glow_effect.dart';
+import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+import 'package:sparkcircuit/presentation/core/utils/feedback_utils.dart';
+import 'package:sparkcircuit/presentation/core/widgets/menu_button.dart';
+import 'package:sparkcircuit/presentation/state/hud_state.dart';
 
 // ✅ CLEAN ARCHITECTURE: Reuse HudService from pause_menu.dart
 class HudService {
@@ -43,33 +42,33 @@ class _WinScreenState extends ConsumerState<WinScreen>
   @override
   void initState() {
     super.initState();
-    
+
     _celebrationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _starsController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _celebrationController,
       curve: Curves.elasticOut,
     ));
-    
+
     _starsAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _starsController,
       curve: Curves.bounceOut,
     ));
-    
+
     // Start animations
     _celebrationController.forward();
     Future.delayed(const Duration(milliseconds: 500), () {
@@ -98,7 +97,7 @@ class _WinScreenState extends ConsumerState<WinScreen>
     final hudState = ref.watch(hudStateProvider(widget.levelId));
     final progress = hudState.progress;
     final hudService = ref.watch(hudServiceProvider(widget.levelId));
-    
+
     return AnimatedBuilder(
       animation: _celebrationController,
       builder: (context, child) {
@@ -132,7 +131,7 @@ class _WinScreenState extends ConsumerState<WinScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                GlowEffect(
+                const GlowEffect(
                   glowColor: Colors.amber,
                   glowRadius: 20,
                   child: Icon(
@@ -185,7 +184,7 @@ class _WinScreenState extends ConsumerState<WinScreen>
             final delay = index * 0.3;
             final starValue = (_starsAnimation.value - delay).clamp(0.0, 1.0);
             final isEarned = index < progress.starsEarned;
-            
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Transform.scale(
@@ -329,7 +328,8 @@ class _WinScreenState extends ConsumerState<WinScreen>
                 icon: Icons.arrow_forward,
                 isPrimary: true,
                 onPressed: () {
-                  final nextLevelId = (int.parse(widget.levelId) + 1).toString();
+                  final nextLevelId =
+                      (int.parse(widget.levelId) + 1).toString();
                   context.go('/game/$nextLevelId');
                 },
               ),

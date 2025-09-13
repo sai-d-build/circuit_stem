@@ -27,13 +27,13 @@ class LevelSystem {
   List<SimpleLevelInfo> getAvailableLevels() {
     // Return a list of available levels
     return [
-      SimpleLevelInfo(
+      const SimpleLevelInfo(
         id: 'tutorial_1',
         title: 'Basic Tutorial',
         description: 'Learn the basics of circuit building',
         levelNumber: 1,
       ),
-      SimpleLevelInfo(
+      const SimpleLevelInfo(
         id: 'basic_1',
         title: 'Series Circuits',
         description: 'Master series circuit connections',
@@ -81,7 +81,8 @@ class LevelSystem {
   }
 
   /// Save level progress
-    Future<void> saveLevelProgress(String levelId, Map<String, dynamic> progress) async {
+  Future<void> saveLevelProgress(
+      String levelId, Map<String, dynamic> progress) async {
     // final progressKey = 'progress_$levelId';
     // Save progress as JSON string in real implementation
     Logger.log('LevelSystem: Saved progress for level $levelId');
@@ -89,7 +90,8 @@ class LevelSystem {
 
   /// Reset all progress
   Future<void> resetProgress() async {
-    final keys = _prefs.getKeys().where((key) => key.startsWith('progress_') || key == 'completed_levels');
+    final keys = _prefs.getKeys().where(
+        (key) => key.startsWith('progress_') || key == 'completed_levels');
     for (final key in keys) {
       await _prefs.remove(key);
     }

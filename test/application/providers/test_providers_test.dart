@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // Note: The test_providers.dart file is referenced but may not be fully implemented yet
 // This file is ready for when test providers are added
@@ -38,7 +38,7 @@ void main() {
       final testContainer = ProviderContainer(overrides: []);
 
       expect(testContainer, isNotNull);
-      expect(() => testContainer.dispose(), returnsNormally);
+      expect(testContainer.dispose, returnsNormally);
 
       testContainer.dispose();
     });

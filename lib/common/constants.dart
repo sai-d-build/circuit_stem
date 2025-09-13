@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const double cellSize = 64.0;
+const double cellSize = 64;
 const int defaultRows = 6;
 const int defaultCols = 6;
 

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:math';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 
@@ -68,9 +69,9 @@ class GameCanvasState {
   /// Calculated properties
   double get scaledCellSize => gridCellSize * scale;
   Size get gridPixelSize => Size(
-    gridWidth * scaledCellSize,
-    gridHeight * scaledCellSize,
-  );
+        gridWidth * scaledCellSize,
+        gridHeight * scaledCellSize,
+      );
 
   GameCanvasState copyWith({
     double? gridCellSize,
@@ -99,13 +100,14 @@ class GameCanvasState {
 
 /// StateNotifier for game canvas state management
 class GameCanvasStateNotifier extends StateNotifier<GameCanvasState> {
-  static const double _defaultCellSize = 60.0;
+  static const double _defaultCellSize = 60;
   static const double _minScale = 0.5;
-  static const double _maxScale = 3.0;
+  static const double _maxScale = 3;
 
-  GameCanvasStateNotifier() : super(const GameCanvasState(
-    interactionState: CanvasInteractionState(),
-  ));
+  GameCanvasStateNotifier()
+      : super(const GameCanvasState(
+          interactionState: CanvasInteractionState(),
+        ));
 
   // FSM methods
   void transitionToIdle() {
@@ -171,10 +173,14 @@ class GameCanvasStateNotifier extends StateNotifier<GameCanvasState> {
 
   // Query methods for FSM state
   bool get isIdle => state.interactionState.mode == CanvasInteractionMode.idle;
-  bool get isDraggingComponent => state.interactionState.mode == CanvasInteractionMode.draggingExisting;
-  bool get isPlacingFromPalette => state.interactionState.mode == CanvasInteractionMode.placingFromPalette;
-  bool get isPanning => state.interactionState.mode == CanvasInteractionMode.panning;
-  bool get isDrawingWire => state.interactionState.mode == CanvasInteractionMode.drawingWire;
+  bool get isDraggingComponent =>
+      state.interactionState.mode == CanvasInteractionMode.draggingExisting;
+  bool get isPlacingFromPalette =>
+      state.interactionState.mode == CanvasInteractionMode.placingFromPalette;
+  bool get isPanning =>
+      state.interactionState.mode == CanvasInteractionMode.panning;
+  bool get isDrawingWire =>
+      state.interactionState.mode == CanvasInteractionMode.drawingWire;
 
   void updateCanvasSize(Size size) {
     if (state.canvasSize != size) {
@@ -236,7 +242,7 @@ class GameCanvasStateNotifier extends StateNotifier<GameCanvasState> {
   }
 
   void resetZoom() {
-    state = state.copyWith(scale: 1.0);
+    state = state.copyWith(scale: 1);
     _constrainPan();
   }
 
@@ -275,9 +281,9 @@ class GameCanvasStateNotifier extends StateNotifier<GameCanvasState> {
 
     // Calculate bounds for panning
     final rawMinPanX = state.canvasSize.width - gridPixelSize.width - 50;
-    final rawMaxPanX = 50.0;
+    const rawMaxPanX = 50.0;
     final rawMinPanY = state.canvasSize.height - gridPixelSize.height - 50;
-    final rawMaxPanY = 50.0;
+    const rawMaxPanY = 50.0;
 
     final minPanX = min(rawMinPanX, rawMaxPanX);
     final maxPanX = max(rawMinPanX, rawMaxPanX);
@@ -333,7 +339,8 @@ class GameCanvasStateNotifier extends StateNotifier<GameCanvasState> {
       scale: state.scale,
       panOffset: state.panOffset,
     );
-    return UnifiedCoordinateService().isWithinGridBounds(screenPosition, config);
+    return UnifiedCoordinateService()
+        .isWithinGridBounds(screenPosition, config);
   }
 
   // Get valid grid position from screen coordinates (returns null if out of bounds)
@@ -345,7 +352,8 @@ class GameCanvasStateNotifier extends StateNotifier<GameCanvasState> {
       scale: state.scale,
       panOffset: state.panOffset,
     );
-    return UnifiedCoordinateService().getValidGridPosition(screenPosition, config);
+    return UnifiedCoordinateService()
+        .getValidGridPosition(screenPosition, config);
   }
 
   // Get the grid bounds visible on screen
@@ -357,7 +365,8 @@ class GameCanvasStateNotifier extends StateNotifier<GameCanvasState> {
       scale: state.scale,
       panOffset: state.panOffset,
     );
-    return UnifiedCoordinateService().calculateVisibleGridBounds(config, state.canvasSize);
+    return UnifiedCoordinateService()
+        .calculateVisibleGridBounds(config, state.canvasSize);
   }
 
   // Check if a grid position is visible
@@ -369,10 +378,10 @@ class GameCanvasStateNotifier extends StateNotifier<GameCanvasState> {
   void reset() {
     state = const GameCanvasState(
       gridCellSize: _defaultCellSize,
-      scale: 1.0,
+      scale: 1,
       panOffset: Offset.zero,
       isScaling: false,
-      lastScale: 1.0,
+      lastScale: 1,
       interactionState: CanvasInteractionState(),
     );
 
@@ -398,6 +407,7 @@ class GameCanvasStateNotifier extends StateNotifier<GameCanvasState> {
 }
 
 /// Provider for GameCanvasStateNotifier
-final gameCanvasStateNotifierProvider = StateNotifierProvider<GameCanvasStateNotifier, GameCanvasState>(
+final gameCanvasStateNotifierProvider =
+    StateNotifierProvider<GameCanvasStateNotifier, GameCanvasState>(
   (ref) => GameCanvasStateNotifier(),
 );

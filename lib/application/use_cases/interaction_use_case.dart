@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
+import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
 import 'package:sparkcircuit/domain/entities/components/wire.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
 
 // ✅ CLEAN: Single provider, no duplicates
-final interactionEngineProvider = StateNotifierProvider.family<InteractionEngine, GameState, String>(
-  (ref, levelId) => InteractionEngine(levelId)
-);
+final interactionEngineProvider =
+    StateNotifierProvider.family<InteractionEngine, GameState, String>(
+        (ref, levelId) => InteractionEngine(levelId));
 
 class InteractionEngine extends StateNotifier<GameState> {
   late final CoordinateSystemService _coordinateService;
@@ -23,12 +23,13 @@ class InteractionEngine extends StateNotifier<GameState> {
     final gridPosition = _coordinateService.screenToGrid(
       globalPosition,
       CoordinateContext(
-        gridDimensions: Size(state.grid.cols.toDouble(), state.grid.rows.toDouble()),
-        cellSize: 60.0,
-        scale: 1.0,
+        gridDimensions:
+            Size(state.grid.cols.toDouble(), state.grid.rows.toDouble()),
+        cellSize: 60,
+        scale: 1,
         panOffset: Offset.zero,
-        canvasSize: Size(800, 600),
-        devicePixelRatio: 1.0,
+        canvasSize: const Size(800, 600),
+        devicePixelRatio: 1,
       ),
     );
 
@@ -39,7 +40,8 @@ class InteractionEngine extends StateNotifier<GameState> {
 
     // Check inventory and occupancy
     final occupiedPositions = state.grid.components.values
-        .map((component) => GridPosition(row: component.row, col: component.col))
+        .map(
+            (component) => GridPosition(row: component.row, col: component.col))
         .toSet();
 
     if (occupiedPositions.contains(gridPosition)) {
@@ -60,8 +62,7 @@ class InteractionEngine extends StateNotifier<GameState> {
     );
 
     final newGrid = state.grid.copyWith(
-      components: {...state.grid.components, componentId: newComponent}
-    );
+        components: {...state.grid.components, componentId: newComponent});
 
     state = state.copyWith(
       grid: newGrid,
@@ -84,24 +85,26 @@ class InteractionEngine extends StateNotifier<GameState> {
     final startNode = _coordinateService.screenToGrid(
       state.wireDrawStartPos!,
       CoordinateContext(
-        gridDimensions: Size(state.grid.cols.toDouble(), state.grid.rows.toDouble()),
-        cellSize: 60.0,
-        scale: 1.0,
+        gridDimensions:
+            Size(state.grid.cols.toDouble(), state.grid.rows.toDouble()),
+        cellSize: 60,
+        scale: 1,
         panOffset: Offset.zero,
-        canvasSize: Size(800, 600),
-        devicePixelRatio: 1.0,
+        canvasSize: const Size(800, 600),
+        devicePixelRatio: 1,
       ),
     );
 
     final endNode = _coordinateService.screenToGrid(
       globalEnd,
       CoordinateContext(
-        gridDimensions: Size(state.grid.cols.toDouble(), state.grid.rows.toDouble()),
-        cellSize: 60.0,
-        scale: 1.0,
+        gridDimensions:
+            Size(state.grid.cols.toDouble(), state.grid.rows.toDouble()),
+        cellSize: 60,
+        scale: 1,
         panOffset: Offset.zero,
-        canvasSize: Size(800, 600),
-        devicePixelRatio: 1.0,
+        canvasSize: const Size(800, 600),
+        devicePixelRatio: 1,
       ),
     );
 
@@ -119,7 +122,7 @@ class InteractionEngine extends StateNotifier<GameState> {
 
     // Simple straight line for now (can be enhanced with pathfinding later)
     final positions = [startNode, endNode];
-    for (int i = 0; i < positions.length; i++) {
+    for (var i = 0; i < positions.length; i++) {
       final position = positions[i];
       final wire = Wire(
         id: '${wireId}_segment_$i',

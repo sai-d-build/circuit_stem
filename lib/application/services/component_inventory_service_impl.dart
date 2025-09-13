@@ -1,6 +1,6 @@
 import 'package:sparkcircuit/application/services/interfaces/component_inventory_service.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 /// Default implementation of ComponentInventoryService
 class DefaultComponentInventoryService implements ComponentInventoryService {
@@ -26,12 +26,14 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
     if (isAvailable) {
       return InventoryCheckResult.available(available, total);
     } else {
-      return InventoryCheckResult.unavailable(available, total, 'No components available in inventory');
+      return InventoryCheckResult.unavailable(
+          available, total, 'No components available in inventory');
     }
   }
 
   @override
-  Future<InventoryConsumptionResult> consumeComponent(ComponentType type) async {
+  Future<InventoryConsumptionResult> consumeComponent(
+      ComponentType type) async {
     final currentAvailable = _inventory[type] ?? 0;
     final currentUsed = _used[type] ?? 0;
 
@@ -42,12 +44,14 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
     });
 
     if (currentAvailable <= 0) {
-      StructuredLogger.warning('Cannot consume component - none available', context: {
-        'componentType': type.toString(),
-        'available': currentAvailable,
-      });
+      StructuredLogger.warning('Cannot consume component - none available',
+          context: {
+            'componentType': type.toString(),
+            'available': currentAvailable,
+          });
 
-      return InventoryConsumptionResult.failed('No components available to consume');
+      return InventoryConsumptionResult.failed(
+          'No components available to consume');
     }
 
     // Update inventory
@@ -115,10 +119,8 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
 
     StructuredLogger.debug('Retrieved all inventory levels', context: {
       'totalTypes': result.length,
-      'inventory': result.map((key, value) => MapEntry(
-        key.toString(),
-        {'available': value.availableCount, 'total': value.totalCount}
-      )),
+      'inventory': result.map((key, value) => MapEntry(key.toString(),
+          {'available': value.availableCount, 'total': value.totalCount})),
     });
 
     return result;
@@ -128,8 +130,10 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
   Future<void> resetInventoryForLevel(String levelId) async {
     StructuredLogger.info('Resetting inventory for level', context: {
       'levelId': levelId,
-      'inventoryBeforeReset': _inventory.map((key, value) => MapEntry(key.toString(), value)),
-      'usedBeforeReset': _used.map((key, value) => MapEntry(key.toString(), value)),
+      'inventoryBeforeReset':
+          _inventory.map((key, value) => MapEntry(key.toString(), value)),
+      'usedBeforeReset':
+          _used.map((key, value) => MapEntry(key.toString(), value)),
     });
 
     // Reset used counts to 0, keep available counts
@@ -137,16 +141,19 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
 
     StructuredLogger.debug('Inventory reset complete', context: {
       'levelId': levelId,
-      'inventoryAfterReset': _inventory.map((key, value) => MapEntry(key.toString(), value)),
+      'inventoryAfterReset':
+          _inventory.map((key, value) => MapEntry(key.toString(), value)),
       'usedAfterReset': _used.length, // Should be 0
     });
   }
 
   /// Initialize inventory for a level with specific component quantities
-  void initializeInventoryForLevel(String levelId, Map<ComponentType, int> initialInventory) {
+  void initializeInventoryForLevel(
+      String levelId, Map<ComponentType, int> initialInventory) {
     StructuredLogger.info('Initializing inventory for level', context: {
       'levelId': levelId,
-      'initialInventory': initialInventory.map((key, value) => MapEntry(key.toString(), value)),
+      'initialInventory':
+          initialInventory.map((key, value) => MapEntry(key.toString(), value)),
     });
 
     _inventory.clear();

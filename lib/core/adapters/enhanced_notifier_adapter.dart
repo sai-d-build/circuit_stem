@@ -1,6 +1,6 @@
 import '../../../application/enhanced_game_state_notifier.dart';
-import '../interfaces/game_state_notifier_interface.dart';
 import '../../../domain/entities/entities.dart';
+import '../interfaces/game_state_notifier_interface.dart';
 
 /// Adapter for EnhancedGameStateNotifier to implement IGameStateNotifier
 class EnhancedNotifierAdapter extends IGameStateNotifier {

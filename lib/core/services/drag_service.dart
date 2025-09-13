@@ -68,6 +68,7 @@
 // - domain/entities/entities.dart: Component type definitions
 // - presentation/models/drag_models.dart: Drag data structures
 ///
+library;
 
 import 'package:flutter/material.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
@@ -116,15 +117,17 @@ class DragState {
   // Convenience properties
   bool get hasComponent => draggedComponentId != null;
   bool get hasValidPosition => dragCurrentPosition != null;
-  Offset? get dragDelta => dragStartPosition != null && dragCurrentPosition != null
-      ? dragCurrentPosition! - dragStartPosition! : null;
+  Offset? get dragDelta =>
+      dragStartPosition != null && dragCurrentPosition != null
+          ? dragCurrentPosition! - dragStartPosition!
+          : null;
 }
 
 /// Types of drag operations
 enum DragType {
-  component,  // Drag from palette
-  move,       // Move existing component on canvas
-  wire,       // Wire drawing operation
+  component, // Drag from palette
+  move, // Move existing component on canvas
+  wire, // Wire drawing operation
 }
 
 /// Events that can occur during drag operations
@@ -139,7 +142,8 @@ class DragStartEvent extends DragEvent {
   final ComponentDragData dragData;
   final DragType dragType;
 
-  const DragStartEvent(super.timestamp, super.position, this.dragData, this.dragType);
+  const DragStartEvent(
+      super.timestamp, super.position, this.dragData, this.dragType);
 }
 
 class DragUpdateEvent extends DragEvent {
@@ -150,7 +154,8 @@ class DragEndEvent extends DragEvent {
   final bool wasSuccessful;
   final Offset? finalPosition;
 
-  const DragEndEvent(super.timestamp, super.position, this.wasSuccessful, this.finalPosition);
+  const DragEndEvent(
+      super.timestamp, super.position, this.wasSuccessful, this.finalPosition);
 }
 
 class DragCancelEvent extends DragEvent {
@@ -175,7 +180,8 @@ typedef DragStartedCallback = void Function(DragStartEvent event);
 typedef DragUpdatedCallback = void Function(DragUpdateEvent event);
 typedef DragEndedCallback = void Function(DragEndEvent event);
 typedef DragCancelledCallback = void Function(DragCancelEvent event);
-typedef ValidationCallback = DropValidationResult Function(ComponentDragData dragData, Offset position);
+typedef ValidationCallback = DropValidationResult Function(
+    ComponentDragData dragData, Offset position);
 
 /// Main drag controller that centralizes all drag logic
 class DragController {
@@ -195,7 +201,8 @@ class DragController {
   bool get isDragging => _state.isDragging;
 
   /// Start a new drag operation
-  void startDrag(ComponentDragData dragData, DragType dragType, Offset startPosition) {
+  void startDrag(
+      ComponentDragData dragData, DragType dragType, Offset startPosition) {
     _state = DragState(
       isDragging: true,
       dragStartPosition: startPosition,
@@ -205,7 +212,8 @@ class DragController {
       draggedComponentId: dragType == DragType.move ? 'temp-component' : null,
     );
 
-    final event = DragStartEvent(DateTime.now(), startPosition, dragData, dragType);
+    final event =
+        DragStartEvent(DateTime.now(), startPosition, dragData, dragType);
     onDragStarted?.call(event);
   }
 
@@ -226,15 +234,19 @@ class DragController {
     _state = _state.copyWith(isValidDrop: true);
     _clearDragState();
 
-    final event = DragEndEvent(DateTime.now(), finalPosition, true, finalPosition);
+    final event =
+        DragEndEvent(DateTime.now(), finalPosition, true, finalPosition);
     onDragEnded?.call(event);
   }
 
   /// Cancel drag operation
-  void cancelDrag({ Offset? cancelPosition }) {
+  void cancelDrag({Offset? cancelPosition}) {
     if (!isDragging) return;
 
-    final position = cancelPosition ?? _state.dragCurrentPosition ?? _state.dragStartPosition ?? Offset.zero;
+    final position = cancelPosition ??
+        _state.dragCurrentPosition ??
+        _state.dragStartPosition ??
+        Offset.zero;
     _clearDragState();
 
     final event = DragCancelEvent(DateTime.now(), position);
@@ -242,7 +254,8 @@ class DragController {
   }
 
   /// Attempt to drop drag operation at specified position
-  DropValidationResult validateDrop(ComponentDragData dragData, Offset dropPosition) {
+  DropValidationResult validateDrop(
+      ComponentDragData dragData, Offset dropPosition) {
     if (onValidateDrop != null) {
       return onValidateDrop!(dragData, dropPosition);
     }
@@ -252,7 +265,8 @@ class DragController {
   }
 
   /// End drag with validation check
-  DropValidationResult endDragAtPosition(ComponentDragData dragData, Offset dropPosition) {
+  DropValidationResult endDragAtPosition(
+      ComponentDragData dragData, Offset dropPosition) {
     final validation = validateDrop(dragData, dropPosition);
 
     if (validation.isValid) {
@@ -276,9 +290,9 @@ class DragService {
   static final DragService _instance = DragService._internal();
   final DragController _controller = DragController();
 
-  DragService._internal();
-
   factory DragService() => _instance;
+
+  DragService._internal();
 
   /// Get the drag controller
   DragController get controller => _controller;
@@ -289,10 +303,12 @@ class DragService {
   }
 
   /// Start moving an existing component
-  void startComponentMove(String componentId, ComponentDragData dragData, Offset startPosition) {
+  void startComponentMove(
+      String componentId, ComponentDragData dragData, Offset startPosition) {
     controller.startDrag(dragData, DragType.move, startPosition);
     // Override the dragged component ID
-    controller._state = controller._state.copyWith(draggedComponentId: componentId);
+    controller._state =
+        controller._state.copyWith(draggedComponentId: componentId);
   }
 
   /// Update drag position
@@ -301,12 +317,13 @@ class DragService {
   }
 
   /// Drop component at position
-  DropValidationResult dropComponent(ComponentDragData dragData, Offset dropPosition) {
+  DropValidationResult dropComponent(
+      ComponentDragData dragData, Offset dropPosition) {
     return controller.endDragAtPosition(dragData, dropPosition);
   }
 
   /// Cancel drag operation
-  void cancelDrag({ Offset? position }) {
+  void cancelDrag({Offset? position}) {
     controller.cancelDrag(cancelPosition: position);
   }
 

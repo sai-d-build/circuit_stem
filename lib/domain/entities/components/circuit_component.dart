@@ -1,20 +1,21 @@
 // lib/domain/entities/components/circuit_component.dart
 import 'package:flutter/material.dart';
+
+import '../../../core/debug/structured_logger.dart';
+import '../../../core/performance/component_cache_manager.dart';
 // Note: Keeping imports minimal for Phase 1 MVP - caching foundation established but simplified
 // Phase 2 integration: full theme and painter system
 import '../../../presentation/core/theme/app_theme.dart';
 import '../../../presentation/features/game/painters/component_painter.dart';
-import '../../../core/performance/component_cache_manager.dart';
-import '../../../core/debug/structured_logger.dart';
 import '../core/component.dart';
-import 'resistor.dart';
-import 'bulb.dart';
-import 'switch_entity.dart';
-import 'wire.dart';
 import 'battery.dart';
+import 'bulb.dart';
 import 'buzzer.dart';
 import 'capacitor.dart';
 import 'inductor.dart';
+import 'resistor.dart';
+import 'switch_entity.dart';
+import 'wire.dart';
 
 // Forward declaration to avoid circular imports
 // class CircuitPainter; // Commented out - not needed for Phase 1 MVP
@@ -38,10 +39,9 @@ abstract class CircuitComponent {
     ComponentState? state,
     Map<String, dynamic>? properties,
     int? rotation,
-  }) :
-    state = state ?? ComponentState.normal,
-    properties = properties ?? {},
-    rotation = rotation ?? 0;
+  })  : state = state ?? ComponentState.normal,
+        properties = properties ?? {},
+        rotation = rotation ?? 0;
 
   /// Position as Offset for Flutter compatibility
   Offset get position => Offset(col.toDouble(), row.toDouble());
@@ -126,7 +126,7 @@ abstract class CircuitComponent {
     ComponentPainter painter,
   ) {
     // Get cached picture from cache manager
-    final ComponentCacheManager cacheManager = ComponentCacheManager();
+    final cacheManager = ComponentCacheManager();
     final cachedPicture = cacheManager.getComponentPicture(
       this,
       colors,
@@ -140,10 +140,11 @@ abstract class CircuitComponent {
       canvas.drawPicture(cachedPicture);
     } else {
       // Fallback - render directly if cache unavailable
-      StructuredLogger.debug('Component cache miss, rendering directly', context: {
-        'componentId': id,
-        'componentType': type.toString(),
-      });
+      StructuredLogger.debug('Component cache miss, rendering directly',
+          context: {
+            'componentId': id,
+            'componentType': type.toString(),
+          });
 
       final center = bounds.center;
       canvas.save();
@@ -158,7 +159,6 @@ abstract class CircuitComponent {
     }
   }
 
-
   /// Invalidate render cache
   void invalidateRenderCache() {
     // Cache invalidation handled by ComponentCacheManager
@@ -167,6 +167,22 @@ abstract class CircuitComponent {
   /// Cleanup resources
   void dispose() {
     // Resources are managed by ComponentCacheManager
+  }
+
+  /// Get component resistance (ohms) - required for current calculation
+  double get resistance;
+
+  /// Calculate current through component given voltage (default ohms law implementation)
+  /// Subclasses should override if they have different behavior (e.g., capacitors)
+  double calculateCurrent(double voltage) {
+    return voltage / resistance;
+  }
+
+  /// Calculate power dissipation/consumption
+  /// Default implementation: P = V * I
+  double calculatePower(double voltage) {
+    final current = calculateCurrent(voltage);
+    return voltage * current;
   }
 
   /// Serialize to JSON

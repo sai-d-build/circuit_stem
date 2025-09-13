@@ -1,5 +1,6 @@
-import 'dart:ui';
 import 'dart:math' as math;
+import 'dart:ui';
+
 import '../../../core/services/unified_coordinate_service.dart';
 
 /// Handles coordinate translation between screen coordinates and grid coordinates
@@ -33,10 +34,14 @@ class CoordinateTranslator {
 
   /// Convert grid coordinates to screen coordinates
   Offset gridToScreen(Offset gridPos) {
-    final screenX = (gridPos.dx * _gridCellSize * _scale) + _panX;
-    final screenY = (gridPos.dy * _gridCellSize * _scale) + _panY;
-    
-    return Offset(screenX, screenY);
+    final config = GridConfiguration(
+      rows: 6, // Default or passed
+      cols: 8,
+      cellSize: _gridCellSize,
+      scale: _scale,
+      panOffset: Offset(_panX, _panY),
+    );
+    return UnifiedCoordinateService().gridToScreen(gridPos, config);
   }
 
   /// Snap screen coordinates to the nearest grid cell center
@@ -85,7 +90,7 @@ class CoordinateTranslator {
       componentSize.width * _scale,
       componentSize.height * _scale,
     );
-    
+
     return Rect.fromCenter(
       center: screenPos,
       width: scaledSize.width,
@@ -118,12 +123,15 @@ class CoordinateTranslator {
       scale: _scale,
       panOffset: Offset(_panX, _panY),
     );
-    final topLeft = UnifiedCoordinateService().screenToGrid(screenRect.topLeft, config);
-    final bottomRight = UnifiedCoordinateService().screenToGrid(screenRect.bottomRight, config);
-    
+    final topLeft =
+        UnifiedCoordinateService().screenToGrid(screenRect.topLeft, config);
+    final bottomRight =
+        UnifiedCoordinateService().screenToGrid(screenRect.bottomRight, config);
+
     return Rect.fromPoints(
       Offset(topLeft.dx.floor().toDouble(), topLeft.dy.floor().toDouble()),
-      Offset(bottomRight.dx.ceil().toDouble(), bottomRight.dy.ceil().toDouble()),
+      Offset(
+          bottomRight.dx.ceil().toDouble(), bottomRight.dy.ceil().toDouble()),
     );
   }
 

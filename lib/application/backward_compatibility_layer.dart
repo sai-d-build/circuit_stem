@@ -19,7 +19,7 @@ class FallbackLevelSystem {
 
   Future<void> loadLevel(int levelId) async {
     // No-op when level system is disabled
-        Logger.log('Level system disabled - using basic circuit mode');
+    Logger.log('Level system disabled - using basic circuit mode');
   }
 
   List<String> getAvailableLevels() => [];
@@ -35,9 +35,10 @@ class FallbackLevelSystem {
 class FallbackAchievementSystem {
   bool get isEnabled => false;
 
-  Future<void> checkAchievements(String event, Map<String, dynamic> data) async {
+  Future<void> checkAchievements(
+      String event, Map<String, dynamic> data) async {
     // No-op when achievement system is disabled
-            Logger.log('Achievement system disabled');
+    Logger.log('Achievement system disabled');
   }
 
   List<String> getUnlockedAchievements() => [];
@@ -53,19 +54,19 @@ class FallbackInteractiveMechanics {
 
   Future<bool> handleDragDrop(String componentId, double x, double y) async {
     // Basic drag-drop without advanced validation
-        Logger.log('Using basic drag-drop mechanics');
+    Logger.log('Using basic drag-drop mechanics');
     return true;
   }
 
   Future<bool> handleRotation(String componentId, double angle) async {
     // Basic rotation without animation
-            Logger.log('Using basic rotation mechanics');
+    Logger.log('Using basic rotation mechanics');
     return true;
   }
 
   Future<bool> handleToggle(String componentId) async {
     // Basic toggle without feedback
-            Logger.log('Using basic toggle mechanics');
+    Logger.log('Using basic toggle mechanics');
     return true;
   }
 }
@@ -92,7 +93,7 @@ class FallbackAnimationSystem {
 
   Future<void> playAnimation(String animationId) async {
     // No animations - just complete immediately
-            Logger.log('Animation system disabled - skipping $animationId');
+    Logger.log('Animation system disabled - skipping $animationId');
   }
 
   Future<void> stopAnimation(String animationId) async {
@@ -110,17 +111,17 @@ class FallbackVisualFeedbackSystem {
 
   Future<void> showSuccessFeedback() async {
     // Basic success indication
-            Logger.log('✓ Success!');
+    Logger.log('✓ Success!');
   }
 
   Future<void> showErrorFeedback(String message) async {
     // Basic error indication
-            Logger.log('✗ Error: $message');
+    Logger.log('✗ Error: $message');
   }
 
   Future<void> showPlacementFeedback(bool valid) async {
     // Basic placement feedback
-            Logger.log(valid ? '✓ Valid placement' : '✗ Invalid placement');
+    Logger.log(valid ? '✓ Valid placement' : '✗ Invalid placement');
   }
 }
 
@@ -128,7 +129,8 @@ class FallbackVisualFeedbackSystem {
 class FallbackEducationalValidator {
   bool get isEnabled => false;
 
-  Future<Map<String, dynamic>> validateSolution(Map<String, dynamic> solution) async {
+  Future<Map<String, dynamic>> validateSolution(
+      Map<String, dynamic> solution) async {
     // Basic validation only - always pass
     return {
       'isValid': true,
@@ -149,7 +151,7 @@ class FallbackLearningAnalytics {
 
   Future<void> trackEvent(String event, Map<String, dynamic> data) async {
     // Basic logging only
-            Logger.log('Learning event: $event with data: $data');
+    Logger.log('Learning event: $event with data: $data');
   }
 
   Future<Map<String, dynamic>> getAnalytics() async {
@@ -203,7 +205,7 @@ class BackwardCompatibilityHelper {
       try {
         return enabledFactory();
       } catch (e) {
-                Logger.log('Failed to create enabled service, using fallback: $e');
+        Logger.log('Failed to create enabled service, using fallback: $e');
         return fallbackFactory();
       }
     } else {
@@ -219,7 +221,7 @@ class BackwardCompatibilityHelper {
     try {
       return await operation();
     } catch (e) {
-              Logger.log('Safe execution failed, using fallback: $e');
+      Logger.log('Safe execution failed, using fallback: $e');
       return fallbackValue;
     }
   }
@@ -233,7 +235,8 @@ class BackwardCompatibilityHelper {
   static Map<String, dynamic> getMigrationStatus() {
     return {
       'isInMigration': isInMigrationMode,
-      'enabledFeatures': FeatureFlagService.getEnabledFeatures().map((f) => f.name).toList(),
+      'enabledFeatures':
+          FeatureFlagService.getEnabledFeatures().map((f) => f.name).toList(),
       'migrationComplete': FeatureFlagService.isMigrationComplete(),
     };
   }
@@ -250,7 +253,8 @@ class LegacyAPIWrapper {
     String action,
     Map<String, dynamic> parameters,
   ) async {
-    if (!BackwardCompatibilityHelper.isFeatureAvailable(FeatureFlag.enableEducationalContent)) {
+    if (!BackwardCompatibilityHelper.isFeatureAvailable(
+        FeatureFlag.enableEducationalContent)) {
       // Fallback to basic circuit simulation
       return await _executeBasicCircuitAction(action, parameters);
     }
@@ -317,9 +321,9 @@ class MigrationUtilities {
       return;
     }
 
-        Logger.log('Starting user data migration...');
+    Logger.log('Starting user data migration...'); // ignore: cascade_invocations
     // Implement data migration logic here
-            Logger.log('User data migration completed');
+    Logger.log('User data migration completed'); // ignore: cascade_invocations
   }
 
   // Feature rollout helper
@@ -335,7 +339,7 @@ class MigrationUtilities {
 
     for (final feature in features) {
       if (!FeatureFlagService.isEnabled(feature)) {
-                Logger.log('Rolling out feature: ${feature.name}');
+        Logger.log('Rolling out feature: ${feature.name}');
         FeatureFlagService.enableFeature(feature);
 
         // Allow time for feature to stabilize

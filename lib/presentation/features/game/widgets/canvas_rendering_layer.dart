@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sparkcircuit/core/services/coordinate_service.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
+import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+import 'package:sparkcircuit/presentation/features/game/painters/painter_factory.dart';
+import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart'
+    as drawing_models;
+
 import '../../../../application/providers/unified_providers.dart';
 import '../../../../core/migration/migration_tracker.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'package:sparkcircuit/presentation/features/game/painters/painter_factory.dart';
-import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart' as drawing_models;
-import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/core/services/coordinate_service.dart';
 
 /// A dedicated widget for handling all canvas rendering operations
 /// This abstracts rendering logic from the main GameCanvas widget for better separation of concerns
@@ -20,19 +22,21 @@ class CanvasRenderingLayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    MigrationTracker.markFileMigrated('canvas_rendering_layer.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated(
+        'canvas_rendering_layer.dart', DateTime.now().toIso8601String());
     final gameState = ref.watch(unifiedGameStateProvider);
     final theme = Theme.of(context);
-    final circuitColors = theme.extension<CircuitColorScheme>() ?? _getDefaultCircuitColors();
+    final circuitColors =
+        theme.extension<CircuitColorScheme>() ?? _getDefaultCircuitColors();
 
     // Convert ComponentModel to CircuitComponent for painter
-    final List<CircuitComponent> circuitComponents = gameState.grid.components.values
-        .map((c) => CircuitComponent.fromComponentModel(c))
+    final circuitComponents = gameState.grid.components.values
+        .map(CircuitComponent.fromComponentModel)
         .toList()
         .cast<CircuitComponent>();
 
     // Convert Grid connections to CircuitWire for painter
-    final List<drawing_models.CircuitWire> circuitWires = [];
+    final circuitWires = <drawing_models.CircuitWire>[];
     gameState.grid.connections.forEach((sourceId, connectedIds) {
       final sourceComponent = gameState.grid.getComponentById(sourceId);
       if (sourceComponent != null) {
@@ -47,7 +51,8 @@ class CanvasRenderingLayer extends ConsumerWidget {
                 startY: sourceComponent.row.toDouble(),
                 endX: targetComponent.col.toDouble(),
                 endY: targetComponent.row.toDouble(),
-                isActive: false, // TODO: Determine active state from simulationResult
+                isActive:
+                    false, // TODO: Determine active state from simulationResult
               ));
             }
           }
@@ -72,8 +77,8 @@ class CanvasRenderingLayer extends ConsumerWidget {
   /// Create a default coordinate service for painters
   CoordinateService _createDefaultCoordinateService(dynamic gameState) {
     return CoordinateService(
-      cellSize: 60.0,
-      scale: 1.0,
+      cellSize: 60,
+      scale: 1,
       panOffset: Offset.zero,
       gridWidth: gameState.grid.cols,
       gridHeight: gameState.grid.rows,

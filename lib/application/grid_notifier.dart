@@ -11,13 +11,15 @@ class GridNotifier extends StateNotifier<Grid> {
 
   /// Set the grid state
   void setState(Grid newGrid) {
-    Logger.log('GridNotifier: updating grid with ${newGrid.components.length} components');
+    Logger.log(
+        'GridNotifier: updating grid with ${newGrid.components.length} components');
     state = newGrid;
   }
 
   /// Update a single component in the grid
   void updateComponent(ComponentModel component) {
-    final updatedComponents = Map<String, ComponentModel>.from(state.components);
+    final updatedComponents =
+        Map<String, ComponentModel>.from(state.components);
     updatedComponents[component.id] = component;
     final newGrid = state.copyWith(components: updatedComponents);
     setState(newGrid);
@@ -25,7 +27,8 @@ class GridNotifier extends StateNotifier<Grid> {
 
   /// Add a component to the grid
   void addComponent(ComponentModel component) {
-    final updatedComponents = Map<String, ComponentModel>.from(state.components);
+    final updatedComponents =
+        Map<String, ComponentModel>.from(state.components);
     updatedComponents[component.id] = component;
     final newGrid = state.copyWith(components: updatedComponents);
     setState(newGrid);
@@ -33,7 +36,8 @@ class GridNotifier extends StateNotifier<Grid> {
 
   /// Remove a component from the grid
   void removeComponent(String componentId) {
-    final updatedComponents = Map<String, ComponentModel>.from(state.components);
+    final updatedComponents =
+        Map<String, ComponentModel>.from(state.components);
     updatedComponents.remove(componentId);
     final newGrid = state.copyWith(components: updatedComponents);
     setState(newGrid);

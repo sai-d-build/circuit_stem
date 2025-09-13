@@ -87,7 +87,7 @@ class AnimationSystem {
       return;
     }
 
-    final animationKey = 'component_place';
+    const animationKey = 'component_place';
     final result = await _playAnimation(
       animationKey,
       position: position,
@@ -110,7 +110,7 @@ class AnimationSystem {
       return;
     }
 
-    final animationKey = 'component_rotate';
+    const animationKey = 'component_rotate';
     final result = await _playAnimation(
       animationKey,
       position: position,
@@ -132,7 +132,7 @@ class AnimationSystem {
       return;
     }
 
-    final animationKey = 'circuit_powered';
+    const animationKey = 'circuit_powered';
 
     // Animate powered components
     for (final componentId in poweredComponents) {
@@ -156,7 +156,7 @@ class AnimationSystem {
       return;
     }
 
-    final animationKey = 'current_flow';
+    const animationKey = 'current_flow';
     final result = await _playAnimation(
       animationKey,
       path: currentPath,
@@ -169,12 +169,13 @@ class AnimationSystem {
   }
 
   /// Play success feedback animation
-  Future<void> playSuccessAnimation(Offset position, {double scale = 1.0}) async {
+  Future<void> playSuccessAnimation(Offset position,
+      {double scale = 1.0}) async {
     if (!FeatureFlagService.isEnabled(FeatureFlag.enableAnimations)) {
       return;
     }
 
-    final animationKey = 'success_burst';
+    const animationKey = 'success_burst';
     final result = await _playAnimation(
       animationKey,
       position: position,
@@ -192,7 +193,7 @@ class AnimationSystem {
       return;
     }
 
-    final animationKey = 'error_flash';
+    const animationKey = 'error_flash';
     final result = await _playAnimation(
       animationKey,
       position: position,
@@ -210,7 +211,7 @@ class AnimationSystem {
       return;
     }
 
-    final animationKey = 'hint_glow';
+    const animationKey = 'hint_glow';
     final result = await _playAnimation(
       animationKey,
       position: position,
@@ -228,11 +229,11 @@ class AnimationSystem {
       return;
     }
 
-    final animationKey = 'level_complete';
+    const animationKey = 'level_complete';
     final result = await _playAnimation(
       animationKey,
       position: Offset.zero, // Full screen
-      scale: 2.0,
+      scale: 2,
     );
 
     if (result.isSuccessful) {
@@ -241,12 +242,13 @@ class AnimationSystem {
   }
 
   /// Play achievement unlock animation
-  Future<void> playAchievementAnimation(String achievementId, Offset position) async {
+  Future<void> playAchievementAnimation(
+      String achievementId, Offset position) async {
     if (!FeatureFlagService.isEnabled(FeatureFlag.enableAnimations)) {
       return;
     }
 
-    final animationKey = 'achievement_unlock';
+    const animationKey = 'achievement_unlock';
     final result = await _playAnimation(
       animationKey,
       position: position,
@@ -261,16 +263,22 @@ class AnimationSystem {
   /// Get animation performance metrics
   AnimationPerformanceMetrics getPerformanceMetrics() {
     final totalAnimations = _metrics.length;
-    final totalPlays = _metrics.values.fold<int>(0, (sum, m) => sum + m.playCount);
-    final averageLoadTime = _metrics.values.isEmpty ? Duration.zero :
-        Duration(milliseconds: _metrics.values.map((m) => m.loadTime.millisecondsSinceEpoch).reduce((a, b) => a + b) ~/ _metrics.length);
+    final totalPlays =
+        _metrics.values.fold<int>(0, (sum, m) => sum + m.playCount);
+    final averageLoadTime = _metrics.values.isEmpty
+        ? Duration.zero
+        : Duration(
+            milliseconds: _metrics.values
+                    .map((m) => m.loadTime.millisecondsSinceEpoch)
+                    .reduce((a, b) => a + b) ~/
+                _metrics.length);
 
     return AnimationPerformanceMetrics(
       totalAnimations: totalAnimations,
       totalPlays: totalPlays,
       averageLoadTime: averageLoadTime,
       memoryUsage: _estimateMemoryUsage(),
-      frameRate: 60.0, // Target frame rate
+      frameRate: 60, // Target frame rate
     );
   }
 
@@ -278,16 +286,16 @@ class AnimationSystem {
 
   Future<AnimationResult> _playAnimation(
     String key, {
-      Offset? position,
-      double? scale,
-      double? rotation,
-      Color? color,
-      List<Offset>? path,
-      double? intensity,
-      String? text,
-      Duration? duration,
-      VoidCallback? onComplete,
-    }) async {
+    Offset? position,
+    double? scale,
+    double? rotation,
+    Color? color,
+    List<Offset>? path,
+    double? intensity,
+    String? text,
+    Duration? duration,
+    VoidCallback? onComplete,
+  }) async {
     final controller = _controllers[key];
     if (controller == null) {
       return AnimationResult.failure('Animation $key not found');
@@ -321,13 +329,13 @@ class AnimationSystem {
 
       final actualDuration = DateTime.now().difference(startTime);
       return AnimationResult.success(actualDuration);
-
     } catch (e) {
       return AnimationResult.failure('Animation failed: ${e.toString()}');
     }
   }
 
-  Future<void> _playComponentStateAnimation(String componentId, bool isPowered) async {
+  Future<void> _playComponentStateAnimation(
+      String componentId, bool isPowered) async {
     // Simplified component state animation
     // In practice, this would animate the specific component
     await Future.delayed(const Duration(milliseconds: 200));
@@ -338,7 +346,7 @@ class AnimationSystem {
       case ComponentType.voltageSource:
         return 1.2;
       case ComponentType.resistor:
-        return 1.0;
+        return 1;
       case ComponentType.capacitor:
         return 1.1;
       case ComponentType.inductor:
@@ -371,7 +379,10 @@ class AnimationSystem {
         playCount: metrics.playCount + 1,
         totalDuration: metrics.totalDuration + duration,
         averageDuration: Duration(
-          milliseconds: ((metrics.averageDuration.inMilliseconds * metrics.playCount) + duration.inMilliseconds) ~/ (metrics.playCount + 1),
+          milliseconds:
+              ((metrics.averageDuration.inMilliseconds * metrics.playCount) +
+                      duration.inMilliseconds) ~/
+                  (metrics.playCount + 1),
         ),
       );
       _metrics[key] = updatedMetrics;
@@ -388,8 +399,10 @@ class AnimationSystem {
 // Animation result
 @freezed
 class AnimationResult with _$AnimationResult {
-  const factory AnimationResult.success(Duration duration) = _AnimationResultSuccess;
-  const factory AnimationResult.failure(String reason) = _AnimationResultFailure;
+  const factory AnimationResult.success(Duration duration) =
+      _AnimationResultSuccess;
+  const factory AnimationResult.failure(String reason) =
+      _AnimationResultFailure;
 
   const AnimationResult._();
 

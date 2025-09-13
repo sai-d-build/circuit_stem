@@ -1,13 +1,13 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sparkcircuit/application/game_engine/v3/game_engine_notifier_v3.dart';
 import 'package:sparkcircuit/application/providers.dart';
 import 'package:sparkcircuit/application/services/component_factory.dart';
 import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
-import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
 import 'package:sparkcircuit/core/simulation/basic_simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
+import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
-import 'package:sparkcircuit/application/game_engine/v3/game_engine_notifier_v3.dart';
 
 void main() {
   group('Palette Functionality Tests', () {
@@ -88,32 +88,39 @@ void main() {
 
     group('Component Inventory Logic', () {
       test('should correctly determine if component can be used', () {
-        final paletteNotifier = container.read(paletteStateProvider('1').notifier);
+        final paletteNotifier =
+            container.read(paletteStateProvider('1').notifier);
         expect(paletteNotifier.canUseComponent('battery'), true);
         expect(paletteNotifier.canUseComponent('resistor'), true);
         expect(paletteNotifier.canUseComponent('nonexistent'), false);
       });
 
       test('should decrement inventory when component is used', () {
-        final paletteNotifier = container.read(paletteStateProvider('1').notifier);
-        final initialBatteryCount = paletteNotifier.state.inventory['battery']?.available;
+        final paletteNotifier =
+            container.read(paletteStateProvider('1').notifier);
+        final initialBatteryCount =
+            paletteNotifier.state.inventory['battery']?.available;
         expect(initialBatteryCount, 1);
         paletteNotifier.useComponent('battery');
-        final updatedBatteryCount = paletteNotifier.state.inventory['battery']?.available;
+        final updatedBatteryCount =
+            paletteNotifier.state.inventory['battery']?.available;
         expect(updatedBatteryCount, 0);
       });
 
       test('should not allow using component when inventory is exhausted', () {
-        final paletteNotifier = container.read(paletteStateProvider('1').notifier);
+        final paletteNotifier =
+            container.read(paletteStateProvider('1').notifier);
         paletteNotifier.useComponent('battery');
         expect(paletteNotifier.canUseComponent('battery'), false);
         paletteNotifier.useComponent('battery');
-        final batteryCount = paletteNotifier.state.inventory['battery']?.available;
+        final batteryCount =
+            paletteNotifier.state.inventory['battery']?.available;
         expect(batteryCount, 0);
       });
 
       test('should return component to inventory correctly', () {
-        final paletteNotifier = container.read(paletteStateProvider('1').notifier);
+        final paletteNotifier =
+            container.read(paletteStateProvider('1').notifier);
         paletteNotifier.useComponent('resistor');
         expect(paletteNotifier.state.inventory['resistor']?.available, 1);
         paletteNotifier.returnComponent('resistor');
@@ -123,7 +130,8 @@ void main() {
 
     group('Component Selection', () {
       test('should select component correctly', () {
-        final paletteNotifier = container.read(paletteStateProvider('1').notifier);
+        final paletteNotifier =
+            container.read(paletteStateProvider('1').notifier);
         paletteNotifier.selectComponent(null);
         paletteNotifier.stopPlacingComponent();
         expect(paletteNotifier.state.selectedComponentType, null);
@@ -140,7 +148,8 @@ void main() {
       });
 
       test('should start and stop placing component correctly', () {
-        final paletteNotifier = container.read(paletteStateProvider('1').notifier);
+        final paletteNotifier =
+            container.read(paletteStateProvider('1').notifier);
         paletteNotifier.selectComponent(null);
         paletteNotifier.stopPlacingComponent();
 
@@ -156,7 +165,8 @@ void main() {
 
     group('Component Filtering', () {
       test('should filter components by search query', () {
-        final paletteNotifier = container.read(paletteStateProvider('1').notifier);
+        final paletteNotifier =
+            container.read(paletteStateProvider('1').notifier);
         paletteNotifier.updateSearchQuery('battery');
         expect(paletteNotifier.state.filteredComponents.length, 1);
         expect(paletteNotifier.state.filteredComponents[0].type, 'battery');
@@ -170,7 +180,8 @@ void main() {
       });
 
       test('should filter components by category', () {
-        final paletteNotifier = container.read(paletteStateProvider('1').notifier);
+        final paletteNotifier =
+            container.read(paletteStateProvider('1').notifier);
         paletteNotifier.addFilter('basic');
         expect(paletteNotifier.state.filteredComponents.length, 3);
 

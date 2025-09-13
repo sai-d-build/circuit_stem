@@ -1,17 +1,19 @@
 import '../core/result.dart';
-import '../transaction.dart';
 import '../services/power_simulation_service.dart';
+import '../transaction.dart';
 import 'component_action.dart';
 import 'notifier_integrated_use_case.dart';
 
 /// Use case for updating a component's internal state and applying changes directly to notifiers
-class UpdateComponentUseCase extends NotifierIntegratedUseCase<UpdateComponentAction> {
+class UpdateComponentUseCase
+    extends NotifierIntegratedUseCase<UpdateComponentAction> {
   final PowerSimulationService _simulation;
 
   const UpdateComponentUseCase(this._simulation);
 
   @override
-  Result<void> validate(UpdateComponentAction action, NotifierContext notifiers) {
+  Result<void> validate(
+      UpdateComponentAction action, NotifierContext notifiers) {
     final component = notifiers.grid.current.componentsById[action.componentId];
     if (component == null) {
       return const Failure('Component not found');

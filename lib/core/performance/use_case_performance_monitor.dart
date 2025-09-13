@@ -4,9 +4,10 @@ import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 /// Performance monitoring for use case operations
 class UseCasePerformanceMonitor {
-  static final UseCasePerformanceMonitor _instance = UseCasePerformanceMonitor._();
+  static final UseCasePerformanceMonitor _instance =
+      UseCasePerformanceMonitor._(); // ignore: cascade_invocations
   factory UseCasePerformanceMonitor() => _instance;
-  UseCasePerformanceMonitor._();
+  UseCasePerformanceMonitor._(); // ignore: cascade_invocations
 
   final Map<String, _PerformanceMetrics> _metrics = {};
   final Map<String, Completer<void>> _activeOperations = {};
@@ -24,11 +25,12 @@ class UseCasePerformanceMonitor {
     _activeOperations[operationId] = Completer<void>();
 
     try {
-      StructuredLogger.debug('UseCase Performance: Starting $operationName', context: {
-        'operationId': operationId,
-        'startTime': startTime,
-        'metadata': metadata,
-      });
+      StructuredLogger.debug('UseCase Performance: Starting $operationName',
+          context: {
+            'operationId': operationId,
+            'startTime': startTime,
+            'metadata': metadata,
+          });
 
       final result = await operation();
 
@@ -38,12 +40,13 @@ class UseCasePerformanceMonitor {
       // Record metrics
       _recordMetrics(operationName, duration, true, metadata);
 
-      StructuredLogger.debug('UseCase Performance: Completed $operationName', context: {
-        'operationId': operationId,
-        'duration': '$durationμs',
-        'success': true,
-        'metadata': metadata,
-      });
+      StructuredLogger.debug('UseCase Performance: Completed $operationName',
+          context: {
+            'operationId': operationId,
+            'duration': '$durationμs',
+            'success': true,
+            'metadata': metadata,
+          });
 
       // Complete the operation
       _activeOperations[operationId]?.complete();
@@ -57,13 +60,14 @@ class UseCasePerformanceMonitor {
       // Record failure metrics
       _recordMetrics(operationName, duration, false, metadata);
 
-      StructuredLogger.error('UseCase Performance: Failed $operationName', context: {
-        'operationId': operationId,
-        'duration': '$durationμs',
-        'success': false,
-        'error': e.toString(),
-        'metadata': metadata,
-      });
+      StructuredLogger.error('UseCase Performance: Failed $operationName',
+          context: {
+            'operationId': operationId,
+            'duration': '$durationμs',
+            'success': false,
+            'error': e.toString(),
+            'metadata': metadata,
+          });
 
       // Complete the operation with error
       _activeOperations[operationId]?.completeError(e);
@@ -82,10 +86,12 @@ class UseCasePerformanceMonitor {
     final startTime = DateTime.now().microsecondsSinceEpoch;
 
     try {
-      StructuredLogger.debug('UseCase Performance: Starting sync $operationName', context: {
-        'startTime': startTime,
-        'metadata': metadata,
-      });
+      StructuredLogger.debug(
+          'UseCase Performance: Starting sync $operationName',
+          context: {
+            'startTime': startTime,
+            'metadata': metadata,
+          });
 
       final result = operation();
 
@@ -95,11 +101,13 @@ class UseCasePerformanceMonitor {
       // Record metrics
       _recordMetrics(operationName, duration, true, metadata);
 
-      StructuredLogger.debug('UseCase Performance: Completed sync $operationName', context: {
-        'duration': '$durationμs',
-        'success': true,
-        'metadata': metadata,
-      });
+      StructuredLogger.debug(
+          'UseCase Performance: Completed sync $operationName',
+          context: {
+            'duration': '$durationμs',
+            'success': true,
+            'metadata': metadata,
+          });
 
       return result;
     } catch (e) {
@@ -109,19 +117,22 @@ class UseCasePerformanceMonitor {
       // Record failure metrics
       _recordMetrics(operationName, duration, false, metadata);
 
-      StructuredLogger.error('UseCase Performance: Failed sync $operationName', context: {
-        'duration': '$durationμs',
-        'success': false,
-        'error': e.toString(),
-        'metadata': metadata,
-      });
+      StructuredLogger.error('UseCase Performance: Failed sync $operationName',
+          context: {
+            'duration': '$durationμs',
+            'success': false,
+            'error': e.toString(),
+            'metadata': metadata,
+          });
 
       rethrow;
     }
   }
 
-  void _recordMetrics(String operationName, int duration, bool success, Map<String, dynamic>? metadata) {
-    final metrics = _metrics.putIfAbsent(operationName, () => _PerformanceMetrics());
+  void _recordMetrics(String operationName, int duration, bool success,
+      Map<String, dynamic>? metadata) {
+    final metrics =
+        _metrics.putIfAbsent(operationName, _PerformanceMetrics.new);
 
     metrics.totalCalls++;
     metrics.totalDuration += duration;
@@ -141,13 +152,15 @@ class UseCasePerformanceMonitor {
     }
 
     // Log performance warnings for slow operations
-    if (duration > 16000) { // 16ms for 60fps
-      StructuredLogger.warning('UseCase Performance: Slow operation detected', context: {
-        'operation': operationName,
-        'duration': '$durationμs',
-        'threshold': '16000μs (60fps)',
-        'metadata': metadata,
-      });
+    if (duration > 16000) {
+      // 16ms for 60fps
+      StructuredLogger.warning('UseCase Performance: Slow operation detected',
+          context: {
+            'operation': operationName,
+            'duration': '$durationμs',
+            'threshold': '16000μs (60fps)',
+            'metadata': metadata,
+          });
     }
   }
 
@@ -158,14 +171,17 @@ class UseCasePerformanceMonitor {
       return {'error': 'No metrics found for operation: $operationName'};
     }
 
-    final avgDuration = metrics.totalCalls > 0 ? metrics.totalDuration / metrics.totalCalls : 0;
+    final avgDuration =
+        metrics.totalCalls > 0 ? metrics.totalDuration / metrics.totalCalls : 0;
 
     return {
       'operation': operationName,
       'totalCalls': metrics.totalCalls,
       'successCount': metrics.successCount,
       'failureCount': metrics.failureCount,
-      'successRate': metrics.totalCalls > 0 ? (metrics.successCount / metrics.totalCalls * 100) : 0,
+      'successRate': metrics.totalCalls > 0
+          ? (metrics.successCount / metrics.totalCalls * 100)
+          : 0,
       'averageDuration': '${avgDuration.round()}μs',
       'minDuration': '$metrics.minDurationμs',
       'maxDuration': '$metrics.maxDurationμs',

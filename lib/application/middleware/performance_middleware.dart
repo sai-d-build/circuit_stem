@@ -1,7 +1,7 @@
+import '../../common/logger.dart';
 import '../game_engine_state.dart';
 import '../use_cases/component_action.dart';
 import 'middleware.dart';
-import '../../common/logger.dart';
 
 class PerformanceMiddleware extends GameEngineMiddleware {
   const PerformanceMiddleware();

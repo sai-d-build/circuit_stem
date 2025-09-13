@@ -20,16 +20,17 @@ class OptimizedGridManager {
       // Clear positions outside new bounds
       _occupiedPositions.removeWhere((pos) {
         final parts = pos.split(',');
-        final row = int.parse(parts[0]);
-        final col = int.parse(parts[1]);
+        final row = int.parse(parts[0]); // ignore: cascade_invocations
+        final col = int.parse(parts[1]); // ignore: cascade_invocations
         return row >= height || col >= width;
       });
 
-      StructuredLogger.info('OptimizedGridManager: Grid dimensions updated', context: {
-        'newWidth': width,
-        'newHeight': height,
-        'remainingOccupiedPositions': _occupiedPositions.length,
-      });
+      StructuredLogger.info('OptimizedGridManager: Grid dimensions updated',
+          context: {
+            'newWidth': width,
+            'newHeight': height,
+            'remainingOccupiedPositions': _occupiedPositions.length,
+          });
     }
   }
 
@@ -49,10 +50,11 @@ class OptimizedGridManager {
     final key = _positionToKey(position);
     _occupiedPositions.add(key);
 
-    StructuredLogger.debug('OptimizedGridManager: Position marked as occupied', context: {
-      'position': position.toString(),
-      'totalOccupied': _occupiedPositions.length,
-    });
+    StructuredLogger.debug('OptimizedGridManager: Position marked as occupied',
+        context: {
+          'position': position.toString(),
+          'totalOccupied': _occupiedPositions.length,
+        });
   }
 
   /// Remove occupied position - O(1)
@@ -60,10 +62,11 @@ class OptimizedGridManager {
     final key = _positionToKey(position);
     _occupiedPositions.remove(key);
 
-    StructuredLogger.debug('OptimizedGridManager: Position marked as free', context: {
-      'position': position.toString(),
-      'totalOccupied': _occupiedPositions.length,
-    });
+    StructuredLogger.debug('OptimizedGridManager: Position marked as free',
+        context: {
+          'position': position.toString(),
+          'totalOccupied': _occupiedPositions.length,
+        });
   }
 
   /// Check if position is occupied - O(1)
@@ -87,8 +90,8 @@ class OptimizedGridManager {
     }
 
     // Check occupancy for multi-cell components
-    for (int row = 0; row < height; row++) {
-      for (int col = 0; col < width; col++) {
+    for (var row = 0; row < height; row++) {
+      for (var col = 0; col < width; col++) {
         final checkPos = Offset(position.dx + col, position.dy + row);
         if (isPositionOccupied(checkPos)) {
           return false;
@@ -101,8 +104,8 @@ class OptimizedGridManager {
 
   /// Place component and mark positions as occupied - O(width * height)
   void placeComponent(Offset position, {int width = 1, int height = 1}) {
-    for (int row = 0; row < height; row++) {
-      for (int col = 0; col < width; col++) {
+    for (var row = 0; row < height; row++) {
+      for (var col = 0; col < width; col++) {
         final pos = Offset(position.dx + col, position.dy + row);
         addOccupiedPosition(pos);
       }
@@ -118,8 +121,8 @@ class OptimizedGridManager {
 
   /// Remove component and free positions - O(width * height)
   void removeComponent(Offset position, {int width = 1, int height = 1}) {
-    for (int row = 0; row < height; row++) {
-      for (int col = 0; col < width; col++) {
+    for (var row = 0; row < height; row++) {
+      for (var col = 0; col < width; col++) {
         final pos = Offset(position.dx + col, position.dy + row);
         removeOccupiedPosition(pos);
       }
@@ -160,13 +163,14 @@ class OptimizedGridManager {
     }
 
     // Spiral search pattern for finding nearest free position
-    for (int radius = 1; radius <= maxRadius; radius++) {
+    for (var radius = 1; radius <= maxRadius; radius++) {
       // Check all positions at current radius
-      for (int dx = -radius; dx <= radius; dx++) {
-        for (int dy = -radius; dy <= radius; dy++) {
+      for (var dx = -radius; dx <= radius; dx++) {
+        for (var dy = -radius; dy <= radius; dy++) {
           // Only check perimeter positions to maintain spiral pattern
           if (dx.abs() == radius || dy.abs() == radius) {
-            final checkPos = Offset(targetPosition.dx + dx, targetPosition.dy + dy);
+            final checkPos =
+                Offset(targetPosition.dx + dx, targetPosition.dy + dy);
             if (isWithinBounds(checkPos) && canPlaceComponent(checkPos)) {
               return checkPos;
             }
@@ -200,16 +204,17 @@ class OptimizedGridManager {
       }
     }
 
-    StructuredLogger.info('OptimizedGridManager: Bulk update completed', context: {
-      'positionsUpdated': positions.length,
-      'setOccupied': occupied,
-      'totalOccupied': _occupiedPositions.length,
-    });
+    StructuredLogger.info('OptimizedGridManager: Bulk update completed',
+        context: {
+          'positionsUpdated': positions.length,
+          'setOccupied': occupied,
+          'totalOccupied': _occupiedPositions.length,
+        });
   }
 
   /// Validate multiple positions at once - O(n) but optimized
   List<bool> validatePositions(List<Offset> positions) {
-    return positions.map((pos) => canPlaceComponent(pos)).toList();
+    return positions.map(canPlaceComponent).toList();
   }
 
   /// Get free positions in a rectangular area - O(area) but optimized
@@ -221,8 +226,8 @@ class OptimizedGridManager {
     final startCol = rect.left.floor();
     final endCol = rect.right.ceil();
 
-    for (int row = startRow; row < endRow; row++) {
-      for (int col = startCol; col < endCol; col++) {
+    for (var row = startRow; row < endRow; row++) {
+      for (var col = startCol; col < endCol; col++) {
         final pos = Offset(col.toDouble(), row.toDouble());
         if (isWithinBounds(pos) && !isPositionOccupied(pos)) {
           freePositions.add(pos);

@@ -1,17 +1,15 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
+
+import '../application/services/component_factory.dart';
+import '../common/logger.dart';
+import '../common/theme.dart';
 import '../domain/behaviors/drawing_behavior.dart';
 import '../domain/behaviors/interaction_behavior.dart';
 import '../domain/behaviors/logic_behavior.dart';
-
-import '../application/services/component_factory.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../infrastructure/rendering/asset_manager.dart';
-import '../common/theme.dart';
-
-
-import '../common/logger.dart';
 
 // --- Switch --- //
 
@@ -41,13 +39,16 @@ class SwitchDrawingBehavior implements DrawingBehavior {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 3;
     final rotationAngle = (component.rotation % 360) * (math.pi / 180);
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(rotationAngle);
-    canvas.translate(-center.dx, -center.dy);
+    canvas
+      ..translate(center.dx, center.dy)
+      ..rotate(rotationAngle)
+      ..translate(-center.dx, -center.dy);
 
     // Draw switch contacts
-    canvas.drawCircle(Offset(center.dx - radius, center.dy), 3, paint);
-    canvas.drawCircle(Offset(center.dx + radius, center.dy), 3, paint);
+    canvas.drawCircle( // ignore: cascade_invocations
+        Offset(center.dx - radius, center.dy), 3, paint);
+    canvas.drawCircle( // ignore: cascade_invocations
+        Offset(center.dx + radius, center.dy), 3, paint);
 
     // Draw switch arm
     final armEnd = isSwitchClosed
@@ -60,7 +61,7 @@ class SwitchDrawingBehavior implements DrawingBehavior {
       paint,
     );
 
-    canvas.restore();
+    canvas.restore(); // ignore: cascade_invocations
   }
 }
 

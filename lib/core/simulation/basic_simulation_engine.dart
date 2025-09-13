@@ -1,4 +1,3 @@
-
 import 'package:sparkcircuit/core/simulation/circuit_netlist.dart';
 import 'package:sparkcircuit/core/simulation/simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/simulation_result.dart';
@@ -19,7 +18,11 @@ class BasicSimulationEngine implements SimulationEngine {
       branchCurrents: {},
       componentStates: {},
       connectionStates: {},
-      diagnostics: [SimulationDiagnostic(message: 'Basic simulation performed (no actual calculation).', level: 'info')],
+      diagnostics: [
+        const SimulationDiagnostic(
+            message: 'Basic simulation performed (no actual calculation).',
+            level: 'info')
+      ],
       timestamp: DateTime.now(),
       isValid: true,
     );

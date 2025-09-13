@@ -1,12 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sparkcircuit/domain/entities/core/component.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 // 🎯 PHASE 3 Task 3.2: Advanced Testing Strategy Implementation
 
 void main() {
   group('InteractionEngine - Advanced Testing Strategy', () {
-
     // 🎯 Test failure scenarios explicitly (beyond happy-path testing)
     test('InteractionEngine should handle edge cases gracefully', () {
       // Test case 1: Invalid coordinate transformation
@@ -18,7 +16,8 @@ void main() {
       // Test case 3: Memory pressure scenarios
       // Expected: Engine should handle low memory conditions gracefully
 
-      expect(true, isTrue); // Placeholder - real implementation would test actual scenarios
+      expect(true,
+          isTrue); // Placeholder - real implementation would test actual scenarios
     });
 
     // 🎯 Performance benchmarks for critical functions
@@ -29,9 +28,9 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       // Simulate 1000 coordinate transformations
-      for (int i = 0; i < 1000; i++) {
+      for (var i = 0; i < 1000; i++) {
         // Would perform: _coordinateService.globalToGrid(Offset(i, i))
-        i * 2; // Simulated operation
+        // Simulated operation completed inline
       }
 
       stopwatch.stop();
@@ -40,13 +39,14 @@ void main() {
       final averageMs = stopwatch.elapsedMilliseconds / 1000.0;
       expect(averageMs, lessThan(16.0));
 
-      StructuredLogger.info('Coordinate transformation performance test', context: {
-        'operation': 'performance_test_coordinate_transformation',
-        'average_time_ms': averageMs,
-        'operations_count': 1000,
-        'threshold_ms': 16.0,
-        'passed': averageMs < 16.0,
-      });
+      StructuredLogger.info('Coordinate transformation performance test',
+          context: {
+            'operation': 'performance_test_coordinate_transformation',
+            'average_time_ms': averageMs,
+            'operations_count': 1000,
+            'threshold_ms': 16.0,
+            'passed': averageMs < 16.0,
+          });
     });
 
     test('Validation pipeline performance should be under 5ms', () {
@@ -54,9 +54,9 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       // Simulate 500 validation operations
-      for (int i = 0; i < 500; i++) {
+      for (var i = 0; i < 500; i++) {
         // Would perform: placement validation pipeline
-        (i % 2 == 0) ? true : false; // Simulate validation result
+        // Simulated validation operation completed
       }
 
       stopwatch.stop();
@@ -82,10 +82,10 @@ void main() {
       // Expected: No crashes, appropriate validation failures
 
       final testCoordinates = [
-        Offset(0, 0),         // Origin
-        Offset(-100, -100),   // Negative
-        Offset(9999, 9999),   // Large positive
-        Offset.zero,          // Zero
+        const Offset(0, 0), // Origin
+        const Offset(-100, -100), // Negative
+        const Offset(9999, 9999), // Large positive
+        Offset.zero, // Zero
       ];
 
       // Verify all extreme positions are handled without exceptions
@@ -104,7 +104,7 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       // Simulate 50 rapid operations (like quick component placements)
-      for (int i = 0; i < 50; i++) {
+      for (var i = 0; i < 50; i++) {
         // Would perform: rapid component placement operations
         DateTime.now().millisecondsSinceEpoch;
       }
@@ -175,29 +175,32 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       // Simulate 3000 high-frequency operations (50fps over 60 seconds)
-      for (int i = 0; i < 3000; i++) {
+      for (var i = 0; i < 3000; i++) {
         // Would process: high-frequency interaction events
-        'mock_timestamp';
+        // Simulated timestamp operation
       }
 
       stopwatch.stop();
 
       // Assert: Can handle sustained high-frequency operations
       final totalTime = stopwatch.elapsedMilliseconds;
-      expect(totalTime, lessThan(1000)); // Less than 1 second for 3000 operations
+      expect(
+          totalTime, lessThan(1000)); // Less than 1 second for 3000 operations
 
       final avgTimePerOperation = totalTime / 3000.0;
-      StructuredLogger.info('High-frequency operations performance test', context: {
-        'operation': 'performance_test_high_frequency',
-        'total_time_ms': totalTime,
-        'operations_count': 3000,
-        'average_time_per_operation_ms': avgTimePerOperation,
-        'threshold_total_ms': 1000,
-        'threshold_avg_ms': 0.33,
-        'passed': totalTime < 1000 && avgTimePerOperation < 0.33,
-      });
+      StructuredLogger.info('High-frequency operations performance test',
+          context: {
+            'operation': 'performance_test_high_frequency',
+            'total_time_ms': totalTime,
+            'operations_count': 3000,
+            'average_time_per_operation_ms': avgTimePerOperation,
+            'threshold_total_ms': 1000,
+            'threshold_avg_ms': 0.33,
+            'passed': totalTime < 1000 && avgTimePerOperation < 0.33,
+          });
 
-      expect(avgTimePerOperation, lessThan(0.33)); // Maintain < 30fps if needed to drop
+      expect(avgTimePerOperation,
+          lessThan(0.33)); // Maintain < 30fps if needed to drop
     });
 
     // 🎯 Recovery and resilience testing
@@ -206,7 +209,11 @@ void main() {
       // Test recovery from invalid state
       // Test graceful degradation under error conditions
 
-      final errorScenarios = ['network_failure', 'invalid_state', 'resource_exhaustion'];
+      final errorScenarios = [
+        'network_failure',
+        'invalid_state',
+        'resource_exhaustion'
+      ];
 
       for (final _ in errorScenarios) {
         // Would simulate error condition and verify recovery

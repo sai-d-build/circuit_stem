@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
-import 'package:sparkcircuit/presentation/features/palette/widgets/component_widget.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+import 'package:sparkcircuit/presentation/features/palette/widgets/component_widget.dart';
+import 'package:sparkcircuit/presentation/state/palette_state.dart';
 
 // ✅ CLEAN ARCHITECTURE: Palette Service
 class PaletteService {
@@ -11,17 +11,22 @@ class PaletteService {
 
   PaletteService(this.paletteNotifier);
 
-  void updateSearchQuery(String query) => paletteNotifier.updateSearchQuery(query);
+  void updateSearchQuery(String query) =>
+      paletteNotifier.updateSearchQuery(query);
   void clearSearch() => paletteNotifier.clearSearch();
   void addFilter(String filter) => paletteNotifier.addFilter(filter);
   void removeFilter(String filter) => paletteNotifier.removeFilter(filter);
   void clearFilters() => paletteNotifier.clearFilters();
-  bool canUseComponent(String componentType) => paletteNotifier.canUseComponent(componentType);
-  void selectComponent(String componentType) => paletteNotifier.selectComponent(componentType);
-  void startPlacingComponent(String componentType) => paletteNotifier.startPlacingComponent(componentType);
+  bool canUseComponent(String componentType) =>
+      paletteNotifier.canUseComponent(componentType);
+  void selectComponent(String componentType) =>
+      paletteNotifier.selectComponent(componentType);
+  void startPlacingComponent(String componentType) =>
+      paletteNotifier.startPlacingComponent(componentType);
 }
 
-final paletteServiceProvider = Provider.family<PaletteService, String>((ref, levelId) {
+final paletteServiceProvider =
+    Provider.family<PaletteService, String>((ref, levelId) {
   final paletteNotifier = ref.watch(paletteStateProvider(levelId).notifier);
   return PaletteService(paletteNotifier);
 });
@@ -48,15 +53,15 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _slideAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeOut,
     ));
-    
+
     _animationController.forward();
   }
 
@@ -73,7 +78,7 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     final circuitColors = theme.extension<CircuitColorScheme>()!;
     final paletteState = ref.watch(paletteStateProvider(widget.levelId));
     final paletteService = ref.watch(paletteServiceProvider(widget.levelId));
-    
+
     return AnimatedBuilder(
       animation: _slideAnimation,
       builder: (context, child) {
@@ -101,11 +106,14 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
               children: [
                 _buildHeader(theme, circuitColors),
                 _buildSearchBar(theme, circuitColors, paletteService),
-                _buildFilters(theme, circuitColors, paletteState, paletteService),
+                _buildFilters(
+                    theme, circuitColors, paletteState, paletteService),
                 Expanded(
-                  child: _buildComponentList(theme, circuitColors, paletteState, paletteService),
+                  child: _buildComponentList(
+                      theme, circuitColors, paletteState, paletteService),
                 ),
-                _buildFooter(theme, circuitColors, paletteState, paletteService),
+                _buildFooter(
+                    theme, circuitColors, paletteState, paletteService),
               ],
             ),
           ),
@@ -158,7 +166,8 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     );
   }
 
-  Widget _buildSearchBar(ThemeData theme, CircuitColorScheme circuitColors, PaletteService paletteService) {
+  Widget _buildSearchBar(ThemeData theme, CircuitColorScheme circuitColors,
+      PaletteService paletteService) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: TextField(
@@ -190,7 +199,8 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
           ),
           filled: true,
           fillColor: circuitColors.surface.withValues(alpha: 0.8),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
     );
@@ -203,7 +213,7 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     PaletteService paletteService,
   ) {
     final filters = ['Basic', 'Active', 'Passive', 'Power', 'Measurement'];
-    
+
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -212,8 +222,9 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
         itemCount: filters.length,
         itemBuilder: (context, index) {
           final filter = filters[index];
-          final isActive = paletteState.activeFilters.contains(filter.toLowerCase());
-          
+          final isActive =
+              paletteState.activeFilters.contains(filter.toLowerCase());
+
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: FilterChip(
@@ -230,7 +241,8 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
               selectedColor: circuitColors.primary.withValues(alpha: 0.2),
               checkmarkColor: circuitColors.primary,
               labelStyle: TextStyle(
-                color: isActive ? circuitColors.primary : circuitColors.onSurface,
+                color:
+                    isActive ? circuitColors.primary : circuitColors.onSurface,
                 fontSize: 12,
               ),
             ),
@@ -247,7 +259,7 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     PaletteService paletteService,
   ) {
     final filteredComponents = paletteState.filteredComponents;
-    
+
     if (filteredComponents.isEmpty) {
       return Center(
         child: Column(
@@ -277,14 +289,14 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
         ),
       );
     }
-    
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       itemCount: filteredComponents.length,
       itemBuilder: (context, index) {
         final component = filteredComponents[index];
         final inventory = paletteState.getInventory(component.type);
-        
+
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: ComponentWidget(
@@ -348,10 +360,12 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
     final canUse = paletteService.canUseComponent(componentType);
 
     if (canUse) {
-      StructuredLogger.info('Component selection approved - starting placement mode', context: {
-        'componentType': componentType,
-        'action': 'selection_and_placement',
-      });
+      StructuredLogger.info(
+          'Component selection approved - starting placement mode',
+          context: {
+            'componentType': componentType,
+            'action': 'selection_and_placement',
+          });
 
       paletteService.selectComponent(componentType);
       paletteService.startPlacingComponent(componentType);
@@ -361,10 +375,12 @@ class _ComponentPaletteState extends ConsumerState<ComponentPalette>
         'result': 'placement_mode_active',
       });
     } else {
-      StructuredLogger.warning('Component selection denied - insufficient inventory', context: {
-        'componentType': componentType,
-        'reason': 'not_available_in_inventory',
-      });
+      StructuredLogger.warning(
+          'Component selection denied - insufficient inventory',
+          context: {
+            'componentType': componentType,
+            'reason': 'not_available_in_inventory',
+          });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

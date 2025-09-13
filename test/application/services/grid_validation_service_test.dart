@@ -2,8 +2,8 @@
 // Basic unit tests for GridValidationService
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sparkcircuit/application/services/interfaces/grid_validation_service.dart';
 import 'package:sparkcircuit/application/services/implementations/grid_validation_service_impl.dart';
+import 'package:sparkcircuit/application/services/interfaces/grid_validation_service.dart';
 
 void main() {
   late GridValidationService service;

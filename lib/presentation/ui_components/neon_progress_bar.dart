@@ -27,7 +27,8 @@ class NeonProgressBar extends StatefulWidget {
   State<NeonProgressBar> createState() => _NeonProgressBarState();
 }
 
-class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProviderStateMixin {
+class _NeonProgressBarState extends State<NeonProgressBar>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _glowAnimation;
 
@@ -39,7 +40,7 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
 
-    _glowAnimation = Tween(begin: 0.6, end: 1.0).animate(
+    _glowAnimation = Tween<double>(begin: 0.6, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -55,11 +56,13 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
     final colors = Theme.of(context).extension<CircuitColorScheme>()!;
     final textTheme = Theme.of(context).textTheme;
 
-    final progressValue = (widget.value - widget.min) / (widget.max - widget.min);
+    final progressValue =
+        (widget.value - widget.min) / (widget.max - widget.min);
     final clampedValue = progressValue.clamp(0.0, 1.0);
 
     final progressColor = widget.progressColor ?? colors.energyPulse;
-    final bgColor = widget.backgroundColor ?? colors.outline.withValues(alpha: 0.3);
+    final bgColor =
+        widget.backgroundColor ?? colors.outline.withValues(alpha: 0.3);
 
     return AnimatedBuilder(
       animation: _glowAnimation,
@@ -79,7 +82,7 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
                         shadows: [
                           BoxShadow(
                             color: colors.neonPrimary.withValues(alpha: 0.3),
-                            blurRadius: 4.0,
+                            blurRadius: 4,
                           ),
                         ],
                       ),
@@ -93,7 +96,7 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
                         shadows: [
                           BoxShadow(
                             color: progressColor.withValues(alpha: 0.5),
-                            blurRadius: 6.0,
+                            blurRadius: 6,
                           ),
                         ],
                       ),
@@ -109,7 +112,7 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
                 color: bgColor,
                 border: Border.all(
                   color: colors.neonPrimary.withValues(alpha: 0.4),
-                  width: 1.0,
+                  width: 1,
                 ),
               ),
               child: ClipRRect(
@@ -132,9 +135,10 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: progressColor.withValues(alpha: _glowAnimation.value * 0.8),
-                              blurRadius: 8.0,
-                              spreadRadius: 2.0,
+                              color: progressColor.withValues(
+                                  alpha: _glowAnimation.value * 0.8),
+                              blurRadius: 8,
+                              spreadRadius: 2,
                             ),
                           ],
                         ),
@@ -149,7 +153,8 @@ class _NeonProgressBarState extends State<NeonProgressBar> with SingleTickerProv
                           gradient: LinearGradient(
                             colors: [
                               Colors.transparent,
-                              progressColor.withValues(alpha: _glowAnimation.value * 0.4),
+                              progressColor.withValues(
+                                  alpha: _glowAnimation.value * 0.4),
                               Colors.transparent,
                             ],
                             stops: const [0.0, 0.5, 1.0],

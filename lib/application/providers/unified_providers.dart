@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../application/states/game_state.dart';
 import '../../../core/debug/structured_logger.dart';
 import '../../../core/interfaces/game_state_notifier_interface.dart';
 import '../../../core/migration/notifier_migration_controller.dart';
-import '../../../application/states/game_state.dart';
 
+export '../enhanced_game_state_notifier.dart';
 // Exports for backward compatibility
 export '../game_engine/v3/game_engine_notifier_v3.dart';
-export '../enhanced_game_state_notifier.dart';
 
 // ============================================================================
 // UNIFIED PROVIDER SYSTEM - Game State Notifier Consolidation
@@ -22,10 +23,10 @@ export '../enhanced_game_state_notifier.dart';
 
 // Use the existing NotifierMigrationController from the migration infrastructure
 
-
 /// Unified Game State Provider - Main Consolidation Point
 /// This replaces the direct usage of individual notifiers in the consolidation plan
-final unifiedGameStateProvider = StateNotifierProvider<IGameStateNotifier, GameState>((ref) {
+final unifiedGameStateProvider =
+    StateNotifierProvider<IGameStateNotifier, GameState>((ref) {
   // ProviderRef no longer needs to be cast - ref is now the correct type
   StructuredLogger.debug('🔍 Ref type in unifiedGameStateProvider', context: {
     'refType': ref.runtimeType.toString(),
@@ -52,6 +53,7 @@ final unifiedGameStateProvider = StateNotifierProvider<IGameStateNotifier, GameS
 
 @Deprecated('Use unifiedGameStateProvider instead. Will be removed in v2.0')
 IGameStateNotifier createCompatibleNotifier(Ref ref) {
-  StructuredLogger.info('Using deprecated createCompatibleNotifier - migrate to unifiedGameStateProvider');
+  StructuredLogger.info(
+      'Using deprecated createCompatibleNotifier - migrate to unifiedGameStateProvider');
   return NotifierMigrationController.createNotifier(ref);
 }

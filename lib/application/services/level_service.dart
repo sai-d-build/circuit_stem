@@ -2,9 +2,10 @@
 // Service for loading and managing level definitions from JSON assets
 
 import 'dart:convert';
+
 import 'package:flutter/services.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 class LevelService {
   final AssetBundle _assetBundle;
@@ -31,7 +32,7 @@ class LevelService {
         'paths': levelPaths,
       });
 
-      final List<LevelDefinition> levels = [];
+      final levels = <LevelDefinition>[];
 
       for (final path in levelPaths) {
         try {
@@ -51,10 +52,12 @@ class LevelService {
             });
           }
         } catch (e) {
-          StructuredLogger.warning('Level loading error - continuing with other levels', context: {
-            'levelPath': path,
-            'error': e.toString(),
-          });
+          StructuredLogger.warning(
+              'Level loading error - continuing with other levels',
+              context: {
+                'levelPath': path,
+                'error': e.toString(),
+              });
           // Continue loading other levels
         }
       }
@@ -70,9 +73,11 @@ class LevelService {
 
       return levels;
     } catch (e) {
-      StructuredLogger.error('Critical failure loading all levels', context: {
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.error('Critical failure loading all levels',
+          context: {
+            'error': e.toString(),
+          },
+          error: e);
       return [];
     }
   }
@@ -85,14 +90,16 @@ class LevelService {
     }
 
     try {
-      final path = 'levels/${_getLevelPath(levelId)}';
+      final path = _getAssetPath('levels/${_getLevelPath(levelId)}');
       return await _loadLevelFromPath(path);
     } catch (e) {
-      StructuredLogger.error('Failed to load specific level', context: {
-        'levelId': levelId,
-        'levelPath': _getLevelPath(levelId),
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.error('Failed to load specific level',
+          context: {
+            'levelId': levelId,
+            'levelPath': _getAssetPath('levels/${_getLevelPath(levelId)}'),
+            'error': e.toString(),
+          },
+          error: e);
       return null;
     }
   }
@@ -117,13 +124,17 @@ class LevelService {
   /// Get levels by difficulty
   Future<List<LevelDefinition>> getLevelsByDifficulty(String difficulty) async {
     final allLevels = await loadAllLevels();
-    return allLevels.where((level) => level.metadata.difficulty == difficulty).toList();
+    return allLevels
+        .where((level) => level.metadata.difficulty == difficulty)
+        .toList();
   }
 
   /// Get levels by tag
   Future<List<LevelDefinition>> getLevelsByTag(String tag) async {
     final allLevels = await loadAllLevels();
-    return allLevels.where((level) => level.metadata.tags?.contains(tag) ?? false).toList();
+    return allLevels
+        .where((level) => level.metadata.tags?.contains(tag) ?? false)
+        .toList();
   }
 
   /// Validate level file structure
@@ -132,10 +143,12 @@ class LevelService {
       final level = await loadLevel(levelId);
       return level != null && _validateLevelStructure(level);
     } catch (e) {
-      StructuredLogger.warning('Level validation failed', context: {
-        'levelId': levelId,
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.warning('Level validation failed',
+          context: {
+            'levelId': levelId,
+            'error': e.toString(),
+          },
+          error: e);
       return false;
     }
   }
@@ -147,6 +160,14 @@ class LevelService {
   }
 
   // Private helper methods
+
+  /// Get the correct asset path based on platform
+  String _getAssetPath(String relativePath) {
+    // For web builds, assets need the 'assets/' prefix
+    // For other platforms, the relative path works directly
+    const isWeb = bool.fromEnvironment('dart.library.js_util');
+    return isWeb ? 'assets/$relativePath' : relativePath;
+  }
 
   /// Dynamically discover all available level files
   Future<List<String>> _discoverAllLevelFiles() async {
@@ -170,7 +191,7 @@ class LevelService {
         'totalDirectories': levelDirectories.length,
       });
 
-      final List<String> levelPaths = [];
+      final levelPaths = <String>[];
 
       for (final directory in levelDirectories) {
         StructuredLogger.debug('🔎 Checking directory', context: {
@@ -186,16 +207,20 @@ class LevelService {
             '$directory/${directory}_03.json',
             '$directory/${directory}_04.json',
             '$directory/${directory}_05.json',
+            '$directory/${directory}_06.json',
+            '$directory/${directory}_07.json',
+            '$directory/${directory}_08.json',
           ];
 
-          StructuredLogger.debug('📄 Checking possible files in directory', context: {
-            'directory': directory,
-            'possibleFiles': possibleFiles,
-            'fileCount': possibleFiles.length,
-          });
+          StructuredLogger.debug('📄 Checking possible files in directory',
+              context: {
+                'directory': directory,
+                'possibleFiles': possibleFiles,
+                'fileCount': possibleFiles.length,
+              });
 
           for (final file in possibleFiles) {
-            final fullPath = 'levels/$file';
+            final fullPath = _getAssetPath('levels/$file');
 
             StructuredLogger.trace('🔍 Testing file existence', context: {
               'file': file,
@@ -216,8 +241,8 @@ class LevelService {
                 'file': file,
                 'contentLength': content.length,
                 'loadTimeMs': loadTime.inMilliseconds,
-                'firstChars': content.length > 50 ? content.substring(0, 50) : content,
-                'fixApplied': 'removed_double_assets_prefix',
+                'firstChars':
+                    content.length > 50 ? content.substring(0, 50) : content,
               });
             } catch (e) {
               // File doesn't exist, continue
@@ -227,7 +252,6 @@ class LevelService {
                 'file': file,
                 'error': e.toString(),
                 'errorType': e.runtimeType.toString(),
-                'fixApplied': 'removed_double_assets_prefix',
               });
             }
           }
@@ -247,58 +271,28 @@ class LevelService {
         'discoverySuccessful': levelPaths.isNotEmpty,
       });
 
-      if (levelPaths.isEmpty) {
-        StructuredLogger.warning('🚨 NO LEVEL FILES FOUND', context: {
-          'searchedDirectories': levelDirectories,
-          'thisWillCauseLevelLoadingFailure': true,
-          'possibleCauses': [
-            'Asset path prefix fix applied - old paths may be cached',
-            'Actual level files might be missing from assets folder',
-            'Web asset bundling issue'
-          ],
-        });
-
-        // Try with original assets/ prefix if web is having issues
-        StructuredLogger.info('🔄 ATTEMPTING WEB COMPATIBILITY MODE', context: {
-          'action': 'retry_with_assets_prefix',
-        });
-
-        try {
-          const testPath = 'assets/levels/tutorial/tutorial_01.json';
-          await _assetBundle.loadString(testPath);
-          StructuredLogger.info('✅ WEB COMPATIBILITY: Assets prefix required', context: {
-            'pathTried': testPath,
-            'result': 'working_with_assets_prefix_remains'
-          });
-          // Assets prefix still required for web
-        } catch (e) {
-          StructuredLogger.error('💥 WEB COMPATIBILITY TEST FAILED', context: {
-            'message': 'Both path formats failed - critical asset loading problem',
-            'error': e.toString(),
-          });
-        }
-      }
-
       return levelPaths;
     } catch (e) {
-      StructuredLogger.error('💥 CRITICAL FAILURE discovering level files', context: {
-        'error': e.toString(),
-        'errorType': e.runtimeType.toString(),
-        'stackTrace': StackTrace.current.toString(),
-        'assetBundleType': _assetBundle.runtimeType.toString(),
-      }, error: e);
+      StructuredLogger.error('💥 CRITICAL FAILURE discovering level files',
+          context: {
+            'error': e.toString(),
+            'errorType': e.runtimeType.toString(),
+            'stackTrace': StackTrace.current.toString(),
+            'assetBundleType': _assetBundle.runtimeType.toString(),
+          },
+          error: e);
 
-      // Fallback to hardcoded paths if discovery fails (no assets/ prefix for web)
+      // Fallback to hardcoded paths with proper asset path handling
       StructuredLogger.info('🔄 FALLING BACK to hardcoded paths', context: {
         'fallbackPaths': [
-          'levels/tutorial/tutorial_01.json',
-          'levels/beginner/beginner_01.json',
+          _getAssetPath('levels/tutorial/tutorial_01.json'),
+          _getAssetPath('levels/beginner/beginner_01.json'),
         ],
       });
 
       return [
-        'levels/tutorial/tutorial_01.json',
-        'levels/beginner/beginner_01.json',
+        _getAssetPath('levels/tutorial/tutorial_01.json'),
+        _getAssetPath('levels/beginner/beginner_01.json'),
       ];
     }
   }
@@ -309,10 +303,12 @@ class LevelService {
       final jsonMap = json.decode(jsonString) as Map<String, dynamic>;
       return LevelDefinition.fromJson(jsonMap);
     } catch (e) {
-      StructuredLogger.error('JSON parsing error for level file', context: {
-        'levelPath': path,
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.error('JSON parsing error for level file',
+          context: {
+            'levelPath': path,
+            'error': e.toString(),
+          },
+          error: e);
       return null;
     }
   }

@@ -2,7 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Phase 4.1: Drag-and-Drop with Fixed Coordinate Translation Tests', () {
-    testWidgets('component drag uses clamped coordinate translation', (tester) async {
+    testWidgets('component drag uses clamped coordinate translation',
+        (tester) async {
       // This test verifies that dragging components uses the GameCanvasController's
       // screenToGrid method with proper clamping instead of the old CoordinateTranslator
       expect(true, isTrue); // Placeholder - needs full integration setup

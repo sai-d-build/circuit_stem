@@ -1,9 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/core/commands/create_component_command.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'package:sparkcircuit/application/states/game_state.dart';
-
-
 
 void main() {
   group('CreateComponentCommand', () {
@@ -11,7 +9,7 @@ void main() {
     late ComponentModel testComponent;
 
     setUp(() {
-      final level = LevelDefinition(
+      const level = LevelDefinition(
         levelId: 'test_level',
         version: '1.0.0',
         metadata: LevelMetadata(
@@ -49,7 +47,8 @@ void main() {
       final newState = command.execute(initialState);
 
       expect(newState.grid.getComponentById(testComponent.id), isNotNull);
-      expect(newState.grid.getComponentById(testComponent.id), equals(testComponent));
+      expect(newState.grid.getComponentById(testComponent.id),
+          equals(testComponent));
     });
 
     test('undo removes the component from the grid', () {
@@ -57,7 +56,8 @@ void main() {
 
       // First, execute the command to add the component
       final stateAfterExecute = command.execute(initialState);
-      expect(stateAfterExecute.grid.getComponentById(testComponent.id), isNotNull);
+      expect(
+          stateAfterExecute.grid.getComponentById(testComponent.id), isNotNull);
 
       // Then, undo the command
       final stateAfterUndo = command.undo(stateAfterExecute);

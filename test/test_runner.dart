@@ -9,13 +9,15 @@ void main() {
     group('Unit Tests', () {
       test('Coordinate Transformation Tests', () {
         // Import and run coordinate transformation tests
-        StructuredLogger.info('Running coordinate transformation unit tests', context: {
-          'operation': 'test_runner_unit_test',
-          'test_type': 'coordinate_transformation',
-          'test_file': 'test/unit/coordinate_transformation_test.dart',
-        });
+        StructuredLogger.info('Running coordinate transformation unit tests',
+            context: {
+              'operation': 'test_runner_unit_test',
+              'test_type': 'coordinate_transformation',
+              'test_file': 'test/unit/coordinate_transformation_test.dart',
+            });
         // Tests are in test/unit/coordinate_transformation_test.dart
-        expect(true, isTrue, reason: 'Coordinate transformation tests should be available');
+        expect(true, isTrue,
+            reason: 'Coordinate transformation tests should be available');
       });
 
       test('Bounds Validation Tests', () {
@@ -26,7 +28,8 @@ void main() {
           'test_file': 'test/unit/bounds_validation_test.dart',
         });
         // Tests are in test/unit/bounds_validation_test.dart
-        expect(true, isTrue, reason: 'Bounds validation tests should be available');
+        expect(true, isTrue,
+            reason: 'Bounds validation tests should be available');
       });
 
       test('Error Handling Tests', () {
@@ -37,20 +40,23 @@ void main() {
           'test_file': 'test/unit/error_handling_test.dart',
         });
         // Tests are in test/unit/error_handling_test.dart
-        expect(true, isTrue, reason: 'Error handling tests should be available');
+        expect(true, isTrue,
+            reason: 'Error handling tests should be available');
       });
     });
 
     group('Integration Tests', () {
       test('Drag and Drop Integration Tests', () {
         // Import and run drag-drop integration tests
-        StructuredLogger.info('Running drag and drop integration tests', context: {
-          'operation': 'test_runner_integration_test',
-          'test_type': 'drag_drop_integration',
-          'test_file': 'test/integration/drag_drop_integration_test.dart',
-        });
+        StructuredLogger.info('Running drag and drop integration tests',
+            context: {
+              'operation': 'test_runner_integration_test',
+              'test_type': 'drag_drop_integration',
+              'test_file': 'test/integration/drag_drop_integration_test.dart',
+            });
         // Tests are in test/integration/drag_drop_integration_test.dart
-        expect(true, isTrue, reason: 'Drag and drop integration tests should be available');
+        expect(true, isTrue,
+            reason: 'Drag and drop integration tests should be available');
       });
     });
 
@@ -63,7 +69,8 @@ void main() {
           'test_file': 'test/widget/circuit_grid_widget_test.dart',
         });
         // Tests are in test/widget/circuit_grid_widget_test.dart
-        expect(true, isTrue, reason: 'CircuitGrid widget tests should be available');
+        expect(true, isTrue,
+            reason: 'CircuitGrid widget tests should be available');
       });
     });
 
@@ -76,7 +83,8 @@ void main() {
           'test_file': 'test/performance/grid_performance_test.dart',
         });
         // Tests are in test/performance/grid_performance_test.dart
-        expect(true, isTrue, reason: 'Grid performance tests should be available');
+        expect(true, isTrue,
+            reason: 'Grid performance tests should be available');
       });
     });
 
@@ -135,9 +143,10 @@ void main() {
 
         // Ensure we have comprehensive test coverage
         expect(testCoverage.length, greaterThan(0),
-               reason: 'Should have comprehensive test coverage for RCA scenarios');
+            reason:
+                'Should have comprehensive test coverage for RCA scenarios');
         expect(rcaScenarios.length, greaterThan(20),
-               reason: 'Should cover all identified RCA scenarios');
+            reason: 'Should cover all identified RCA scenarios');
       });
     });
   });
@@ -228,7 +237,7 @@ class TestConfiguration {
   };
 
   static void printTestSummary() {
-    int totalScenarios = 0;
+    var totalScenarios = 0;
     final scenarioDetails = <String, int>{};
 
     testScenarios.forEach((key, config) {
@@ -237,24 +246,27 @@ class TestConfiguration {
       scenarioDetails[key] = scenarios.length;
     });
 
-    StructuredLogger.info('CircuitGrid Comprehensive Test Suite Summary', context: {
-      'operation': 'test_suite_summary',
-      'total_test_scenarios': totalScenarios,
-      'total_test_files': testScenarios.length,
-      'scenario_breakdown': scenarioDetails,
-      'coverage_description': '${testScenarios.length} test files for comprehensive RCA analysis',
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    StructuredLogger.info('CircuitGrid Comprehensive Test Suite Summary',
+        context: {
+          'operation': 'test_suite_summary',
+          'total_test_scenarios': totalScenarios,
+          'total_test_files': testScenarios.length,
+          'scenario_breakdown': scenarioDetails,
+          'coverage_description':
+              '${testScenarios.length} test files for comprehensive RCA analysis',
+          'timestamp': DateTime.now().toIso8601String(),
+        });
   }
 }
 
 /// Test Execution Helper
 class TestExecutor {
   static Future<void> runAllTests() async {
-    StructuredLogger.info('Starting CircuitGrid Comprehensive Test Suite', context: {
-      'operation': 'test_suite_execution_start',
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    StructuredLogger.info('Starting CircuitGrid Comprehensive Test Suite',
+        context: {
+          'operation': 'test_suite_execution_start',
+          'timestamp': DateTime.now().toIso8601String(),
+        });
 
     // Run unit tests
     StructuredLogger.info('Running Unit Tests', context: {
@@ -287,10 +299,11 @@ class TestExecutor {
 
   static Future<void> _runUnitTests() async {
     // Coordinate transformation tests
-    StructuredLogger.debug('Unit test completed: Coordinate transformation', context: {
-      'operation': 'unit_test_completion',
-      'test_type': 'coordinate_transformation',
-    });
+    StructuredLogger.debug('Unit test completed: Coordinate transformation',
+        context: {
+          'operation': 'unit_test_completion',
+          'test_type': 'coordinate_transformation',
+        });
 
     // Bounds validation tests
     StructuredLogger.debug('Unit test completed: Bounds validation', context: {
@@ -307,10 +320,11 @@ class TestExecutor {
 
   static Future<void> _runIntegrationTests() async {
     // Drag and drop integration tests
-    StructuredLogger.debug('Integration test completed: Drag and drop', context: {
-      'operation': 'integration_test_completion',
-      'test_type': 'drag_drop_integration',
-    });
+    StructuredLogger.debug('Integration test completed: Drag and drop',
+        context: {
+          'operation': 'integration_test_completion',
+          'test_type': 'drag_drop_integration',
+        });
   }
 
   static Future<void> _runWidgetTests() async {
@@ -323,10 +337,11 @@ class TestExecutor {
 
   static Future<void> _runPerformanceTests() async {
     // Grid performance tests
-    StructuredLogger.debug('Performance test completed: Grid performance', context: {
-      'operation': 'performance_test_completion',
-      'test_type': 'grid_performance',
-    });
+    StructuredLogger.debug('Performance test completed: Grid performance',
+        context: {
+          'operation': 'performance_test_completion',
+          'test_type': 'grid_performance',
+        });
   }
 }
 
@@ -371,7 +386,8 @@ class RCAValidator {
       }
     }
 
-    final coverage = (coveredIssues.length / identifiedIssues.length * 100).round();
+    final coverage =
+        (coveredIssues.length / identifiedIssues.length * 100).round();
 
     StructuredLogger.info('RCA Coverage Validation', context: {
       'operation': 'rca_coverage_validation',
@@ -388,10 +404,22 @@ class RCAValidator {
   static bool _isIssueCoveredByTests(String issue) {
     // Map issues to test coverage
     final coverageMap = {
-      'GRID Type Casting Error': ['error_handling_test.dart', 'drag_drop_integration_test.dart'],
-      'PALETTE DRAG OUT OF BOUNDS Error': ['coordinate_transformation_test.dart', 'bounds_validation_test.dart'],
-      'Provider Context Mismatch': ['error_handling_test.dart', 'drag_drop_integration_test.dart'],
-      'Coordinate System Mismatch': ['coordinate_transformation_test.dart', 'grid_performance_test.dart'],
+      'GRID Type Casting Error': [
+        'error_handling_test.dart',
+        'drag_drop_integration_test.dart'
+      ],
+      'PALETTE DRAG OUT OF BOUNDS Error': [
+        'coordinate_transformation_test.dart',
+        'bounds_validation_test.dart'
+      ],
+      'Provider Context Mismatch': [
+        'error_handling_test.dart',
+        'drag_drop_integration_test.dart'
+      ],
+      'Coordinate System Mismatch': [
+        'coordinate_transformation_test.dart',
+        'grid_performance_test.dart'
+      ],
       'Widget Tree Rendering Order': ['circuit_grid_widget_test.dart'],
       'Selection State Management': ['drag_drop_integration_test.dart'],
       'Notifier Context Construction': ['error_handling_test.dart'],

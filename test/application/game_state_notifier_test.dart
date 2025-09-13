@@ -5,25 +5,25 @@ import 'package:sparkcircuit/domain/entities/entities.dart';
 void main() {
   group('GameState', () {
     test('initial creates valid game state', () {
-      final level = LevelDefinition(
+      const level = LevelDefinition(
         levelId: 'test_level',
         version: '1.0.0',
-        metadata: const LevelMetadata(
+        metadata: LevelMetadata(
           id: 'test_level',
           title: 'Test Level',
           description: 'A test level',
           difficulty: 'easy',
         ),
-        grid: const GridConfig(
+        grid: GridConfig(
           width: 10,
           height: 10,
         ),
-        components: const ComponentConfig(
+        components: ComponentConfig(
           available: [],
           preplaced: [],
         ),
-        goals: const [],
-        validation: const ValidationRules(
+        goals: [],
+        validation: ValidationRules(
           circuitRules: [],
           successConditions: [],
         ),
@@ -39,25 +39,25 @@ void main() {
     });
 
     test('copyWith creates modified copy', () {
-      final level = LevelDefinition(
+      const level = LevelDefinition(
         levelId: 'test_level',
         version: '1.0.0',
-        metadata: const LevelMetadata(
+        metadata: LevelMetadata(
           id: 'test_level',
           title: 'Test Level',
           description: 'A test level',
           difficulty: 'easy',
         ),
-        grid: const GridConfig(
+        grid: GridConfig(
           width: 10,
           height: 10,
         ),
-        components: const ComponentConfig(
+        components: ComponentConfig(
           available: [],
           preplaced: [],
         ),
-        goals: const [],
-        validation: const ValidationRules(
+        goals: [],
+        validation: ValidationRules(
           circuitRules: [],
           successConditions: [],
         ),
@@ -67,7 +67,8 @@ void main() {
       final modifiedState = state.copyWith(isPaused: true);
 
       expect(modifiedState.isPaused, true);
-      expect(modifiedState.currentLevel?.levelId, 'test_level'); // Other properties unchanged
+      expect(modifiedState.currentLevel?.levelId,
+          'test_level'); // Other properties unchanged
     });
   });
 }

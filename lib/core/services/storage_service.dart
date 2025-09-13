@@ -1,4 +1,3 @@
-
 import 'package:sparkcircuit/application/enhanced_game_state.dart';
 
 abstract class StorageService {

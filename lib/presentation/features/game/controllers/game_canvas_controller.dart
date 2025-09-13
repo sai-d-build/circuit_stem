@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:math';
+
+import 'package:flutter/material.dart';
 import 'package:sparkcircuit/core/services/coordinate_service.dart';
 import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
 
@@ -42,19 +43,19 @@ class CanvasInteractionState {
 }
 
 class GameCanvasController extends ChangeNotifier {
-  static const double _defaultCellSize = 60.0;
+  static const double _defaultCellSize = 60;
   static const double _minScale = 0.5;
-  static const double _maxScale = 3.0;
+  static const double _maxScale = 3;
 
   double _gridCellSize = _defaultCellSize;
-  double _scale = 1.0;
+  double _scale = 1;
   Offset _panOffset = Offset.zero;
   bool _isScaling = false;
-  double _lastScale = 1.0;
+  double _lastScale = 1;
 
   // Grid properties
   Size _canvasSize = Size.zero;
-  int _gridWidth = 8;  // Default to level size, will be updated
+  int _gridWidth = 8; // Default to level size, will be updated
   int _gridHeight = 6; // Default to level size, will be updated
 
   // Interaction state machine
@@ -119,11 +120,14 @@ class GameCanvasController extends ChangeNotifier {
 
   // Query methods for FSM state
   bool get isIdle => _interactionState.mode == CanvasInteractionMode.idle;
-  bool get isDraggingComponent => _interactionState.mode == CanvasInteractionMode.draggingExisting;
-  bool get isPlacingFromPalette => _interactionState.mode == CanvasInteractionMode.placingFromPalette;
+  bool get isDraggingComponent =>
+      _interactionState.mode == CanvasInteractionMode.draggingExisting;
+  bool get isPlacingFromPalette =>
+      _interactionState.mode == CanvasInteractionMode.placingFromPalette;
   bool get isPanning => _interactionState.mode == CanvasInteractionMode.panning;
-  bool get isDrawingWire => _interactionState.mode == CanvasInteractionMode.drawingWire;
-  
+  bool get isDrawingWire =>
+      _interactionState.mode == CanvasInteractionMode.drawingWire;
+
   // Getters
   double get gridCellSize => _gridCellSize;
   double get scale => _scale;
@@ -135,15 +139,16 @@ class GameCanvasController extends ChangeNotifier {
   CanvasInteractionState get interactionState => _interactionState;
 
   // Coordinate service getter
-  CoordinateService get coordinateService => CoordinateService.fromController(this);
-  
+  CoordinateService get coordinateService =>
+      CoordinateService.fromController(this);
+
   // Calculated properties
   double get scaledCellSize => _gridCellSize * _scale;
   Size get gridPixelSize => Size(
-    _gridWidth * scaledCellSize,
-    _gridHeight * scaledCellSize,
-  );
-  
+        _gridWidth * scaledCellSize,
+        _gridHeight * scaledCellSize,
+      );
+
   void updateCanvasSize(Size size) {
     if (_canvasSize != size) {
       _canvasSize = size;
@@ -160,27 +165,27 @@ class GameCanvasController extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   void updatePan(Offset delta) {
     _panOffset = _panOffset + delta;
     _constrainPan();
     notifyListeners();
   }
-  
+
   void setPan(Offset newPan) {
     _panOffset = newPan;
     _constrainPan();
     notifyListeners();
   }
-  
+
   void startScale() {
     _isScaling = true;
     _lastScale = _scale;
   }
-  
+
   void updateScale(double scaleValue) {
     if (!_isScaling) return;
-    
+
     final newScale = (_lastScale * scaleValue).clamp(_minScale, _maxScale);
     if (newScale != _scale) {
       _scale = newScale;
@@ -188,11 +193,11 @@ class GameCanvasController extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   void endScale() {
     _isScaling = false;
   }
-  
+
   void zoomIn() {
     final newScale = (_scale * 1.2).clamp(_minScale, _maxScale);
     if (newScale != _scale) {
@@ -201,7 +206,7 @@ class GameCanvasController extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   void zoomOut() {
     final newScale = (_scale / 1.2).clamp(_minScale, _maxScale);
     if (newScale != _scale) {
@@ -210,16 +215,16 @@ class GameCanvasController extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   void resetZoom() {
     _scale = 1.0;
     _constrainPan();
     notifyListeners();
   }
-  
+
   void centerGrid() {
     if (_canvasSize == Size.zero) return;
-    
+
     final gridPixelSize = this.gridPixelSize;
     _panOffset = Offset(
       (_canvasSize.width - gridPixelSize.width) / 2,
@@ -227,24 +232,24 @@ class GameCanvasController extends ChangeNotifier {
     );
     notifyListeners();
   }
-  
+
   void focusOnComponent(Offset gridPosition) {
     if (_canvasSize == Size.zero) return;
-    
+
     final screenPosition = Offset(
       gridPosition.dx * scaledCellSize,
       gridPosition.dy * scaledCellSize,
     );
-    
+
     _panOffset = Offset(
       _canvasSize.width / 2 - screenPosition.dx,
       _canvasSize.height / 2 - screenPosition.dy,
     );
-    
+
     _constrainPan();
     notifyListeners();
   }
-  
+
   void _constrainPan() {
     if (_canvasSize == Size.zero) return;
 
@@ -252,9 +257,9 @@ class GameCanvasController extends ChangeNotifier {
 
     // Calculate bounds for panning
     final rawMinPanX = _canvasSize.width - gridPixelSize.width - 50;
-    final rawMaxPanX = 50.0;
+    const rawMaxPanX = 50.0;
     final rawMinPanY = _canvasSize.height - gridPixelSize.height - 50;
-    final rawMaxPanY = 50.0;
+    const rawMaxPanY = 50.0;
 
     final minPanX = min(rawMinPanX, rawMaxPanX);
     final maxPanX = max(rawMinPanX, rawMaxPanX);
@@ -280,8 +285,7 @@ class GameCanvasController extends ChangeNotifier {
       ),
     );
   }
-  
-  
+
   // Convert grid coordinates to screen coordinates
   Offset gridToScreen(Offset gridPosition) {
     final config = GridConfiguration(
@@ -293,7 +297,7 @@ class GameCanvasController extends ChangeNotifier {
     );
     return UnifiedCoordinateService().gridToScreen(gridPosition, config);
   }
-  
+
   // Snap screen coordinates to grid with bounds checking
   Offset snapToGrid(Offset screenPosition) {
     final config = GridConfiguration(
@@ -315,7 +319,8 @@ class GameCanvasController extends ChangeNotifier {
       scale: _scale,
       panOffset: _panOffset,
     );
-    return UnifiedCoordinateService().isWithinGridBounds(screenPosition, config);
+    return UnifiedCoordinateService()
+        .isWithinGridBounds(screenPosition, config);
   }
 
   // Get valid grid position from screen coordinates (returns null if out of bounds)
@@ -327,9 +332,10 @@ class GameCanvasController extends ChangeNotifier {
       scale: _scale,
       panOffset: _panOffset,
     );
-    return UnifiedCoordinateService().getValidGridPosition(screenPosition, config);
+    return UnifiedCoordinateService()
+        .getValidGridPosition(screenPosition, config);
   }
-  
+
   // Get the grid bounds visible on screen
   Rect getVisibleGridBounds() {
     final config = GridConfiguration(
@@ -339,15 +345,16 @@ class GameCanvasController extends ChangeNotifier {
       scale: _scale,
       panOffset: _panOffset,
     );
-    return UnifiedCoordinateService().calculateVisibleGridBounds(config, _canvasSize);
+    return UnifiedCoordinateService()
+        .calculateVisibleGridBounds(config, _canvasSize);
   }
-  
+
   // Check if a grid position is visible
   bool isGridPositionVisible(Offset gridPosition) {
     final visibleBounds = getVisibleGridBounds();
     return visibleBounds.contains(gridPosition);
   }
-  
+
   // Animation support
   void animatePanTo(
     Offset targetPan, {
@@ -358,7 +365,7 @@ class GameCanvasController extends ChangeNotifier {
     // For now, we'll just set the pan directly
     setPan(targetPan);
   }
-  
+
   void animateScaleTo(
     double targetScale, {
     Duration duration = const Duration(milliseconds: 300),
@@ -371,9 +378,10 @@ class GameCanvasController extends ChangeNotifier {
     _constrainPan();
     notifyListeners();
   }
-  
+
   // Interaction state management (FSM)
-  void setInteractionMode(CanvasInteractionMode mode, {
+  void setInteractionMode(
+    CanvasInteractionMode mode, {
     Offset? dragStartPosition,
     String? draggedComponentId,
     String? placingComponentType,
@@ -386,7 +394,6 @@ class GameCanvasController extends ChangeNotifier {
     );
     notifyListeners();
   }
-
 
   void reset() {
     _gridCellSize = _defaultCellSize;
@@ -403,7 +410,7 @@ class GameCanvasController extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   // Debug information
   Map<String, dynamic> getDebugInfo() {
     return {

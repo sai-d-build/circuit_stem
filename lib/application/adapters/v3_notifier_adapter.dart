@@ -1,8 +1,8 @@
-import 'package:sparkcircuit/core/interfaces/game_state_notifier_interface.dart';
 import 'package:sparkcircuit/application/game_engine/v3/game_engine_notifier_v3.dart';
 import 'package:sparkcircuit/application/states/game_state.dart' as enhanced;
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/interfaces/game_state_notifier_interface.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 /// Adapter for GameEngineNotifierV3 to implement IGameStateNotifier
 class V3NotifierAdapter extends IGameStateNotifier {
@@ -17,7 +17,7 @@ class V3NotifierAdapter extends IGameStateNotifier {
 
   @override
   ComponentModel placeComponent(ComponentType type, int row, int col) =>
-    _v3.placeComponent(type, row, col);
+      _v3.placeComponent(type, row, col);
 
   @override
   Future<void> placeComponentAsync(ComponentType type, int row, int col) async {
@@ -37,34 +37,27 @@ class V3NotifierAdapter extends IGameStateNotifier {
 
   // Delegate other methods to V3 notifier
   @override
-  void selectComponent(String? componentId) =>
-    _v3.selectComponent(componentId);
+  void selectComponent(String? componentId) => _v3.selectComponent(componentId);
 
   @override
-  void removeComponent(String componentId) =>
-    _v3.removeComponent(componentId);
+  void removeComponent(String componentId) => _v3.removeComponent(componentId);
 
   @override
   void moveComponent(String componentId, int newRow, int newCol) =>
-    _v3.moveComponent(componentId, newRow, newCol);
+      _v3.moveComponent(componentId, newRow, newCol);
 
   @override
-  void rotateComponent(String componentId) =>
-    _v3.rotateComponent(componentId);
+  void rotateComponent(String componentId) => _v3.rotateComponent(componentId);
 
   @override
-  void loadLevel(LevelDefinition level) =>
-    _v3.loadLevel(level);
+  void loadLevel(LevelDefinition level) => _v3.loadLevel(level);
 
   @override
-  void resetLevel() =>
-    _v3.resetLevel();
+  void resetLevel() => _v3.resetLevel();
 
   @override
-  void togglePause() =>
-    _v3.togglePause();
+  void togglePause() => _v3.togglePause();
 
-  // ✅ Fix: Add grid property override to delegate to V3 state
-  @override
+  // ✅ Fix: Add grid property to delegate to V3 state
   Grid get grid => _v3.state.grid;
 }

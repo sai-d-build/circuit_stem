@@ -1,5 +1,5 @@
-import 'circuit_component.dart';
 import '../core/component.dart';
+import 'circuit_component.dart';
 
 /// Switch component that controls current flow in a circuit
 class SwitchEntity extends CircuitComponent {
@@ -84,6 +84,9 @@ class SwitchEntity extends CircuitComponent {
 
   @override
   List<String> get requiredConnections => ['input', 'output'];
+
+  @override
+  double get resistance => getEffectiveResistance();
 
   /// Toggle the switch state
   void toggle() {

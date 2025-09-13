@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'presentation/features/menus/screens/main_menu.dart';
-import 'presentation/features/menus/screens/level_select.dart';
-import 'presentation/features/menus/screens/settings_screen.dart';
+
 import 'presentation/features/game/screens/game_screen.dart';
+import 'presentation/features/menus/screens/level_select.dart';
+import 'presentation/features/menus/screens/main_menu.dart';
+import 'presentation/features/menus/screens/settings_screen.dart';
 
 class AppRoutes {
   static const String mainMenu = '/';
@@ -30,8 +31,7 @@ class AppRoutes {
                   'The game screen requires a levelId (String) argument.'));
         }
         final levelId = settings.arguments as String;
-        return MaterialPageRoute(
-            builder: (_) => GameScreen(levelId: levelId));
+        return MaterialPageRoute(builder: (_) => GameScreen(levelId: levelId));
 
       default:
         return MaterialPageRoute(

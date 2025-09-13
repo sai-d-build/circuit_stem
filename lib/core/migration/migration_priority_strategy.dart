@@ -52,17 +52,17 @@ class MigrationPriorityStrategy {
   /// Check if file is high priority
   static bool _isHighPriority(String filePath) {
     return filePath.contains('use_case') ||
-           filePath.contains('create_component') ||
-           filePath.contains('core') ||
-           filePath.contains('business_logic');
+        filePath.contains('create_component') ||
+        filePath.contains('core') ||
+        filePath.contains('business_logic');
   }
 
   /// Check if file is medium priority
   static bool _isMediumPriority(String filePath) {
     return filePath.contains('controller') ||
-           filePath.contains('service') ||
-           filePath.contains('handler') ||
-           filePath.contains('manager');
+        filePath.contains('service') ||
+        filePath.contains('handler') ||
+        filePath.contains('manager');
   }
 
   /// Get recommended migration order
@@ -82,9 +82,21 @@ class MigrationPriorityStrategy {
       'medium_priority_count': (totalFiles * 0.5).round(), // 50%
       'low_priority_count': (totalFiles * 0.3).round(), // 30%
       'recommended_batches': [
-        {'name': 'High Priority', 'percentage': 20, 'files': (totalFiles * 0.2).round()},
-        {'name': 'Medium Priority', 'percentage': 50, 'files': (totalFiles * 0.5).round()},
-        {'name': 'Low Priority', 'percentage': 30, 'files': (totalFiles * 0.3).round()},
+        {
+          'name': 'High Priority',
+          'percentage': 20,
+          'files': (totalFiles * 0.2).round()
+        },
+        {
+          'name': 'Medium Priority',
+          'percentage': 50,
+          'files': (totalFiles * 0.5).round()
+        },
+        {
+          'name': 'Low Priority',
+          'percentage': 30,
+          'files': (totalFiles * 0.3).round()
+        },
       ],
     };
   }
@@ -97,7 +109,8 @@ class MigrationPriorityStrategy {
       case 'PHASE_1':
         return priority == priorityLow; // Only low priority in phase 1
       case 'PHASE_2':
-        return priority == priorityLow || priority == priorityMedium; // Low + medium
+        return priority == priorityLow ||
+            priority == priorityMedium; // Low + medium
       case 'PHASE_3':
         return true; // All priorities in phase 3
       default:
@@ -124,7 +137,8 @@ class MigrationPhase {
   static const String phase3 = 'PHASE_3'; // High-risk & critical files
 
   static String getCurrentPhase(int migratedFiles) {
-    final percentage = (migratedFiles / MigrationPriorityStrategy.totalFiles) * 100;
+    final percentage =
+        (migratedFiles / MigrationPriorityStrategy.totalFiles) * 100;
 
     if (percentage < 30) return phase1;
     if (percentage < 80) return phase2;

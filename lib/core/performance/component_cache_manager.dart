@@ -1,17 +1,19 @@
 // lib/core/performance/component_cache_manager.dart
 
 import 'dart:ui' show Picture, PictureRecorder, Canvas;
+
 import 'package:flutter/material.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 /// Unified component cache manager for Phase 1 performance optimization
 /// Target: 40-50% rendering performance improvement through intelligent caching
 class ComponentCacheManager {
-  static final ComponentCacheManager _instance = ComponentCacheManager._internal();
+  static final ComponentCacheManager _instance =
+      ComponentCacheManager._internal(); // ignore: cascade_invocations
   factory ComponentCacheManager() => _instance;
-  ComponentCacheManager._internal();
+  ComponentCacheManager._internal(); // ignore: cascade_invocations
 
   // Cache storage for rendered component images
   final Map<String, _ComponentCacheEntry> _imageCache = {};
@@ -48,7 +50,8 @@ class ComponentCacheManager {
 
     // Generate new cached image
     _cacheMisses++;
-    final picture = _renderComponentToPicture(component, colors, bounds, scale, isSelected);
+    final picture =
+        _renderComponentToPicture(component, colors, bounds, scale, isSelected);
 
     if (picture != null) {
       _imageCache[cacheKey] = _ComponentCacheEntry(DateTime.now());
@@ -96,7 +99,8 @@ class ComponentCacheManager {
   /// Get cache performance statistics
   Map<String, double> getPerformanceStats() {
     final totalRequests = _cacheHits + _cacheMisses;
-    final hitRate = totalRequests > 0 ? (_cacheHits / totalRequests) * 100 : 0.0;
+    final hitRate =
+        totalRequests > 0 ? (_cacheHits / totalRequests) * 100 : 0.0;
 
     return {
       'cacheHitRate': hitRate,
@@ -109,7 +113,8 @@ class ComponentCacheManager {
   }
 
   /// Private: Generate unique cache key for component
-  String _generateCacheKey(CircuitComponent component, double scale, bool isSelected) {
+  String _generateCacheKey(
+      CircuitComponent component, double scale, bool isSelected) {
     // Create cache key based on component state - exclude frequently changing properties
     return '${component.id}-${component.type}-${component.row}-${component.col}-${component.state}-${component.rotation}-$scale-$isSelected';
   }
@@ -133,22 +138,27 @@ class ComponentCacheManager {
 
       canvas.translate(centerX, centerY);
       if (component.rotation != 0) {
-        canvas.rotate(component.rotation.toDouble() * (3.141592653589793 / 180.0)); // Convert to radians
+        canvas.rotate(component.rotation.toDouble() *
+            (3.141592653589793 / 180.0)); // Convert to radians
       }
       canvas.translate(-centerX, -centerY);
 
       // Render component background
-      _renderComponentBackground(canvas, bounds, colors, component.state, scale);
+      _renderComponentBackground(
+          canvas, bounds, colors, component.state, scale);
 
       // Render component-specific details using painter delegation
-      _renderComponentDetails(canvas, bounds, component, colors, scale, isSelected);
+      _renderComponentDetails(
+          canvas, bounds, component, colors, scale, isSelected);
 
       return recorder.endRecording();
     } catch (e) {
-      StructuredLogger.error('Failed to render component to cache', context: {
-        'componentId': component.id,
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.error('Failed to render component to cache',
+          context: {
+            'componentId': component.id,
+            'error': e.toString(),
+          },
+          error: e);
       return null;
     }
   }
@@ -241,7 +251,8 @@ class ComponentCacheManager {
   }
 
   /// Private: Render battery symbol
-  void _renderBatterySymbol(Canvas canvas, Offset center, double size, Paint paint, double scale) {
+  void _renderBatterySymbol(
+      Canvas canvas, Offset center, double size, Paint paint, double scale) {
     // Positive terminal
     canvas.drawLine(
       Offset(center.dx - size * 0.25, center.dy - size * 0.5),
@@ -258,7 +269,8 @@ class ComponentCacheManager {
   }
 
   /// Private: Render capacitor symbol
-  void _renderCapacitorSymbol(Canvas canvas, Offset center, double size, Paint paint) {
+  void _renderCapacitorSymbol(
+      Canvas canvas, Offset center, double size, Paint paint) {
     final plateHeight = size * 0.6;
 
     // Parallel plates
@@ -276,7 +288,8 @@ class ComponentCacheManager {
   }
 
   /// Private: Render default component symbol
-  void _renderDefaultSymbol(Canvas canvas, Offset center, double size, Paint paint) {
+  void _renderDefaultSymbol(
+      Canvas canvas, Offset center, double size, Paint paint) {
     // Simple diagonal cross
     canvas.drawLine(
       Offset(center.dx - size, center.dy - size),
@@ -324,7 +337,7 @@ class ComponentCacheManager {
   /// Private: Calculate memory efficiency percentage
   double _calculateMemoryEfficiency() {
     final totalRequests = _cacheHits + _cacheMisses;
-    if (totalRequests == 0) return 0.0;
+    if (totalRequests == 0) return 0;
 
     // Efficiency = (hits / total) * (1 / cache_size_factor)
     final cacheSizeFactor = (_imageCache.length + 1.0) / _maxCacheSize;

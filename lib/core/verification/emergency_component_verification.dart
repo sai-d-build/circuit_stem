@@ -2,20 +2,20 @@
 // Ensures critical capacitor/inductor components are working to prevent app crashes
 // This is PHASE 0 of the component optimization project
 
-import '../../domain/entities/core/component.dart';
-import '../../domain/entities/components/circuit_component.dart';
 import '../../domain/entities/components/capacitor.dart';
+import '../../domain/entities/components/circuit_component.dart';
 import '../../domain/entities/components/inductor.dart';
+import '../../domain/entities/core/component.dart';
 import '../debug/structured_logger.dart';
 
 /// Emergency verification system for critical component types
 class EmergencyComponentVerification {
   static const List<ComponentType> _criticalComponents = [
-    ComponentType.resistor,      // ❌ Original (should work)
-    ComponentType.battery,       // ❌ Original (should work)
-    ComponentType.wire,          // ❌ Original (should work)
-    ComponentType.capacitor,     // ✅ NEW - Phase 0 fix
-    ComponentType.inductor,      // ✅ NEW - Phase 0 fix
+    ComponentType.resistor, // ❌ Original (should work)
+    ComponentType.battery, // ❌ Original (should work)
+    ComponentType.wire, // ❌ Original (should work)
+    ComponentType.capacitor, // ✅ NEW - Phase 0 fix
+    ComponentType.inductor, // ✅ NEW - Phase 0 fix
   ];
 
   /// VERIFICATION STATUS TRACKING
@@ -30,7 +30,8 @@ class EmergencyComponentVerification {
     final report = VerificationReport();
 
     StructuredLogger.info('🔬 STARTING PHASE 0 COMPONENT VERIFICATION');
-    StructuredLogger.info('Target components: ${_criticalComponents.map((c) => c.name).join(', ')}');
+    StructuredLogger.info(
+        'Target components: ${_criticalComponents.map((c) => c.name).join(', ')}');
 
     _verificationAttempts++;
 
@@ -43,7 +44,8 @@ class EmergencyComponentVerification {
         StructuredLogger.info('✅ ${componentType.name}: VERIFIED');
       } else {
         _failureCount++;
-        StructuredLogger.error('❌ ${componentType.name}: FAILED - ${result.message}');
+        StructuredLogger.error(
+            '❌ ${componentType.name}: FAILED - ${result.message}');
         report.addFailure(componentType, result.message);
       }
     }
@@ -55,7 +57,9 @@ class EmergencyComponentVerification {
     // DETERMINE OVERALL STATUS
     report.overallStatus = _failureCount == 0
         ? VerificationStatus.allPassed
-        : (_failureCount < 3 ? VerificationStatus.partialSuccess : VerificationStatus.criticalFailures);
+        : (_failureCount < 3
+            ? VerificationStatus.partialSuccess
+            : VerificationStatus.criticalFailures);
 
     // FINAL REPORT
     _printVerificationSummary(report);
@@ -69,7 +73,8 @@ class EmergencyComponentVerification {
   }
 
   /// VERIFY INDIVIDUAL COMPONENT TYPE (core verification logic)
-  static Future<VerificationResult> _verifyComponentType(ComponentType type) async {
+  static Future<VerificationResult> _verifyComponentType(
+      ComponentType type) async {
     try {
       // CREATE TEST COMPONENT MODEL
       final testModel = _createTestComponentModel(type);
@@ -78,29 +83,26 @@ class EmergencyComponentVerification {
       final circuitComponent = CircuitComponent.fromComponentModel(testModel);
 
       // VALIDATE COMPONENT PROPERTIES
-      final validationErrors = _validateComponentProperties(circuitComponent, type);
+      final validationErrors =
+          _validateComponentProperties(circuitComponent, type);
 
       if (validationErrors.isNotEmpty) {
         return VerificationResult.failure(
-          type,
-          'Property validation failed: ${validationErrors.join(', ')}'
-        );
+            type, 'Property validation failed: ${validationErrors.join(', ')}');
       }
 
       // TEST SERIALIZATION ROUND-TRIP
       final jsonData = circuitComponent.toJson();
       if (jsonData.isEmpty) {
-        return VerificationResult.failure(type, 'Serialization produced empty JSON');
+        return VerificationResult.failure(
+            type, 'Serialization produced empty JSON');
       }
 
       // SUCCESS!
       return VerificationResult.success(type, 'Component type fully verified');
-
     } catch (e) {
       return VerificationResult.failure(
-        type,
-        'Exception during verification: $e'
-      );
+          type, 'Exception during verification: $e');
     }
   }
 
@@ -116,9 +118,9 @@ class EmergencyComponentVerification {
           row: 0,
           col: 0,
           properties: {
-            'capacitance': 0.001,        // 1µF
-            'voltageRating': 25.0,       // 25V
-            'currentCharge': 0.0,         // No charge
+            'capacitance': 0.001, // 1µF
+            'voltageRating': 25.0, // 25V
+            'currentCharge': 0.0, // No charge
             'leakageResistance': 1000000.0, // 1MΩ
           },
         );
@@ -130,10 +132,10 @@ class EmergencyComponentVerification {
           row: 0,
           col: 0,
           properties: {
-            'inductance': 0.001,         // 1mH
-            'currentRating': 1.0,        // 1A
-            'current': 0.0,              // No current
-            'dcResistance': 0.01,        // 10mΩ
+            'inductance': 0.001, // 1mH
+            'currentRating': 1.0, // 1A
+            'current': 0.0, // No current
+            'dcResistance': 0.01, // 10mΩ
           },
         );
 
@@ -151,14 +153,13 @@ class EmergencyComponentVerification {
 
   /// VALIDATE COMPONENT-SPECIFIC PROPERTIES
   static List<String> _validateComponentProperties(
-    CircuitComponent component,
-    ComponentType expectedType
-  ) {
+      CircuitComponent component, ComponentType expectedType) {
     final errors = <String>[];
 
     // VERIFY TYPE MATCH
     if (component.type != expectedType) {
-      errors.add('Type mismatch: expected $expectedType, got ${component.type}');
+      errors
+          .add('Type mismatch: expected $expectedType, got ${component.type}');
     }
 
     // VERIFY REQUIRED METHODS EXIST
@@ -206,57 +207,70 @@ class EmergencyComponentVerification {
 
   /// PRINT COMPREHENSIVE VERIFICATION SUMMARY
   static void _printVerificationSummary(VerificationReport report) {
-    final statusEmoji = report.overallStatus == VerificationStatus.allPassed ? '✅' :
-                       report.overallStatus == VerificationStatus.partialSuccess ? '⚠️' : '❌';
+    final statusEmoji = report.overallStatus == VerificationStatus.allPassed
+        ? '✅'
+        : report.overallStatus == VerificationStatus.partialSuccess
+            ? '⚠️'
+            : '❌';
 
-    StructuredLogger.info('');
-    StructuredLogger.info('=' * 60);
-    StructuredLogger.info('PHASE 0 COMPONENT VERIFICATION REPORT');
-    StructuredLogger.info('=' * 60);
-    StructuredLogger.info('Status: $statusEmoji ${report.overallStatus.name.replaceAll('_', ' ')}');
-    StructuredLogger.info('');
+    StructuredLogger.info(''); // ignore: cascade_invocations
+    StructuredLogger.info('=' * 60); // ignore: cascade_invocations
+    StructuredLogger.info('PHASE 0 COMPONENT VERIFICATION REPORT'); // ignore: cascade_invocations
+    StructuredLogger.info('=' * 60); // ignore: cascade_invocations
+    StructuredLogger.info(
+        'Status: $statusEmoji ${report.overallStatus.name.replaceAll('_', ' ')}');
+    StructuredLogger.info(''); // ignore: cascade_invocations
 
-    StructuredLogger.info('COMPONENTS TESTED:');
+    StructuredLogger.info('COMPONENTS TESTED:'); // ignore: cascade_invocations
     for (final result in _verificationResults.values) {
       final status = result.isSuccess ? '✅ PASS' : '❌ FAIL';
-      StructuredLogger.info('  $status ${result.componentType.name}: ${result.message}');
+      StructuredLogger.info(
+          '  $status ${result.componentType.name}: ${result.message}');
     }
 
-    StructuredLogger.info('');
-    StructuredLogger.info('STATISTICS:');
-    StructuredLogger.info('  Total attempts: $report.totalAttempts');
-    StructuredLogger.info('  Successful: $report.successCount');
-    StructuredLogger.info('  Failed: $report.failureCount');
+    StructuredLogger.info(''); // ignore: cascade_invocations
+    StructuredLogger.info('STATISTICS:'); // ignore: cascade_invocations
+    StructuredLogger.info('  Total attempts: $report.totalAttempts'); // ignore: cascade_invocations
+    StructuredLogger.info('  Successful: $report.successCount'); // ignore: cascade_invocations
+    StructuredLogger.info('  Failed: $report.failureCount'); // ignore: cascade_invocations
 
     if (report.failureCount > 0) {
-      StructuredLogger.info('');
-      StructuredLogger.info('FAILURES:');
+      StructuredLogger.info(''); // ignore: cascade_invocations
+      StructuredLogger.info('FAILURES:'); // ignore: cascade_invocations
       report.failures.forEach((type, error) {
-        StructuredLogger.error('  ❌ $type: $error');
+        StructuredLogger.error('  ❌ $type: $error'); // ignore: cascade_invocations
       });
     }
 
-    StructuredLogger.info('');
-    StructuredLogger.info('RECOMMENDATIONS:');
+    StructuredLogger.info(''); // ignore: cascade_invocations
+    StructuredLogger.info('RECOMMENDATIONS:'); // ignore: cascade_invocations
     switch (report.overallStatus) {
       case VerificationStatus.allPassed:
-        StructuredLogger.info('  ✅ Phase 0 completion verified - app crashes resolved');
-        StructuredLogger.info('  ✅ Ready to proceed to Phase 1 architecture optimization');
+        StructuredLogger.info(
+            '  ✅ Phase 0 completion verified - app crashes resolved');
+        StructuredLogger.info(
+            '  ✅ Ready to proceed to Phase 1 architecture optimization');
         break;
 
       case VerificationStatus.partialSuccess:
-        StructuredLogger.warning('  ⚠️  Partial success - some components have issues');
-        StructuredLogger.warning('  ⚠️  Address remaining failures before proceeding');
+        StructuredLogger.warning(
+            '  ⚠️  Partial success - some components have issues');
+        StructuredLogger.warning(
+            '  ⚠️  Address remaining failures before proceeding');
         break;
 
       case VerificationStatus.criticalFailures:
-        StructuredLogger.error('  ❌ Critical failures detected - immediate action required');
-        StructuredLogger.error('  ❌ Do not deploy until all critical components pass');
+        StructuredLogger.error(
+            '  ❌ Critical failures detected - immediate action required');
+        StructuredLogger.error(
+            '  ❌ Do not deploy until all critical components pass');
         break;
 
       case VerificationStatus.unknown:
-        StructuredLogger.warning('  ❓ Unknown verification status - verification may be incomplete');
-        StructuredLogger.warning('  ❓ Run verification again to determine actual status');
+        StructuredLogger.warning(
+            '  ❓ Unknown verification status - verification may be incomplete');
+        StructuredLogger.warning(
+            '  ❓ Run verification again to determine actual status');
         break;
     }
 
@@ -273,16 +287,17 @@ class VerificationResult {
   final StackTrace? stackTrace;
 
   VerificationResult.success(this.componentType, this.message)
-    : isSuccess = true,
-      originalError = null,
-      stackTrace = null;
+      : isSuccess = true,
+        originalError = null,
+        stackTrace = null;
 
   VerificationResult.failure(this.componentType, this.message,
-    {this.originalError, this.stackTrace})
-    : isSuccess = false;
+      {this.originalError, this.stackTrace})
+      : isSuccess = false;
 
   @override
-  String toString() => '$componentType: ${isSuccess ? 'PASS' : 'FAIL'} - $message';
+  String toString() =>
+      '$componentType: ${isSuccess ? 'PASS' : 'FAIL'} - $message';
 }
 
 /// COMPREHENSIVE VERIFICATION REPORT
@@ -303,10 +318,10 @@ class VerificationReport {
 
 /// OVERALL VERIFICATION STATUS
 enum VerificationStatus {
-  allPassed,         // All critical components working (Phase 0 complete)
-  partialSuccess,    // Some components working, some failing
-  criticalFailures,  // Multiple components failing (blocking)
-  unknown,           // Initial state
+  allPassed, // All critical components working (Phase 0 complete)
+  partialSuccess, // Some components working, some failing
+  criticalFailures, // Multiple components failing (blocking)
+  unknown, // Initial state
 }
 
 /// EMERGENCY VERIFICATION RUNNER
@@ -316,28 +331,34 @@ class EmergencyVerificationRunner {
     StructuredLogger.info('🚨 STARTING EMERGENCY COMPONENT VERIFICATION');
 
     try {
-      final report = await EmergencyComponentVerification.verifyAllCriticalComponents();
+      final report =
+          await EmergencyComponentVerification.verifyAllCriticalComponents();
 
       if (report.allPassed) {
-        StructuredLogger.info('🎉 PHASE 0 SUCCESS! All component crashes resolved!');
-        StructuredLogger.info('✅ Safe to proceed with architectural optimization');
+        StructuredLogger.info(
+            '🎉 PHASE 0 SUCCESS! All component crashes resolved!');
+        StructuredLogger.info(
+            '✅ Safe to proceed with architectural optimization');
       } else {
-        StructuredLogger.warning('⚠️  PHASE 0 INCOMPLETE! Component issues remain');
-        StructuredLogger.warning('⚠️  Fix all failures before proceeding to production');
+        StructuredLogger.warning(
+            '⚠️  PHASE 0 INCOMPLETE! Component issues remain');
+        StructuredLogger.warning(
+            '⚠️  Fix all failures before proceeding to production');
       }
-
     } catch (e, stackTrace) {
-      StructuredLogger.fatal('💥 EMERGENCY VERIFICATION SYSTEM FAILURE');
-      StructuredLogger.error('   Error: $e');
-      StructuredLogger.error('   StackTrace: $stackTrace');
-      StructuredLogger.error('   This indicates a critical problem with the verification system itself');
+      StructuredLogger.fatal('💥 EMERGENCY VERIFICATION SYSTEM FAILURE'); // ignore: cascade_invocations
+      StructuredLogger.error('   Error: $e'); // ignore: cascade_invocations
+      StructuredLogger.error('   StackTrace: $stackTrace'); // ignore: cascade_invocations
+      StructuredLogger.error(
+          '   This indicates a critical problem with the verification system itself');
     }
   }
 
   /// QUICK CHECK - USE IN CI/CD PIPELINES
   static Future<bool> quickHealthCheck() async {
     try {
-      final report = await EmergencyComponentVerification.verifyAllCriticalComponents();
+      final report =
+          await EmergencyComponentVerification.verifyAllCriticalComponents();
       return report.allPassed;
     } catch (e) {
       StructuredLogger.error('❌ Quick health check failed: $e');

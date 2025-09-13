@@ -1,14 +1,15 @@
-import 'circuit_component.dart';
 import '../core/component.dart';
+import 'circuit_component.dart';
 
 /// Wire component that connects other components in a circuit
 class Wire extends CircuitComponent {
   /// Wire resistance in ohms (usually very low)
-  double get resistance => getProperty<double>('resistance', 0.0);
+  @override
+  double get resistance => getProperty<double>('resistance', 0);
   set resistance(double value) => setProperty('resistance', value);
 
   /// Wire length (for calculating resistance based on material properties)
-  double get length => getProperty<double>('length', 1.0);
+  double get length => getProperty<double>('length', 1);
   set length(double value) => setProperty('length', value);
 
   /// Wire material (affects resistance calculation)
@@ -116,8 +117,9 @@ class Wire extends CircuitComponent {
       'silver': 1.59e-8,
     };
 
-    final materialResistivity = resistivity[material.toLowerCase()] ?? resistivity['copper']!;
-    final crossSectionalArea = 1e-6; // Assume 1mm² cross-section
+    final materialResistivity =
+        resistivity[material.toLowerCase()] ?? resistivity['copper']!;
+    const crossSectionalArea = 1e-6; // Assume 1mm² cross-section
     return (materialResistivity * length) / crossSectionalArea;
   }
 

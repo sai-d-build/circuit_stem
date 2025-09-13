@@ -41,18 +41,18 @@ class _MenuButtonState extends ConsumerState<MenuButton>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
-      begin: 1.0,
+      begin: 1,
       end: 0.95,
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _glowAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
@@ -91,7 +91,7 @@ class _MenuButtonState extends ConsumerState<MenuButton>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>()!;
-    
+
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
@@ -105,7 +105,8 @@ class _MenuButtonState extends ConsumerState<MenuButton>
               boxShadow: [
                 BoxShadow(
                   color: widget.isPrimary
-                      ? circuitColors.glowEffect.withValues(alpha: 0.3 + (0.4 * _glowAnimation.value))
+                      ? circuitColors.glowEffect
+                          .withValues(alpha: 0.3 + (0.4 * _glowAnimation.value))
                       : theme.colorScheme.shadow.withValues(alpha: 0.2),
                   offset: const Offset(0, 4),
                   blurRadius: 8 + (8 * _glowAnimation.value),
@@ -116,10 +117,12 @@ class _MenuButtonState extends ConsumerState<MenuButton>
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: widget.isEnabled ? () {
-                  _playButtonSound();
-                  widget.onPressed();
-                } : null,
+                onTap: widget.isEnabled
+                    ? () {
+                        _playButtonSound();
+                        widget.onPressed();
+                      }
+                    : null,
                 onTapDown: _onTapDown,
                 onTapUp: _onTapUp,
                 onTapCancel: _onTapCancel,
@@ -141,7 +144,8 @@ class _MenuButtonState extends ConsumerState<MenuButton>
                             end: Alignment.bottomRight,
                             colors: [
                               circuitColors.surfaceContainer,
-                              circuitColors.surfaceContainer.withValues(alpha: 0.9),
+                              circuitColors.surfaceContainer
+                                  .withValues(alpha: 0.9),
                             ],
                           ),
                     border: Border.all(

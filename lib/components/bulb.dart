@@ -1,13 +1,14 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
+
+import '../application/services/component_factory.dart';
+import '../common/logger.dart';
+import '../common/theme.dart';
 import '../domain/behaviors/drawing_behavior.dart';
 import '../domain/behaviors/logic_behavior.dart';
-import '../application/services/component_factory.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../infrastructure/rendering/asset_manager.dart';
-import '../common/theme.dart';
-import '../common/logger.dart';
 
 // --- Bulb --- //
 
@@ -45,7 +46,7 @@ class BulbDrawingBehavior implements DrawingBehavior {
 
       // Add light rays
       paint.strokeWidth = 1.0;
-      for (int i = 0; i < 8; i++) {
+      for (var i = 0; i < 8; i++) {
         final angle = (i * 45) * (math.pi / 180);
         final start = Offset(
           center.dx + (radius + 2) * math.cos(angle),
@@ -66,7 +67,7 @@ class BulbDrawingBehavior implements DrawingBehavior {
       Offset(center.dx + radius * 0.5, center.dy + radius * 0.5),
       paint,
     );
-    canvas.drawLine(
+    canvas.drawLine( // ignore: cascade_invocations
       Offset(center.dx - radius * 0.5, center.dy + radius * 0.5),
       Offset(center.dx + radius * 0.5, center.dy - radius * 0.5),
       paint,
@@ -90,16 +91,14 @@ class BulbLogicBehavior extends BaseLogicBehavior {
 
 void registerBulb(ComponentFactory factory) {
   Logger.log('registerBulb() called.');
-  factory.registerBehavior<BulbDrawingBehavior>(() => const BulbDrawingBehavior());
-  factory.registerBehavior<BulbLogicBehavior>(() => BulbLogicBehavior());
-  // Note: MoveBehavior is abstract and can't be instantiated directly
-  // factory.registerBehavior<MoveBehavior>(() => MoveBehavior());
-
-  factory.register(
-    type: 'Component.Bulb',
-    displayName: 'Bulb',
-    behaviors: [BulbDrawingBehavior, BulbLogicBehavior],
-    isDraggable: true, // Bulbs are draggable in the palette
-  );
+  factory
+    ..registerBehavior<BulbDrawingBehavior>(() => const BulbDrawingBehavior())
+    ..registerBehavior<BulbLogicBehavior>(BulbLogicBehavior.new)
+    ..register(
+      type: 'Component.Bulb',
+      displayName: 'Bulb',
+      behaviors: [BulbDrawingBehavior, BulbLogicBehavior],
+      isDraggable: true, // Bulbs are draggable in the palette
+    );
   Logger.log('registerBulb() completed.');
 }

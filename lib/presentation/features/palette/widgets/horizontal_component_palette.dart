@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart' as palette_state;
+import 'package:sparkcircuit/application/providers/core_providers.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
-import 'package:sparkcircuit/application/providers/core_providers.dart';
+import 'package:sparkcircuit/presentation/state/palette_state.dart'
+    as palette_state;
 
 // Performance optimization: Cached component filtering service
 class OptimizedComponentFilter {
@@ -18,7 +19,8 @@ class OptimizedComponentFilter {
     String searchQuery,
     Set<String> activeFilters,
   ) {
-    final cacheKey = _generateCacheKey(levelId, availableComponents, inventory, searchQuery, activeFilters);
+    final cacheKey = _generateCacheKey(
+        levelId, availableComponents, inventory, searchQuery, activeFilters);
 
     // Check cache first
     if (_cache.containsKey(cacheKey)) {
@@ -29,7 +31,8 @@ class OptimizedComponentFilter {
     }
 
     // Perform filtering
-    final result = _performFiltering(availableComponents, inventory, searchQuery, activeFilters);
+    final result = _performFiltering(
+        availableComponents, inventory, searchQuery, activeFilters);
 
     // Cache result
     _cache[cacheKey] = _FilterCache(result);
@@ -53,8 +56,11 @@ class OptimizedComponentFilter {
     Set<String> activeFilters,
   ) {
     // Generate a stable cache key based on relevant data
-    final componentsHash = availableComponents.map((c) => '${c.type}:${c.isUnlocked}').join(',');
-    final inventoryHash = inventory.entries.map((e) => '${e.key}:${e.value.available}:${e.value.canUse}').join(',');
+    final componentsHash =
+        availableComponents.map((c) => '${c.type}:${c.isUnlocked}').join(',');
+    final inventoryHash = inventory.entries
+        .map((e) => '${e.key}:${e.value.available}:${e.value.canUse}')
+        .join(',');
     final filtersHash = activeFilters.join(',');
     return '$levelId|$componentsHash|$inventoryHash|$searchQuery|$filtersHash';
   }
@@ -71,7 +77,9 @@ class OptimizedComponentFilter {
 
       // Inventory filter
       final componentInventory = inventory[component.type];
-      if (componentInventory == null || !componentInventory.canUse) return false;
+      if (componentInventory == null || !componentInventory.canUse) {
+        return false;
+      }
 
       // Search filter
       if (searchQuery.isNotEmpty) {
@@ -101,7 +109,8 @@ class _FilterCache {
 
   _FilterCache(this.result) : _createdAt = DateTime.now();
 
-  bool get isExpired => DateTime.now().difference(_createdAt).inSeconds > 5; // 5 second cache
+  bool get isExpired =>
+      DateTime.now().difference(_createdAt).inSeconds > 5; // 5 second cache
 }
 
 // ✅ CLEAN ARCHITECTURE: Reuse Palette Service
@@ -110,18 +119,24 @@ class PaletteService {
 
   PaletteService(this.paletteNotifier);
 
-  void updateSearchQuery(String query) => paletteNotifier.updateSearchQuery(query);
+  void updateSearchQuery(String query) =>
+      paletteNotifier.updateSearchQuery(query);
   void clearSearch() => paletteNotifier.clearSearch();
   void addFilter(String filter) => paletteNotifier.addFilter(filter);
   void removeFilter(String filter) => paletteNotifier.removeFilter(filter);
   void clearFilters() => paletteNotifier.clearFilters();
-  bool canUseComponent(String componentType) => paletteNotifier.canUseComponent(componentType);
-  void selectComponent(String componentType) => paletteNotifier.selectComponent(componentType);
-  void startPlacingComponent(String componentType) => paletteNotifier.startPlacingComponent(componentType);
+  bool canUseComponent(String componentType) =>
+      paletteNotifier.canUseComponent(componentType);
+  void selectComponent(String componentType) =>
+      paletteNotifier.selectComponent(componentType);
+  void startPlacingComponent(String componentType) =>
+      paletteNotifier.startPlacingComponent(componentType);
 }
 
-final paletteServiceProvider = Provider.family<PaletteService, String>((ref, levelId) {
-  final paletteNotifier = ref.watch(palette_state.paletteStateProvider(levelId).notifier);
+final paletteServiceProvider =
+    Provider.family<PaletteService, String>((ref, levelId) {
+  final paletteNotifier =
+      ref.watch(palette_state.paletteStateProvider(levelId).notifier);
   return PaletteService(paletteNotifier);
 });
 
@@ -131,21 +146,24 @@ class HorizontalComponentPalette extends ConsumerWidget {
   const HorizontalComponentPalette({super.key, required this.levelId});
 
   static const double _paletteHeight = 120;
-  static const double _chipPadding = 8.0;
+  static const double _chipPadding = 8;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    StructuredLogger.debug('🎨 HORIZONTAL PALETTE BUILD CALLED for level: $levelId', context: {
-      'levelId': levelId,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
+    StructuredLogger.debug(
+        '🎨 HORIZONTAL PALETTE BUILD CALLED for level: $levelId',
+        context: {
+          'levelId': levelId,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        });
     final paletteState = ref.watch(palette_state.paletteStateProvider(levelId));
     final paletteService = ref.watch(paletteServiceProvider(levelId));
     // Note: paletteNotifier variable removed - using helper methods instead
 
     // Performance optimization: Minimize logging in hot paths
     // Only log essential information and reduce frequency
-    if (paletteState.filteredComponents.isEmpty && paletteState.availableComponents.isNotEmpty) {
+    if (paletteState.filteredComponents.isEmpty &&
+        paletteState.availableComponents.isNotEmpty) {
       StructuredLogger.warning('🎨 No filtered components available', context: {
         'levelId': levelId,
         'availableComponentsCount': paletteState.availableComponents.length,
@@ -164,25 +182,29 @@ class HorizontalComponentPalette extends ConsumerWidget {
           // Instruction text with component counts
           Consumer(
             builder: (context, ref, child) {
-              final paletteState = ref.watch(palette_state.paletteStateProvider(levelId));
+              final paletteState =
+                  ref.watch(palette_state.paletteStateProvider(levelId));
               final totalComponents = paletteState.inventory.values.fold<int>(
                 0,
                 (sum, inventory) => sum + inventory.total,
               );
               final usedComponents = paletteState.inventory.values.fold<int>(
                 0,
-                (sum, inventory) => sum + (inventory.total - inventory.available),
+                (sum, inventory) =>
+                    sum + (inventory.total - inventory.available),
               );
 
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 color: Colors.blue[50],
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.touch_app, size: 16, color: Colors.blue[700]),
+                        Icon(Icons.touch_app,
+                            size: 16, color: Colors.blue[700]),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -198,7 +220,8 @@ class HorizontalComponentPalette extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -225,24 +248,31 @@ class HorizontalComponentPalette extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               itemCount: paletteState.filteredComponents.length,
               itemBuilder: (context, index) {
-                final componentDefinition = paletteState.filteredComponents[index];
-                final isSelected = paletteState.selectedComponentType == componentDefinition.type;
-                final dragData = ComponentDragData.fromPaletteComponentDefinition(componentDefinition);
+                final componentDefinition =
+                    paletteState.filteredComponents[index];
+                final isSelected = paletteState.selectedComponentType ==
+                    componentDefinition.type;
+                final dragData =
+                    ComponentDragData.fromPaletteComponentDefinition(
+                        componentDefinition);
 
                 // Performance optimization: Minimize logging in hot paths
-                final inventory = paletteState.inventory[componentDefinition.type];
+                final inventory =
+                    paletteState.inventory[componentDefinition.type];
                 final canUse = inventory?.canUse ?? false;
                 final isExhausted = inventory?.isExhausted ?? false;
                 final shouldBeDraggable = isSelected && canUse && !isExhausted;
 
                 // Only log warnings for problematic states, not every component
                 if (!canUse && inventory != null && inventory.available > 0) {
-                  StructuredLogger.debug('Component not draggable - inventory issue', context: {
-                    'componentName': componentDefinition.name,
-                    'componentType': componentDefinition.type,
-                    'available': inventory.available,
-                    'levelId': levelId,
-                  });
+                  StructuredLogger.debug(
+                      'Component not draggable - inventory issue',
+                      context: {
+                        'componentName': componentDefinition.name,
+                        'componentType': componentDefinition.type,
+                        'available': inventory.available,
+                        'levelId': levelId,
+                      });
                 }
 
                 return Padding(
@@ -282,16 +312,19 @@ class HorizontalComponentPalette extends ConsumerWidget {
 
                             // Auto-select component when dragging starts
                             if (!isSelected) {
-                              paletteService.selectComponent(componentDefinition.type);
+                              paletteService
+                                  .selectComponent(componentDefinition.type);
                             }
 
-                            ref.read(paletteDragActiveProvider.notifier).state = true;
+                            ref.read(paletteDragActiveProvider.notifier).state =
+                                true;
                             HapticFeedback.mediumImpact();
 
                             // Show success message
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Dragging ${componentDefinition.name}...'),
+                                content: Text(
+                                    'Dragging ${componentDefinition.name}...'),
                                 duration: const Duration(milliseconds: 500),
                                 backgroundColor: Colors.green,
                               ),
@@ -299,40 +332,49 @@ class HorizontalComponentPalette extends ConsumerWidget {
                           },
                           onDraggableCanceled: (velocity, offset) {
                             // Performance optimization: Minimal logging for cancelled drags
-                            StructuredLogger.debug('Component drag cancelled', context: {
-                              'component': componentDefinition.name,
-                              'levelId': levelId,
-                            });
-                            ref.read(paletteDragActiveProvider.notifier).state = false;
+                            StructuredLogger.debug('Component drag cancelled',
+                                context: {
+                                  'component': componentDefinition.name,
+                                  'levelId': levelId,
+                                });
+                            ref.read(paletteDragActiveProvider.notifier).state =
+                                false;
                           },
                           onDragEnd: (details) {
                             // Performance optimization: Only log important drag outcomes
                             if (details.wasAccepted) {
-                              StructuredLogger.info('Component drag accepted', context: {
-                                'component': componentDefinition.name,
-                                'levelId': levelId,
-                              });
+                              StructuredLogger.info('Component drag accepted',
+                                  context: {
+                                    'component': componentDefinition.name,
+                                    'levelId': levelId,
+                                  });
                             } else {
-                              StructuredLogger.debug('Component drag rejected', context: {
-                                'component': componentDefinition.name,
-                                'levelId': levelId,
-                              });
+                              StructuredLogger.debug('Component drag rejected',
+                                  context: {
+                                    'component': componentDefinition.name,
+                                    'levelId': levelId,
+                                  });
                             }
-                            ref.read(paletteDragActiveProvider.notifier).state = false;
+                            ref.read(paletteDragActiveProvider.notifier).state =
+                                false;
                           },
                           child: GestureDetector(
                             onTap: () {
                               // Performance optimization: Minimal logging for tap events
                               if (isSelected) {
-                                paletteService.startPlacingComponent(componentDefinition.type);
+                                paletteService.startPlacingComponent(
+                                    componentDefinition.type);
                               } else {
-                                paletteService.selectComponent(componentDefinition.type);
+                                paletteService
+                                    .selectComponent(componentDefinition.type);
                               }
                             },
                             child: _buildChip(
                               componentDefinition.name,
                               componentDefinition.type,
-                              background: isSelected ? Colors.blue[200] : Colors.green.shade300,
+                              background: isSelected
+                                  ? Colors.blue[200]
+                                  : Colors.green.shade300,
                               isSelected: isSelected,
                               canUse: canUse,
                               available: inventory?.available ?? 0,
@@ -341,14 +383,17 @@ class HorizontalComponentPalette extends ConsumerWidget {
                           ),
                         )
                       : GestureDetector(
-                        onTap: () {
-                          // Performance optimization: Minimal logging for non-draggable taps
-                          paletteService.selectComponent(componentDefinition.type);
-                        },
+                          onTap: () {
+                            // Performance optimization: Minimal logging for non-draggable taps
+                            paletteService
+                                .selectComponent(componentDefinition.type);
+                          },
                           child: _buildChip(
                             componentDefinition.name,
                             componentDefinition.type,
-                            background: isSelected ? Colors.blue[200] : Colors.green.shade300,
+                            background: isSelected
+                                ? Colors.blue[200]
+                                : Colors.green.shade300,
                             isSelected: isSelected,
                             canUse: canUse,
                             available: inventory?.available ?? 0,
@@ -364,7 +409,12 @@ class HorizontalComponentPalette extends ConsumerWidget {
     );
   }
 
-  Widget _buildChip(String name, String type, {Color? background, bool isSelected = false, bool canUse = true, int available = 0, int total = 0}) {
+  Widget _buildChip(String name, String type,
+      {Color? background,
+      bool isSelected = false,
+      bool canUse = true,
+      int available = 0,
+      int total = 0}) {
     final icon = _getComponentIcon(type);
     final isDraggable = isSelected && canUse && available > 0;
 
@@ -458,7 +508,8 @@ class HorizontalComponentPalette extends ConsumerWidget {
               ),
             ],
           ),
-          backgroundColor: Colors.transparent, // Use container background instead
+          backgroundColor:
+              Colors.transparent, // Use container background instead
           avatar: Icon(
             icon,
             color: isDraggable

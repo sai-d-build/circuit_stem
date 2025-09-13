@@ -1,8 +1,8 @@
-
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'package:sparkcircuit/core/simulation/simulation_result.dart';
 import 'package:flutter/material.dart'; // For Offset
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:sparkcircuit/core/simulation/simulation_result.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
+
 import '../common/converters.dart';
 
 part 'enhanced_game_state.freezed.dart';
@@ -53,8 +53,6 @@ class GameState with _$GameState {
         history: HistoryState.initial(),
         error: null,
       );
-
-  
 }
 
 @freezed
@@ -68,8 +66,6 @@ class InteractionState with _$InteractionState {
   }) = _InteractionState;
 
   factory InteractionState.initial() => const InteractionState();
-
-  
 }
 
 @freezed
@@ -79,6 +75,4 @@ class HistoryState with _$HistoryState {
   }) = _HistoryState;
 
   factory HistoryState.initial() => const HistoryState();
-
-  
 }

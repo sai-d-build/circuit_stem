@@ -2,7 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sparkcircuit/application/enhanced_game_state.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 
-
 part 'circuit_netlist.freezed.dart';
 part 'circuit_netlist.g.dart';
 
@@ -100,12 +99,16 @@ class CircuitNetlist with _$CircuitNetlist {
         if (!processedConnections.contains(uniqueConnectionId)) {
           // Assuming a direct connection between component centers for now.
           // In a real circuit, connections are between specific terminals/pins.
-          final sourceComponent = gameState.grid.getComponentById(sourceComponentId);
-          final targetComponent = gameState.grid.getComponentById(targetComponentId);
+          final sourceComponent =
+              gameState.grid.getComponentById(sourceComponentId); // ignore: cascade_invocations
+          final targetComponent =
+              gameState.grid.getComponentById(targetComponentId); // ignore: cascade_invocations
 
           if (sourceComponent != null && targetComponent != null) {
-            final node1Id = getNodeKey(sourceComponent.row, sourceComponent.col);
-            final node2Id = getNodeKey(targetComponent.row, targetComponent.col);
+            final node1Id =
+                getNodeKey(sourceComponent.row, sourceComponent.col);
+            final node2Id =
+                getNodeKey(targetComponent.row, targetComponent.col);
 
             connections.add(SimConnection(
               id: uniqueConnectionId,
@@ -114,8 +117,10 @@ class CircuitNetlist with _$CircuitNetlist {
             ));
 
             // Update connectedNodes for SimComponents (this is a simplification)
-            final simSource = components.firstWhere((c) => c.id == sourceComponentId);
-            final simTarget = components.firstWhere((c) => c.id == targetComponentId);
+            final simSource =
+                components.firstWhere((c) => c.id == sourceComponentId);
+            final simTarget =
+                components.firstWhere((c) => c.id == targetComponentId);
             if (!simSource.connectedNodes.contains(node2Id)) {
               simSource.connectedNodes.add(node2Id);
             }

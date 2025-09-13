@@ -1,8 +1,8 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sparkcircuit/core/services/pathfinding_service.dart';
 import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
+import 'package:sparkcircuit/core/services/pathfinding_service.dart';
 
 // Mock classes
 class MockRef extends Mock implements Ref {}
@@ -29,64 +29,65 @@ void main() {
 
       test('PathfindingResult handles success correctly', () {
         final path = [
-          GridPosition(row: 0, col: 0),
-          GridPosition(row: 0, col: 1),
-          GridPosition(row: 1, col: 1),
+          const GridPosition(row: 0, col: 0),
+          const GridPosition(row: 0, col: 1),
+          const GridPosition(row: 1, col: 1),
         ];
 
         final result = PathfindingResult.success(
           path,
           5,
-          2.0,
-          Duration(milliseconds: 10),
+          2,
+          const Duration(milliseconds: 10),
         );
 
         expect(result.success, true);
         expect(result.path, path);
         expect(result.nodesExplored, 5);
         expect(result.pathCost, 2.0);
-        expect(result.computationTime, Duration(milliseconds: 10));
+        expect(result.computationTime, const Duration(milliseconds: 10));
       });
 
       test('PathfindingResult handles failure correctly', () {
-        final result = PathfindingResult.failure(10, Duration(milliseconds: 50));
+        final result =
+            PathfindingResult.failure(10, const Duration(milliseconds: 50));
 
         expect(result.success, false);
         expect(result.path, isEmpty);
         expect(result.nodesExplored, 10);
         expect(result.pathCost, 0.0);
-        expect(result.computationTime, Duration(milliseconds: 50));
+        expect(result.computationTime, const Duration(milliseconds: 50));
       });
     });
 
     group('PathNode', () {
       test('PathNode calculates fCost correctly', () {
-        final node = PathNode(
+        const node = PathNode(
           position: GridPosition(row: 1, col: 1),
-          gCost: 2.0,
-          hCost: 3.0,
+          gCost: 2,
+          hCost: 3,
         );
 
         expect(node.fCost, 5.0);
       });
 
       test('PathNode equality works correctly', () {
-        final node1 = PathNode(
+        const node1 = PathNode(
           position: GridPosition(row: 1, col: 1),
-          gCost: 1.0,
-          hCost: 1.0,
+          gCost: 1,
+          hCost: 1,
         );
 
-        final node2 = PathNode(
+        const node2 = PathNode(
           position: GridPosition(row: 1, col: 1),
-          gCost: 2.0,
-          hCost: 2.0,
+          gCost: 2,
+          hCost: 2,
         );
 
-        final node3 = PathNode(
+        const node3 = PathNode(
           position: GridPosition(row: 1, col: 2),
-          gCost: 1.0,
-          hCost: 1.0,
+          gCost: 1,
+          hCost: 1,
         );
 
         expect(node1 == node2, true); // Same position
@@ -94,13 +95,13 @@ void main() {
       });
 
       test('PathNode copyWith works correctly', () {
-        final original = PathNode(
+        const original = PathNode(
           position: GridPosition(row: 1, col: 1),
-          gCost: 1.0,
-          hCost: 2.0,
+          gCost: 1,
+          hCost: 2,
         );
 
-        final copied = original.copyWith(gCost: 3.0);
+        final copied = original.copyWith(gCost: 3);
 
         expect(copied.gCost, 3.0);
         expect(copied.hCost, 2.0); // Unchanged
@@ -110,17 +111,17 @@ void main() {
 
     group('GridPosition', () {
       test('GridPosition equality works', () {
-        final pos1 = GridPosition(row: 1, col: 2);
-        final pos2 = GridPosition(row: 1, col: 2);
-        final pos3 = GridPosition(row: 2, col: 1);
+        const pos1 = GridPosition(row: 1, col: 2);
+        const pos2 = GridPosition(row: 1, col: 2);
+        const pos3 = GridPosition(row: 2, col: 1);
 
         expect(pos1 == pos2, true);
         expect(pos1 == pos3, false);
       });
 
       test('GridPosition hashCode is consistent', () {
-        final pos1 = GridPosition(row: 1, col: 2);
-        final pos2 = GridPosition(row: 1, col: 2);
+        const pos1 = GridPosition(row: 1, col: 2);
+        const pos2 = GridPosition(row: 1, col: 2);
 
         expect(pos1.hashCode == pos2.hashCode, true);
       });
@@ -142,8 +143,8 @@ void main() {
     group('Integration Tests', () {
       test('Pathfinding integrates with coordinate system', () {
         // Test integration between pathfinding and coordinate services
-        final start = GridPosition(row: 0, col: 0);
-        final end = GridPosition(row: 5, col: 5);
+        const start = GridPosition(row: 0, col: 0);
+        const end = GridPosition(row: 5, col: 5);
 
         // Verify positions are valid GridPosition instances
         expect(start.row, 0);
@@ -154,7 +155,7 @@ void main() {
 
       test('Pathfinding handles occupied positions', () {
         // Test that occupied positions are avoided
-        final occupied = {GridPosition(row: 1, col: 1)};
+        final occupied = {const GridPosition(row: 1, col: 1)};
         expect(occupied.length, 1);
       });
     });

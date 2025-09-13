@@ -15,11 +15,14 @@ class AppAssets {
   static const String imageBattery = '$_assetsBase/images/battery.svg';
   static const String imageBulbOff = '$_assetsBase/images/bulb_off.svg';
   static const String imageBulbOn = '$_assetsBase/images/bulb_on.svg';
-  static const String imageGridBgLevel1 = '$_assetsBase/images/grid_bg_level1.png';
-  static const String imageSwitchClosed = '$_assetsBase/images/switch_closed.svg';
+  static const String imageGridBgLevel1 =
+      '$_assetsBase/images/grid_bg_level1.png';
+  static const String imageSwitchClosed =
+      '$_assetsBase/images/switch_closed.svg';
   static const String imageSwitchOpen = '$_assetsBase/images/switch_open.svg';
   static const String imageWireCorner = '$_assetsBase/images/wire_corner.svg';
-  static const String imageWireStraight = '$_assetsBase/images/wire_straight.svg';
+  static const String imageWireStraight =
+      '$_assetsBase/images/wire_straight.svg';
   static const String imageWireT = '$_assetsBase/images/wire_t.svg';
 
   // Level assets
@@ -56,6 +59,7 @@ class AppAssets {
 
   /// Validate that an asset path is properly formatted
   static bool isValidAssetPath(String path) {
-    return path.startsWith(_assetsBase) && !path.contains('$_assetsBase/$_assetsBase');
+    return path.startsWith(_assetsBase) &&
+        !path.contains('$_assetsBase/$_assetsBase');
   }
 }

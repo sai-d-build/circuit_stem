@@ -1,23 +1,25 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart' as domain_user;
+
 import '../../common/cloud_config.dart';
+import '../../presentation/state/hud_state.dart';
 import 'auth_service.dart';
 import 'cloud_storage_service.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart' as domain_user;
-import '../../presentation/state/hud_state.dart';
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 // Mock implementations for testing
 class MockAuthService implements AuthService {
-   @override
-   Stream<domain_user.User?> authStateChanges() => Stream.value(null);
+  @override
+  Stream<domain_user.User?> authStateChanges() => Stream.value(null);
 
   @override
   Future<domain_user.User?> getCurrentUser() async => null;
 
   @override
-  Future<domain_user.User> signInWithEmail(String email, String password) async {
+  Future<domain_user.User> signInWithEmail(
+      String email, String password) async {
     await Future.delayed(const Duration(seconds: 1));
     throw UnimplementedError('Mock auth - use real implementation');
   }
@@ -56,18 +58,19 @@ class MockAuthService implements AuthService {
   Future<void> refreshToken() async {}
 }
 
-
 class MockCloudStorageService implements CloudStorageService {
   @override
-  Future<void> uploadProgress(String userId, ProgressData progress, String levelId) async {
+  Future<void> uploadProgress(
+      String userId, ProgressData progress, String levelId) async {
     await Future.delayed(const Duration(milliseconds: 500));
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Mock cloud service - progress uploaded', context: {
-        'userId': userId,
-        'levelId': levelId,
-        'score': progress.currentScore,
-        'serviceType': 'mock_upload',
-      });
+      StructuredLogger.debug('Mock cloud service - progress uploaded',
+          context: {
+            'userId': userId,
+            'levelId': levelId,
+            'score': progress.currentScore,
+            'serviceType': 'mock_upload',
+          });
     }
   }
 
@@ -75,11 +78,12 @@ class MockCloudStorageService implements CloudStorageService {
   Future<ProgressData?> downloadProgress(String userId, String levelId) async {
     await Future.delayed(const Duration(milliseconds: 300));
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Mock cloud service - progress download request', context: {
-        'userId': userId,
-        'levelId': levelId,
-        'serviceType': 'mock_download',
-      });
+      StructuredLogger.debug('Mock cloud service - progress download request',
+          context: {
+            'userId': userId,
+            'levelId': levelId,
+            'serviceType': 'mock_download',
+          });
     }
     return null;
   }
@@ -88,32 +92,38 @@ class MockCloudStorageService implements CloudStorageService {
   Future<void> syncAllProgress(String userId) async {
     await Future.delayed(const Duration(seconds: 1));
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Mock cloud service - full progress sync started', context: {
-        'userId': userId,
-        'serviceType': 'mock_sync',
-      });
+      StructuredLogger.debug('Mock cloud service - full progress sync started',
+          context: {
+            'userId': userId,
+            'serviceType': 'mock_sync',
+          });
     }
   }
 
   @override
-  Future<void> uploadPreferences(String userId, domain_user.UserPreferences preferences) async {
+  Future<void> uploadPreferences(
+      String userId, domain_user.UserPreferences preferences) async {
     await Future.delayed(const Duration(milliseconds: 200));
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Mock cloud service - preferences uploaded', context: {
-        'userId': userId,
-        'serviceType': 'mock_preferences_upload',
-      });
+      StructuredLogger.debug('Mock cloud service - preferences uploaded',
+          context: {
+            'userId': userId,
+            'serviceType': 'mock_preferences_upload',
+          });
     }
   }
 
   @override
-  Future<domain_user.UserPreferences?> downloadPreferences(String userId) async {
+  Future<domain_user.UserPreferences?> downloadPreferences(
+      String userId) async {
     await Future.delayed(const Duration(milliseconds: 200));
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Mock cloud service - preferences download request', context: {
-        'userId': userId,
-        'serviceType': 'mock_preferences_download',
-      });
+      StructuredLogger.debug(
+          'Mock cloud service - preferences download request',
+          context: {
+            'userId': userId,
+            'serviceType': 'mock_preferences_download',
+          });
     }
     return null;
   }
@@ -133,10 +143,11 @@ class MockCloudStorageService implements CloudStorageService {
   Future<domain_user.UserStats?> downloadStats(String userId) async {
     await Future.delayed(const Duration(milliseconds: 200));
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Mock cloud service - stats download request', context: {
-        'userId': userId,
-        'serviceType': 'mock_stats_download',
-      });
+      StructuredLogger.debug('Mock cloud service - stats download request',
+          context: {
+            'userId': userId,
+            'serviceType': 'mock_stats_download',
+          });
     }
     return null;
   }
@@ -151,10 +162,11 @@ class MockCloudStorageService implements CloudStorageService {
   Future<void> deleteUserData(String userId) async {
     await Future.delayed(const Duration(milliseconds: 300));
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Mock cloud service - user data deletion', context: {
-        'userId': userId,
-        'serviceType': 'mock_data_deletion',
-      });
+      StructuredLogger.debug('Mock cloud service - user data deletion',
+          context: {
+            'userId': userId,
+            'serviceType': 'mock_data_deletion',
+          });
     }
   }
 
@@ -162,7 +174,11 @@ class MockCloudStorageService implements CloudStorageService {
   Future<SyncStatus> getSyncStatus(String userId) async => SyncStatus.synced;
 
   @override
-  Future<SyncResult> resolveConflicts(Map<String, dynamic> local, Map<String, dynamic> remote, ConflictResolutionStrategy strategy) async => SyncResult.success;
+  Future<SyncResult> resolveConflicts(
+          Map<String, dynamic> local,
+          Map<String, dynamic> remote,
+          ConflictResolutionStrategy strategy) async =>
+      SyncResult.success;
 }
 
 class LocalAuthService implements AuthService {
@@ -173,7 +189,8 @@ class LocalAuthService implements AuthService {
   Future<domain_user.User?> getCurrentUser() async => null;
 
   @override
-  Future<domain_user.User> signInWithEmail(String email, String password) async {
+  Future<domain_user.User> signInWithEmail(
+      String email, String password) async {
     throw UnsupportedError('Authentication is disabled in local-only mode');
   }
 
@@ -210,10 +227,10 @@ class LocalAuthService implements AuthService {
   Future<void> refreshToken() async {}
 }
 
-
 class LocalCloudStorageService implements CloudStorageService {
   @override
-  Future<void> uploadProgress(String userId, ProgressData progress, String levelId) async {
+  Future<void> uploadProgress(
+      String userId, ProgressData progress, String levelId) async {
     if (CloudConfig.enableCloudLogging) {
       StructuredLogger.debug('Local cloud service - upload ignored', context: {
         'userId': userId,
@@ -226,11 +243,12 @@ class LocalCloudStorageService implements CloudStorageService {
   @override
   Future<ProgressData?> downloadProgress(String userId, String levelId) async {
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Local cloud service - download ignored', context: {
-        'userId': userId,
-        'levelId': levelId,
-        'serviceType': 'local_mode_disabled',
-      });
+      StructuredLogger.debug('Local cloud service - download ignored',
+          context: {
+            'userId': userId,
+            'levelId': levelId,
+            'serviceType': 'local_mode_disabled',
+          });
     }
     return null;
   }
@@ -246,22 +264,27 @@ class LocalCloudStorageService implements CloudStorageService {
   }
 
   @override
-  Future<void> uploadPreferences(String userId, domain_user.UserPreferences preferences) async {
+  Future<void> uploadPreferences(
+      String userId, domain_user.UserPreferences preferences) async {
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Local cloud service - preferences upload ignored', context: {
-        'userId': userId,
-        'serviceType': 'local_only_mode',
-      });
+      StructuredLogger.debug('Local cloud service - preferences upload ignored',
+          context: {
+            'userId': userId,
+            'serviceType': 'local_only_mode',
+          });
     }
   }
 
   @override
-  Future<domain_user.UserPreferences?> downloadPreferences(String userId) async {
+  Future<domain_user.UserPreferences?> downloadPreferences(
+      String userId) async {
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Local cloud service - preferences download ignored', context: {
-        'userId': userId,
-        'serviceType': 'local_only_mode',
-      });
+      StructuredLogger.debug(
+          'Local cloud service - preferences download ignored',
+          context: {
+            'userId': userId,
+            'serviceType': 'local_only_mode',
+          });
     }
     return null;
   }
@@ -269,20 +292,22 @@ class LocalCloudStorageService implements CloudStorageService {
   @override
   Future<void> uploadStats(String userId, domain_user.UserStats stats) async {
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Local cloud service - stats upload ignored', context: {
-        'userId': userId,
-        'serviceType': 'local_only_mode',
-      });
+      StructuredLogger.debug('Local cloud service - stats upload ignored',
+          context: {
+            'userId': userId,
+            'serviceType': 'local_only_mode',
+          });
     }
   }
 
   @override
   Future<domain_user.UserStats?> downloadStats(String userId) async {
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Local cloud service - stats download ignored', context: {
-        'userId': userId,
-        'serviceType': 'local_only_mode',
-      });
+      StructuredLogger.debug('Local cloud service - stats download ignored',
+          context: {
+            'userId': userId,
+            'serviceType': 'local_only_mode',
+          });
     }
     return null;
   }
@@ -293,10 +318,11 @@ class LocalCloudStorageService implements CloudStorageService {
   @override
   Future<void> deleteUserData(String userId) async {
     if (CloudConfig.enableCloudLogging) {
-      StructuredLogger.debug('Local cloud service - user data deletion ignored', context: {
-        'userId': userId,
-        'serviceType': 'local_only_mode',
-      });
+      StructuredLogger.debug('Local cloud service - user data deletion ignored',
+          context: {
+            'userId': userId,
+            'serviceType': 'local_only_mode',
+          });
     }
   }
 
@@ -304,25 +330,30 @@ class LocalCloudStorageService implements CloudStorageService {
   Future<SyncStatus> getSyncStatus(String userId) async => SyncStatus.noData;
 
   @override
-  Future<SyncResult> resolveConflicts(Map<String, dynamic> local, Map<String, dynamic> remote, ConflictResolutionStrategy strategy) async => SyncResult.success;
+  Future<SyncResult> resolveConflicts(
+          Map<String, dynamic> local,
+          Map<String, dynamic> remote,
+          ConflictResolutionStrategy strategy) async =>
+      SyncResult.success;
 }
 
 // Cloud Service Manager
 class CloudServiceManager {
-    static AuthService getAuthService() {
+  static AuthService getAuthService() {
     switch (currentCloudMode) {
       case CloudServiceMode.real:
         return FirebaseAuthService(fb_auth.FirebaseAuth.instance);
       case CloudServiceMode.mocked:
         return MockAuthService();
       case CloudServiceMode.emulator:
-        return FirebaseAuthService(fb_auth.FirebaseAuth.instance); // Assuming emulator is configured globally
+        return FirebaseAuthService(fb_auth
+            .FirebaseAuth.instance); // Assuming emulator is configured globally
       case CloudServiceMode.localOnly:
         return LocalAuthService();
     }
   }
 
-    static CloudStorageService getCloudStorageService() {
+  static CloudStorageService getCloudStorageService() {
     switch (currentCloudMode) {
       case CloudServiceMode.real:
         return FirebaseCloudStorageService(FirebaseFirestore.instance);

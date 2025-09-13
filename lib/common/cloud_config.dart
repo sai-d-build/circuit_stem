@@ -6,14 +6,16 @@ import 'package:flutter/foundation.dart';
 /// Cloud configuration for SparkCircuit
 class CloudConfig {
   // Feature flags for cloud functionality
-  static const bool enableCloudSync = kDebugMode ? false : true; // Disabled in debug mode by default
+  static const bool enableCloudSync =
+      kDebugMode ? false : true; // Disabled in debug mode by default
   static const bool enableAuthentication = kDebugMode ? false : true;
   static const bool enableOfflineMode = true; // Always enabled
   static const bool enableConflictResolution = true;
 
   // Cloud service configuration
   static const String firebaseProjectId = 'sparkcircuit-prod';
-  static const bool useEmulatorInDebug = kDebugMode && true; // Use Firebase emulator in debug
+  static const bool useEmulatorInDebug =
+      kDebugMode && true; // Use Firebase emulator in debug
 
   // Sync configuration
   static const Duration syncInterval = Duration(minutes: 5);
@@ -99,13 +101,15 @@ class CloudTestingUtils {
   }
 
   /// Check if cloud sync is currently enabled
-  static bool get isCloudEnabled => currentCloudMode != CloudServiceMode.localOnly;
+  static bool get isCloudEnabled =>
+      currentCloudMode != CloudServiceMode.localOnly;
 
   /// Check if using mocked services
   static bool get isUsingMock => currentCloudMode == CloudServiceMode.mocked;
 
   /// Check if using emulator
-  static bool get isUsingEmulator => currentCloudMode == CloudServiceMode.emulator;
+  static bool get isUsingEmulator =>
+      currentCloudMode == CloudServiceMode.emulator;
 
   /// Get current mode description
   static String get currentModeDescription {

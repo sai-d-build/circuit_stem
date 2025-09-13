@@ -46,17 +46,18 @@ class SparkError {
   });
 
   /// Predefined common errors
-  static SparkError componentNotAvailable = SparkError(
+  static SparkError componentNotAvailable = const SparkError(
     type: SparkErrorType.componentPlacement,
     severity: ErrorSeverity.medium,
     title: 'Component Not Available',
     message: 'This component is not available in your current inventory.',
-    suggestion: 'Try selecting a different component or complete more levels to unlock it.',
+    suggestion:
+        'Try selecting a different component or complete more levels to unlock it.',
     icon: Icons.inventory_2_outlined,
     color: Colors.orange,
   );
 
-  static SparkError positionOccupied = SparkError(
+  static SparkError positionOccupied = const SparkError(
     type: SparkErrorType.componentPlacement,
     severity: ErrorSeverity.low,
     title: 'Position Occupied',
@@ -66,7 +67,7 @@ class SparkError {
     color: Colors.blue,
   );
 
-  static SparkError simulationFailed = SparkError(
+  static SparkError simulationFailed = const SparkError(
     type: SparkErrorType.simulation,
     severity: ErrorSeverity.high,
     title: 'Circuit Simulation Failed',
@@ -77,18 +78,19 @@ class SparkError {
     color: Colors.red,
   );
 
-  static SparkError networkError = SparkError(
+  static SparkError networkError = const SparkError(
     type: SparkErrorType.network,
     severity: ErrorSeverity.medium,
     title: 'Connection Error',
-    message: 'Unable to connect to the server. Please check your internet connection.',
+    message:
+        'Unable to connect to the server. Please check your internet connection.',
     suggestion: 'Check your network settings and try again.',
     actionLabel: 'Retry',
     icon: Icons.wifi_off_outlined,
     color: Colors.orange,
   );
 
-  static SparkError invalidCircuit = SparkError(
+  static SparkError invalidCircuit = const SparkError(
     type: SparkErrorType.validation,
     severity: ErrorSeverity.medium,
     title: 'Invalid Circuit',
@@ -137,7 +139,8 @@ class ErrorUtils {
                     Text(
                       error.message,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: error.color?.withValues(alpha: 0.9) ?? theme.colorScheme.onError,
+                        color: error.color?.withValues(alpha: 0.9) ??
+                            theme.colorScheme.onError,
                       ),
                     ),
                   ],
@@ -146,7 +149,8 @@ class ErrorUtils {
                     Text(
                       error.suggestion!,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: error.color?.withValues(alpha: 0.7) ?? theme.colorScheme.onError.withValues(alpha: 0.7),
+                        color: error.color?.withValues(alpha: 0.7) ??
+                            theme.colorScheme.onError.withValues(alpha: 0.7),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -156,7 +160,8 @@ class ErrorUtils {
             ),
           ],
         ),
-        backgroundColor: error.color?.withValues(alpha: 0.1) ?? theme.colorScheme.errorContainer,
+        backgroundColor: error.color?.withValues(alpha: 0.1) ??
+            theme.colorScheme.errorContainer,
         duration: duration,
         action: error.action != null && error.actionLabel != null
             ? SnackBarAction(
@@ -385,7 +390,8 @@ class ErrorUtils {
     }
 
     // Use dialog for high severity errors
-    if (error.severity == ErrorSeverity.high || error.severity == ErrorSeverity.critical) {
+    if (error.severity == ErrorSeverity.high ||
+        error.severity == ErrorSeverity.critical) {
       return ErrorDisplayMethod.dialog;
     }
 
@@ -407,7 +413,8 @@ class ErrorUtils {
       severity: ErrorSeverity.medium,
       title: 'Something went wrong',
       message: exception.toString(),
-      suggestion: 'Please try again or contact support if the problem persists.',
+      suggestion:
+          'Please try again or contact support if the problem persists.',
       icon: Icons.error_outline,
       color: Colors.red,
     );

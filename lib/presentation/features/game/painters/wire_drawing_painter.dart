@@ -31,13 +31,13 @@ class WireDrawingPainter extends CustomPainter {
       ..color = circuitColors.primary
       ..style = PaintingStyle.fill;
 
-    canvas.drawCircle(startPosition!, 6.0, pointPaint);
-    canvas.drawCircle(endPosition!, 6.0, pointPaint);
+    canvas.drawCircle(startPosition!, 6, pointPaint);
+    canvas.drawCircle(endPosition!, 6, pointPaint);
   }
 
   @override
   bool shouldRepaint(WireDrawingPainter oldDelegate) {
     return oldDelegate.startPosition != startPosition ||
-           oldDelegate.endPosition != endPosition;
+        oldDelegate.endPosition != endPosition;
   }
 }

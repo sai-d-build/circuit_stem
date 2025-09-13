@@ -12,6 +12,5 @@ class Hint with _$Hint {
     dynamic triggerValue, // Can be int or String
   }) = _Hint;
 
-  factory Hint.fromJson(Map<String, dynamic> json) =>
-      _$HintFromJson(json);
+  factory Hint.fromJson(Map<String, dynamic> json) => _$HintFromJson(json);
 }

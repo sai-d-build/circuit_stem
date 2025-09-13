@@ -1,4 +1,3 @@
-import './component_factory.dart';
 import '../../components/battery.dart';
 import '../../components/bulb.dart';
 import '../../components/buzzer.dart';
@@ -6,6 +5,7 @@ import '../../components/switch.dart';
 import '../../components/timer.dart';
 import '../../components/wire.dart';
 import '../../domain/goals/power_bulb_goal.dart';
+import './component_factory.dart';
 
 class ComponentRegistry {
   static void registerAll(ComponentFactory factory) {

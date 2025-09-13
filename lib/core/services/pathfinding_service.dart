@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
-import 'package:sparkcircuit/domain/entities/core/component.dart';
 import 'package:sparkcircuit/application/providers/unified_providers.dart';
 import 'package:sparkcircuit/core/migration/migration_tracker.dart';
+import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
+import 'package:sparkcircuit/domain/entities/core/component.dart';
 
 enum PathfindingAlgorithm {
-  manhattan,  // Current implementation
-  astar,      // New A* implementation
+  manhattan, // Current implementation
+  astar, // New A* implementation
   astarOptimized, // A* with precomputed heuristics
   astarDiagonal, // A* with diagonal movement
   astarComponentAware, // A* with component-aware routing
@@ -14,9 +14,9 @@ enum PathfindingAlgorithm {
 
 class PathNode {
   final GridPosition position;
-  final double gCost;  // Cost from start
-  final double hCost;  // Heuristic cost to end
-  final double fCost;  // Total cost (g + h)
+  final double gCost; // Cost from start
+  final double hCost; // Heuristic cost to end
+  final double fCost; // Total cost (g + h)
   final PathNode? parent;
 
   const PathNode({
@@ -42,8 +42,7 @@ class PathNode {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PathNode && position == other.position;
+      identical(this, other) || other is PathNode && position == other.position;
 
   @override
   int get hashCode => position.hashCode;
@@ -79,12 +78,13 @@ class PathfindingResult {
     );
   }
 
-  factory PathfindingResult.failure(int nodesExplored, Duration computationTime) {
+  factory PathfindingResult.failure(
+      int nodesExplored, Duration computationTime) {
     return PathfindingResult(
       path: [],
       success: false,
       nodesExplored: nodesExplored,
-      pathCost: 0.0,
+      pathCost: 0,
       computationTime: computationTime,
     );
   }
@@ -92,7 +92,8 @@ class PathfindingResult {
 
 final pathfindingServiceProvider = Provider.family<PathfindingService, String>(
   (ref, levelId) {
-    MigrationTracker.markFileMigrated('pathfinding_service.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated(
+        'pathfinding_service.dart', DateTime.now().toIso8601String());
     return PathfindingService(
       gameState: ref.read(unifiedGameStateProvider),
       levelId: levelId,
@@ -128,13 +129,19 @@ class PathfindingService {
         case PathfindingAlgorithm.manhattan:
           return _findPathManhattan(start, end, occupiedPositions, stopwatch);
         case PathfindingAlgorithm.astar:
-          return _findPathAStar(start, end, occupiedPositions, maxNodes, stopwatch, allowDiagonal: false);
+          return _findPathAStar(
+              start, end, occupiedPositions, maxNodes, stopwatch,
+              allowDiagonal: false);
         case PathfindingAlgorithm.astarOptimized:
-          return _findPathAStarOptimized(start, end, occupiedPositions, maxNodes, stopwatch);
+          return _findPathAStarOptimized(
+              start, end, occupiedPositions, maxNodes, stopwatch);
         case PathfindingAlgorithm.astarDiagonal:
-          return _findPathAStar(start, end, occupiedPositions, maxNodes, stopwatch, allowDiagonal: true);
+          return _findPathAStar(
+              start, end, occupiedPositions, maxNodes, stopwatch,
+              allowDiagonal: true);
         case PathfindingAlgorithm.astarComponentAware:
-          return _findPathAStarComponentAware(start, end, occupiedPositions, maxNodes, stopwatch);
+          return _findPathAStarComponentAware(
+              start, end, occupiedPositions, maxNodes, stopwatch);
       }
     } finally {
       stopwatch.stop();
@@ -155,11 +162,11 @@ class PathfindingService {
     // Horizontal move
     final hTarget = GridPosition(row: current.row, col: end.col);
     if (hTarget.col > current.col) {
-      for (int col = current.col + 1; col <= hTarget.col; col++) {
+      for (var col = current.col + 1; col <= hTarget.col; col++) {
         path.add(GridPosition(row: current.row, col: col));
       }
     } else {
-      for (int col = current.col - 1; col >= hTarget.col; col--) {
+      for (var col = current.col - 1; col >= hTarget.col; col--) {
         path.add(GridPosition(row: current.row, col: col));
       }
     }
@@ -167,11 +174,11 @@ class PathfindingService {
     // Vertical move
     final vTarget = GridPosition(row: end.row, col: end.col);
     if (vTarget.row > hTarget.row) {
-      for (int row = hTarget.row + 1; row <= vTarget.row; row++) {
+      for (var row = hTarget.row + 1; row <= vTarget.row; row++) {
         path.add(GridPosition(row: row, col: hTarget.col));
       }
     } else {
-      for (int row = hTarget.row - 1; row >= vTarget.row; row--) {
+      for (var row = hTarget.row - 1; row >= vTarget.row; row--) {
         path.add(GridPosition(row: row, col: hTarget.col));
       }
     }
@@ -210,7 +217,7 @@ class PathfindingService {
     gScore[start] = 0;
     fScore[start] = startNode.fCost;
 
-    int nodesExplored = 0;
+    var nodesExplored = 0;
 
     while (openSet.isNotEmpty && nodesExplored < maxNodes) {
       // Find node with lowest fCost
@@ -231,12 +238,15 @@ class PathfindingService {
 
       closedSet.add(current.position);
 
-      for (final neighbor in _getNeighbors(current.position, occupiedPositions, allowDiagonal: allowDiagonal)) {
+      for (final neighbor in _getNeighbors(current.position, occupiedPositions,
+          allowDiagonal: allowDiagonal)) {
         if (closedSet.contains(neighbor)) continue;
 
-        final tentativeGScore = current.gCost + _movementCost(current.position, neighbor);
+        final tentativeGScore =
+            current.gCost + _movementCost(current.position, neighbor);
 
-        if (!gScore.containsKey(neighbor) || tentativeGScore < gScore[neighbor]!) {
+        if (!gScore.containsKey(neighbor) ||
+            tentativeGScore < gScore[neighbor]!) {
           cameFrom[neighbor] = current;
           gScore[neighbor] = tentativeGScore;
 
@@ -303,19 +313,19 @@ class PathfindingService {
 
     final neighbors = <GridPosition>[];
     final directions = [
-      GridPosition(row: 0, col: 1),   // Right
-      GridPosition(row: 1, col: 0),   // Down
-      GridPosition(row: 0, col: -1),  // Left
-      GridPosition(row: -1, col: 0),  // Up
+      const GridPosition(row: 0, col: 1), // Right
+      const GridPosition(row: 1, col: 0), // Down
+      const GridPosition(row: 0, col: -1), // Left
+      const GridPosition(row: -1, col: 0), // Up
     ];
 
     // Add diagonal directions if enabled
     if (allowDiagonal) {
       directions.addAll([
-        GridPosition(row: 1, col: 1),   // Down-Right
-        GridPosition(row: 1, col: -1),  // Down-Left
-        GridPosition(row: -1, col: 1),  // Up-Right
-        GridPosition(row: -1, col: -1), // Up-Left
+        const GridPosition(row: 1, col: 1), // Down-Right
+        const GridPosition(row: 1, col: -1), // Down-Left
+        const GridPosition(row: -1, col: 1), // Up-Right
+        const GridPosition(row: -1, col: -1), // Up-Left
       ]);
     }
 
@@ -336,13 +346,16 @@ class PathfindingService {
   }
 
   /// Check if position is valid (within bounds and not occupied)
-  bool _isValidPosition(GridPosition position, Set<GridPosition>? occupiedPositions) {
+  bool _isValidPosition(
+      GridPosition position, Set<GridPosition>? occupiedPositions) {
     // Get grid dimensions from game state
     final grid = gameState.grid;
 
     // Check bounds
-    if (position.row < 0 || position.row >= grid.rows ||
-        position.col < 0 || position.col >= grid.cols) {
+    if (position.row < 0 ||
+        position.row >= grid.rows ||
+        position.col < 0 ||
+        position.col >= grid.cols) {
       return false;
     }
 
@@ -365,7 +378,7 @@ class PathfindingService {
     }
 
     // Orthogonal movement
-    return 1.0;
+    return 1;
   }
 
   /// Component-aware movement cost
@@ -375,7 +388,8 @@ class PathfindingService {
     // Add penalties for moving near certain components
     // Check if the target position has a component that affects routing
     final componentAtTarget = gameState.grid.components.values
-        .where((component) => component.row == to.row && component.col == to.col)
+        .where(
+            (component) => component.row == to.row && component.col == to.col)
         .firstOrNull;
 
     if (componentAtTarget != null) {
@@ -398,8 +412,10 @@ class PathfindingService {
     final neighbors = <GridPosition>[];
 
     final directions = [
-      GridPosition(row: 0, col: 1), GridPosition(row: 1, col: 0),
-      GridPosition(row: 0, col: -1), GridPosition(row: -1, col: 0),
+      const GridPosition(row: 0, col: 1),
+      const GridPosition(row: 1, col: 0),
+      const GridPosition(row: 0, col: -1),
+      const GridPosition(row: -1, col: 0),
     ];
 
     for (final dir in directions) {
@@ -409,7 +425,8 @@ class PathfindingService {
       );
 
       final componentAtNeighbor = gameState.grid.components.values
-          .where((component) => component.row == neighbor.row && component.col == neighbor.col)
+          .where((component) =>
+              component.row == neighbor.row && component.col == neighbor.col)
           .firstOrNull;
 
       if (componentAtNeighbor?.type == ComponentType.wire) {
@@ -445,7 +462,7 @@ class PathfindingService {
     gScore[start] = 0;
     fScore[start] = startNode.fCost;
 
-    int nodesExplored = 0;
+    var nodesExplored = 0;
 
     while (openSet.isNotEmpty && nodesExplored < maxNodes) {
       // Find node with lowest fCost
@@ -466,13 +483,16 @@ class PathfindingService {
 
       closedSet.add(current.position);
 
-      for (final neighbor in _getNeighbors(current.position, occupiedPositions, allowDiagonal: true)) {
+      for (final neighbor in _getNeighbors(current.position, occupiedPositions,
+          allowDiagonal: true)) {
         if (closedSet.contains(neighbor)) continue;
 
-        final movementCost = _componentAwareMovementCost(current.position, neighbor);
+        final movementCost =
+            _componentAwareMovementCost(current.position, neighbor);
         final tentativeGScore = current.gCost + movementCost;
 
-        if (!gScore.containsKey(neighbor) || tentativeGScore < gScore[neighbor]!) {
+        if (!gScore.containsKey(neighbor) ||
+            tentativeGScore < gScore[neighbor]!) {
           cameFrom[neighbor] = current;
           gScore[neighbor] = tentativeGScore;
 
@@ -498,8 +518,8 @@ class PathfindingService {
 
   /// Calculate total path cost
   double _calculatePathCost(List<GridPosition> path) {
-    double cost = 0.0;
-    for (int i = 1; i < path.length; i++) {
+    var cost = 0.0;
+    for (var i = 1; i < path.length; i++) {
       cost += _movementCost(path[i - 1], path[i]);
     }
     return cost;
@@ -526,8 +546,8 @@ class PathfindingService {
   void _precomputeHeuristics(GridPosition end) {
     final grid = gameState.grid;
 
-    for (int row = 0; row < grid.rows; row++) {
-      for (int col = 0; col < grid.cols; col++) {
+    for (var row = 0; row < grid.rows; row++) {
+      for (var col = 0; col < grid.cols; col++) {
         final position = GridPosition(row: row, col: col);
         _heuristic(position, end);
       }
@@ -538,8 +558,8 @@ class PathfindingService {
   void _precomputeNeighbors(Set<GridPosition>? occupiedPositions) {
     final grid = gameState.grid;
 
-    for (int row = 0; row < grid.rows; row++) {
-      for (int col = 0; col < grid.cols; col++) {
+    for (var row = 0; row < grid.rows; row++) {
+      for (var col = 0; col < grid.cols; col++) {
         final position = GridPosition(row: row, col: col);
         _getNeighbors(position, occupiedPositions);
       }

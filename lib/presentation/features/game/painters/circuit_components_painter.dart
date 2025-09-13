@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sparkcircuit/core/services/coordinate_service.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/features/game/painters/painter_factory.dart';
-import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart' as drawing_models;
-import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'package:sparkcircuit/core/services/coordinate_service.dart';
+import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart'
+    as drawing_models;
 
 class CircuitComponentsPainter extends CustomPainter {
   final List<CircuitComponent> components;
@@ -41,9 +42,9 @@ class CircuitComponentsPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CircuitComponentsPainter oldDelegate) {
     return oldDelegate.components != components ||
-            oldDelegate.wires != wires ||
-            oldDelegate.circuitColors != circuitColors ||
-            oldDelegate.selectedComponentId != selectedComponentId ||
-            oldDelegate.coordinateService != coordinateService;
+        oldDelegate.wires != wires ||
+        oldDelegate.circuitColors != circuitColors ||
+        oldDelegate.selectedComponentId != selectedComponentId ||
+        oldDelegate.coordinateService != coordinateService;
   }
 }

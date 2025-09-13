@@ -16,7 +16,7 @@ class CanvasDragPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final circuitColors = Theme.of(context).extension<CircuitColorScheme>() ??
-                         _getDefaultCircuitColors();
+        _getDefaultCircuitColors();
 
     return Positioned(
       left: position.dx - 25,

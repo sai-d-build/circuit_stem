@@ -22,7 +22,8 @@ class LoadingUtils {
       child: ShimmerLoading(
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
             borderRadius: borderRadius ?? BorderRadius.circular(8),
           ),
         ),
@@ -82,7 +83,10 @@ class LoadingUtils {
             child: ShimmerLoading(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -251,7 +255,8 @@ class SparkProgressIndicator extends StatelessWidget {
           height: 40,
           child: CircularProgressIndicator(
             value: value,
-            backgroundColor: backgroundColor ?? theme.colorScheme.surfaceContainerHighest,
+            backgroundColor:
+                backgroundColor ?? theme.colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(
               valueColor ?? theme.colorScheme.primary,
             ),

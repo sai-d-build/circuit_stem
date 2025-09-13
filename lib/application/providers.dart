@@ -1,37 +1,39 @@
 import 'dart:ui';
-import '../core/services/grid_service.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'game_engine_state.dart';
-import 'game_engine_notifier.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../application/providers/core_providers.dart'
+    show interactionStateProvider;
+import '../application/services/component_palette_manager.dart';
+import '../core/services/grid_service.dart';
 import '../infrastructure/audio/audio_service.dart';
 import '../infrastructure/persistence/level_manager.dart';
 import '../infrastructure/persistence/level_manager_state.dart';
-import 'animation_scheduler.dart';
 import '../infrastructure/rendering/asset_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'animation_scheduler.dart';
+import 'component_selection_notifier.dart'
+    show componentSelectionNotifierProvider;
+import 'game_engine/v3/providers_v3.dart' as v3_providers;
+import 'game_engine_notifier.dart';
+import 'game_engine_state.dart';
+import 'game_progress_notifier.dart' show gameProgressNotifierProvider;
 // Import missing providers
 import 'grid_notifier.dart' show gridNotifierProvider;
 import 'history_notifier.dart' show historyNotifierProvider;
-import 'game_progress_notifier.dart' show gameProgressNotifierProvider;
-import 'component_selection_notifier.dart' show componentSelectionNotifierProvider;
-import '../application/providers/core_providers.dart' show interactionStateProvider;
-import '../application/services/component_palette_manager.dart';
-
 // Import all provider definitions with prefixes to avoid conflicts
 import 'use_cases/providers.dart' as use_case_providers;
-import 'game_engine/v3/providers_v3.dart' as v3_providers;
 
 // Grid Service Provider
 final gridServiceProvider = Provider<GridService>((ref) => GridService());
 
 // Grid Configuration Providers
 final gridConfigurationProvider = Provider<GridConfiguration>((ref) {
-  return GridConfiguration(
+  return const GridConfiguration(
     rows: 10,
     cols: 15,
     cellSize: GridConstants.defaultCellSize,
-    scale: 1.0,
+    scale: 1,
     panOffset: Offset.zero,
   );
 });
@@ -53,9 +55,10 @@ final assetManagerNotifierProvider = Provider<AssetManagerNotifier>((ref) {
   return AssetManagerNotifier();
 });
 
-final levelManagerProvider = StateNotifierProvider<LevelManagerNotifier, LevelManagerState>((ref) {
-  final sharedPrefs = ref.watch(sharedPreferencesProvider);
-  final assetManager = ref.watch(assetManagerNotifierProvider);
+final levelManagerProvider =
+    StateNotifierProvider<LevelManagerNotifier, LevelManagerState>((ref) {
+  final sharedPrefs = ref.watch(sharedPreferencesProvider); // ignore: cascade_invocations
+  final assetManager = ref.watch(assetManagerNotifierProvider); // ignore: cascade_invocations
   final manager = LevelManagerNotifier(sharedPrefs, assetManager);
   manager.init(); // Initialize the manager
   return manager;
@@ -64,12 +67,13 @@ final levelManagerProvider = StateNotifierProvider<LevelManagerNotifier, LevelMa
 // Animation Scheduler Provider
 final animationSchedulerProvider = Provider<AnimationScheduler>((ref) {
   final manager = AnimationScheduler();
-  ref.onDispose(() => manager.dispose());
+  ref.onDispose(manager.dispose);
   return manager;
 });
 
 // Game Engine Provider
-final gameEngineNotifierProvider = StateNotifierProvider<GameEngineNotifier, GameEngineState>((ref) {
+final gameEngineNotifierProvider =
+    StateNotifierProvider<GameEngineNotifier, GameEngineState>((ref) {
   return GameEngineNotifier(
     audioService: ref.watch(audioServiceProvider),
     animationScheduler: ref.watch(animationSchedulerProvider),
@@ -77,8 +81,9 @@ final gameEngineNotifierProvider = StateNotifierProvider<GameEngineNotifier, Gam
     historyNotifier: ref.watch(historyNotifierProvider.notifier),
     progressNotifier: ref.watch(gameProgressNotifierProvider.notifier),
     selectionNotifier: ref.watch(componentSelectionNotifierProvider.notifier),
-    interactionNotifier: ref.watch(interactionStateProvider('default').notifier),
-    paletteManager: ComponentPaletteManager(availableTemplates: []),
+    interactionNotifier:
+        ref.watch(interactionStateProvider('default').notifier),
+    paletteManager: const ComponentPaletteManager(availableTemplates: []),
     loadLevelUseCase: ref.watch(loadLevelUseCaseProvider),
     createComponentUseCase: ref.watch(createComponentUseCaseProvider),
     rotateComponentUseCase: ref.watch(rotateComponentUseCaseProvider),
@@ -86,7 +91,8 @@ final gameEngineNotifierProvider = StateNotifierProvider<GameEngineNotifier, Gam
     tapComponentUseCase: ref.watch(tapComponentUseCaseProvider),
     updateComponentUseCase: ref.watch(updateComponentUseCaseProvider),
     restartLevelUseCase: ref.watch(restartLevelUseCaseProvider),
-    selectPaletteComponentUseCase: ref.watch(selectPaletteComponentUseCaseProvider),
+    selectPaletteComponentUseCase:
+        ref.watch(selectPaletteComponentUseCaseProvider),
     togglePauseUseCase: ref.watch(togglePauseUseCaseProvider),
     undoUseCase: ref.watch(undoUseCaseProvider),
   );
@@ -108,26 +114,40 @@ final storageServiceProvider = use_case_providers.storageServiceProvider;
 
 // MNA solver and simulation providers from use_cases
 final mnaSolverProvider = use_case_providers.mnaSolverProvider;
-final powerSimulationServiceProvider = use_case_providers.powerSimulationServiceProvider;
-final goalCheckingServiceProvider = use_case_providers.goalCheckingServiceProvider;
-final componentPaletteManagerProvider = use_case_providers.componentPaletteManagerProvider;
+final powerSimulationServiceProvider =
+    use_case_providers.powerSimulationServiceProvider;
+final goalCheckingServiceProvider =
+    use_case_providers.goalCheckingServiceProvider;
+final componentPaletteManagerProvider =
+    use_case_providers.componentPaletteManagerProvider;
 
 // Use case providers from use_cases
-final checkWinConditionUseCaseProvider = use_case_providers.checkWinConditionUseCaseProvider;
-final createComponentUseCaseProvider = use_case_providers.createComponentUseCaseProvider;
+final checkWinConditionUseCaseProvider =
+    use_case_providers.checkWinConditionUseCaseProvider;
+final createComponentUseCaseProvider =
+    use_case_providers.createComponentUseCaseProvider;
 final loadLevelUseCaseProvider = use_case_providers.loadLevelUseCaseProvider;
-final moveComponentUseCaseProvider = use_case_providers.moveComponentUseCaseProvider;
-final restartLevelUseCaseProvider = use_case_providers.restartLevelUseCaseProvider;
-final rotateComponentUseCaseProvider = use_case_providers.rotateComponentUseCaseProvider;
-final selectPaletteComponentUseCaseProvider = use_case_providers.selectPaletteComponentUseCaseProvider;
-final simulatePowerFlowUseCaseProvider = use_case_providers.simulatePowerFlowUseCaseProvider;
-final tapComponentUseCaseProvider = use_case_providers.tapComponentUseCaseProvider;
-final togglePauseUseCaseProvider = use_case_providers.togglePauseUseCaseProvider;
+final moveComponentUseCaseProvider =
+    use_case_providers.moveComponentUseCaseProvider;
+final restartLevelUseCaseProvider =
+    use_case_providers.restartLevelUseCaseProvider;
+final rotateComponentUseCaseProvider =
+    use_case_providers.rotateComponentUseCaseProvider;
+final selectPaletteComponentUseCaseProvider =
+    use_case_providers.selectPaletteComponentUseCaseProvider;
+final simulatePowerFlowUseCaseProvider =
+    use_case_providers.simulatePowerFlowUseCaseProvider;
+final tapComponentUseCaseProvider =
+    use_case_providers.tapComponentUseCaseProvider;
+final togglePauseUseCaseProvider =
+    use_case_providers.togglePauseUseCaseProvider;
 final undoUseCaseProvider = use_case_providers.undoUseCaseProvider;
-final updateComponentUseCaseProvider = use_case_providers.updateComponentUseCaseProvider;
+final updateComponentUseCaseProvider =
+    use_case_providers.updateComponentUseCaseProvider;
 
 // Game Engine V3 Providers - use specific names to avoid conflicts
-final enhancedGameStateNotifierProvider = v3_providers.enhancedGameStateNotifierProvider;
+final enhancedGameStateNotifierProvider =
+    v3_providers.enhancedGameStateNotifierProvider;
 final gameEngineNotifierV3Provider = v3_providers.gameEngineNotifierV3Provider;
 final paletteDragActiveProvider = v3_providers.paletteDragActiveProvider;
 final levelServiceProvider = v3_providers.levelServiceProvider;

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/providers/unified_providers.dart';
 import 'package:sparkcircuit/application/providers/core_providers.dart';
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
 import 'package:sparkcircuit/core/migration/migration_tracker.dart';
-import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
+import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/features/game/widgets/circuit_component_widget.dart';
 
 /// CanvasComponentLayer handles the rendering and interaction of circuit components.
@@ -20,7 +20,8 @@ class CanvasComponentLayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    MigrationTracker.markFileMigrated('canvas_component_layer.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated(
+        'canvas_component_layer.dart', DateTime.now().toIso8601String());
     final gameState = ref.watch(unifiedGameStateProvider);
     final canvasState = ref.watch(gameCanvasOrchestratorProvider(levelId));
     final viewportState = canvasState.viewportState;
@@ -37,7 +38,8 @@ class CanvasComponentLayer extends ConsumerWidget {
     return Stack(
       children: gameState.grid.components.values.map((component) {
         // Calculate screen position for the component
-        final screenPos = ComponentRenderingUtils.getComponentScreenPosition(component, unifiedGridConfig);
+        final screenPos = ComponentRenderingUtils.getComponentScreenPosition(
+            component, unifiedGridConfig);
 
         return Positioned(
           left: screenPos.dx - 30, // Center the 60x60 component
@@ -55,7 +57,8 @@ class CanvasComponentLayer extends ConsumerWidget {
 /// Component rendering utilities
 class ComponentRenderingUtils {
   /// Get the screen position for a component
-  static Offset getComponentScreenPosition(ComponentModel component, GridConfiguration gridConfig) {
+  static Offset getComponentScreenPosition(
+      ComponentModel component, GridConfiguration gridConfig) {
     return GridService.gridToScreen(
       Offset(component.col.toDouble() + 0.5, component.row.toDouble() + 0.5),
       gridConfig,
@@ -63,7 +66,8 @@ class ComponentRenderingUtils {
   }
 
   /// Get the bounds of a component in screen coordinates
-  static Rect getComponentBounds(ComponentModel component, GridConfiguration gridConfig, Size componentSize) {
+  static Rect getComponentBounds(ComponentModel component,
+      GridConfiguration gridConfig, Size componentSize) {
     final screenPos = getComponentScreenPosition(component, gridConfig);
     final scaledSize = Size(
       componentSize.width * gridConfig.scale,
@@ -78,7 +82,8 @@ class ComponentRenderingUtils {
   }
 
   /// Check if a component is currently selected
-  static bool isComponentSelected(ComponentModel component, String? selectedComponentId) {
+  static bool isComponentSelected(
+      ComponentModel component, String? selectedComponentId) {
     return component.id == selectedComponentId;
   }
 

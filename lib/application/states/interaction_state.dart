@@ -30,8 +30,10 @@ class InteractionState {
     return InteractionState(
       selectedComponentId: selectedComponentId ?? this.selectedComponentId,
       draggedComponentId: draggedComponentId ?? this.draggedComponentId,
-      dragStartLocalPosition: dragStartLocalPosition ?? this.dragStartLocalPosition,
-      dragUpdateLocalPosition: dragUpdateLocalPosition ?? this.dragUpdateLocalPosition,
+      dragStartLocalPosition:
+          dragStartLocalPosition ?? this.dragStartLocalPosition,
+      dragUpdateLocalPosition:
+          dragUpdateLocalPosition ?? this.dragUpdateLocalPosition,
       isDragging: isDragging ?? this.isDragging,
     );
   }

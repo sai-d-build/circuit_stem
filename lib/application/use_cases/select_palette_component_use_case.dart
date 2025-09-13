@@ -3,11 +3,13 @@ import '../transaction.dart';
 import 'component_action.dart';
 import 'notifier_integrated_use_case.dart';
 
-class SelectPaletteComponentUseCase extends NotifierIntegratedUseCase<SelectPaletteComponentAction> {
+class SelectPaletteComponentUseCase
+    extends NotifierIntegratedUseCase<SelectPaletteComponentAction> {
   const SelectPaletteComponentUseCase();
 
   @override
-  Result<void> validate(SelectPaletteComponentAction action, NotifierContext notifiers) {
+  Result<void> validate(
+      SelectPaletteComponentAction action, NotifierContext notifiers) {
     if (action.componentId.isEmpty) {
       return const Failure('Component ID cannot be empty');
     }

@@ -1,22 +1,27 @@
-import 'circuit_component.dart';
 import '../core/component.dart';
+import 'circuit_component.dart';
 
 /// Battery component that provides power to a circuit
 class Battery extends CircuitComponent {
   /// Voltage output in volts
-  double get voltage => getProperty<double>('voltage', 9.0);
+  double get voltage => getProperty<double>('voltage', 9);
   set voltage(double value) => setProperty('voltage', value);
 
   /// Internal resistance in ohms
-  double get internalResistance => getProperty<double>('internalResistance', 0.1);
-  set internalResistance(double value) => setProperty('internalResistance', value);
+  double get internalResistance =>
+      getProperty<double>('internalResistance', 0.1);
+  set internalResistance(double value) =>
+      setProperty('internalResistance', value);
+
+  @override
+  double get resistance => internalResistance;
 
   /// Battery capacity in ampere-hours
-  double get capacity => getProperty<double>('capacity', 100.0);
+  double get capacity => getProperty<double>('capacity', 100);
   set capacity(double value) => setProperty('capacity', value);
 
   /// Current charge level (0.0 to 1.0)
-  double get chargeLevel => getProperty<double>('chargeLevel', 1.0);
+  double get chargeLevel => getProperty<double>('chargeLevel', 1);
   set chargeLevel(double value) => setProperty('chargeLevel', value);
 
   Battery({

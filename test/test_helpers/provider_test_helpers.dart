@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/providers/scoped_providers.dart';
+import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart'
+    as providers_v3;
 import 'package:sparkcircuit/application/providers/core_providers.dart';
+import 'package:sparkcircuit/application/providers/scoped_providers.dart';
 import 'package:sparkcircuit/core/services/game_state_reader.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
-import 'package:sparkcircuit/presentation/features/game/services/viewport_service.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/canvas_interaction_controller.dart';
+import 'package:sparkcircuit/presentation/features/game/services/viewport_service.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
 
 /// Mock classes for testing
@@ -85,43 +86,47 @@ class TestProviderFactory {
 /// Test-specific overrides for different scenarios
 class GameCanvasTestOverrides {
   static List<Override> basicOverrides() => [
-    providers_v3.storageServiceProvider.overrideWith((ref) => MockStorageService() as dynamic),
-    providers_v3.levelServiceProvider.overrideWith((ref) => MockLevelService() as dynamic),
-    ...TestScopedProviders.getOverrides(
-      gameStateReader: TestGameStateReader(),
-      storageService: MockStorageService(),
-      levelService: MockLevelService(),
-    ),
-  ];
+        providers_v3.storageServiceProvider
+            .overrideWith((ref) => MockStorageService() as dynamic),
+        providers_v3.levelServiceProvider
+            .overrideWith((ref) => MockLevelService() as dynamic),
+        ...TestScopedProviders.getOverrides(
+          gameStateReader: TestGameStateReader(),
+          storageService: MockStorageService(),
+          levelService: MockLevelService(),
+        ),
+      ];
 
   static List<Override> fullGameCanvasOverrides() => [
-    ...basicOverrides(),
-    viewportServiceProvider.overrideWith(
-      (ref, levelId) => ViewportService(initialState: const ViewportState()),
-    ),
-    interactionStateProvider.overrideWith(
-      (ref, levelId) => InteractionStateNotifier(
-        ref: ref as dynamic,
-        levelId: levelId,
-      ),
-    ),
-    paletteStateProvider.overrideWith(
-      (ref, levelId) => MockGameEngineNotifierV3() as dynamic,
-    ),
-  ];
+        ...basicOverrides(),
+        viewportServiceProvider.overrideWith(
+          (ref, levelId) =>
+              ViewportService(initialState: const ViewportState()),
+        ),
+        interactionStateProvider.overrideWith(
+          (ref, levelId) => InteractionStateNotifier(
+            ref: ref as dynamic,
+            levelId: levelId,
+          ),
+        ),
+        paletteStateProvider.overrideWith(
+          (ref, levelId) => MockGameEngineNotifierV3() as dynamic,
+        ),
+      ];
 
   static List<Override> integrationTestOverrides() => [
-    // Use more realistic mocks for integration tests
-    providers_v3.storageServiceProvider.overrideWith((ref) => MockStorageService() as dynamic),
-    providers_v3.enhancedGameStateNotifierProvider.overrideWith(
-      (ref) => MockGameEngineNotifierV3() as dynamic,
-    ),
-    ...TestScopedProviders.getOverrides(
-      gameStateReader: TestGameStateReader(),
-      storageService: MockStorageService(),
-      levelService: MockLevelService(),
-    ),
-  ];
+        // Use more realistic mocks for integration tests
+        providers_v3.storageServiceProvider
+            .overrideWith((ref) => MockStorageService() as dynamic),
+        providers_v3.enhancedGameStateNotifierProvider.overrideWith(
+          (ref) => MockGameEngineNotifierV3() as dynamic,
+        ),
+        ...TestScopedProviders.getOverrides(
+          gameStateReader: TestGameStateReader(),
+          storageService: MockStorageService(),
+          levelService: MockLevelService(),
+        ),
+      ];
 }
 
 /// Helper class for creating test scenarios

@@ -5,7 +5,8 @@ import '../entities/core/component.dart';
 import '../entities/core/grid.dart';
 
 abstract class MoveBehavior {
-  ComponentModel? handle(ComponentModel component, String action, dynamic context);
+  ComponentModel? handle(
+      ComponentModel component, String action, dynamic context);
   bool canMove(ComponentModel component, int newRow, int newCol, Grid grid);
   String get behaviorType;
 }
@@ -13,7 +14,8 @@ abstract class MoveBehavior {
 // Base implementation of move behavior
 class BaseMoveBehavior implements MoveBehavior {
   @override
-  ComponentModel? handle(ComponentModel component, String action, dynamic context) {
+  ComponentModel? handle(
+      ComponentModel component, String action, dynamic context) {
     // Base implementation - override in subclasses
     return component;
   }
@@ -30,7 +32,8 @@ class BaseMoveBehavior implements MoveBehavior {
 // Standard move behavior for most components
 class StandardMoveBehavior extends BaseMoveBehavior {
   @override
-  ComponentModel? handle(ComponentModel component, String action, dynamic context) {
+  ComponentModel? handle(
+      ComponentModel component, String action, dynamic context) {
     if (action != 'move' || context is! GameContext) {
       return component;
     }

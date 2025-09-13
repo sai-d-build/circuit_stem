@@ -1,8 +1,8 @@
 // test/conditional_debug_logging_test.dart
 // Test suite for conditional debug logging system
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_test/flutter_test.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 class _TestStructuredLogger {
@@ -56,11 +56,18 @@ void main() {
       // Test runtime flag setting
       StructuredLogger.setRuntimeFlag('testFlag', true);
       expect(StructuredLogger.getRuntimeFlag('testFlag'), true);
-      expect(StructuredLogger.getRuntimeFlag('testFlag', defaultValue: false), true);
+      expect(StructuredLogger.getRuntimeFlag('testFlag', defaultValue: false),
+          true);
 
       // Test fallback to default
-      expect(StructuredLogger.getRuntimeFlag('nonExistentFlag', defaultValue: false), false);
-      expect(StructuredLogger.getRuntimeFlag('nonExistentFlag', defaultValue: true), true);
+      expect(
+          StructuredLogger.getRuntimeFlag('nonExistentFlag',
+              defaultValue: false),
+          false);
+      expect(
+          StructuredLogger.getRuntimeFlag('nonExistentFlag',
+              defaultValue: true),
+          true);
     });
 
     test('hasAnyDebugEnabled performance optimization', () {
@@ -78,21 +85,24 @@ void main() {
 
     test('Module-specific logging methods work conditionally', () {
       // Test services logging
-      StructuredLogger.services('Test services operation', context: {'operation': 'test'});
+      StructuredLogger.services('Test services operation',
+          context: {'operation': 'test'});
       // Should log if debugServices is enabled
 
       // Test critical logging (always enabled)
-      StructuredLogger.critical('Test critical issue', context: {'severity': 'high'});
+      StructuredLogger.critical('Test critical issue',
+          context: {'severity': 'high'});
       // Should always log regardless of critical flag
     });
 
     test('Log optimization prevents expensive operations when disabled', () {
-      int expensiveOperationCount = 0;
+      var expensiveOperationCount = 0;
 
       void expensiveLoadOperation() {
         expensiveOperationCount++;
         // Simulate expensive string building
-        List.generate(1000, (i) => i).fold<String>('', (prev, i) => prev + i.toString());
+        List.generate(1000, (i) => i)
+            .fold<String>('', (prev, i) => prev + i.toString());
         // Don't return anything, just perform expensive operation
       }
 
@@ -118,7 +128,8 @@ void main() {
       }
     });
 
-    test('Web-specific debug flags are automatically enabled in web builds', () {
+    test('Web-specific debug flags are automatically enabled in web builds',
+        () {
       if (kIsWeb) {
         // In web builds, web debug should default to true
         expect(StructuredLogger.debugWeb, true);
@@ -133,7 +144,8 @@ void main() {
       StructuredLogger.setRuntimeFlag('disableAll', true);
 
       // Critical issues should always be logged
-      StructuredLogger.critical('System critical error', context: {'requiresAttention': true});
+      StructuredLogger.critical('System critical error',
+          context: {'requiresAttention': true});
 
       // Other debug logging might be disabled but critical remains
       expect(StructuredLogger.debugCritical, true);

@@ -60,7 +60,8 @@ void main() {
         final result = sanitizationService.sanitizeDragData(dragData);
 
         expect(result.isValid, isTrue);
-        expect(result.sanitizedData!['componentName'], equals('scriptalert("xss")/scriptResistor'));
+        expect(result.sanitizedData!['componentName'],
+            equals('scriptalert("xss")/scriptResistor'));
       });
 
       test('handles null drag data', () {
@@ -99,10 +100,14 @@ void main() {
         final result = sanitizationService.sanitizeDragData(dragData);
 
         expect(result.isValid, isTrue);
-        expect(result.sanitizedData!['properties']['inductance'], equals(0.001));
-        expect(result.sanitizedData!['properties']['currentRating'], equals(1.0));
-        expect(result.sanitizedData!['properties']['invalidProp'], isNull); // NaN removed
-        expect(result.sanitizedData!['properties']['dangerousString'], equals('dangerouscontent/dangerous')); // Sanitized
+        expect(
+            result.sanitizedData!['properties']['inductance'], equals(0.001));
+        expect(
+            result.sanitizedData!['properties']['currentRating'], equals(1.0));
+        expect(result.sanitizedData!['properties']['invalidProp'],
+            isNull); // NaN removed
+        expect(result.sanitizedData!['properties']['dangerousString'],
+            equals('dangerouscontent/dangerous')); // Sanitized
       });
     });
 
@@ -113,7 +118,7 @@ void main() {
       });
 
       test('adds and removes occupied positions', () {
-        final position = Offset(2, 3);
+        const position = Offset(2, 3);
 
         gridManager.addOccupiedPosition(position);
         expect(gridManager.isPositionOccupied(position), isTrue);
@@ -127,26 +132,27 @@ void main() {
       });
 
       test('validates component placement', () {
-        final position = Offset(2, 3);
+        const position = Offset(2, 3);
 
         expect(gridManager.canPlaceComponent(position), isTrue);
 
         gridManager.addOccupiedPosition(position);
         expect(gridManager.canPlaceComponent(position), isFalse);
-        expect(gridManager.canPlaceComponent(position, width: 2, height: 1), isFalse); // Overlaps
+        expect(gridManager.canPlaceComponent(position, width: 2, height: 1),
+            isFalse); // Overlaps
       });
 
       test('places and removes components', () {
-        final position = Offset(2, 3);
+        const position = Offset(2, 3);
 
         gridManager.placeComponent(position, width: 2, height: 2);
         expect(gridManager.occupiedCount, equals(4)); // 2x2 = 4 positions
 
         // Check all positions are occupied
-        expect(gridManager.isPositionOccupied(Offset(2, 3)), isTrue);
-        expect(gridManager.isPositionOccupied(Offset(3, 3)), isTrue);
-        expect(gridManager.isPositionOccupied(Offset(2, 4)), isTrue);
-        expect(gridManager.isPositionOccupied(Offset(3, 4)), isTrue);
+        expect(gridManager.isPositionOccupied(const Offset(2, 3)), isTrue);
+        expect(gridManager.isPositionOccupied(const Offset(3, 3)), isTrue);
+        expect(gridManager.isPositionOccupied(const Offset(2, 4)), isTrue);
+        expect(gridManager.isPositionOccupied(const Offset(3, 4)), isTrue);
 
         gridManager.removeComponent(position, width: 2, height: 2);
         expect(gridManager.occupiedCount, equals(0));
@@ -154,32 +160,35 @@ void main() {
 
       test('respects grid bounds', () {
         // Position outside bounds
-        final outOfBounds = Offset(15, 15);
+        const outOfBounds = Offset(15, 15);
         expect(gridManager.isWithinBounds(outOfBounds), isFalse);
         expect(gridManager.canPlaceComponent(outOfBounds), isFalse);
 
         // Position within bounds
-        final inBounds = Offset(5, 5);
+        const inBounds = Offset(5, 5);
         expect(gridManager.isWithinBounds(inBounds), isTrue);
         expect(gridManager.canPlaceComponent(inBounds), isTrue);
       });
 
       test('finds nearest free position', () {
         // Occupy center position
-        gridManager.addOccupiedPosition(Offset(5, 5));
+        gridManager.addOccupiedPosition(const Offset(5, 5));
 
         // Find nearest free position
-        final nearest = gridManager.findNearestFreePosition(Offset(5, 5));
+        final nearest = gridManager.findNearestFreePosition(const Offset(5, 5));
 
         expect(nearest, isNotNull);
-        expect(nearest, isNot(equals(Offset(5, 5)))); // Should not return occupied position
+        expect(
+            nearest,
+            isNot(equals(
+                const Offset(5, 5)))); // Should not return occupied position
         expect(gridManager.isWithinBounds(nearest!), isTrue);
-        expect(gridManager.canPlaceComponent(nearest!), isTrue);
+        expect(gridManager.canPlaceComponent(nearest), isTrue);
       });
 
       test('provides grid statistics', () {
-        gridManager.addOccupiedPosition(Offset(0, 0));
-        gridManager.addOccupiedPosition(Offset(1, 1));
+        gridManager.addOccupiedPosition(const Offset(0, 0));
+        gridManager.addOccupiedPosition(const Offset(1, 1));
 
         final stats = gridManager.getStatistics();
 
@@ -193,9 +202,9 @@ void main() {
 
       test('handles bulk operations', () {
         final positions = [
-          Offset(0, 0),
-          Offset(1, 1),
-          Offset(2, 2),
+          const Offset(0, 0),
+          const Offset(1, 1),
+          const Offset(2, 2),
         ];
 
         gridManager.bulkUpdateOccupiedPositions(positions, true);
@@ -206,40 +215,42 @@ void main() {
       });
 
       test('validates multiple positions', () {
-        gridManager.addOccupiedPosition(Offset(1, 1));
+        gridManager.addOccupiedPosition(const Offset(1, 1));
 
         final positions = [
-          Offset(0, 0), // Free
-          Offset(1, 1), // Occupied
-          Offset(2, 2), // Free
+          const Offset(0, 0), // Free
+          const Offset(1, 1), // Occupied
+          const Offset(2, 2), // Free
         ];
 
         final results = gridManager.validatePositions(positions);
 
-        expect(results[0], isTrue);  // (0,0) is free
+        expect(results[0], isTrue); // (0,0) is free
         expect(results[1], isFalse); // (1,1) is occupied
-        expect(results[2], isTrue);  // (2,2) is free
+        expect(results[2], isTrue); // (2,2) is free
       });
     });
 
     group('Gesture Validation', () {
       test('validates drag gestures', () {
         final gestureData = {
-          'startPosition': Offset(100, 100),
-          'currentPosition': Offset(150, 150),
+          'startPosition': const Offset(100, 100),
+          'currentPosition': const Offset(150, 150),
         };
 
         final result = sanitizationService.validateGesture('drag', gestureData);
 
         expect(result.isValid, isTrue);
-        expect(result.sanitizedData!['startPosition'], equals(Offset(100, 100)));
-        expect(result.sanitizedData!['currentPosition'], equals(Offset(150, 150)));
+        expect(result.sanitizedData!['startPosition'],
+            equals(const Offset(100, 100)));
+        expect(result.sanitizedData!['currentPosition'],
+            equals(const Offset(150, 150)));
       });
 
       test('rejects invalid drag gestures', () {
         final gestureData = {
           'startPosition': 'invalid',
-          'currentPosition': Offset(150, 150),
+          'currentPosition': const Offset(150, 150),
         };
 
         final result = sanitizationService.validateGesture('drag', gestureData);
@@ -250,13 +261,13 @@ void main() {
 
       test('validates pan gestures', () {
         final gestureData = {
-          'delta': Offset(50, 30),
+          'delta': const Offset(50, 30),
         };
 
         final result = sanitizationService.validateGesture('pan', gestureData);
 
         expect(result.isValid, isTrue);
-        expect(result.sanitizedData!['delta'], equals(Offset(50, 30)));
+        expect(result.sanitizedData!['delta'], equals(const Offset(50, 30)));
       });
 
       test('validates scale gestures', () {
@@ -264,7 +275,8 @@ void main() {
           'scale': 1.5,
         };
 
-        final result = sanitizationService.validateGesture('scale', gestureData);
+        final result =
+            sanitizationService.validateGesture('scale', gestureData);
 
         expect(result.isValid, isTrue);
         expect(result.sanitizedData!['scale'], equals(1.5));
@@ -272,7 +284,7 @@ void main() {
 
       test('rejects excessive pan deltas', () {
         final gestureData = {
-          'delta': Offset(5000, 5000), // Too large
+          'delta': const Offset(5000, 5000), // Too large
         };
 
         final result = sanitizationService.validateGesture('pan', gestureData);
@@ -286,7 +298,8 @@ void main() {
           'scale': 25.0, // Too large
         };
 
-        final result = sanitizationService.validateGesture('scale', gestureData);
+        final result =
+            sanitizationService.validateGesture('scale', gestureData);
 
         expect(result.isValid, isTrue);
         expect(result.sanitizedData!['scale'], equals(10.0)); // Clamped
@@ -296,15 +309,16 @@ void main() {
     group('Performance Tests', () {
       test('grid manager performs well with many operations', () {
         // Add many positions
-        for (int i = 0; i < 50; i++) {
-          gridManager.addOccupiedPosition(Offset((i % 10).toDouble(), (i ~/ 10).toDouble()));
+        for (var i = 0; i < 50; i++) {
+          gridManager.addOccupiedPosition(
+              Offset((i % 10).toDouble(), (i ~/ 10).toDouble()));
         }
 
         expect(gridManager.occupiedCount, equals(50));
 
         // Performance test: many occupancy checks
         final startTime = DateTime.now();
-        for (int i = 0; i < 1000; i++) {
+        for (var i = 0; i < 1000; i++) {
           final x = i % 10;
           final y = (i ~/ 10) % 10;
           gridManager.isPositionOccupied(Offset(x.toDouble(), y.toDouble()));
@@ -339,7 +353,8 @@ void main() {
         final duration1 = endTime1.difference(startTime1);
         final duration2 = endTime2.difference(startTime2);
 
-        expect(duration2.inMicroseconds, lessThanOrEqualTo(duration1.inMicroseconds));
+        expect(duration2.inMicroseconds,
+            lessThanOrEqualTo(duration1.inMicroseconds));
       });
     });
 
@@ -357,15 +372,16 @@ void main() {
 
         // 2. Validate gesture
         final gestureData = {
-          'startPosition': Offset(100, 100),
-          'currentPosition': Offset(250, 300), // Grid position (5,6)
+          'startPosition': const Offset(100, 100),
+          'currentPosition': const Offset(250, 300), // Grid position (5,6)
         };
 
-        final gestureResult = sanitizationService.validateGesture('drag', gestureData);
+        final gestureResult =
+            sanitizationService.validateGesture('drag', gestureData);
         expect(gestureResult.isValid, isTrue);
 
         // 3. Check grid placement
-        final targetPosition = Offset(5, 6);
+        const targetPosition = Offset(5, 6);
         expect(gridManager.canPlaceComponent(targetPosition), isTrue);
 
         // 4. Place component
@@ -389,12 +405,12 @@ void main() {
         expect(result.isValid, isFalse);
 
         // Test with out-of-bounds position
-        final outOfBoundsPos = Offset(20, 20);
+        const outOfBoundsPos = Offset(20, 20);
         expect(gridManager.canPlaceComponent(outOfBoundsPos), isFalse);
 
         // Test with occupied position
-        gridManager.addOccupiedPosition(Offset(1, 1));
-        expect(gridManager.canPlaceComponent(Offset(1, 1)), isFalse);
+        gridManager.addOccupiedPosition(const Offset(1, 1));
+        expect(gridManager.canPlaceComponent(const Offset(1, 1)), isFalse);
       });
     });
   });

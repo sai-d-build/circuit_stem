@@ -30,7 +30,8 @@ class ComponentSelectionState {
 }
 
 /// Notifier for managing component selection state
-class ComponentSelectionNotifier extends StateNotifier<ComponentSelectionState> {
+class ComponentSelectionNotifier
+    extends StateNotifier<ComponentSelectionState> {
   ComponentSelectionNotifier() : super(const ComponentSelectionState());
 
   /// Select a component from the grid
@@ -57,7 +58,8 @@ class ComponentSelectionNotifier extends StateNotifier<ComponentSelectionState> 
   void startDragging() {
     if (state.hasSelection) {
       state = state.copyWith(isDragging: true);
-      Logger.log('ComponentSelection: Started dragging ${state.selectedComponentId}');
+      Logger.log(
+          'ComponentSelection: Started dragging ${state.selectedComponentId}');
     }
   }
 
@@ -107,6 +109,8 @@ class ComponentSelectionNotifier extends StateNotifier<ComponentSelectionState> 
 }
 
 // Provider for ComponentSelectionNotifier
-final componentSelectionNotifierProvider = StateNotifierProvider<ComponentSelectionNotifier, ComponentSelectionState>((ref) {
+final componentSelectionNotifierProvider =
+    StateNotifierProvider<ComponentSelectionNotifier, ComponentSelectionState>(
+        (ref) {
   return ComponentSelectionNotifier();
 });

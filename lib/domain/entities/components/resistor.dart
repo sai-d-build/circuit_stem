@@ -1,10 +1,11 @@
-import 'circuit_component.dart';
 import '../core/component.dart';
+import 'circuit_component.dart';
 
 /// Resistor component that limits current flow in a circuit
 class Resistor extends CircuitComponent {
   /// Resistance value in ohms
-  double get resistance => getProperty<double>('resistance', 1000.0);
+  @override
+  double get resistance => getProperty<double>('resistance', 1000);
   set resistance(double value) => setProperty('resistance', value);
 
   Resistor({
@@ -79,15 +80,4 @@ class Resistor extends CircuitComponent {
 
   @override
   List<String> get requiredConnections => ['a', 'b'];
-
-  /// Calculate current through resistor given voltage
-  double calculateCurrent(double voltage) {
-    return voltage / resistance;
-  }
-
-  /// Calculate power dissipation
-  double calculatePower(double voltage) {
-    final current = calculateCurrent(voltage);
-    return voltage * current;
-  }
 }

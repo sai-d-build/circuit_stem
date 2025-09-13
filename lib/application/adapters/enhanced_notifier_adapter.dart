@@ -1,15 +1,16 @@
-import 'package:sparkcircuit/core/interfaces/game_state_notifier_interface.dart';
 import 'package:sparkcircuit/application/enhanced_game_state_notifier.dart';
 import 'package:sparkcircuit/application/states/game_state.dart' as enhanced;
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/interfaces/game_state_notifier_interface.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:uuid/uuid.dart';
 
 /// Adapter for EnhancedGameStateNotifier to implement IGameStateNotifier
 class EnhancedNotifierAdapter extends IGameStateNotifier {
   final EnhancedGameStateNotifier _enhanced;
 
-  EnhancedNotifierAdapter(this._enhanced) : super(enhanced.GameState.initial(null)); // Initialize with empty state
+  EnhancedNotifierAdapter(this._enhanced)
+      : super(enhanced.GameState.initial(null)); // Initialize with empty state
 
   @override
   ComponentModel placeComponent(ComponentType type, int row, int col) {
@@ -24,21 +25,25 @@ class EnhancedNotifierAdapter extends IGameStateNotifier {
 
     // Update adapter's state immediately for UI consistency
     final currentState = state;
-    final updatedComponents = Map<String, ComponentModel>.from(currentState.grid.components);
+    final updatedComponents =
+        Map<String, ComponentModel>.from(currentState.grid.components);
     updatedComponents[component.id] = component;
 
-    final updatedGrid = currentState.grid.copyWith(components: updatedComponents);
+    final updatedGrid =
+        currentState.grid.copyWith(components: updatedComponents);
     state = currentState.copyWith(
       grid: updatedGrid,
       lastUpdated: DateTime.now(),
     );
 
-    StructuredLogger.debug('EnhancedNotifierAdapter: State updated with new component', context: {
-      'componentId': component.id,
-      'componentType': component.type.toString(),
-      'position': {'row': row, 'col': col},
-      'totalComponents': updatedComponents.length,
-    });
+    StructuredLogger.debug(
+        'EnhancedNotifierAdapter: State updated with new component',
+        context: {
+          'componentId': component.id,
+          'componentType': component.type.toString(),
+          'position': {'row': row, 'col': col},
+          'totalComponents': updatedComponents.length,
+        });
 
     // Queue async operation to sync with enhanced notifier
     _enhanced.placeComponent(type, row, col).catchError((error) {
@@ -63,21 +68,25 @@ class EnhancedNotifierAdapter extends IGameStateNotifier {
     );
 
     final currentState = state;
-    final updatedComponents = Map<String, ComponentModel>.from(currentState.grid.components);
+    final updatedComponents =
+        Map<String, ComponentModel>.from(currentState.grid.components);
     updatedComponents[component.id] = component;
 
-    final updatedGrid = currentState.grid.copyWith(components: updatedComponents);
+    final updatedGrid =
+        currentState.grid.copyWith(components: updatedComponents);
     state = currentState.copyWith(
       grid: updatedGrid,
       lastUpdated: DateTime.now(),
     );
 
-    StructuredLogger.debug('EnhancedNotifierAdapter: Async state updated with new component', context: {
-      'componentId': component.id,
-      'componentType': component.type.toString(),
-      'position': {'row': row, 'col': col},
-      'totalComponents': updatedComponents.length,
-    });
+    StructuredLogger.debug(
+        'EnhancedNotifierAdapter: Async state updated with new component',
+        context: {
+          'componentId': component.id,
+          'componentType': component.type.toString(),
+          'position': {'row': row, 'col': col},
+          'totalComponents': updatedComponents.length,
+        });
 
     // Wait for enhanced notifier to complete
     await _enhanced.placeComponent(type, row, col);
@@ -92,41 +101,47 @@ class EnhancedNotifierAdapter extends IGameStateNotifier {
   // Delegate other methods to enhanced notifier
   @override
   void selectComponent(String? componentId) =>
-    _enhanced.selectComponent(componentId);
+      _enhanced.selectComponent(componentId);
 
   @override
   void removeComponent(String componentId) {
     // Enhanced notifier uses command pattern for removal
     // Find component and remove it from state
     final currentState = _enhanced.state;
-    final updatedComponents = Map<String, ComponentModel>.from(currentState.grid.components);
-    updatedComponents.remove(componentId);
+    final updatedComponents =
+        Map<String, ComponentModel>.from(currentState.grid.components);
+    updatedComponents.remove(componentId); // ignore: cascade_invocations
 
     // Update state through enhanced notifier's methods
-    StructuredLogger.info('Component removed via EnhancedNotifierAdapter', context: {
-      'componentId': componentId,
-      'remainingComponents': updatedComponents.length,
-    });
+    StructuredLogger.info('Component removed via EnhancedNotifierAdapter',
+        context: {
+          'componentId': componentId,
+          'remainingComponents': updatedComponents.length,
+        });
   }
 
   @override
   void moveComponent(String componentId, int newRow, int newCol) =>
-    _enhanced.moveComponent(componentId, newRow, newCol);
+      _enhanced.moveComponent(componentId, newRow, newCol);
 
   @override
   void rotateComponent(String componentId) =>
-    _enhanced.rotateComponent(componentId);
+      _enhanced.rotateComponent(componentId);
 
   @override
   void loadLevel(LevelDefinition level) {
     // Enhanced notifier uses command pattern for level loading
     // Update the game state with the level's grid dimensions
-    StructuredLogger.info('loadLevel called on EnhancedNotifierAdapter', context: {
-      'levelId': level.levelId,
-      'title': level.metadata.title,
-      'componentCount': level.components.available.length,
-      'gridDimensions': {'width': level.grid.width, 'height': level.grid.height},
-    });
+    StructuredLogger.info('loadLevel called on EnhancedNotifierAdapter',
+        context: {
+          'levelId': level.levelId,
+          'title': level.metadata.title,
+          'componentCount': level.components.available.length,
+          'gridDimensions': {
+            'width': level.grid.width,
+            'height': level.grid.height
+          },
+        });
 
     // Update the enhanced notifier's state with the level's grid dimensions
     final currentState = _enhanced.state;
@@ -142,10 +157,15 @@ class EnhancedNotifierAdapter extends IGameStateNotifier {
       lastUpdated: DateTime.now(),
     );
 
-    StructuredLogger.info('EnhancedNotifierAdapter: Grid state updated with level dimensions', context: {
-      'levelId': level.levelId,
-      'newGridDimensions': {'rows': level.grid.height, 'cols': level.grid.width},
-    });
+    StructuredLogger.info(
+        'EnhancedNotifierAdapter: Grid state updated with level dimensions',
+        context: {
+          'levelId': level.levelId,
+          'newGridDimensions': {
+            'rows': level.grid.height,
+            'cols': level.grid.width
+          },
+        });
   }
 
   @override
@@ -158,10 +178,11 @@ class EnhancedNotifierAdapter extends IGameStateNotifier {
     final currentState = _enhanced.state;
     final newPausedState = !currentState.isPaused;
 
-    StructuredLogger.info('togglePause called on EnhancedNotifierAdapter', context: {
-      'currentPausedState': currentState.isPaused,
-      'newPausedState': newPausedState,
-    });
+    StructuredLogger.info('togglePause called on EnhancedNotifierAdapter',
+        context: {
+          'currentPausedState': currentState.isPaused,
+          'newPausedState': newPausedState,
+        });
 
     // The actual toggling would be handled by the use case layer
     // For now, we'll log the call and let the use case handle it

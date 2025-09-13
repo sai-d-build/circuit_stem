@@ -35,7 +35,8 @@ class _CoachMarkState extends State<CoachMark>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _fadeAnimation =
+        CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
 
     if (widget.isVisible) {
       _controller.forward();

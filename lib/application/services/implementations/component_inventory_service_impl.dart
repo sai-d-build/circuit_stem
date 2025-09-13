@@ -1,9 +1,10 @@
 // lib/application/services/implementations/component_inventory_service_impl.dart
 // Implementation of ComponentInventoryService extracted from PaletteState
 
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
+
 import '../interfaces/component_inventory_service.dart';
 
 /// Default implementation of ComponentInventoryService
@@ -23,11 +24,8 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
     if (!canUse) {
       // Get inventory through public methods instead of accessing state directly
       final inventory = _getInventoryForType(componentTypeString);
-      return InventoryCheckResult.unavailable(
-        inventory?.available ?? 0,
-        inventory?.total ?? 0,
-        'Component not available in inventory'
-      );
+      return InventoryCheckResult.unavailable(inventory?.available ?? 0,
+          inventory?.total ?? 0, 'Component not available in inventory');
     }
 
     final inventory = _getInventoryForType(componentTypeString);
@@ -72,13 +70,15 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
   }
 
   @override
-  Future<InventoryConsumptionResult> consumeComponent(ComponentType type) async {
+  Future<InventoryConsumptionResult> consumeComponent(
+      ComponentType type) async {
     final componentTypeString = _componentTypeToString(type);
 
     try {
       final canUse = _paletteStateNotifier.canUseComponent(componentTypeString);
       if (!canUse) {
-        return InventoryConsumptionResult.failed('Component not available in inventory');
+        return InventoryConsumptionResult.failed(
+            'Component not available in inventory');
       }
 
       _paletteStateNotifier.useComponent(componentTypeString);
@@ -86,9 +86,9 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
       // Get remaining count through public interface
       final remainingCount = _getRemainingCount(componentTypeString);
       return InventoryConsumptionResult.success(remainingCount);
-
     } catch (e) {
-      return InventoryConsumptionResult.failed('Failed to consume component: $e');
+      return InventoryConsumptionResult.failed(
+          'Failed to consume component: $e');
     }
   }
 
@@ -96,7 +96,8 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
   int _getRemainingCount(String componentTypeString) {
     // This is a workaround - ideally PaletteStateNotifier should expose this
     try {
-      final canUseAfterConsumption = _paletteStateNotifier.canUseComponent(componentTypeString);
+      final canUseAfterConsumption =
+          _paletteStateNotifier.canUseComponent(componentTypeString);
       return canUseAfterConsumption ? 1 : 0; // Simplified assumption
     } catch (e) {
       return 0;
@@ -112,9 +113,9 @@ class DefaultComponentInventoryService implements ComponentInventoryService {
 
       final updatedCount = _getRemainingCount(componentTypeString);
       return InventoryConsumptionResult.success(updatedCount);
-
     } catch (e) {
-      return InventoryConsumptionResult.failed('Failed to return component: $e');
+      return InventoryConsumptionResult.failed(
+          'Failed to return component: $e');
     }
   }
 

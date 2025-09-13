@@ -1,10 +1,9 @@
-import '../behaviors/goal_checking_behavior.dart';
-import '../entities/goal.dart';
-import '../entities/core/grid.dart';
-import '../entities/core/component.dart';
-
 import '../../application/services/component_factory.dart';
 import '../../common/logger.dart';
+import '../behaviors/goal_checking_behavior.dart';
+import '../entities/core/component.dart';
+import '../entities/core/grid.dart';
+import '../entities/goal.dart';
 
 class PowerBulbGoalBehavior implements GoalCheckingBehavior {
   @override
@@ -31,7 +30,7 @@ class PowerBulbGoalBehavior implements GoalCheckingBehavior {
 
 void registerPowerBulbGoal(ComponentFactory factory) {
   Logger.log('registerPowerBulbGoal() called.');
-  factory.registerBehavior<PowerBulbGoalBehavior>(() => PowerBulbGoalBehavior());
+  factory.registerBehavior<PowerBulbGoalBehavior>(PowerBulbGoalBehavior.new);
 
   factory.register(
     type: 'Goal.PowerBulb',

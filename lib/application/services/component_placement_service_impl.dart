@@ -1,9 +1,9 @@
-import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';
 import 'package:sparkcircuit/application/services/interfaces/component_inventory_service.dart';
+import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';
 import 'package:sparkcircuit/application/services/interfaces/grid_validation_service.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 /// Default implementation of ComponentPlacementService
 class DefaultComponentPlacementService implements ComponentPlacementService {
@@ -13,8 +13,8 @@ class DefaultComponentPlacementService implements ComponentPlacementService {
   DefaultComponentPlacementService({
     required ComponentInventoryService inventoryService,
     required GridValidationService gridValidationService,
-  }) : _inventoryService = inventoryService,
-       _gridValidationService = gridValidationService;
+  })  : _inventoryService = inventoryService,
+        _gridValidationService = gridValidationService;
 
   @override
   PlacementValidationResult validatePlacement(
@@ -32,21 +32,28 @@ class DefaultComponentPlacementService implements ComponentPlacementService {
     // Check inventory availability
     final inventoryCheck = _inventoryService.checkAvailability(type);
     if (!inventoryCheck.isAvailable) {
-      StructuredLogger.debug('Placement validation failed - insufficient inventory', context: {
-        'componentType': type.toString(),
-        'reason': inventoryCheck.reason,
-      });
-      return PlacementValidationResult.invalid(inventoryCheck.reason ?? 'Insufficient inventory');
+      StructuredLogger.debug(
+          'Placement validation failed - insufficient inventory',
+          context: {
+            'componentType': type.toString(),
+            'reason': inventoryCheck.reason,
+          });
+      return PlacementValidationResult.invalid(
+          inventoryCheck.reason ?? 'Insufficient inventory');
     }
 
     // Check grid position validity
-    final gridCheck = _gridValidationService.validatePosition(row, col, gameState);
+    final gridCheck =
+        _gridValidationService.validatePosition(row, col, gameState);
     if (!gridCheck.isValid) {
-      StructuredLogger.debug('Placement validation failed - invalid grid position', context: {
-        'position': '($row, $col)',
-        'reason': gridCheck.reason,
-      });
-      return PlacementValidationResult.invalid(gridCheck.reason ?? 'Invalid grid position');
+      StructuredLogger.debug(
+          'Placement validation failed - invalid grid position',
+          context: {
+            'position': '($row, $col)',
+            'reason': gridCheck.reason,
+          });
+      return PlacementValidationResult.invalid(
+          gridCheck.reason ?? 'Invalid grid position');
     }
 
     StructuredLogger.debug('Placement validation successful', context: {
@@ -59,8 +66,7 @@ class DefaultComponentPlacementService implements ComponentPlacementService {
 
   @override
   Future<PlacementExecutionResult> executeComponentPlacement(
-    ComponentPlacementRequest request
-  ) async {
+      ComponentPlacementRequest request) async {
     StructuredLogger.info('Executing component placement', context: {
       'componentType': request.componentType.toString(),
       'position': '(${request.row}, ${request.col})',
@@ -77,24 +83,30 @@ class DefaultComponentPlacementService implements ComponentPlacementService {
       );
 
       if (!validation.isValid) {
-        StructuredLogger.warning('Component placement failed validation', context: {
-          'componentType': request.componentType.toString(),
-          'reason': validation.reason,
-        });
-        return PlacementExecutionResult.failed(validation.reason ?? 'Validation failed');
+        StructuredLogger.warning('Component placement failed validation',
+            context: {
+              'componentType': request.componentType.toString(),
+              'reason': validation.reason,
+            });
+        return PlacementExecutionResult.failed(
+            validation.reason ?? 'Validation failed');
       }
 
       // Consume component from inventory
-      final consumeResult = await _inventoryService.consumeComponent(request.componentType);
+      final consumeResult =
+          await _inventoryService.consumeComponent(request.componentType);
       if (!consumeResult.isSuccess) {
-        StructuredLogger.error('Failed to consume component from inventory', context: {
-          'componentType': request.componentType.toString(),
-        });
-        return PlacementExecutionResult.failed('Failed to consume component from inventory');
+        StructuredLogger.error('Failed to consume component from inventory',
+            context: {
+              'componentType': request.componentType.toString(),
+            });
+        return PlacementExecutionResult.failed(
+            'Failed to consume component from inventory');
       }
 
       // Create new component
-      final componentId = _generateComponentId(request.componentType, request.row, request.col);
+      final componentId =
+          _generateComponentId(request.componentType, request.row, request.col);
       final component = ComponentModel(
         id: componentId,
         type: request.componentType,
@@ -104,7 +116,8 @@ class DefaultComponentPlacementService implements ComponentPlacementService {
       );
 
       // Update game state
-      final updatedComponents = Map<String, ComponentModel>.from(request.currentGameState.grid.components);
+      final updatedComponents = Map<String, ComponentModel>.from(
+          request.currentGameState.grid.components);
       updatedComponents[componentId] = component;
 
       // Create updated grid (Note: Interface doesn't currently support returning updated state)
@@ -117,13 +130,14 @@ class DefaultComponentPlacementService implements ComponentPlacementService {
       });
 
       return PlacementExecutionResult.success();
-
     } catch (e, stackTrace) {
-      StructuredLogger.error('Component placement execution failed', context: {
-        'componentType': request.componentType.toString(),
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-      }, error: e);
+      StructuredLogger.error('Component placement execution failed',
+          context: {
+            'componentType': request.componentType.toString(),
+            'error': e.toString(),
+            'stackTrace': stackTrace.toString(),
+          },
+          error: e);
 
       return PlacementExecutionResult.failed('Component placement failed: $e');
     }

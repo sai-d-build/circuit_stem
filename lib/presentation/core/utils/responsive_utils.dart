@@ -93,7 +93,8 @@ class ResponsiveUtils {
   }
 
   /// Get responsive component size
-  static double getResponsiveComponentSize(BuildContext context, double baseSize) {
+  static double getResponsiveComponentSize(
+      BuildContext context, double baseSize) {
     final type = getScreenType(context);
     switch (type) {
       case ScreenType.mobile:
@@ -162,7 +163,7 @@ class ResponsiveUtils {
     final type = getScreenType(context);
     switch (type) {
       case ScreenType.mobile:
-        return 1.0;
+        return 1;
       case ScreenType.tablet:
         return 1.2;
       case ScreenType.desktop:
@@ -187,13 +188,19 @@ extension ResponsiveExtension on BuildContext {
   bool get isTablet => ResponsiveUtils.isTablet(this);
   bool get isDesktop => ResponsiveUtils.isDesktop(this);
   bool get isLandscape => ResponsiveUtils.isLandscape(this);
-  EdgeInsets get responsivePadding => ResponsiveUtils.getResponsivePadding(this);
-  double responsiveSpacing([double base = 8]) => ResponsiveUtils.getResponsiveSpacing(this, base: base);
-  double responsiveFontSize(double baseSize) => ResponsiveUtils.getResponsiveFontSize(this, baseSize);
-  double responsiveIconSize(double baseSize) => ResponsiveUtils.getResponsiveIconSize(this, baseSize);
-  double responsiveComponentSize(double baseSize) => ResponsiveUtils.getResponsiveComponentSize(this, baseSize);
+  EdgeInsets get responsivePadding =>
+      ResponsiveUtils.getResponsivePadding(this);
+  double responsiveSpacing([double base = 8]) =>
+      ResponsiveUtils.getResponsiveSpacing(this, base: base);
+  double responsiveFontSize(double baseSize) =>
+      ResponsiveUtils.getResponsiveFontSize(this, baseSize);
+  double responsiveIconSize(double baseSize) =>
+      ResponsiveUtils.getResponsiveIconSize(this, baseSize);
+  double responsiveComponentSize(double baseSize) =>
+      ResponsiveUtils.getResponsiveComponentSize(this, baseSize);
   double get paletteHeight => ResponsiveUtils.getPaletteHeight(this);
   double get hudHeight => ResponsiveUtils.getHudHeight(this);
   int get gridColumns => ResponsiveUtils.getGridColumns(this);
-  double get componentAspectRatio => ResponsiveUtils.getComponentAspectRatio(this);
+  double get componentAspectRatio =>
+      ResponsiveUtils.getComponentAspectRatio(this);
 }

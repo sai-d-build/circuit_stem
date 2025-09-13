@@ -2,8 +2,8 @@
 // Basic unit tests for ComponentPlacementService
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';
 import 'package:sparkcircuit/application/services/implementations/component_placement_service_impl.dart';
+import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';
 
 void main() {
   group('ComponentPlacementService - Basic Tests', () {

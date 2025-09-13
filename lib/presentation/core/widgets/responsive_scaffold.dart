@@ -38,12 +38,12 @@ class ResponsiveScaffold extends StatelessWidget {
     final screenHeight = mediaQuery.size.height;
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>()!;
-    
+
     // Determine layout type based on screen size
     final isTablet = screenWidth >= 768;
     final isDesktop = screenWidth >= 1024;
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
-    
+
     return Scaffold(
       appBar: appBar,
       drawer: drawer,
@@ -90,9 +90,10 @@ class ResponsiveScaffold extends StatelessWidget {
     bool isLandscape,
   ) {
     // Calculate responsive margins and padding
-    final horizontalPadding = _getHorizontalPadding(screenWidth, isTablet, isDesktop);
+    final horizontalPadding =
+        _getHorizontalPadding(screenWidth, isTablet, isDesktop);
     final verticalPadding = _getVerticalPadding(screenHeight, isLandscape);
-    
+
     if (isDesktop) {
       // Desktop layout with maximum content width
       return Center(
@@ -128,22 +129,23 @@ class ResponsiveScaffold extends StatelessWidget {
     }
   }
 
-  double _getHorizontalPadding(double screenWidth, bool isTablet, bool isDesktop) {
+  double _getHorizontalPadding(
+      double screenWidth, bool isTablet, bool isDesktop) {
     if (isDesktop) {
-      return 32.0;
+      return 32;
     } else if (isTablet) {
-      return 24.0;
+      return 24;
     } else {
-      return 16.0;
+      return 16;
     }
   }
 
   double _getVerticalPadding(double screenHeight, bool isLandscape) {
     if (isLandscape && screenHeight < 600) {
       // Reduce vertical padding in landscape on small screens
-      return 8.0;
+      return 8;
     }
-    return 16.0;
+    return 16;
   }
 }
 
@@ -168,7 +170,7 @@ class ResponsiveLayoutBuilder extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        
+
         if (width >= desktopBreakpoint && desktop != null) {
           return desktop!;
         } else if (width >= tabletBreakpoint && tablet != null) {
@@ -195,7 +197,7 @@ class ResponsiveGridView extends StatelessWidget {
     required this.children,
     this.childAspectRatio = 1.0,
     this.spacing = 16.0,
-    this.padding = const EdgeInsets.all(16.0),
+    this.padding = const EdgeInsets.all(16),
     this.minCrossAxisCount = 1,
     this.maxCrossAxisCount = 6,
     this.maxCrossAxisExtent = 200.0,

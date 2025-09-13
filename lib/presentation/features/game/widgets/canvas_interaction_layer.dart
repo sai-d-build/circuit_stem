@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/providers/unified_providers.dart';
-import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
-import 'package:sparkcircuit/domain/entities/core/component.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
+import 'package:sparkcircuit/domain/entities/core/component.dart';
 
 /// CanvasInteractionLayer handles mouse interactions, hover states, and selection feedback.
 /// This layer extracts interaction logic from GameCanvas.
@@ -18,16 +18,19 @@ class CanvasInteractionLayer extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CanvasInteractionLayer> createState() => _CanvasInteractionLayerState();
+  ConsumerState<CanvasInteractionLayer> createState() =>
+      _CanvasInteractionLayerState();
 }
 
-class _CanvasInteractionLayerState extends ConsumerState<CanvasInteractionLayer> {
+class _CanvasInteractionLayerState
+    extends ConsumerState<CanvasInteractionLayer> {
   Offset? _mousePosition;
   String? _hoveredComponentId;
 
   @override
   Widget build(BuildContext context) {
-    MigrationTracker.markFileMigrated('canvas_interaction_layer.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated(
+        'canvas_interaction_layer.dart', DateTime.now().toIso8601String());
     final gameState = ref.watch(unifiedGameStateProvider);
 
     return MouseRegion(
@@ -40,13 +43,14 @@ class _CanvasInteractionLayerState extends ConsumerState<CanvasInteractionLayer>
         final gridConfig = GridConfiguration(
           rows: gameState.grid.rows,
           cols: gameState.grid.cols,
-          cellSize: 60.0,
-          scale: 1.0,
+          cellSize: 60,
+          scale: 1,
           panOffset: Offset.zero,
         );
 
         final unifiedService = UnifiedCoordinateService();
-        final gridPos = unifiedService.screenToGrid(event.localPosition, gridConfig);
+        final gridPos =
+            unifiedService.screenToGrid(event.localPosition, gridConfig);
         final component = _getComponentAtPosition(gridPos, gameState);
 
         if (component != null && component.id != _hoveredComponentId) {
@@ -65,7 +69,8 @@ class _CanvasInteractionLayerState extends ConsumerState<CanvasInteractionLayer>
           StructuredLogger.debug('Component hover ended');
         }
 
-        debugPrint('🖱️ MOUSE POSITION: ${event.localPosition} -> Grid: (${(event.localPosition.dx / 60).floor()}, ${(event.localPosition.dy / 60).floor()})');
+        debugPrint(
+            '🖱️ MOUSE POSITION: ${event.localPosition} -> Grid: (${(event.localPosition.dx / 60).floor()}, ${(event.localPosition.dy / 60).floor()})');
       },
       onExit: (event) {
         setState(() {
@@ -110,10 +115,12 @@ class _CanvasInteractionLayerState extends ConsumerState<CanvasInteractionLayer>
     );
   }
 
-  ComponentModel? _getComponentAtPosition(Offset gridPosition, GameState gameState) {
+  ComponentModel? _getComponentAtPosition(
+      Offset gridPosition, GameState gameState) {
     // Find component at this exact grid position
     for (final component in gameState.grid.components.values) {
-      if (component.col == gridPosition.dx.toInt() && component.row == gridPosition.dy.toInt()) {
+      if (component.col == gridPosition.dx.toInt() &&
+          component.row == gridPosition.dy.toInt()) {
         return component;
       }
     }
@@ -139,8 +146,8 @@ class ComponentHoverPainter extends CustomPainter {
     final gridConfig = GridConfiguration(
       rows: gameState.grid.rows,
       cols: gameState.grid.cols,
-      cellSize: 60.0,
-      scale: 1.0,
+      cellSize: 60,
+      scale: 1,
       panOffset: Offset.zero,
     );
 
@@ -175,6 +182,6 @@ class ComponentHoverPainter extends CustomPainter {
   @override
   bool shouldRepaint(ComponentHoverPainter oldDelegate) {
     return oldDelegate.hoveredComponentId != hoveredComponentId ||
-           oldDelegate.gameState != gameState;
+        oldDelegate.gameState != gameState;
   }
 }

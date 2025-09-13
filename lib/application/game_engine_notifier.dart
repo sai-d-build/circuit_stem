@@ -1,28 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:sparkcircuit/domain/entities/entities.dart';
 
-// Application layer
-import 'game_engine_state.dart';
-import '../infrastructure/audio/audio_service.dart';
 import '../common/logger.dart';
-import 'audio_manager.dart';
-import 'input_manager.dart';
+import '../infrastructure/audio/audio_service.dart';
 import 'animation_scheduler.dart';
-import 'transaction.dart';
-import 'services/component_palette_manager.dart';
-
-import 'use_cases/component_action.dart';
-
-// Middleware
-import 'middleware/middleware.dart';
-import 'middleware/logging_middleware.dart';
-import 'middleware/validation_middleware.dart';
-import 'middleware/performance_middleware.dart';
-
+import 'audio_manager.dart';
 // Core
 import 'core/result.dart';
-
+// Application layer
+import 'game_engine_state.dart';
+import 'input_manager.dart';
+import 'middleware/logging_middleware.dart';
+// Middleware
+import 'middleware/middleware.dart';
+import 'middleware/performance_middleware.dart';
+import 'middleware/validation_middleware.dart';
+import 'services/component_palette_manager.dart';
+import 'transaction.dart';
+import 'use_cases/component_action.dart';
 import 'use_cases/notifier_integrated_use_case.dart';
 
 class GameEngineNotifier extends StateNotifier<GameEngineState> {
@@ -89,7 +84,6 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     _init();
   }
 
-
   Map<String, dynamic> _getUseCaseInstances() {
     // ✅ RETURN: Map of injected use case instances
     return {
@@ -125,14 +119,15 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     final notifierContext = _createNotifierContext();
 
     try {
-      ComponentAction processedAction = action;
+      var processedAction = action;
 
       // Middleware beforeAction
       for (final middleware in _middleware) {
         processedAction = await middleware.beforeAction(state, processedAction);
       }
 
-      final result = await _executeUseCase(processedAction, notifierContext, transaction);
+      final result =
+          await _executeUseCase(processedAction, notifierContext, transaction);
 
       return result.fold(
         (_) async {
@@ -156,41 +151,53 @@ class GameEngineNotifier extends StateNotifier<GameEngineState> {
     }
   }
 
-  Future<Result<void>> _executeUseCase(
-      ComponentAction action, NotifierContext context, GameTransaction transaction) async {
+  Future<Result<void>> _executeUseCase(ComponentAction action,
+      NotifierContext context, GameTransaction transaction) async {
     // ✅ OPTIMIZED: Use injected use case instances
     final useCases = _getUseCaseInstances();
     switch (action.runtimeType) {
       case LoadLevelAction _:
-        return useCases['_loadLevelUseCase']?.executeWithNotifiers(action as LoadLevelAction, context, transaction) ??
-               const Failure('Load level use case not available');
+        return useCases['_loadLevelUseCase']?.executeWithNotifiers(
+                action as LoadLevelAction, context, transaction) ??
+            const Failure('Load level use case not available');
       case CreateComponentFromTemplateAction _:
-        return useCases['_createComponentUseCase']?.executeWithNotifiers(action as CreateComponentFromTemplateAction, context, transaction) ??
-               const Failure('Create component use case not available');
+        return useCases['_createComponentUseCase']?.executeWithNotifiers(
+                action as CreateComponentFromTemplateAction,
+                context,
+                transaction) ??
+            const Failure('Create component use case not available');
       case RotateComponentAction _:
-        return useCases['_rotateComponentUseCase']?.executeWithNotifiers(action as RotateComponentAction, context, transaction) ??
-               const Failure('Rotate component use case not available');
+        return useCases['_rotateComponentUseCase']?.executeWithNotifiers(
+                action as RotateComponentAction, context, transaction) ??
+            const Failure('Rotate component use case not available');
       case MoveComponentAction _:
-        return useCases['_moveComponentUseCase']?.executeWithNotifiers(action as MoveComponentAction, context, transaction) ??
-               const Failure('Move component use case not available');
+        return useCases['_moveComponentUseCase']?.executeWithNotifiers(
+                action as MoveComponentAction, context, transaction) ??
+            const Failure('Move component use case not available');
       case TapComponentAction _:
-        return useCases['_tapComponentUseCase']?.executeWithNotifiers(action as TapComponentAction, context, transaction) ??
-               const Failure('Tap component use case not available');
+        return useCases['_tapComponentUseCase']?.executeWithNotifiers(
+                action as TapComponentAction, context, transaction) ??
+            const Failure('Tap component use case not available');
       case UpdateComponentAction _:
-        return useCases['_updateComponentUseCase']?.executeWithNotifiers(action as UpdateComponentAction, context, transaction) ??
-               const Failure('Update component use case not available');
+        return useCases['_updateComponentUseCase']?.executeWithNotifiers(
+                action as UpdateComponentAction, context, transaction) ??
+            const Failure('Update component use case not available');
       case RestartLevelAction _:
-        return useCases['_restartLevelUseCase']?.executeWithNotifiers(action as RestartLevelAction, context, transaction) ??
-               const Failure('Restart level use case not available');
+        return useCases['_restartLevelUseCase']?.executeWithNotifiers(
+                action as RestartLevelAction, context, transaction) ??
+            const Failure('Restart level use case not available');
       case SelectPaletteComponentAction _:
-        return useCases['_selectPaletteComponentUseCase']?.executeWithNotifiers(action as SelectPaletteComponentAction, context, transaction) ??
-               const Failure('Select palette component use case not available');
+        return useCases['_selectPaletteComponentUseCase']?.executeWithNotifiers(
+                action as SelectPaletteComponentAction, context, transaction) ??
+            const Failure('Select palette component use case not available');
       case TogglePauseAction _:
-        return useCases['_togglePauseUseCase']?.executeWithNotifiers(action as TogglePauseAction, context, transaction) ??
-               const Failure('Toggle pause use case not available');
+        return useCases['_togglePauseUseCase']?.executeWithNotifiers(
+                action as TogglePauseAction, context, transaction) ??
+            const Failure('Toggle pause use case not available');
       case UndoAction _:
-        return useCases['_undoUseCase']?.executeWithNotifiers(action as UndoAction, context, transaction) ??
-               const Failure('Undo use case not available');
+        return useCases['_undoUseCase']?.executeWithNotifiers(
+                action as UndoAction, context, transaction) ??
+            const Failure('Undo use case not available');
       default:
         return const Failure('Unknown action type');
     }

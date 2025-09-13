@@ -1,5 +1,5 @@
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:flutter/foundation.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 @immutable
 class ComponentPaletteManager {

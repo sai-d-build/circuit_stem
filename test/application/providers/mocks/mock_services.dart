@@ -8,9 +8,11 @@ import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_stora
 // Mock Classes
 class MockComponentFactory extends Mock implements ComponentFactory {}
 
-class MockComponentPaletteManager extends Mock implements ComponentPaletteManager {}
+class MockComponentPaletteManager extends Mock
+    implements ComponentPaletteManager {}
 
-class MockSharedPreferencesStorageService extends Mock implements SharedPreferencesStorageService {}
+class MockSharedPreferencesStorageService extends Mock
+    implements SharedPreferencesStorageService {}
 
 class MockLevelService extends Mock {
   Future<dynamic> loadLevel(String levelId) async => null;

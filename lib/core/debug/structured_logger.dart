@@ -3,17 +3,20 @@ import 'package:flutter/foundation.dart';
 export 'game_constants.dart';
 
 // 🔥 CRITICAL DEBUG FLAGS - Enable via --dart-define during flutter run
-const bool enableComponentTypeLogging = bool.fromEnvironment('DEBUG_COMPONENT_TYPES');
-const bool enableInventoryDetailed = bool.fromEnvironment('DEBUG_INVENTORY');
-const bool enableStateSyncLogging = bool.fromEnvironment('DEBUG_STATE_SYNC');
-const bool enableDragDropSequence = bool.fromEnvironment('DEBUG_DRAG_DROP');
-const bool enableCoordinateValidation = bool.fromEnvironment('DEBUG_COORDINATES');
-const bool enableGridStateChanges = bool.fromEnvironment('DEBUG_GRID_STATE');
-const bool enableLevelIntegrationDebug = bool.fromEnvironment('DEBUG_LEVEL_INTEGRATION');
+const bool enableComponentTypeLogging =
+    bool.fromEnvironment('DEBUG_COMPONENT_TYPES'); // ignore: cascade_invocations
+const bool enableInventoryDetailed = bool.fromEnvironment('DEBUG_INVENTORY'); // ignore: cascade_invocations
+const bool enableStateSyncLogging = bool.fromEnvironment('DEBUG_STATE_SYNC'); // ignore: cascade_invocations
+const bool enableDragDropSequence = bool.fromEnvironment('DEBUG_DRAG_DROP'); // ignore: cascade_invocations
+const bool enableCoordinateValidation =
+    bool.fromEnvironment('DEBUG_COORDINATES'); // ignore: cascade_invocations
+const bool enableGridStateChanges = bool.fromEnvironment('DEBUG_GRID_STATE'); // ignore: cascade_invocations
+const bool enableLevelIntegrationDebug =
+    bool.fromEnvironment('DEBUG_LEVEL_INTEGRATION'); // ignore: cascade_invocations
 
 // 📊 EXISTING FLAGS (kept for compatibility)
-const bool enableDebugLogging = bool.fromEnvironment('ENABLE_GRID_SYNC_LOGS');
-const bool enableDropLogs = bool.fromEnvironment('ENABLE_DROP_LOGS');
+const bool enableDebugLogging = bool.fromEnvironment('ENABLE_GRID_SYNC_LOGS'); // ignore: cascade_invocations
+const bool enableDropLogs = bool.fromEnvironment('ENABLE_DROP_LOGS'); // ignore: cascade_invocations
 
 // 💻 PRODUCTION vs DEVELOPMENT detection
 const bool isProduction = bool.fromEnvironment('dart.vm.product');
@@ -84,18 +87,28 @@ class StructuredLogger {
   static bool debugInventory = true;
 
   // Component filtering debugging flags
-  static bool debugFiltering = false;       // Main component filtering flow
-  static bool debugFilterDetails = false;   // Detailed filtering steps
+  static bool debugFiltering = false; // Main component filtering flow
+  static bool debugFilterDetails = false; // Detailed filtering steps
 
   // Migration and development flags
-  static bool debugMigration = false;       // Migration tracking
+  static bool debugMigration = false; // Migration tracking
 
-  static bool get hasAnyDebugEnabled => debugServices || debugGameCanvas ||
-      debugPresentation || debugCritical || debugWeb || debugComponents ||
-      debugPerformance || debugDashboard || debugInventory || debugFiltering ||
-      debugFilterDetails || debugMigration;
+  static bool get hasAnyDebugEnabled =>
+      debugServices ||
+      debugGameCanvas ||
+      debugPresentation ||
+      debugCritical ||
+      debugWeb ||
+      debugComponents ||
+      debugPerformance ||
+      debugDashboard ||
+      debugInventory ||
+      debugFiltering ||
+      debugFilterDetails ||
+      debugMigration;
 
-  static void debug(String message, {Map<String, dynamic>? context, Object? error}) {
+  static void debug(String message,
+      {Map<String, dynamic>? context, Object? error}) {
     if (!LoggingConfig.shouldLog(LogLevel.debug)) return;
     _log('DEBUG', message, context, error: error);
   }
@@ -105,7 +118,8 @@ class StructuredLogger {
     _log('INFO', message, context);
   }
 
-  static void warning(String message, {Map<String, dynamic>? context, Object? error}) {
+  static void warning(String message,
+      {Map<String, dynamic>? context, Object? error}) {
     if (!LoggingConfig.shouldLog(LogLevel.warning)) return;
     _log('WARNING', message, context, error: error);
   }
@@ -120,7 +134,8 @@ class StructuredLogger {
     }
   }
 
-  static void error(String message, {Map<String, dynamic>? context, Object? error}) {
+  static void error(String message,
+      {Map<String, dynamic>? context, Object? error}) {
     if (!LoggingConfig.shouldLog(LogLevel.error)) return;
     _log('ERROR', message, context, error: error);
   }
@@ -237,7 +252,8 @@ class StructuredLogger {
     }
   }
 
-  static void critical(String message, {Map<String, dynamic>? context, Object? error}) {
+  static void critical(String message,
+      {Map<String, dynamic>? context, Object? error}) {
     if (debugCritical && LoggingConfig.shouldLog(LogLevel.error)) {
       _log('CRITICAL', message, context, error: error);
     }
@@ -261,12 +277,14 @@ class StructuredLogger {
     }
   }
 
-  static void _log(String level, String message, Map<String, dynamic>? context, {Object? error}) {
+  static void _log(String level, String message, Map<String, dynamic>? context,
+      {Object? error}) {
     final timestamp = DateTime.now().toIso8601String();
     final contextStr = context != null ? ' | Context: $context' : '';
     final errorStr = error != null ? ' | Error: $error' : '';
 
-    final logMessage = '$_tag [$level] $timestamp - $message$contextStr$errorStr';
+    final logMessage =
+        '$_tag [$level] $timestamp - $message$contextStr$errorStr';
     if (kDebugMode) {
       print(logMessage);
     }
@@ -281,7 +299,11 @@ class StructuredLogger {
 
     info('Logging configured', context: {
       'level': LoggingConfig.currentLevel.name,
-      'environment': kReleaseMode ? 'release' : kProfileMode ? 'profile' : 'debug',
+      'environment': kReleaseMode
+          ? 'release'
+          : kProfileMode
+              ? 'profile'
+              : 'debug',
       'dashboard_debug': debugDashboard,
       'inventory_debug': debugInventory,
       'filtering_debug': debugFiltering,

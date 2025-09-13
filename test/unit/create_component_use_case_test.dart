@@ -5,7 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('CreateComponentUseCase Tests', () {
-    test('placeholder test - CreateComponentUseCase class has architectural issues', () {
+    test(
+        'placeholder test - CreateComponentUseCase class has architectural issues',
+        () {
       // This test serves as a placeholder until the use case and dependencies are properly implemented
       expect(true, isTrue);
     });

@@ -834,6 +834,7 @@ mixin _$GridConfig {
   int get width => throw _privateConstructorUsedError;
   int get height => throw _privateConstructorUsedError;
   String? get background => throw _privateConstructorUsedError;
+  BoundaryConfig? get boundaries => throw _privateConstructorUsedError;
 
   /// Serializes this GridConfig to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -851,7 +852,10 @@ abstract class $GridConfigCopyWith<$Res> {
           GridConfig value, $Res Function(GridConfig) then) =
       _$GridConfigCopyWithImpl<$Res, GridConfig>;
   @useResult
-  $Res call({int width, int height, String? background});
+  $Res call(
+      {int width, int height, String? background, BoundaryConfig? boundaries});
+
+  $BoundaryConfigCopyWith<$Res>? get boundaries;
 }
 
 /// @nodoc
@@ -872,6 +876,7 @@ class _$GridConfigCopyWithImpl<$Res, $Val extends GridConfig>
     Object? width = null,
     Object? height = null,
     Object? background = freezed,
+    Object? boundaries = freezed,
   }) {
     return _then(_value.copyWith(
       width: null == width
@@ -886,7 +891,25 @@ class _$GridConfigCopyWithImpl<$Res, $Val extends GridConfig>
           ? _value.background
           : background // ignore: cast_nullable_to_non_nullable
               as String?,
+      boundaries: freezed == boundaries
+          ? _value.boundaries
+          : boundaries // ignore: cast_nullable_to_non_nullable
+              as BoundaryConfig?,
     ) as $Val);
+  }
+
+  /// Create a copy of GridConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $BoundaryConfigCopyWith<$Res>? get boundaries {
+    if (_value.boundaries == null) {
+      return null;
+    }
+
+    return $BoundaryConfigCopyWith<$Res>(_value.boundaries!, (value) {
+      return _then(_value.copyWith(boundaries: value) as $Val);
+    });
   }
 }
 
@@ -898,7 +921,11 @@ abstract class _$$GridConfigImplCopyWith<$Res>
       __$$GridConfigImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int width, int height, String? background});
+  $Res call(
+      {int width, int height, String? background, BoundaryConfig? boundaries});
+
+  @override
+  $BoundaryConfigCopyWith<$Res>? get boundaries;
 }
 
 /// @nodoc
@@ -917,6 +944,7 @@ class __$$GridConfigImplCopyWithImpl<$Res>
     Object? width = null,
     Object? height = null,
     Object? background = freezed,
+    Object? boundaries = freezed,
   }) {
     return _then(_$GridConfigImpl(
       width: null == width
@@ -931,6 +959,10 @@ class __$$GridConfigImplCopyWithImpl<$Res>
           ? _value.background
           : background // ignore: cast_nullable_to_non_nullable
               as String?,
+      boundaries: freezed == boundaries
+          ? _value.boundaries
+          : boundaries // ignore: cast_nullable_to_non_nullable
+              as BoundaryConfig?,
     ));
   }
 }
@@ -939,7 +971,10 @@ class __$$GridConfigImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$GridConfigImpl implements _GridConfig {
   const _$GridConfigImpl(
-      {required this.width, required this.height, this.background});
+      {required this.width,
+      required this.height,
+      this.background,
+      this.boundaries});
 
   factory _$GridConfigImpl.fromJson(Map<String, dynamic> json) =>
       _$$GridConfigImplFromJson(json);
@@ -950,10 +985,12 @@ class _$GridConfigImpl implements _GridConfig {
   final int height;
   @override
   final String? background;
+  @override
+  final BoundaryConfig? boundaries;
 
   @override
   String toString() {
-    return 'GridConfig(width: $width, height: $height, background: $background)';
+    return 'GridConfig(width: $width, height: $height, background: $background, boundaries: $boundaries)';
   }
 
   @override
@@ -964,12 +1001,15 @@ class _$GridConfigImpl implements _GridConfig {
             (identical(other.width, width) || other.width == width) &&
             (identical(other.height, height) || other.height == height) &&
             (identical(other.background, background) ||
-                other.background == background));
+                other.background == background) &&
+            (identical(other.boundaries, boundaries) ||
+                other.boundaries == boundaries));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, width, height, background);
+  int get hashCode =>
+      Object.hash(runtimeType, width, height, background, boundaries);
 
   /// Create a copy of GridConfig
   /// with the given fields replaced by the non-null parameter values.
@@ -991,7 +1031,8 @@ abstract class _GridConfig implements GridConfig {
   const factory _GridConfig(
       {required final int width,
       required final int height,
-      final String? background}) = _$GridConfigImpl;
+      final String? background,
+      final BoundaryConfig? boundaries}) = _$GridConfigImpl;
 
   factory _GridConfig.fromJson(Map<String, dynamic> json) =
       _$GridConfigImpl.fromJson;
@@ -1002,12 +1043,660 @@ abstract class _GridConfig implements GridConfig {
   int get height;
   @override
   String? get background;
+  @override
+  BoundaryConfig? get boundaries;
 
   /// Create a copy of GridConfig
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$GridConfigImplCopyWith<_$GridConfigImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+BoundaryConfig _$BoundaryConfigFromJson(Map<String, dynamic> json) {
+  return _BoundaryConfig.fromJson(json);
+}
+
+/// @nodoc
+mixin _$BoundaryConfig {
+  PlayableArea get playableArea => throw _privateConstructorUsedError;
+  VisualArea get visualArea => throw _privateConstructorUsedError;
+  String? get style => throw _privateConstructorUsedError;
+  String? get behavior => throw _privateConstructorUsedError;
+  Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
+
+  /// Serializes this BoundaryConfig to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of BoundaryConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $BoundaryConfigCopyWith<BoundaryConfig> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $BoundaryConfigCopyWith<$Res> {
+  factory $BoundaryConfigCopyWith(
+          BoundaryConfig value, $Res Function(BoundaryConfig) then) =
+      _$BoundaryConfigCopyWithImpl<$Res, BoundaryConfig>;
+  @useResult
+  $Res call(
+      {PlayableArea playableArea,
+      VisualArea visualArea,
+      String? style,
+      String? behavior,
+      Map<String, dynamic>? settings});
+
+  $PlayableAreaCopyWith<$Res> get playableArea;
+  $VisualAreaCopyWith<$Res> get visualArea;
+}
+
+/// @nodoc
+class _$BoundaryConfigCopyWithImpl<$Res, $Val extends BoundaryConfig>
+    implements $BoundaryConfigCopyWith<$Res> {
+  _$BoundaryConfigCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of BoundaryConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? playableArea = null,
+    Object? visualArea = null,
+    Object? style = freezed,
+    Object? behavior = freezed,
+    Object? settings = freezed,
+  }) {
+    return _then(_value.copyWith(
+      playableArea: null == playableArea
+          ? _value.playableArea
+          : playableArea // ignore: cast_nullable_to_non_nullable
+              as PlayableArea,
+      visualArea: null == visualArea
+          ? _value.visualArea
+          : visualArea // ignore: cast_nullable_to_non_nullable
+              as VisualArea,
+      style: freezed == style
+          ? _value.style
+          : style // ignore: cast_nullable_to_non_nullable
+              as String?,
+      behavior: freezed == behavior
+          ? _value.behavior
+          : behavior // ignore: cast_nullable_to_non_nullable
+              as String?,
+      settings: freezed == settings
+          ? _value.settings
+          : settings // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ) as $Val);
+  }
+
+  /// Create a copy of BoundaryConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $PlayableAreaCopyWith<$Res> get playableArea {
+    return $PlayableAreaCopyWith<$Res>(_value.playableArea, (value) {
+      return _then(_value.copyWith(playableArea: value) as $Val);
+    });
+  }
+
+  /// Create a copy of BoundaryConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $VisualAreaCopyWith<$Res> get visualArea {
+    return $VisualAreaCopyWith<$Res>(_value.visualArea, (value) {
+      return _then(_value.copyWith(visualArea: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$BoundaryConfigImplCopyWith<$Res>
+    implements $BoundaryConfigCopyWith<$Res> {
+  factory _$$BoundaryConfigImplCopyWith(_$BoundaryConfigImpl value,
+          $Res Function(_$BoundaryConfigImpl) then) =
+      __$$BoundaryConfigImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {PlayableArea playableArea,
+      VisualArea visualArea,
+      String? style,
+      String? behavior,
+      Map<String, dynamic>? settings});
+
+  @override
+  $PlayableAreaCopyWith<$Res> get playableArea;
+  @override
+  $VisualAreaCopyWith<$Res> get visualArea;
+}
+
+/// @nodoc
+class __$$BoundaryConfigImplCopyWithImpl<$Res>
+    extends _$BoundaryConfigCopyWithImpl<$Res, _$BoundaryConfigImpl>
+    implements _$$BoundaryConfigImplCopyWith<$Res> {
+  __$$BoundaryConfigImplCopyWithImpl(
+      _$BoundaryConfigImpl _value, $Res Function(_$BoundaryConfigImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of BoundaryConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? playableArea = null,
+    Object? visualArea = null,
+    Object? style = freezed,
+    Object? behavior = freezed,
+    Object? settings = freezed,
+  }) {
+    return _then(_$BoundaryConfigImpl(
+      playableArea: null == playableArea
+          ? _value.playableArea
+          : playableArea // ignore: cast_nullable_to_non_nullable
+              as PlayableArea,
+      visualArea: null == visualArea
+          ? _value.visualArea
+          : visualArea // ignore: cast_nullable_to_non_nullable
+              as VisualArea,
+      style: freezed == style
+          ? _value.style
+          : style // ignore: cast_nullable_to_non_nullable
+              as String?,
+      behavior: freezed == behavior
+          ? _value.behavior
+          : behavior // ignore: cast_nullable_to_non_nullable
+              as String?,
+      settings: freezed == settings
+          ? _value._settings
+          : settings // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$BoundaryConfigImpl implements _BoundaryConfig {
+  const _$BoundaryConfigImpl(
+      {required this.playableArea,
+      required this.visualArea,
+      this.style,
+      this.behavior,
+      final Map<String, dynamic>? settings})
+      : _settings = settings;
+
+  factory _$BoundaryConfigImpl.fromJson(Map<String, dynamic> json) =>
+      _$$BoundaryConfigImplFromJson(json);
+
+  @override
+  final PlayableArea playableArea;
+  @override
+  final VisualArea visualArea;
+  @override
+  final String? style;
+  @override
+  final String? behavior;
+  final Map<String, dynamic>? _settings;
+  @override
+  Map<String, dynamic>? get settings {
+    final value = _settings;
+    if (value == null) return null;
+    if (_settings is EqualUnmodifiableMapView) return _settings;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
+
+  @override
+  String toString() {
+    return 'BoundaryConfig(playableArea: $playableArea, visualArea: $visualArea, style: $style, behavior: $behavior, settings: $settings)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$BoundaryConfigImpl &&
+            (identical(other.playableArea, playableArea) ||
+                other.playableArea == playableArea) &&
+            (identical(other.visualArea, visualArea) ||
+                other.visualArea == visualArea) &&
+            (identical(other.style, style) || other.style == style) &&
+            (identical(other.behavior, behavior) ||
+                other.behavior == behavior) &&
+            const DeepCollectionEquality().equals(other._settings, _settings));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, playableArea, visualArea, style,
+      behavior, const DeepCollectionEquality().hash(_settings));
+
+  /// Create a copy of BoundaryConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$BoundaryConfigImplCopyWith<_$BoundaryConfigImpl> get copyWith =>
+      __$$BoundaryConfigImplCopyWithImpl<_$BoundaryConfigImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$BoundaryConfigImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _BoundaryConfig implements BoundaryConfig {
+  const factory _BoundaryConfig(
+      {required final PlayableArea playableArea,
+      required final VisualArea visualArea,
+      final String? style,
+      final String? behavior,
+      final Map<String, dynamic>? settings}) = _$BoundaryConfigImpl;
+
+  factory _BoundaryConfig.fromJson(Map<String, dynamic> json) =
+      _$BoundaryConfigImpl.fromJson;
+
+  @override
+  PlayableArea get playableArea;
+  @override
+  VisualArea get visualArea;
+  @override
+  String? get style;
+  @override
+  String? get behavior;
+  @override
+  Map<String, dynamic>? get settings;
+
+  /// Create a copy of BoundaryConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$BoundaryConfigImplCopyWith<_$BoundaryConfigImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+PlayableArea _$PlayableAreaFromJson(Map<String, dynamic> json) {
+  return _PlayableArea.fromJson(json);
+}
+
+/// @nodoc
+mixin _$PlayableArea {
+  int get width => throw _privateConstructorUsedError;
+  int get height => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
+
+  /// Serializes this PlayableArea to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of PlayableArea
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $PlayableAreaCopyWith<PlayableArea> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $PlayableAreaCopyWith<$Res> {
+  factory $PlayableAreaCopyWith(
+          PlayableArea value, $Res Function(PlayableArea) then) =
+      _$PlayableAreaCopyWithImpl<$Res, PlayableArea>;
+  @useResult
+  $Res call({int width, int height, String? description});
+}
+
+/// @nodoc
+class _$PlayableAreaCopyWithImpl<$Res, $Val extends PlayableArea>
+    implements $PlayableAreaCopyWith<$Res> {
+  _$PlayableAreaCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of PlayableArea
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? width = null,
+    Object? height = null,
+    Object? description = freezed,
+  }) {
+    return _then(_value.copyWith(
+      width: null == width
+          ? _value.width
+          : width // ignore: cast_nullable_to_non_nullable
+              as int,
+      height: null == height
+          ? _value.height
+          : height // ignore: cast_nullable_to_non_nullable
+              as int,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$PlayableAreaImplCopyWith<$Res>
+    implements $PlayableAreaCopyWith<$Res> {
+  factory _$$PlayableAreaImplCopyWith(
+          _$PlayableAreaImpl value, $Res Function(_$PlayableAreaImpl) then) =
+      __$$PlayableAreaImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({int width, int height, String? description});
+}
+
+/// @nodoc
+class __$$PlayableAreaImplCopyWithImpl<$Res>
+    extends _$PlayableAreaCopyWithImpl<$Res, _$PlayableAreaImpl>
+    implements _$$PlayableAreaImplCopyWith<$Res> {
+  __$$PlayableAreaImplCopyWithImpl(
+      _$PlayableAreaImpl _value, $Res Function(_$PlayableAreaImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of PlayableArea
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? width = null,
+    Object? height = null,
+    Object? description = freezed,
+  }) {
+    return _then(_$PlayableAreaImpl(
+      width: null == width
+          ? _value.width
+          : width // ignore: cast_nullable_to_non_nullable
+              as int,
+      height: null == height
+          ? _value.height
+          : height // ignore: cast_nullable_to_non_nullable
+              as int,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$PlayableAreaImpl implements _PlayableArea {
+  const _$PlayableAreaImpl(
+      {required this.width, required this.height, this.description});
+
+  factory _$PlayableAreaImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PlayableAreaImplFromJson(json);
+
+  @override
+  final int width;
+  @override
+  final int height;
+  @override
+  final String? description;
+
+  @override
+  String toString() {
+    return 'PlayableArea(width: $width, height: $height, description: $description)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PlayableAreaImpl &&
+            (identical(other.width, width) || other.width == width) &&
+            (identical(other.height, height) || other.height == height) &&
+            (identical(other.description, description) ||
+                other.description == description));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, width, height, description);
+
+  /// Create a copy of PlayableArea
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PlayableAreaImplCopyWith<_$PlayableAreaImpl> get copyWith =>
+      __$$PlayableAreaImplCopyWithImpl<_$PlayableAreaImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$PlayableAreaImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _PlayableArea implements PlayableArea {
+  const factory _PlayableArea(
+      {required final int width,
+      required final int height,
+      final String? description}) = _$PlayableAreaImpl;
+
+  factory _PlayableArea.fromJson(Map<String, dynamic> json) =
+      _$PlayableAreaImpl.fromJson;
+
+  @override
+  int get width;
+  @override
+  int get height;
+  @override
+  String? get description;
+
+  /// Create a copy of PlayableArea
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$PlayableAreaImplCopyWith<_$PlayableAreaImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+VisualArea _$VisualAreaFromJson(Map<String, dynamic> json) {
+  return _VisualArea.fromJson(json);
+}
+
+/// @nodoc
+mixin _$VisualArea {
+  int get width => throw _privateConstructorUsedError;
+  int get height => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
+
+  /// Serializes this VisualArea to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of VisualArea
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $VisualAreaCopyWith<VisualArea> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $VisualAreaCopyWith<$Res> {
+  factory $VisualAreaCopyWith(
+          VisualArea value, $Res Function(VisualArea) then) =
+      _$VisualAreaCopyWithImpl<$Res, VisualArea>;
+  @useResult
+  $Res call({int width, int height, String? description});
+}
+
+/// @nodoc
+class _$VisualAreaCopyWithImpl<$Res, $Val extends VisualArea>
+    implements $VisualAreaCopyWith<$Res> {
+  _$VisualAreaCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of VisualArea
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? width = null,
+    Object? height = null,
+    Object? description = freezed,
+  }) {
+    return _then(_value.copyWith(
+      width: null == width
+          ? _value.width
+          : width // ignore: cast_nullable_to_non_nullable
+              as int,
+      height: null == height
+          ? _value.height
+          : height // ignore: cast_nullable_to_non_nullable
+              as int,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$VisualAreaImplCopyWith<$Res>
+    implements $VisualAreaCopyWith<$Res> {
+  factory _$$VisualAreaImplCopyWith(
+          _$VisualAreaImpl value, $Res Function(_$VisualAreaImpl) then) =
+      __$$VisualAreaImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({int width, int height, String? description});
+}
+
+/// @nodoc
+class __$$VisualAreaImplCopyWithImpl<$Res>
+    extends _$VisualAreaCopyWithImpl<$Res, _$VisualAreaImpl>
+    implements _$$VisualAreaImplCopyWith<$Res> {
+  __$$VisualAreaImplCopyWithImpl(
+      _$VisualAreaImpl _value, $Res Function(_$VisualAreaImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of VisualArea
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? width = null,
+    Object? height = null,
+    Object? description = freezed,
+  }) {
+    return _then(_$VisualAreaImpl(
+      width: null == width
+          ? _value.width
+          : width // ignore: cast_nullable_to_non_nullable
+              as int,
+      height: null == height
+          ? _value.height
+          : height // ignore: cast_nullable_to_non_nullable
+              as int,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$VisualAreaImpl implements _VisualArea {
+  const _$VisualAreaImpl(
+      {required this.width, required this.height, this.description});
+
+  factory _$VisualAreaImpl.fromJson(Map<String, dynamic> json) =>
+      _$$VisualAreaImplFromJson(json);
+
+  @override
+  final int width;
+  @override
+  final int height;
+  @override
+  final String? description;
+
+  @override
+  String toString() {
+    return 'VisualArea(width: $width, height: $height, description: $description)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$VisualAreaImpl &&
+            (identical(other.width, width) || other.width == width) &&
+            (identical(other.height, height) || other.height == height) &&
+            (identical(other.description, description) ||
+                other.description == description));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, width, height, description);
+
+  /// Create a copy of VisualArea
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$VisualAreaImplCopyWith<_$VisualAreaImpl> get copyWith =>
+      __$$VisualAreaImplCopyWithImpl<_$VisualAreaImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$VisualAreaImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _VisualArea implements VisualArea {
+  const factory _VisualArea(
+      {required final int width,
+      required final int height,
+      final String? description}) = _$VisualAreaImpl;
+
+  factory _VisualArea.fromJson(Map<String, dynamic> json) =
+      _$VisualAreaImpl.fromJson;
+
+  @override
+  int get width;
+  @override
+  int get height;
+  @override
+  String? get description;
+
+  /// Create a copy of VisualArea
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$VisualAreaImplCopyWith<_$VisualAreaImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 

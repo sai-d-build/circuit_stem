@@ -1,18 +1,20 @@
-import '../services/power_simulation_service.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
+
 import '../../common/logger.dart';
 import '../core/result.dart';
+import '../services/power_simulation_service.dart';
+import '../transaction.dart';
 import 'component_action.dart';
 import 'notifier_integrated_use_case.dart';
-import '../transaction.dart';
 
-class RestartLevelUseCase extends NotifierIntegratedUseCase<RestartLevelAction> {
+class RestartLevelUseCase
+    extends NotifierIntegratedUseCase<RestartLevelAction> {
   final PowerSimulationService _powerSimulationService;
 
   const RestartLevelUseCase(this._powerSimulationService);
 
   @override
-    Future<Result<void>> executeWithNotifiers(
+  Future<Result<void>> executeWithNotifiers(
     RestartLevelAction action,
     NotifierContext notifiers,
     GameTransaction transaction,
@@ -25,7 +27,8 @@ class RestartLevelUseCase extends NotifierIntegratedUseCase<RestartLevelAction> 
       }
 
       // Build initial grid for the level and simulate power flow (pure)
-      final preplacedComponents = []; // TODO: Update when preplaced components are defined in domain
+      final preplacedComponents =
+          []; // TODO: Update when preplaced components are defined in domain
       final componentModels = preplacedComponents.map((preplaced) {
         // Convert string type to ComponentType enum
         ComponentType componentType;
@@ -55,23 +58,26 @@ class RestartLevelUseCase extends NotifierIntegratedUseCase<RestartLevelAction> 
         components: {for (final comp in componentModels) comp.id: comp},
       );
 
-      final simulatedGrid = _powerSimulationService.simulatePowerFlow(initialGrid);
+      final simulatedGrid =
+          _powerSimulationService.simulatePowerFlow(initialGrid);
 
-            // Update notifiers within the transaction
-           transaction.onCommit(() async {
-             notifiers.grid.setState(simulatedGrid);
-             notifiers.progress.setWinState(false);
-             notifiers.history.clearHistory();
-             notifiers.selection.clearSelection();
-             notifiers.interaction.resetToIdle();
-     
-             // 🔥 CRITICAL FIX: Reset palette inventory when restarting level
-             // This clears zombie components and replenishes depleted inventory
-             Logger.log('🔄 RestartLevel: Resetting palette inventory to fix zombie components');
-             await notifiers.paletteManager.reset();
-           });
+      // Update notifiers within the transaction
+      transaction.onCommit(() async {
+        notifiers.grid.setState(simulatedGrid);
+        notifiers.progress.setWinState(false);
+        notifiers.history.clearHistory();
+        notifiers.selection.clearSelection();
+        notifiers.interaction.resetToIdle();
 
-      Logger.log('RestartLevel: committed restart for level ${currentLevel.levelId}');
+        // 🔥 CRITICAL FIX: Reset palette inventory when restarting level
+        // This clears zombie components and replenishes depleted inventory
+        Logger.log(
+            '🔄 RestartLevel: Resetting palette inventory to fix zombie components');
+        await notifiers.paletteManager.reset();
+      });
+
+      Logger.log(
+          'RestartLevel: committed restart for level ${currentLevel.levelId}');
       return const Success(null);
     } catch (e) {
       Logger.log('❌ RestartLevelUseCase error: $e');
@@ -79,4 +85,3 @@ class RestartLevelUseCase extends NotifierIntegratedUseCase<RestartLevelAction> 
     }
   }
 }
-

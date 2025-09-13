@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
+import 'package:sparkcircuit/core/services/bounds_manager.dart' as bounds_manager;
 import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
 import 'package:sparkcircuit/domain/entities/levels/level_definition.dart';
@@ -59,16 +60,30 @@ class InteractionEngine extends StateNotifier<GameState> {
     StructuredLogger.info('InteractionEngine: Initialized for level $_levelId');
   }
 
-  // CENTRALIZED VALIDATION - TODO: Add visual bounds check too
+  // CENTRALIZED VALIDATION - Enhanced for full-screen mode
   bool _isValidPlacement(GridPosition position) {
-    // Check boundaries - Use level grid dimensions (6x8)
-    if (position.row < 0 || position.row >= state.grid.rows ||
-        position.col < 0 || position.col >= state.grid.cols) {
-      StructuredLogger.warning('PLACEMENT BLOCKED: Coordinate out of level bounds', context: {
+    // Check if we're in full-screen mode (allow placement anywhere in visual grid)
+    final boundsManager = bounds_manager.UnifiedBoundsManager();
+    final boundsConfig = boundsManager.getConfiguration();
+
+    // Use visual bounds (50x50) in full-screen mode, otherwise use level bounds
+    final useVisualBounds = boundsConfig.levelSpecificSettings?['disableBoundsChecking'] == true ||
+                           boundsConfig.levelSpecificSettings?['allowFullScreen'] == true;
+
+    final maxRows = useVisualBounds ? boundsConfig.visualBounds.height.toInt() : state.grid.rows;
+    final maxCols = useVisualBounds ? boundsConfig.visualBounds.width.toInt() : state.grid.cols;
+
+    // Check boundaries
+    if (position.row < 0 || position.row >= maxRows ||
+        position.col < 0 || position.col >= maxCols) {
+      StructuredLogger.warning('PLACEMENT BLOCKED: Coordinate out of bounds', context: {
         'requestedPosition': {'row': position.row, 'col': position.col},
+        'boundsMode': useVisualBounds ? 'visual' : 'level',
+        'maxDimensions': {'rows': maxRows, 'cols': maxCols},
         'levelGridDimensions': {'rows': state.grid.rows, 'cols': state.grid.cols},
-        'validRanges': {'rows': '0-${state.grid.rows - 1}', 'cols': '0-${state.grid.cols - 1}'},
-        'error': _getBoundsError(position),
+        'visualGridDimensions': {'rows': boundsConfig.visualBounds.height.toInt(), 'cols': boundsConfig.visualBounds.width.toInt()},
+        'validRanges': {'rows': '0-${maxRows - 1}', 'cols': '0-${maxCols - 1}'},
+        'error': _getBoundsError(position, maxRows, maxCols),
       });
       return false;
     }
@@ -88,11 +103,14 @@ class InteractionEngine extends StateNotifier<GameState> {
   }
 
   // Enhanced bounds error reporting
-  String _getBoundsError(GridPosition position) {
+  String _getBoundsError(GridPosition position, [int? maxRows, int? maxCols]) {
+    final rows = maxRows ?? state.grid.rows;
+    final cols = maxCols ?? state.grid.cols;
+
     if (position.row < 0) return 'Row below 0';
-    if (position.row >= state.grid.rows) return 'Row ${position.row} exceeds max ${state.grid.rows - 1}';
+    if (position.row >= rows) return 'Row ${position.row} exceeds max ${rows - 1}';
     if (position.col < 0) return 'Col below 0';
-    if (position.col >= state.grid.cols) return 'Col ${position.col} exceeds max ${state.grid.cols - 1}';
+    if (position.col >= cols) return 'Col ${position.col} exceeds max ${cols - 1}';
     return 'Unknown bounds error';
   }
 

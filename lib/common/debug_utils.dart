@@ -1,5 +1,5 @@
-import 'logger.dart';
 import '../application/services/component_factory.dart';
+import 'logger.dart';
 
 void checkMoveBehaviorAttachment(ComponentFactory factory) {
   Logger.log('--- MoveBehavior Attachment Check ---');
@@ -17,7 +17,7 @@ void checkMoveBehaviorAttachment(ComponentFactory factory) {
     'Component.Timer',
   ];
 
-  for (var type in componentTypesToCheck) {
+  for (final type in componentTypesToCheck) {
     // Create a dummy component to check its behaviors
     // This assumes create() or createFromJson() can be called with minimal data
     // and will attach behaviors based on registration.
@@ -29,8 +29,7 @@ void checkMoveBehaviorAttachment(ComponentFactory factory) {
         c: 0,
       );
       final componentModel = dummyComponent.toComponentModel();
-      final hasMoveBehavior =
-          componentModel.behaviors.contains('MoveBehavior');
+      final hasMoveBehavior = componentModel.behaviors.contains('MoveBehavior');
 
       if (hasMoveBehavior) {
         Logger.log('✅ $type has MoveBehavior attached');

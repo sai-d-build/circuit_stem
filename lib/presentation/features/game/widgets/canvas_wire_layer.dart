@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/providers/unified_providers.dart';
-import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
-import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
-import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart' as drawing_models;
 import 'package:sparkcircuit/domain/entities/entities.dart';
+import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+import 'package:sparkcircuit/presentation/models/circuit_drawing_models.dart'
+    as drawing_models;
 
 /// CanvasWireLayer handles the rendering of circuit wires and connections.
 /// This layer extracts wire rendering logic from GameCanvas.
@@ -20,10 +21,11 @@ class CanvasWireLayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    MigrationTracker.markFileMigrated('canvas_wire_layer.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated(
+        'canvas_wire_layer.dart', DateTime.now().toIso8601String());
     final gameState = ref.watch(unifiedGameStateProvider);
     final circuitColors = Theme.of(context).extension<CircuitColorScheme>() ??
-                         _getDefaultCircuitColors();
+        _getDefaultCircuitColors();
 
     // Convert Grid connections to CircuitWire for rendering
     final circuitWires = _buildCircuitWires(gameState);
@@ -60,7 +62,8 @@ class CanvasWireLayer extends ConsumerWidget {
                 startY: sourceComponent.row.toDouble(),
                 endX: targetComponent.col.toDouble(),
                 endY: targetComponent.row.toDouble(),
-                isActive: wireActivity[wireId] ?? false, // Determine from wire activity
+                isActive: wireActivity[wireId] ??
+                    false, // Determine from wire activity
               ));
             }
           }
@@ -149,11 +152,11 @@ class WireRenderingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // TODO: GameState/grid configuration should be passed from the widget
     // For now, using reasonable defaults that match the game's typical grid size
-    final gridConfig = GridConfiguration(
+    const gridConfig = GridConfiguration(
       rows: 20, // Standard game grid rows
       cols: 20, // Standard game grid columns
-      cellSize: 60.0, // Standard cell size
-      scale: 1.0,
+      cellSize: 60, // Standard cell size
+      scale: 1,
       panOffset: Offset.zero,
     );
 
@@ -168,7 +171,9 @@ class WireRenderingPainter extends CustomPainter {
       );
 
       final paint = Paint()
-        ..color = wire.isActive ? circuitColors.wireActive : circuitColors.wireInactive
+        ..color = wire.isActive
+            ? circuitColors.wireActive
+            : circuitColors.wireInactive
         ..strokeWidth = 3.0
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round;
@@ -180,14 +185,14 @@ class WireRenderingPainter extends CustomPainter {
         ..color = circuitColors.primary
         ..style = PaintingStyle.fill;
 
-      canvas.drawCircle(startPos, 4.0, pointPaint);
-      canvas.drawCircle(endPos, 4.0, pointPaint);
+      canvas.drawCircle(startPos, 4, pointPaint); // ignore: cascade_invocations
+      canvas.drawCircle(endPos, 4, pointPaint); // ignore: cascade_invocations
     }
   }
 
   @override
   bool shouldRepaint(WireRenderingPainter oldDelegate) {
     return oldDelegate.wires != wires ||
-           oldDelegate.circuitColors != circuitColors;
+        oldDelegate.circuitColors != circuitColors;
   }
 }

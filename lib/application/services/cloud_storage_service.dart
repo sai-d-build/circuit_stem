@@ -7,7 +7,8 @@ import '../../presentation/state/hud_state.dart';
 
 abstract class CloudStorageService {
   /// Upload user progress to cloud
-  Future<void> uploadProgress(String userId, ProgressData progress, String levelId);
+  Future<void> uploadProgress(
+      String userId, ProgressData progress, String levelId);
 
   /// Download user progress from cloud
   Future<ProgressData?> downloadProgress(String userId, String levelId);
@@ -51,7 +52,8 @@ class FirebaseCloudStorageService implements CloudStorageService {
   FirebaseCloudStorageService(this._firestore);
 
   @override
-  Future<void> uploadProgress(String userId, ProgressData progress, String levelId) async {
+  Future<void> uploadProgress(
+      String userId, ProgressData progress, String levelId) async {
     try {
       final progressData = {
         'currentScore': progress.currentScore,
@@ -94,7 +96,7 @@ class FirebaseCloudStorageService implements CloudStorageService {
 
       final data = doc.data()!;
       return ProgressData(
-        levelId: levelId,  // Add required levelId parameter
+        levelId: levelId, // Add required levelId parameter
         currentScore: data['currentScore'] ?? 0,
         bestScore: data['bestScore'] ?? 0,
         starsEarned: data['starsEarned'] ?? 0,
@@ -111,7 +113,7 @@ class FirebaseCloudStorageService implements CloudStorageService {
 
   @override
   Future<void> syncAllProgress(String userId) async {
-        try {
+    try {
       // final progressCollection = await _firestore
       //     .collection('users')
       //     .doc(userId)
@@ -127,7 +129,8 @@ class FirebaseCloudStorageService implements CloudStorageService {
   }
 
   @override
-  Future<void> uploadPreferences(String userId, UserPreferences preferences) async {
+  Future<void> uploadPreferences(
+      String userId, UserPreferences preferences) async {
     try {
       final prefsData = {
         'soundEnabled': preferences.soundEnabled,
@@ -225,7 +228,8 @@ class FirebaseCloudStorageService implements CloudStorageService {
         currentStreak: stats['currentStreak'] ?? 0,
         longestStreak: stats['longestStreak'] ?? 0,
         achievements: List<String>.from(stats['achievements'] ?? []),
-        unlockedComponents: List<String>.from(stats['unlockedComponents'] ?? []),
+        unlockedComponents:
+            List<String>.from(stats['unlockedComponents'] ?? []),
         firstPlayDate: stats['firstPlayDate'] != null
             ? DateTime.parse(stats['firstPlayDate'])
             : null,
@@ -312,12 +316,9 @@ class FirebaseCloudStorageService implements CloudStorageService {
   }
 
   Future<void> _updateLastSync(String userId) async {
-    await _firestore
-        .collection('users')
-        .doc(userId)
-        .set({
-          'lastSync': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
+    await _firestore.collection('users').doc(userId).set({
+      'lastSync': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 }
 

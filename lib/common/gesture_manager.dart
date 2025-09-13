@@ -8,7 +8,8 @@ class GestureManager {
   GestureManager._internal();
 
   // Unified gesture settings
-  static double get tapSlop => PlatformUtils.prefersPreciseGestures ? 8.0 : 12.0;
+  static double get tapSlop =>
+      PlatformUtils.prefersPreciseGestures ? 8.0 : 12.0;
   static double get panSlop => PlatformUtils.prefersPreciseGestures ? 4.0 : 8.0;
   static Duration get longPressTimeout => PlatformUtils.isIOS
       ? const Duration(milliseconds: 500)
@@ -61,7 +62,8 @@ class GestureManager {
   }
 
   // Unified gesture arena management
-  static void resolveGestureArena(GestureArenaEntry entry, GestureDisposition disposition) {
+  static void resolveGestureArena(
+      GestureArenaEntry entry, GestureDisposition disposition) {
     entry.resolve(disposition);
   }
 

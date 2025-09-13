@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+import 'package:sparkcircuit/presentation/models/drag_models.dart';
 
 /// DropZoneHighlightPainter handles the visual highlighting of valid drop zones.
 /// This painter extracts the drop zone highlighting logic from GameCanvas.
@@ -22,10 +22,12 @@ class DropZoneHighlightPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Draw highlights for valid drop positions
-    for (int row = 0; row < gameState.grid.rows; row++) {
-      for (int col = 0; col < gameState.grid.cols; col++) {
-        final screenX = col * gridConfig.cellSize * gridConfig.scale + gridConfig.panOffset.dx;
-        final screenY = row * gridConfig.cellSize * gridConfig.scale + gridConfig.panOffset.dy;
+    for (var row = 0; row < gameState.grid.rows; row++) {
+      for (var col = 0; col < gameState.grid.cols; col++) {
+        final screenX = col * gridConfig.cellSize * gridConfig.scale +
+            gridConfig.panOffset.dx;
+        final screenY = row * gridConfig.cellSize * gridConfig.scale +
+            gridConfig.panOffset.dy;
 
         // Check if this position is valid for dropping
         final isValid = _isValidDropPosition(row, col);
@@ -37,7 +39,11 @@ class DropZoneHighlightPainter extends CustomPainter {
             ..style = PaintingStyle.fill;
 
           canvas.drawRect(
-            Rect.fromLTWH(screenX, screenY, gridConfig.cellSize * gridConfig.scale, gridConfig.cellSize * gridConfig.scale),
+            Rect.fromLTWH(
+                screenX,
+                screenY,
+                gridConfig.cellSize * gridConfig.scale,
+                gridConfig.cellSize * gridConfig.scale),
             validPaint,
           );
 
@@ -47,9 +53,10 @@ class DropZoneHighlightPainter extends CustomPainter {
             ..style = PaintingStyle.fill;
 
           final innerRect = Rect.fromLTWH(
-            screenX + 4, screenY + 4,
-            (gridConfig.cellSize * gridConfig.scale) - 8, (gridConfig.cellSize * gridConfig.scale) - 8
-          );
+              screenX + 4,
+              screenY + 4,
+              (gridConfig.cellSize * gridConfig.scale) - 8,
+              (gridConfig.cellSize * gridConfig.scale) - 8);
           canvas.drawRect(innerRect, innerPaint);
 
           // Draw border with glow effect
@@ -59,7 +66,11 @@ class DropZoneHighlightPainter extends CustomPainter {
             ..strokeWidth = 3.0;
 
           canvas.drawRect(
-            Rect.fromLTWH(screenX, screenY, gridConfig.cellSize * gridConfig.scale, gridConfig.cellSize * gridConfig.scale),
+            Rect.fromLTWH(
+                screenX,
+                screenY,
+                gridConfig.cellSize * gridConfig.scale,
+                gridConfig.cellSize * gridConfig.scale),
             borderPaint,
           );
 
@@ -76,17 +87,29 @@ class DropZoneHighlightPainter extends CustomPainter {
           );
           // Top-right corner
           canvas.drawRect(
-            Rect.fromLTWH(screenX + (gridConfig.cellSize * gridConfig.scale) - cornerSize, screenY, cornerSize, cornerSize),
+            Rect.fromLTWH(
+                screenX + (gridConfig.cellSize * gridConfig.scale) - cornerSize,
+                screenY,
+                cornerSize,
+                cornerSize),
             cornerPaint,
           );
           // Bottom-left corner
           canvas.drawRect(
-            Rect.fromLTWH(screenX, screenY + (gridConfig.cellSize * gridConfig.scale) - cornerSize, cornerSize, cornerSize),
+            Rect.fromLTWH(
+                screenX,
+                screenY + (gridConfig.cellSize * gridConfig.scale) - cornerSize,
+                cornerSize,
+                cornerSize),
             cornerPaint,
           );
           // Bottom-right corner
           canvas.drawRect(
-            Rect.fromLTWH(screenX + (gridConfig.cellSize * gridConfig.scale) - cornerSize, screenY + (gridConfig.cellSize * gridConfig.scale) - cornerSize, cornerSize, cornerSize),
+            Rect.fromLTWH(
+                screenX + (gridConfig.cellSize * gridConfig.scale) - cornerSize,
+                screenY + (gridConfig.cellSize * gridConfig.scale) - cornerSize,
+                cornerSize,
+                cornerSize),
             cornerPaint,
           );
         }
@@ -96,7 +119,10 @@ class DropZoneHighlightPainter extends CustomPainter {
 
   bool _isValidDropPosition(int row, int col) {
     // Check if position is within bounds
-    if (row < 0 || row >= gameState.grid.rows || col < 0 || col >= gameState.grid.cols) {
+    if (row < 0 ||
+        row >= gameState.grid.rows ||
+        col < 0 ||
+        col >= gameState.grid.cols) {
       return false;
     }
 
@@ -117,7 +143,7 @@ class DropZoneHighlightPainter extends CustomPainter {
   @override
   bool shouldRepaint(DropZoneHighlightPainter oldDelegate) {
     return oldDelegate.dragData != dragData ||
-           oldDelegate.gameState != gameState ||
-           oldDelegate.gridConfig != gridConfig;
+        oldDelegate.gameState != gameState ||
+        oldDelegate.gridConfig != gridConfig;
   }
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/application/providers/unified_providers.dart';
-import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
-import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
-import 'package:sparkcircuit/core/services/grid_service.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
+import 'package:sparkcircuit/core/services/grid_service.dart';
+import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
+import 'package:sparkcircuit/presentation/models/drag_models.dart';
 
 /// CanvasDropZoneLayer handles drop zone highlighting and validation visualization.
 /// This layer extracts the drop zone highlighting logic from GameCanvas.
@@ -24,30 +24,37 @@ class CanvasDropZoneLayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    StructuredLogger.trace('CanvasDropZoneLayer: Building drop zone layer', context: {
-      'dragData_componentName': dragData?.componentName ?? 'null',
-      'dragData_componentType': dragData?.componentType.toString() ?? 'null',
-      'dragData_cost': dragData?.cost ?? 0,
-    });
+    StructuredLogger.trace('CanvasDropZoneLayer: Building drop zone layer',
+        context: {
+          'dragData_componentName': dragData?.componentName ?? 'null',
+          'dragData_componentType':
+              dragData?.componentType.toString() ?? 'null',
+          'dragData_cost': dragData?.cost ?? 0,
+        });
 
-    MigrationTracker.markFileMigrated('canvas_drop_zone_layer.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated(
+        'canvas_drop_zone_layer.dart', DateTime.now().toIso8601String());
     final gameState = ref.watch(unifiedGameStateProvider);
     final circuitColors = Theme.of(context).extension<CircuitColorScheme>() ??
-                          _getDefaultCircuitColors();
+        _getDefaultCircuitColors();
 
-    StructuredLogger.debug('CanvasDropZoneLayer: State watchers resolved', context: {
-      'gameState_grid_components_count': gameState.grid.components.length,
-    });
+    StructuredLogger.debug('CanvasDropZoneLayer: State watchers resolved',
+        context: {
+          'gameState_grid_components_count': gameState.grid.components.length,
+        });
 
     if (dragData == null) {
-      StructuredLogger.info('CanvasDropZoneLayer: No drag data, returning child widget');
+      StructuredLogger.info(
+          'CanvasDropZoneLayer: No drag data, returning child widget');
       return child;
     }
 
-    StructuredLogger.info('CanvasDropZoneLayer: Rendering drop zone with valid drag data', context: {
-      'dragData_valid': dragData != null,
-      'will_render_drop_zone': true,
-    });
+    StructuredLogger.info(
+        'CanvasDropZoneLayer: Rendering drop zone with valid drag data',
+        context: {
+          'dragData_valid': dragData != null,
+          'will_render_drop_zone': true,
+        });
 
     return Container(
       decoration: BoxDecoration(
@@ -81,9 +88,10 @@ class CanvasDropZoneLayer extends ConsumerWidget {
                 gridConfig: GridConfiguration(
                   rows: gameState.grid.rows,
                   cols: gameState.grid.cols,
-                  cellSize: 60.0,
-                  scale: 1.0, // Using default scale to match highlighter
-                  panOffset: Offset.zero, // Using default pan to match highlighter
+                  cellSize: 60,
+                  scale: 1, // Using default scale to match highlighter
+                  panOffset:
+                      Offset.zero, // Using default pan to match highlighter
                 ),
                 hoveredCellIndex: hoveredCellIndex,
               ),
@@ -176,14 +184,16 @@ class DropZoneHighlightPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    StructuredLogger.trace('DropZoneHighlightPainter: Starting to paint drop zones', context: {
-      'grid_rows': gameState.grid.rows,
-      'grid_cols': gameState.grid.cols,
-      'size': '${size.width.toInt()}x${size.height.toInt()}',
-      'cellSize': gridConfig.cellSize,
-      'hasDragData': dragData != null,
-      'hoveredCellIndex': hoveredCellIndex,
-    });
+    StructuredLogger.trace(
+        'DropZoneHighlightPainter: Starting to paint drop zones',
+        context: {
+          'grid_rows': gameState.grid.rows,
+          'grid_cols': gameState.grid.cols,
+          'size': '${size.width.toInt()}x${size.height.toInt()}',
+          'cellSize': gridConfig.cellSize,
+          'hasDragData': dragData != null,
+          'hoveredCellIndex': hoveredCellIndex,
+        });
 
     // If we have drag data, highlight all valid drop positions
     if (dragData != null) {
@@ -197,35 +207,45 @@ class DropZoneHighlightPainter extends CustomPainter {
 
   void _paintDragHighlights(Canvas canvas, Size size) {
     // Draw highlights for valid drop positions
-    for (int row = 0; row < gameState.grid.rows; row++) {
-      for (int col = 0; col < gameState.grid.cols; col++) {
-        final screenX = col * gridConfig.cellSize * gridConfig.scale + gridConfig.panOffset.dx;
-        final screenY = row * gridConfig.cellSize * gridConfig.scale + gridConfig.panOffset.dy;
+    for (var row = 0; row < gameState.grid.rows; row++) {
+      for (var col = 0; col < gameState.grid.cols; col++) {
+        final screenX = col * gridConfig.cellSize * gridConfig.scale +
+            gridConfig.panOffset.dx;
+        final screenY = row * gridConfig.cellSize * gridConfig.scale +
+            gridConfig.panOffset.dy;
 
         // Check if this position is valid for dropping
         final isValid = _isValidDropPosition(row, col);
 
-        StructuredLogger.trace('DropZoneHighlightPainter: Cell validation result', context: {
-          'row': row,
-          'col': col,
-          'screenX': screenX,
-          'screenY': screenY,
-          'isValidPosition': isValid,
-        });
+        StructuredLogger.trace(
+            'DropZoneHighlightPainter: Cell validation result',
+            context: {
+              'row': row,
+              'col': col,
+              'screenX': screenX,
+              'screenY': screenY,
+              'isValidPosition': isValid,
+            });
 
         if (isValid) {
-          StructuredLogger.debug('DropZoneHighlightPainter: Highlighting valid drop cell', context: {
-            'row': row,
-            'col': col,
-            'will_draw_highlight': true,
-          });
+          StructuredLogger.debug(
+              'DropZoneHighlightPainter: Highlighting valid drop cell',
+              context: {
+                'row': row,
+                'col': col,
+                'will_draw_highlight': true,
+              });
           // Draw valid drop highlight with more prominent styling
           final validPaint = Paint()
             ..color = circuitColors.primary.withValues(alpha: 0.4)
             ..style = PaintingStyle.fill;
 
           canvas.drawRect(
-            Rect.fromLTWH(screenX, screenY, gridConfig.cellSize * gridConfig.scale, gridConfig.cellSize * gridConfig.scale),
+            Rect.fromLTWH(
+                screenX,
+                screenY,
+                gridConfig.cellSize * gridConfig.scale,
+                gridConfig.cellSize * gridConfig.scale),
             validPaint,
           );
 
@@ -235,9 +255,10 @@ class DropZoneHighlightPainter extends CustomPainter {
             ..style = PaintingStyle.fill;
 
           final innerRect = Rect.fromLTWH(
-            screenX + 4, screenY + 4,
-            (gridConfig.cellSize * gridConfig.scale) - 8, (gridConfig.cellSize * gridConfig.scale) - 8
-          );
+              screenX + 4,
+              screenY + 4,
+              (gridConfig.cellSize * gridConfig.scale) - 8,
+              (gridConfig.cellSize * gridConfig.scale) - 8);
           canvas.drawRect(innerRect, innerPaint);
 
           // Draw border with glow effect
@@ -247,7 +268,11 @@ class DropZoneHighlightPainter extends CustomPainter {
             ..strokeWidth = 3.0;
 
           canvas.drawRect(
-            Rect.fromLTWH(screenX, screenY, gridConfig.cellSize * gridConfig.scale, gridConfig.cellSize * gridConfig.scale),
+            Rect.fromLTWH(
+                screenX,
+                screenY,
+                gridConfig.cellSize * gridConfig.scale,
+                gridConfig.cellSize * gridConfig.scale),
             borderPaint,
           );
 
@@ -258,23 +283,35 @@ class DropZoneHighlightPainter extends CustomPainter {
 
           const cornerSize = 3.0; // Reduced from 6.0 to minimize artifacts
           // Top-left corner
-          canvas.drawRect(
+          canvas.drawRect( // ignore: cascade_invocations
             Rect.fromLTWH(screenX, screenY, cornerSize, cornerSize),
             cornerPaint,
           );
           // Top-right corner
-          canvas.drawRect(
-            Rect.fromLTWH(screenX + (gridConfig.cellSize * gridConfig.scale) - cornerSize, screenY, cornerSize, cornerSize),
+          canvas.drawRect( // ignore: cascade_invocations
+            Rect.fromLTWH(
+                screenX + (gridConfig.cellSize * gridConfig.scale) - cornerSize,
+                screenY,
+                cornerSize,
+                cornerSize),
             cornerPaint,
           );
           // Bottom-left corner
-          canvas.drawRect(
-            Rect.fromLTWH(screenX, screenY + (gridConfig.cellSize * gridConfig.scale) - cornerSize, cornerSize, cornerSize),
+          canvas.drawRect( // ignore: cascade_invocations
+            Rect.fromLTWH(
+                screenX,
+                screenY + (gridConfig.cellSize * gridConfig.scale) - cornerSize,
+                cornerSize,
+                cornerSize),
             cornerPaint,
           );
           // Bottom-right corner
-          canvas.drawRect(
-            Rect.fromLTWH(screenX + (gridConfig.cellSize * gridConfig.scale) - cornerSize, screenY + (gridConfig.cellSize * gridConfig.scale) - cornerSize, cornerSize, cornerSize),
+          canvas.drawRect( // ignore: cascade_invocations
+            Rect.fromLTWH(
+                screenX + (gridConfig.cellSize * gridConfig.scale) - cornerSize,
+                screenY + (gridConfig.cellSize * gridConfig.scale) - cornerSize,
+                cornerSize,
+                cornerSize),
             cornerPaint,
           );
         }
@@ -288,16 +325,19 @@ class DropZoneHighlightPainter extends CustomPainter {
     final row = hoveredCellIndex! ~/ gameState.grid.cols;
     final col = hoveredCellIndex! % gameState.grid.cols;
 
-    final screenX = col * gridConfig.cellSize * gridConfig.scale + gridConfig.panOffset.dx;
-    final screenY = row * gridConfig.cellSize * gridConfig.scale + gridConfig.panOffset.dy;
+    final screenX =
+        col * gridConfig.cellSize * gridConfig.scale + gridConfig.panOffset.dx;
+    final screenY =
+        row * gridConfig.cellSize * gridConfig.scale + gridConfig.panOffset.dy;
 
-    StructuredLogger.debug('DropZoneHighlightPainter: Painting hover feedback', context: {
-      'hoveredCellIndex': hoveredCellIndex,
-      'row': row,
-      'col': col,
-      'screenX': screenX,
-      'screenY': screenY,
-    });
+    StructuredLogger.debug('DropZoneHighlightPainter: Painting hover feedback',
+        context: {
+          'hoveredCellIndex': hoveredCellIndex,
+          'row': row,
+          'col': col,
+          'screenX': screenX,
+          'screenY': screenY,
+        });
 
     // Draw hover highlight
     final hoverPaint = Paint()
@@ -305,7 +345,8 @@ class DropZoneHighlightPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     canvas.drawRect(
-      Rect.fromLTWH(screenX, screenY, gridConfig.cellSize * gridConfig.scale, gridConfig.cellSize * gridConfig.scale),
+      Rect.fromLTWH(screenX, screenY, gridConfig.cellSize * gridConfig.scale,
+          gridConfig.cellSize * gridConfig.scale),
       hoverPaint,
     );
 
@@ -316,25 +357,31 @@ class DropZoneHighlightPainter extends CustomPainter {
       ..strokeWidth = 2.0;
 
     canvas.drawRect(
-      Rect.fromLTWH(screenX, screenY, gridConfig.cellSize * gridConfig.scale, gridConfig.cellSize * gridConfig.scale),
+      Rect.fromLTWH(screenX, screenY, gridConfig.cellSize * gridConfig.scale,
+          gridConfig.cellSize * gridConfig.scale),
       borderPaint,
     );
   }
 
   bool _isValidDropPosition(int row, int col) {
-    StructuredLogger.trace('DropZoneHighlightPainter: Validating drop position', context: {
-      'row': row,
-      'col': col,
-      'grid_bounds': '${gameState.grid.rows}x${gameState.grid.cols}',
-    });
+    StructuredLogger.trace('DropZoneHighlightPainter: Validating drop position',
+        context: {
+          'row': row,
+          'col': col,
+          'grid_bounds': '${gameState.grid.rows}x${gameState.grid.cols}',
+        });
 
     // Check if position is within bounds
-    if (row < 0 || row >= gameState.grid.rows || col < 0 || col >= gameState.grid.cols) {
-      StructuredLogger.trace('DropZoneHighlightPainter: Position out of bounds', context: {
-        'row_valid': row >= 0 && row < gameState.grid.rows,
-        'col_valid': col >= 0 && col < gameState.grid.cols,
-        'validation_result': false,
-      });
+    if (row < 0 ||
+        row >= gameState.grid.rows ||
+        col < 0 ||
+        col >= gameState.grid.cols) {
+      StructuredLogger.trace('DropZoneHighlightPainter: Position out of bounds',
+          context: {
+            'row_valid': row >= 0 && row < gameState.grid.rows,
+            'col_valid': col >= 0 && col < gameState.grid.cols,
+            'validation_result': false,
+          });
       return false;
     }
 
@@ -344,31 +391,33 @@ class DropZoneHighlightPainter extends CustomPainter {
         .isNotEmpty;
 
     if (existingComponent) {
-      StructuredLogger.debug('DropZoneHighlightPainter: Position occupied', context: {
-        'row': row,
-        'col': col,
-        'existing_component_found': true,
-        'validation_result': false,
-      });
+      StructuredLogger.debug('DropZoneHighlightPainter: Position occupied',
+          context: {
+            'row': row,
+            'col': col,
+            'existing_component_found': true,
+            'validation_result': false,
+          });
       return false;
     }
 
     // Check if component is available in inventory (simplified check)
     // In a real implementation, this would check the palette state
-    StructuredLogger.debug('DropZoneHighlightPainter: Position valid for drop', context: {
-      'row': row,
-      'col': col,
-      'validation_result': true,
-      'reason': 'within_bounds_and_unoccupied',
-    });
+    StructuredLogger.debug('DropZoneHighlightPainter: Position valid for drop',
+        context: {
+          'row': row,
+          'col': col,
+          'validation_result': true,
+          'reason': 'within_bounds_and_unoccupied',
+        });
     return true;
   }
 
   @override
   bool shouldRepaint(DropZoneHighlightPainter oldDelegate) {
     return oldDelegate.dragData != dragData ||
-            oldDelegate.gameState != gameState ||
-            oldDelegate.gridConfig != gridConfig ||
-            oldDelegate.hoveredCellIndex != hoveredCellIndex;
+        oldDelegate.gameState != gameState ||
+        oldDelegate.gridConfig != gridConfig ||
+        oldDelegate.hoveredCellIndex != hoveredCellIndex;
   }
 }

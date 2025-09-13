@@ -1,8 +1,9 @@
 #!/usr/bin/env dart
 // ignore_for_file: avoid_print
 
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:path/path.dart' as path;
 
 /// Migration validation result
@@ -89,7 +90,8 @@ ${isComplete ? '🎉 MIGRATION COMPLETE!' : '🚀 CONTINUE MIGRATION'}
 /// Main validation class
 class MigrationValidator {
   static const String libPath = 'lib';
-  static const String migrationTrackerPath = 'lib/core/migration/migration_tracker.dart';
+  static const String migrationTrackerPath =
+      'lib/core/migration/migration_tracker.dart';
 
   /// Validate migration completion
   static Future<ValidationResult> validate() async {
@@ -102,12 +104,17 @@ class MigrationValidator {
     final migrationStatus = await _checkFileMigrations();
 
     // Calculate completion
-    final totalComponents = infrastructureStatus.length + migrationStatus['totalFiles'];
-    final completedComponents = infrastructureStatus.values.where((v) => v['status'] == 'complete').length +
-                               migrationStatus['completedFiles'].length;
+    final totalComponents =
+        infrastructureStatus.length + migrationStatus['totalFiles'];
+    final completedComponents = infrastructureStatus.values
+            .where((v) => v['status'] == 'complete')
+            .length +
+        migrationStatus['completedFiles'].length;
 
-    final completionPercentage = totalComponents > 0 ? completedComponents / totalComponents : 0.0;
-    final isComplete = completionPercentage >= 0.95; // 95% threshold for completion
+    final completionPercentage =
+        totalComponents > 0 ? completedComponents / totalComponents : 0.0;
+    final isComplete =
+        completionPercentage >= 0.95; // 95% threshold for completion
 
     // Generate recommendations
     final recommendations = _generateRecommendations(
@@ -131,32 +138,47 @@ class MigrationValidator {
     final status = <String, dynamic>{};
 
     // Check unified interface
-    status['Unified Interface'] = await _checkFileExists('lib/core/interfaces/game_state_notifier_interface.dart')
+    status['Unified Interface'] = await _checkFileExists(
+            'lib/core/interfaces/game_state_notifier_interface.dart')
         ? {'status': 'complete', 'details': 'IGameStateNotifier defined'}
         : {'status': 'missing', 'details': 'Interface file not found'};
 
     // Check adapters
-    status['Enhanced Adapter'] = await _checkFileExists('lib/core/adapters/enhanced_notifier_adapter.dart')
+    status['Enhanced Adapter'] = await _checkFileExists(
+            'lib/core/adapters/enhanced_notifier_adapter.dart')
         ? {'status': 'complete', 'details': 'Adapter implemented'}
         : {'status': 'missing', 'details': 'Adapter file not found'};
 
-    status['V3 Adapter'] = await _checkFileExists('lib/core/adapters/v3_notifier_adapter.dart')
-        ? {'status': 'complete', 'details': 'Adapter implemented'}
-        : {'status': 'missing', 'details': 'Adapter file not found'};
+    status['V3 Adapter'] =
+        await _checkFileExists('lib/core/adapters/v3_notifier_adapter.dart')
+            ? {'status': 'complete', 'details': 'Adapter implemented'}
+            : {'status': 'missing', 'details': 'Adapter file not found'};
 
     // Check feature flags
-    status['Feature Flags'] = await _checkFileExists('lib/core/migration/feature_flag_service.dart')
-        ? {'status': 'complete', 'details': 'Feature flag service implemented'}
-        : {'status': 'missing', 'details': 'Feature flag service not found'};
+    status['Feature Flags'] =
+        await _checkFileExists('lib/core/migration/feature_flag_service.dart')
+            ? {
+                'status': 'complete',
+                'details': 'Feature flag service implemented'
+              }
+            : {
+                'status': 'missing',
+                'details': 'Feature flag service not found'
+              };
 
     // Check migration controller
-    status['Migration Controller'] = await _checkFileExists('lib/core/migration/notifier_migration_controller.dart')
+    status['Migration Controller'] = await _checkFileExists(
+            'lib/core/migration/notifier_migration_controller.dart')
         ? {'status': 'complete', 'details': 'Migration controller implemented'}
         : {'status': 'missing', 'details': 'Migration controller not found'};
 
     // Check unified providers
-    status['Unified Providers'] = await _checkFileExists('lib/application/providers/unified_providers.dart')
-        ? {'status': 'complete', 'details': 'Unified provider system implemented'}
+    status['Unified Providers'] = await _checkFileExists(
+            'lib/application/providers/unified_providers.dart')
+        ? {
+            'status': 'complete',
+            'details': 'Unified provider system implemented'
+          }
         : {'status': 'missing', 'details': 'Unified providers not found'};
 
     // Check migration tracker
@@ -228,8 +250,10 @@ class MigrationValidator {
     // Check for anti-patterns (ref.read() calls)
     if (content.contains('ref.read(') || content.contains('ref.watch(')) {
       // Allow if it's in a provider definition or clean context
-      if (content.contains('Provider(') || content.contains('StateNotifierProvider(') ||
-          content.contains('final.*Provider') || content.contains('ref.watch(gameCanvasOrchestratorProvider')) {
+      if (content.contains('Provider(') ||
+          content.contains('StateNotifierProvider(') ||
+          content.contains('final.*Provider') ||
+          content.contains('ref.watch(gameCanvasOrchestratorProvider')) {
         return true; // Provider definitions are OK
       }
       return false; // Has ref.read() calls that aren't in provider definitions
@@ -237,32 +261,32 @@ class MigrationValidator {
 
     // Check for clean architecture patterns
     final hasCleanPatterns = content.contains('final.*UseCase') ||
-                            content.contains('final.*Service') ||
-                            content.contains('final.*Repository') ||
-                            content.contains('constructor') ||
-                            content.contains('required this.') ||
-                            content.contains('@override') ||
-                            content.contains('implements') ||
-                            content.contains('abstract class');
+        content.contains('final.*Service') ||
+        content.contains('final.*Repository') ||
+        content.contains('constructor') ||
+        content.contains('required this.') ||
+        content.contains('@override') ||
+        content.contains('implements') ||
+        content.contains('abstract class');
 
     // Pure utility/service classes without providers
     final isPureService = !content.contains('import.*riverpod') &&
-                         !content.contains('ConsumerWidget') &&
-                         !content.contains('StatefulWidget') &&
-                         !content.contains('StatelessWidget') &&
-                         (content.contains('class.*Service') ||
-                          content.contains('class.*Manager') ||
-                          content.contains('class.*Helper') ||
-                          content.contains('class.*Validator') ||
-                          content.contains('class.*Calculator'));
+        !content.contains('ConsumerWidget') &&
+        !content.contains('StatefulWidget') &&
+        !content.contains('StatelessWidget') &&
+        (content.contains('class.*Service') ||
+            content.contains('class.*Manager') ||
+            content.contains('class.*Helper') ||
+            content.contains('class.*Validator') ||
+            content.contains('class.*Calculator'));
 
     // Mathematical/simulation classes
     final isMathSimulation = content.contains('class.*Solver') ||
-                            content.contains('class.*Engine') ||
-                            content.contains('class.*Simulation') ||
-                            content.contains('List<List<double>>') ||
-                            content.contains('Matrix') ||
-                            content.contains('Vector');
+        content.contains('class.*Engine') ||
+        content.contains('class.*Simulation') ||
+        content.contains('List<List<double>>') ||
+        content.contains('Matrix') ||
+        content.contains('Vector');
 
     return hasCleanPatterns || isPureService || isMathSimulation;
   }
@@ -282,20 +306,24 @@ class MigrationValidator {
         .toList();
 
     if (missingInfrastructure.isNotEmpty) {
-      recommendations.add('Complete missing infrastructure: ${missingInfrastructure.join(', ')}');
+      recommendations.add(
+          'Complete missing infrastructure: ${missingInfrastructure.join(', ')}');
     }
 
     // Migration recommendations
     final pendingCount = migrationStatus['pendingFiles'].length;
     if (pendingCount > 0) {
-      recommendations.add('Migrate remaining $pendingCount files to unified provider system');
-      recommendations.add('Focus on high-priority files first (use cases, services, core components)');
+      recommendations.add(
+          'Migrate remaining $pendingCount files to unified provider system');
+      recommendations.add(
+          'Focus on high-priority files first (use cases, services, core components)');
       recommendations.add('Update tests to use unified provider patterns');
     }
 
     // Completion recommendations
     if (completionPercentage < 0.95) {
-      recommendations.add('Continue migration until 95% completion threshold is reached');
+      recommendations
+          .add('Continue migration until 95% completion threshold is reached');
       recommendations.add('Run validation script regularly to track progress');
     } else if (completionPercentage >= 0.95 && completionPercentage < 1.0) {
       recommendations.add('Complete final migration touches and cleanup');
@@ -307,8 +335,10 @@ class MigrationValidator {
     }
 
     // Testing recommendations
-    recommendations.add('Ensure all migrated files have corresponding unit tests');
-    recommendations.add('Run integration tests to validate unified provider behavior');
+    recommendations
+        .add('Ensure all migrated files have corresponding unit tests');
+    recommendations
+        .add('Run integration tests to validate unified provider behavior');
     recommendations.add('Set up performance monitoring for the new system');
 
     return recommendations;
@@ -319,7 +349,8 @@ class MigrationValidator {
 void main() async {
   try {
     print('🚀 Circuit STEM - Game State Notifier Consolidation Validator');
-    print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    print(
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     final result = await MigrationValidator.validate();
 
@@ -339,7 +370,6 @@ void main() async {
 
     // Exit with appropriate code
     exit(result.isComplete ? 0 : 1);
-
   } catch (e, stackTrace) {
     print('❌ Validation failed: $e');
     print('Stack trace: $stackTrace');

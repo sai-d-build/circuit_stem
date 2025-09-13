@@ -1,16 +1,17 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/states/game_canvas_state.dart';
+import 'package:sparkcircuit/application/services/interfaces/canvas_rendering_service.dart';
 import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';
 import 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart';
-import 'package:sparkcircuit/application/services/interfaces/canvas_rendering_service.dart';
 import 'package:sparkcircuit/application/services/level_service.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
+import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
 
 // Re-export for convenience
-export 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart' show GestureProcessingResult;
+export 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart'
+    show GestureProcessingResult;
 // Export locally defined types
 export 'package:sparkcircuit/application/states/game_canvas_state.dart';
 
@@ -29,30 +30,33 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
     required dynamic interactionService,
     required dynamic renderingService,
     PaletteStateNotifier? paletteStateNotifier,
-  }) :
-        _interactionService = interactionService,
+  })  : _interactionService = interactionService,
         _renderingService = renderingService,
         _paletteStateNotifier = paletteStateNotifier,
         super(GameCanvasState.initial()) {
     StructuredLogger.info('GameCanvasOrchestrator initialized', context: {
       'interactionService': interactionService.runtimeType.toString(),
       'renderingService': renderingService.runtimeType.toString(),
-      'paletteStateNotifier': paletteStateNotifier?.runtimeType.toString() ?? 'none',
+      'paletteStateNotifier':
+          paletteStateNotifier?.runtimeType.toString() ?? 'none',
     });
   }
 
   /// Initialize the canvas with a level
   Future<void> initializeLevel(String levelId) async {
-    StructuredLogger.info('Orchestrator: Starting level initialization', context: {
-      'levelId': levelId,
-      'currentState_error': state.error,
-      'currentState_isLoading': state.isLoading,
-      'current_viewport_scale': state.viewportState.scale,
-      'current_viewport_canvasSize': state.viewportState.canvasSize.toString(),
-      'current_gridConfig_rows': state.viewportState.gridConfiguration.rows,
-      'current_gridConfig_cols': state.viewportState.gridConfiguration.cols,
-      'current_gridConfig_cellSize': state.viewportState.gridConfiguration.cellSize,
-    });
+    StructuredLogger.info('Orchestrator: Starting level initialization',
+        context: {
+          'levelId': levelId,
+          'currentState_error': state.error,
+          'currentState_isLoading': state.isLoading,
+          'current_viewport_scale': state.viewportState.scale,
+          'current_viewport_canvasSize':
+              state.viewportState.canvasSize.toString(),
+          'current_gridConfig_rows': state.viewportState.gridConfiguration.rows,
+          'current_gridConfig_cols': state.viewportState.gridConfiguration.cols,
+          'current_gridConfig_cellSize':
+              state.viewportState.gridConfiguration.cellSize,
+        });
 
     state = state.copyWith(isLoading: true);
 
@@ -63,22 +67,31 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
       if (level != null) {
         // 🔥 CRITICAL FIX: Reset palette inventory when loading new level
         // This clears zombie components and replenishes depleted inventory
-        StructuredLogger.debug('🔄 GameCanvasOrchestrator: Checking palette state notifier', context: {
-          'levelId': levelId,
-          'paletteStateNotifier': _paletteStateNotifier?.runtimeType.toString() ?? 'NULL',
-          'isNull': _paletteStateNotifier == null,
-        });
+        StructuredLogger.debug(
+            '🔄 GameCanvasOrchestrator: Checking palette state notifier',
+            context: {
+              'levelId': levelId,
+              'paletteStateNotifier':
+                  _paletteStateNotifier?.runtimeType.toString() ?? 'NULL',
+              'isNull': _paletteStateNotifier == null,
+            });
 
         if (_paletteStateNotifier != null) {
-          StructuredLogger.info('🔄 GameCanvasOrchestrator: Resetting palette inventory for fresh level start');
-          await _paletteStateNotifier!.reset();
-          StructuredLogger.info('🔄 GameCanvasOrchestrator: Palette reset completed successfully');
+          StructuredLogger.info(
+              '🔄 GameCanvasOrchestrator: Resetting palette inventory for fresh level start');
+          await _paletteStateNotifier.reset();
+          StructuredLogger.info(
+              '🔄 GameCanvasOrchestrator: Palette reset completed successfully');
         } else {
-          StructuredLogger.error('🔄 GameCanvasOrchestrator: Cannot reset palette - notifier is NULL', context: {
-            'levelId': levelId,
-            'problem': 'PaletteStateNotifier was not injected into GameCanvasOrchestrator',
-            'solution': 'Check provider configuration in core_providers.dart',
-          });
+          StructuredLogger.error(
+              '🔄 GameCanvasOrchestrator: Cannot reset palette - notifier is NULL',
+              context: {
+                'levelId': levelId,
+                'problem':
+                    'PaletteStateNotifier was not injected into GameCanvasOrchestrator',
+                'solution':
+                    'Check provider configuration in core_providers.dart',
+              });
         }
 
         final renderingData = _renderingService.buildRenderingData(level);
@@ -86,7 +99,7 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
         // 🛠️ MAINTAIN VISUAL GRID AT 20x20 FOR DISPLAY
         // While underlying logic uses level dimensions internally
         final visualGridConfig = GridConfiguration(
-          rows: 20,  // Keep visual grid at 20x20 for display consistency
+          rows: 20, // Keep visual grid at 20x20 for display consistency
           cols: 20,
           cellSize: state.viewportState.gridConfiguration.cellSize,
         );
@@ -102,13 +115,21 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
           isLoading: false,
         );
 
-        StructuredLogger.info('Level initialized with visual grid maintained', context: {
-          'levelId': level.levelId,
-          'componentCount': level.components.available.length,
-          'levelGridDimensions': {'rows': level.grid.height, 'cols': level.grid.width},
-          'visualGridDimensions': {'rows': 20, 'cols': 20, 'reason': 'maintained_for_display_consistency'},
-          'isSynchronized': true,
-        });
+        StructuredLogger.info('Level initialized with visual grid maintained',
+            context: {
+              'levelId': level.levelId,
+              'componentCount': level.components.available.length,
+              'levelGridDimensions': {
+                'rows': level.grid.height,
+                'cols': level.grid.width
+              },
+              'visualGridDimensions': {
+                'rows': 20,
+                'cols': 20,
+                'reason': 'maintained_for_display_consistency'
+              },
+              'isSynchronized': true,
+            });
       } else {
         state = state.copyWith(
           isLoading: false,
@@ -126,10 +147,12 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
         error: 'Error initializing level: $e',
       );
 
-      StructuredLogger.error('Level initialization error', context: {
-        'levelId': levelId,
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.error('Level initialization error',
+          context: {
+            'levelId': levelId,
+            'error': e.toString(),
+          },
+          error: e);
     }
   }
 
@@ -156,10 +179,12 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
         'sideEffectsCount': result.sideEffects.length,
       });
     } catch (e) {
-      StructuredLogger.error('Gesture processing failed', context: {
-        'gestureType': event.type.toString(),
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.error('Gesture processing failed',
+          context: {
+            'gestureType': event.type.toString(),
+            'error': e.toString(),
+          },
+          error: e);
     }
   }
 
@@ -201,11 +226,13 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
     StructuredLogger.debug('Orchestrator: Executing viewport update', context: {
       'updateType': sideEffect.runtimeType.toString(),
       'newViewport_scale': sideEffect.newViewportState.scale,
-      'newViewport_canvasSize': sideEffect.newViewportState.canvasSize.toString(),
+      'newViewport_canvasSize':
+          sideEffect.newViewportState.canvasSize.toString(),
       'newViewport_panOffset': sideEffect.newViewportState.panOffset.toString(),
       'newGridConfig_rows': sideEffect.newViewportState.gridConfiguration.rows,
       'newGridConfig_cols': sideEffect.newViewportState.gridConfiguration.cols,
-      'newGridConfig_cellSize': sideEffect.newViewportState.gridConfiguration.cellSize,
+      'newGridConfig_cellSize':
+          sideEffect.newViewportState.gridConfiguration.cellSize,
     });
 
     // Update viewport state
@@ -218,7 +245,8 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
       'updated_viewport_canvasSize': state.viewportState.canvasSize.toString(),
       'updated_gridConfig_rows': state.viewportState.gridConfiguration.rows,
       'updated_gridConfig_cols': state.viewportState.gridConfiguration.cols,
-      'updated_gridConfig_cellSize': state.viewportState.gridConfiguration.cellSize,
+      'updated_gridConfig_cellSize':
+          state.viewportState.gridConfiguration.cellSize,
     });
   }
 
@@ -255,11 +283,13 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
 
       return level;
     } catch (e, stackTrace) {
-      StructuredLogger.error('Failed to load level', context: {
-        'levelId': levelId,
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-      }, error: e);
+      StructuredLogger.error('Failed to load level',
+          context: {
+            'levelId': levelId,
+            'error': e.toString(),
+            'stackTrace': stackTrace.toString(),
+          },
+          error: e);
       return null;
     }
   }
@@ -268,7 +298,8 @@ class GameCanvasOrchestrator extends StateNotifier<GameCanvasState> {
   GameCanvasState get currentState => state;
 
   /// Check if canvas is ready for interaction
-  bool get isReady => !state.isLoading && state.error == null && state.currentLevel != null;
+  bool get isReady =>
+      !state.isLoading && state.error == null && state.currentLevel != null;
 }
 
 // ============================================================================
@@ -358,7 +389,8 @@ class GestureInputEvent {
     );
   }
 
-  factory GestureInputEvent.scaleUpdate(Offset position, double scale, int pointerCount) {
+  factory GestureInputEvent.scaleUpdate(
+      Offset position, double scale, int pointerCount) {
     return GestureInputEvent(
       type: GestureEventType.scaleUpdate,
       position: position,

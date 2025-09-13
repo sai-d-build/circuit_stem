@@ -26,7 +26,8 @@ class ParticleEffect extends StatefulWidget {
   State<ParticleEffect> createState() => _ParticleEffectState();
 }
 
-class _ParticleEffectState extends State<ParticleEffect> with SingleTickerProviderStateMixin {
+class _ParticleEffectState extends State<ParticleEffect>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final List<_Particle> _particles = [];
   final Random _random = Random();
@@ -40,9 +41,7 @@ class _ParticleEffectState extends State<ParticleEffect> with SingleTickerProvid
     )..repeat();
 
     _controller.addListener(() {
-      setState(() {
-        _updateParticles();
-      });
+      setState(_updateParticles);
     });
 
     _initParticles();
@@ -52,7 +51,7 @@ class _ParticleEffectState extends State<ParticleEffect> with SingleTickerProvid
     final centerX = widget.spawnPosition?.dx ?? 0.5;
     final centerY = widget.spawnPosition?.dy ?? 0.5;
 
-    for (int i = 0; i < widget.numberOfParticles; i++) {
+    for (var i = 0; i < widget.numberOfParticles; i++) {
       final angle = _random.nextDouble() * 2 * pi;
       final speed = _random.nextDouble() * 0.01 + 0.005;
 
@@ -63,13 +62,14 @@ class _ParticleEffectState extends State<ParticleEffect> with SingleTickerProvid
           sin(angle) * speed,
         ),
         life: _random.nextDouble() * 0.8 + 0.2, // 0.2 to 1.0
-        size: _random.nextDouble() * widget.particleSize + widget.particleSize * 0.5,
+        size: _random.nextDouble() * widget.particleSize +
+            widget.particleSize * 0.5,
       ));
     }
   }
 
   void _updateParticles() {
-    for (int i = 0; i < widget.numberOfParticles; i++) {
+    for (var i = 0; i < widget.numberOfParticles; i++) {
       final particle = _particles[i];
 
       // Update position
@@ -77,7 +77,8 @@ class _ParticleEffectState extends State<ParticleEffect> with SingleTickerProvid
 
       // Apply gravity if enabled
       if (widget.enablePhysics) {
-        particle.velocity = particle.velocity + Offset(0, widget.gravity * 0.001);
+        particle.velocity =
+            particle.velocity + Offset(0, widget.gravity * 0.001);
       }
 
       // Update life
@@ -107,7 +108,8 @@ class _ParticleEffectState extends State<ParticleEffect> with SingleTickerProvid
       sin(angle) * speed,
     );
     particle.life = _random.nextDouble() * 0.8 + 0.2;
-    particle.size = _random.nextDouble() * widget.particleSize + widget.particleSize * 0.5;
+    particle.size =
+        _random.nextDouble() * widget.particleSize + widget.particleSize * 0.5;
   }
 
   @override
@@ -194,7 +196,7 @@ class SparkEffect extends StatelessWidget {
     return ParticleEffect(
       numberOfParticles: 20,
       particleColor: colors.energyPulse,
-      particleSize: 2.0,
+      particleSize: 2,
       animationDuration: const Duration(milliseconds: 800),
       enablePhysics: false,
       spawnPosition: position,
@@ -213,7 +215,7 @@ class FireworkEffect extends StatelessWidget {
     return ParticleEffect(
       numberOfParticles: 100,
       particleColor: colors.neonAccent,
-      particleSize: 4.0,
+      particleSize: 4,
       animationDuration: const Duration(seconds: 2),
       enablePhysics: true,
       gravity: 0.05,

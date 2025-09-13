@@ -33,7 +33,8 @@ class ABTestConfig {
       variants: List<String>.from(json['variants'] as List),
       weights: Map<String, double>.from(json['weights'] ?? {}),
       isActive: json['isActive'] ?? true,
-      startDate: json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
+      startDate:
+          json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
       endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
     );
   }
@@ -258,7 +259,8 @@ class ABTestingService {
       return {
         'testId': testId,
         'totalEvents': 0,
-        'variants': config.variants.map((v) => {'name': v, 'count': 0}).toList(),
+        'variants':
+            config.variants.map((v) => {'name': v, 'count': 0}).toList(),
       };
     }
 
@@ -279,14 +281,15 @@ class ABTestingService {
     return {
       'testId': testId,
       'totalEvents': testEvents.length,
-      'variants': variantCounts.entries.map((e) => {
-        'name': e.key,
-        'count': e.value,
-      }).toList(),
+      'variants': variantCounts.entries
+          .map((e) => {
+                'name': e.key,
+                'count': e.value,
+              })
+          .toList(),
       'config': config.toJson(),
     };
   }
-
 
   /// Force reset all assignments (for testing)
   void resetAllAssignments() {
@@ -303,10 +306,11 @@ class ABTestingService {
     }
 
     // Weighted selection
-    final totalWeight = config.weights.values.fold(0.0, (sum, weight) => sum + weight);
+    final totalWeight =
+        config.weights.values.fold(0.0, (sum, weight) => sum + weight);
     final randomValue = _random.nextDouble() * totalWeight;
 
-    double cumulativeWeight = 0.0;
+    var cumulativeWeight = 0.0;
     for (final variant in config.variants) {
       cumulativeWeight += config.weights[variant] ?? 1.0;
       if (randomValue <= cumulativeWeight) {
@@ -328,11 +332,13 @@ class ABTestingService {
     // For now, just log the batch
     StructuredLogger.info('A/B test events batch processed', context: {
       'eventCount': events.length,
-      'events': events.map((e) => {
-        'testId': e.testId,
-        'variant': e.variant,
-        'eventType': e.eventType,
-      }).toList(),
+      'events': events
+          .map((e) => {
+                'testId': e.testId,
+                'variant': e.variant,
+                'eventType': e.eventType,
+              })
+          .toList(),
     });
 
     // Save events to storage for persistence

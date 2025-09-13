@@ -1,17 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../application/providers/unified_providers.dart';
-import '../../core/migration/migration_tracker.dart';
+
 import '../../application/game_engine/v3/providers_v3.dart' as v3_providers;
 import '../../application/providers/core_providers.dart' as core_providers;
+import '../../application/providers/unified_providers.dart';
+import '../../core/migration/migration_tracker.dart';
 import '../features/game/services/viewport_service.dart';
 import '../state/palette_state.dart';
 
 // ✅ CLEAN ARCHITECTURE: Injected presentation service
 class CentralInteractionService {
-  final dynamic gameStateNotifier;        // ✅ Injected
-  final dynamic levelService;             // ✅ Injected
-  final Function(String, dynamic) loadGameLevel;   // ✅ Injected function
-  final Function(String) initializeOrchestrator;   // ✅ Injected function
+  final dynamic gameStateNotifier; // ✅ Injected
+  final dynamic levelService; // ✅ Injected
+  final Function(String, dynamic) loadGameLevel; // ✅ Injected function
+  final Function(String) initializeOrchestrator; // ✅ Injected function
   final String levelId;
 
   CentralInteractionService({
@@ -51,9 +52,11 @@ class CentralInteractionService {
 }
 
 // ✅ PROVIDER: Single injection point - MIGRATED to clean architecture
-final centralInteractionServiceProvider = Provider.family<CentralInteractionService, String>(
+final centralInteractionServiceProvider =
+    Provider.family<CentralInteractionService, String>(
   (ref, levelId) {
-    MigrationTracker.markFileMigrated('central_interaction_helper.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated(
+        'central_interaction_helper.dart', DateTime.now().toIso8601String());
 
     // ✅ CLEAN: Use watch for reactive dependencies, read only for initialization
     final gameStateNotifier = ref.watch(unifiedGameStateProvider.notifier);
@@ -62,8 +65,12 @@ final centralInteractionServiceProvider = Provider.family<CentralInteractionServ
     return CentralInteractionService(
       gameStateNotifier: gameStateNotifier,
       levelService: levelService,
-      loadGameLevel: (levelId, levelData) => gameStateNotifier.loadLevel(levelData),
-      initializeOrchestrator: (levelId) => ref.watch(core_providers.gameCanvasOrchestratorProvider(levelId).notifier).initializeLevel(levelId),
+      loadGameLevel: (levelId, levelData) =>
+          gameStateNotifier.loadLevel(levelData),
+      initializeOrchestrator: (levelId) => ref
+          .watch(
+              core_providers.gameCanvasOrchestratorProvider(levelId).notifier)
+          .initializeLevel(levelId),
       levelId: levelId,
     );
   },

@@ -1,15 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../common/logger.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 
+import '../common/logger.dart';
+import 'component_selection_notifier.dart';
 import 'core/result.dart';
-
+import 'game_engine_state.dart';
+import 'game_progress_notifier.dart';
 import 'grid_notifier.dart';
 import 'history_notifier.dart';
-import 'game_progress_notifier.dart';
-import 'component_selection_notifier.dart';
 import 'interaction_state_notifier.dart';
-import 'game_engine_state.dart';
 
 /// Central orchestrator for the V2 game engine architecture
 /// Coordinates all notifiers and manages cross-cutting concerns
@@ -47,7 +46,11 @@ class GameEngineOrchestrator {
     grid.addListener((state) {
       if (grid.current.components.isNotEmpty) {
         history.pushState(
-          {'components': state.components, 'rows': state.rows, 'cols': state.cols},
+          {
+            'components': state.components,
+            'rows': state.rows,
+            'cols': state.cols
+          },
           {'selectedComponentId': selection.selectedComponentId},
         );
       }
@@ -56,9 +59,9 @@ class GameEngineOrchestrator {
     // Selection changes should update interaction state
     selection.addListener((state) {
       if (selection.current.hasSelection) {
-        interaction.setInteractionMode('component_selected');
+        interaction.setInteractionMode('component_selected'); // ignore: cascade_invocations
       } else {
-        interaction.setInteractionMode('normal');
+        interaction.setInteractionMode('normal'); // ignore: cascade_invocations
       }
     });
   }
@@ -80,8 +83,6 @@ class GameEngineOrchestrator {
     // Reset interaction state
     interaction.resetToIdle();
   }
-
-  
 
   /// Handle level loading coordination
   void onLevelLoaded(String levelId, Grid levelGrid) {
@@ -111,14 +112,14 @@ class GameEngineOrchestrator {
         difficulty: 'medium',
       ),
       grid: GridConfig(width: levelGrid.cols, height: levelGrid.rows),
-      components: ComponentConfig(
+      components: const ComponentConfig(
         available: [],
         preplaced: [],
         // layout and other complex parameters would need to be defined
         // based on the actual ComponentConfig class definition
       ),
       goals: [],
-      validation: ValidationRules(
+      validation: const ValidationRules(
         circuitRules: [],
         successConditions: [],
       ),
@@ -132,7 +133,8 @@ class GameEngineOrchestrator {
 
     // TODO: Replace with GameEngineNotifierV3.placeComponent when orchestrator is migrated
     // For now, keep legacy GridNotifier call but add logging
-    Logger.log('⚠️ GameEngineOrchestrator: Using legacy GridNotifier.addComponent - migrate to command pattern');
+    Logger.log(
+        '⚠️ GameEngineOrchestrator: Using legacy GridNotifier.addComponent - migrate to command pattern');
     grid.addComponent(component);
 
     // Clear selection after placement
@@ -162,7 +164,8 @@ class GameEngineOrchestrator {
       // Restore grid state
       final gridData = lastState.gridState;
       if (gridData.containsKey('components')) {
-        final components = gridData['components'] as Map<String, ComponentModel>;
+        final components =
+            gridData['components'] as Map<String, ComponentModel>;
         final rows = gridData['rows'] as int;
         final cols = gridData['cols'] as int;
 
@@ -178,9 +181,9 @@ class GameEngineOrchestrator {
       final componentData = lastState.componentStates;
       final selectedId = componentData['selectedComponentId'] as String?;
       if (selectedId != null) {
-        selection.selectGridComponent(selectedId);
+        selection.selectGridComponent(selectedId); // ignore: cascade_invocations
       } else {
-        selection.clearSelection();
+        selection.clearSelection(); // ignore: cascade_invocations
       }
 
       // Remove the state from history
@@ -247,11 +250,11 @@ class GameEngineOrchestrator {
 
 // Provider for GameEngineOrchestrator
 final gameEngineOrchestratorProvider = Provider<GameEngineOrchestrator>((ref) {
-  final grid = ref.watch(gridNotifierProvider.notifier);
-  final history = ref.watch(historyNotifierProvider.notifier);
-  final progress = ref.watch(gameProgressNotifierProvider.notifier);
-  final selection = ref.watch(componentSelectionNotifierProvider.notifier);
-  final interaction = ref.watch(interactionStateNotifierProvider.notifier);
+  final grid = ref.watch(gridNotifierProvider.notifier); // ignore: cascade_invocations
+  final history = ref.watch(historyNotifierProvider.notifier); // ignore: cascade_invocations
+  final progress = ref.watch(gameProgressNotifierProvider.notifier); // ignore: cascade_invocations
+  final selection = ref.watch(componentSelectionNotifierProvider.notifier); // ignore: cascade_invocations
+  final interaction = ref.watch(interactionStateNotifierProvider.notifier); // ignore: cascade_invocations
 
   final orchestrator = GameEngineOrchestrator(
     grid: grid,

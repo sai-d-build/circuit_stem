@@ -9,9 +9,12 @@ class ABTestingDemoService {
   ABTestingDemoService(this._manager);
 
   Future<Map<String, String>> loadTestConfigurations() async {
-    final theme = await _manager.getConfigValue<String>('ui_theme_test', 'theme', 'classic');
-    final tutorialMode = await _manager.getConfigValue<String>('tutorial_flow_test', 'tutorialMode', 'step_by_step');
-    final difficultyMode = await _manager.getConfigValue<String>('difficulty_progression_test', 'progression', 'gradual');
+    final theme = await _manager.getConfigValue<String>(
+        'ui_theme_test', 'theme', 'classic');
+    final tutorialMode = await _manager.getConfigValue<String>(
+        'tutorial_flow_test', 'tutorialMode', 'step_by_step');
+    final difficultyMode = await _manager.getConfigValue<String>(
+        'difficulty_progression_test', 'progression', 'gradual');
 
     return {
       'theme': theme ?? 'classic',
@@ -20,11 +23,13 @@ class ABTestingDemoService {
     };
   }
 
-  Future<void> trackEngagement(String testId, String eventType, Map<String, dynamic> properties) async {
+  Future<void> trackEngagement(
+      String testId, String eventType, Map<String, dynamic> properties) async {
     await _manager.trackEngagement(testId, eventType, properties);
   }
 
-  Future<void> trackConversion(String testId, String eventType, Map<String, dynamic> properties) async {
+  Future<void> trackConversion(
+      String testId, String eventType, Map<String, dynamic> properties) async {
     await _manager.trackConversion(testId, eventType, properties);
   }
 }
@@ -65,7 +70,8 @@ class _ABTestingDemoState extends ConsumerState<ABTestingDemo> {
     });
 
     // Track that user viewed the demo
-    await service.trackEngagement('ui_theme_test', 'demo_viewed', {'theme': _currentTheme});
+    await service.trackEngagement(
+        'ui_theme_test', 'demo_viewed', {'theme': _currentTheme});
   }
 
   Future<void> _trackButtonClick() async {
@@ -90,7 +96,7 @@ class _ABTestingDemoState extends ConsumerState<ABTestingDemo> {
         backgroundColor: _getThemeColor(),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

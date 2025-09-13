@@ -1,6 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:flutter_test/flutter_test.dart';
 // Import the actual providers we want to test
 import 'package:sparkcircuit/application/providers/core_providers.dart';
 
@@ -199,8 +198,10 @@ void main() {
       // This test ensures that the entire dependency graph can be resolved
       // starting from the most dependent provider
 
-      expect(() => container.read(createComponentUseCaseProvider), returnsNormally);
-      expect(() => container.read(checkWinConditionUseCaseProvider), returnsNormally);
+      expect(() => container.read(createComponentUseCaseProvider),
+          returnsNormally);
+      expect(() => container.read(checkWinConditionUseCaseProvider),
+          returnsNormally);
       expect(() => container.read(simulationEngineProvider), returnsNormally);
     });
 

@@ -55,7 +55,8 @@ class CreateComponentFromTemplateAction extends ComponentAction {
     }
 
     if (state.currentLevel != null) {
-      if (row >= state.currentLevel!.grid.height || col >= state.currentLevel!.grid.width) {
+      if (row >= state.currentLevel!.grid.height ||
+          col >= state.currentLevel!.grid.width) {
         return const Failure('Position out of bounds');
       }
     }

@@ -1,6 +1,6 @@
 import '../../../application/game_engine/v3/game_engine_notifier_v3.dart';
-import '../interfaces/game_state_notifier_interface.dart';
 import '../../../domain/entities/entities.dart';
+import '../interfaces/game_state_notifier_interface.dart';
 
 /// Adapter for GameEngineNotifierV3 to implement IGameStateNotifier
 class V3NotifierAdapter extends IGameStateNotifier {

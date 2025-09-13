@@ -1,55 +1,51 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// Domain entities
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
+import '../../application/states/game_state.dart';
+import '../../application/use_cases/providers.dart' as use_case_providers;
+import '../../core/simulation/basic_simulation_engine.dart';
 // Core simulation and solver imports
 import '../../core/simulation/mna_solver.dart';
-import '../services/power_simulation_service.dart';
 import '../../core/simulation/netlist_builder.dart';
-import '../../core/simulation/basic_simulation_engine.dart';
-
+import '../../infrastructure/persistence/shared_preferences_storage_service.dart';
+import '../../presentation/features/game/controllers/canvas_interaction_controller.dart'
+    as canvas_controller;
+// Canvas and orchestrator imports
+import '../../presentation/features/game/controllers/game_canvas_orchestrator.dart'
+    hide InteractionState;
+import '../../presentation/state/palette_state.dart';
+import '../component_selection_notifier.dart'
+    show ComponentSelectionNotifier, ComponentSelectionState;
+import '../component_selection_notifier.dart';
+import '../enhanced_game_state_notifier.dart';
+// Game Engine V3 imports
+import '../game_engine/v3/game_engine_notifier_v3.dart';
+import '../game_progress_notifier.dart' show GameProgressNotifier, GameProgress;
+import '../game_progress_notifier.dart';
+// Missing notifier providers
+import '../grid_notifier.dart';
+// Import notifier classes for provider definitions - Grid is already available via entities import above
+import '../history_notifier.dart' show HistoryNotifier, GameStateSnapshot;
+import '../history_notifier.dart';
+import '../interaction_state_notifier.dart'
+    show InteractionStateNotifier, InteractionState;
+import '../interaction_state_notifier.dart';
 // Services and infrastructure
 import '../services/component_factory.dart';
 import '../services/component_palette_manager.dart';
-import '../../infrastructure/persistence/shared_preferences_storage_service.dart';
 import '../services/goal_checking_service.dart';
-
-// Game Engine V3 imports
-import '../game_engine/v3/game_engine_notifier_v3.dart';
-import '../enhanced_game_state_notifier.dart';
-import '../../application/use_cases/providers.dart' as use_case_providers;
-
-// Missing notifier providers
-import '../grid_notifier.dart';
-import '../history_notifier.dart';
-import '../game_progress_notifier.dart';
-import '../component_selection_notifier.dart';
-import '../interaction_state_notifier.dart';
-
-// Import notifier classes for provider definitions - Grid is already available via entities import above
-import '../history_notifier.dart' show HistoryNotifier, GameStateSnapshot;
-import '../game_progress_notifier.dart' show GameProgressNotifier, GameProgress;
-import '../component_selection_notifier.dart' show ComponentSelectionNotifier, ComponentSelectionState;
-import '../interaction_state_notifier.dart' show InteractionStateNotifier, InteractionState;
-
-// Domain entities
-import 'package:sparkcircuit/domain/entities/entities.dart';
-import '../../application/states/game_state.dart';
-
-import '../../presentation/state/palette_state.dart';
-
-// Canvas and orchestrator imports
-import '../../presentation/features/game/controllers/game_canvas_orchestrator.dart' hide InteractionState;
-import '../../presentation/features/game/controllers/canvas_interaction_controller.dart' as canvas_controller;
+import '../services/implementations/canvas_business_service_impl.dart';
+import '../services/implementations/canvas_rendering_service_impl.dart';
+import '../services/implementations/component_inventory_service_impl.dart';
+import '../services/implementations/component_placement_service_impl.dart';
+import '../services/implementations/game_interaction_service_impl.dart';
+import '../services/implementations/grid_validation_service_impl.dart';
+import '../services/interfaces/canvas_rendering_service.dart';
 import '../services/interfaces/component_placement_service.dart';
 import '../services/interfaces/game_interaction_service.dart';
-import '../services/interfaces/canvas_rendering_service.dart';
-import '../services/implementations/game_interaction_service_impl.dart';
-import '../services/implementations/canvas_rendering_service_impl.dart';
-import '../services/implementations/component_placement_service_impl.dart';
-import '../services/implementations/component_inventory_service_impl.dart';
-import '../services/implementations/grid_validation_service_impl.dart';
-import '../services/implementations/canvas_business_service_impl.dart';
 import '../services/placement_service_adapter.dart';
-import '../../presentation/state/palette_state.dart';
+import '../services/power_simulation_service.dart';
 
 // Provider imports (moved from bottom) - consolidated with class imports above
 
@@ -79,17 +75,19 @@ final simulationEngineProvider = Provider((ref) {
 // ============================================================================
 
 // Game Engine V3 Provider - Clean implementation
-final gameEngineNotifierV3Provider = StateNotifierProvider<GameEngineNotifierV3, GameState>((ref) {
+final gameEngineNotifierV3Provider =
+    StateNotifierProvider<GameEngineNotifierV3, GameState>((ref) {
   return GameEngineNotifierV3();
 });
 
 // Enhanced Game State Provider with full dependencies (for consolidation plan)
-final enhancedGameStateNotifierProvider = StateNotifierProvider<EnhancedGameStateNotifier, GameState>((ref) {
-  final simulationEngine = ref.watch(simulationEngineProvider);
-  final netlistBuilder = ref.watch(netlistBuilderProvider);
-  final storageService = ref.watch(storageServiceProvider);
-  final commandStack = ref.watch(use_case_providers.commandStackProvider);
-  final componentFactory = ref.watch(componentFactoryProvider);
+final enhancedGameStateNotifierProvider =
+    StateNotifierProvider<EnhancedGameStateNotifier, GameState>((ref) {
+  final simulationEngine = ref.watch(simulationEngineProvider); // ignore: cascade_invocations
+  final netlistBuilder = ref.watch(netlistBuilderProvider); // ignore: cascade_invocations
+  final storageService = ref.watch(storageServiceProvider); // ignore: cascade_invocations
+  final commandStack = ref.watch(use_case_providers.commandStackProvider); // ignore: cascade_invocations
+  final componentFactory = ref.watch(componentFactoryProvider); // ignore: cascade_invocations
 
   return EnhancedGameStateNotifier(
     simulationEngine: simulationEngine,
@@ -132,22 +130,27 @@ final gridNotifierProvider = StateNotifierProvider<GridNotifier, Grid>((ref) {
 });
 
 // History Notifier Provider - Manages undo/redo history
-final historyNotifierProvider = StateNotifierProvider<HistoryNotifier, List<GameStateSnapshot>>((ref) {
+final historyNotifierProvider =
+    StateNotifierProvider<HistoryNotifier, List<GameStateSnapshot>>((ref) {
   return HistoryNotifier();
 });
 
 // Game Progress Notifier Provider - Manages game progress state
-final gameProgressNotifierProvider = StateNotifierProvider<GameProgressNotifier, GameProgress>((ref) {
+final gameProgressNotifierProvider =
+    StateNotifierProvider<GameProgressNotifier, GameProgress>((ref) {
   return GameProgressNotifier();
 });
 
 // Component Selection Notifier Provider - Manages component selection state
-final componentSelectionNotifierProvider = StateNotifierProvider<ComponentSelectionNotifier, ComponentSelectionState>((ref) {
+final componentSelectionNotifierProvider =
+    StateNotifierProvider<ComponentSelectionNotifier, ComponentSelectionState>(
+        (ref) {
   return ComponentSelectionNotifier();
 });
 
 // Interaction State Notifier Provider - Manages interaction state
-final interactionStateNotifierProvider = StateNotifierProvider<InteractionStateNotifier, InteractionState>((ref) {
+final interactionStateNotifierProvider =
+    StateNotifierProvider<InteractionStateNotifier, InteractionState>((ref) {
   return InteractionStateNotifier();
 });
 
@@ -174,9 +177,9 @@ final componentPaletteManagerProvider = Provider((ref) {
 
 // Shared Preferences Storage Provider - User settings and data
 final storageServiceProvider = Provider<SharedPreferencesStorageService>((ref) {
-  throw UnimplementedError('SharedPreferencesStorageService must be initialized in main.dart and overridden via ProviderScope');
+  throw UnimplementedError(
+      'SharedPreferencesStorageService must be initialized in main.dart and overridden via ProviderScope');
 });
-
 
 // ============================================================================
 // UI STATE PROVIDERS
@@ -186,8 +189,12 @@ final storageServiceProvider = Provider<SharedPreferencesStorageService>((ref) {
 final paletteDragActiveProvider = StateProvider<bool>((ref) => false);
 
 // Interaction State Provider - For canvas drag-drop interactions
-final interactionStateProvider = StateNotifierProvider.family<canvas_controller.InteractionStateNotifier, canvas_controller.InteractionState, String>(
-  (ref, levelId) => canvas_controller.InteractionStateNotifier(ref: ref, levelId: levelId),
+final interactionStateProvider = StateNotifierProvider.family<
+    canvas_controller.InteractionStateNotifier,
+    canvas_controller.InteractionState,
+    String>(
+  (ref, levelId) =>
+      canvas_controller.InteractionStateNotifier(ref: ref, levelId: levelId),
 );
 
 // ============================================================================
@@ -195,7 +202,8 @@ final interactionStateProvider = StateNotifierProvider.family<canvas_controller.
 // ============================================================================
 
 // Goal Checking Service Provider - Validates level completion
-final goalCheckingServiceProvider = Provider((ref) => GoalCheckingService());
+final goalCheckingServiceProvider =
+    Provider((ref) => const GoalCheckingService());
 
 // ============================================================================
 // USE CASE PROVIDERS
@@ -204,8 +212,8 @@ final goalCheckingServiceProvider = Provider((ref) => GoalCheckingService());
 
 // Component Creation Use Case Provider - Placeholder implementation
 final createComponentUseCaseProvider = Provider((ref) {
-  final factory = ref.watch(componentFactoryProvider);
-  final simulation = ref.watch(powerSimulationServiceProvider);
+  final factory = ref.watch(componentFactoryProvider); // ignore: cascade_invocations
+  final simulation = ref.watch(powerSimulationServiceProvider); // ignore: cascade_invocations
   // Simple placeholder - replace with actual use case when available
   return {
     'factory': factory,
@@ -230,10 +238,10 @@ final checkWinConditionUseCaseProvider = Provider((ref) {
 
 // Game Canvas Orchestrator Provider (from game_canvas_providers.dart)
 final gameCanvasOrchestratorProvider = StateNotifierProvider.family<
-  GameCanvasOrchestrator,
-  GameCanvasState,
-  String  // levelId
->((ref, levelId) {
+    GameCanvasOrchestrator,
+    GameCanvasState,
+    String // levelId
+    >((ref, levelId) {
   return GameCanvasOrchestrator(
     interactionService: ref.watch(gameInteractionServiceProvider),
     renderingService: ref.watch(canvasRenderingServiceProvider),
@@ -242,9 +250,11 @@ final gameCanvasOrchestratorProvider = StateNotifierProvider.family<
 });
 
 // Component Placement Service Provider (from game_canvas_providers.dart)
-final componentPlacementServiceProvider = Provider.family<ComponentPlacementService, String>((ref, levelId) {
+final componentPlacementServiceProvider =
+    Provider.family<ComponentPlacementService, String>((ref, levelId) {
   // Use concrete implementations
-  final paletteStateNotifier = ref.watch(paletteStateProvider(levelId).notifier);
+  final paletteStateNotifier =
+      ref.watch(paletteStateProvider(levelId).notifier);
   final inventoryService = DefaultComponentInventoryService(
     paletteStateNotifier: paletteStateNotifier,
     levelId: levelId,
@@ -270,20 +280,24 @@ final canvasRenderingServiceProvider = Provider<CanvasRenderingService>((ref) {
 });
 
 // Placement Service Adapter Provider - Clean dependency injection
-final placementServiceAdapterProvider = Provider.family<PlacementServiceAdapter, String>((ref, levelId) {
+final placementServiceAdapterProvider =
+    Provider.family<PlacementServiceAdapter, String>((ref, levelId) {
   return PlacementServiceAdapter(
     gameStateNotifier: ref.watch(enhancedGameStateNotifierProvider.notifier),
     paletteStateNotifier: ref.watch(paletteStateProvider(levelId).notifier),
-    componentPlacementService: ref.watch(componentPlacementServiceProvider(levelId)),
+    componentPlacementService:
+        ref.watch(componentPlacementServiceProvider(levelId)),
     levelId: levelId,
   );
 });
 
 // Canvas Business Service Provider - Clean dependency injection
-final canvasBusinessServiceProvider = Provider.family<CanvasBusinessServiceImpl, String>((ref, levelId) {
+final canvasBusinessServiceProvider =
+    Provider.family<CanvasBusinessServiceImpl, String>((ref, levelId) {
   return CanvasBusinessServiceImpl(
     paletteStateNotifier: ref.watch(paletteStateProvider(levelId).notifier),
-    componentPlacementService: ref.watch(componentPlacementServiceProvider(levelId)),
+    componentPlacementService:
+        ref.watch(componentPlacementServiceProvider(levelId)),
   );
 });
 

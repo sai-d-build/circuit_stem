@@ -46,13 +46,15 @@ void main() {
       expect(deserializedGrid.rows, testGrid.rows);
       expect(deserializedGrid.cols, testGrid.cols);
       expect(deserializedGrid.components.length, testGrid.components.length);
-      expect(deserializedGrid.occupiedPositions.length, testGrid.occupiedPositions.length);
+      expect(deserializedGrid.occupiedPositions.length,
+          testGrid.occupiedPositions.length);
     });
 
     test('should handle unknown component types gracefully', () {
       final corruptedJson = testGrid.toJson();
       // Corrupt a component type
-      (corruptedJson['components'] as Map<String, dynamic>)['comp1']!['type'] = 'ComponentType.unknown';
+      (corruptedJson['components'] as Map<String, dynamic>)['comp1']!['type'] =
+          'ComponentType.unknown';
 
       final deserializedGrid = Grid.fromJson(corruptedJson);
 
@@ -83,7 +85,8 @@ void main() {
       final deserializedGrid = Grid.fromJson(json);
 
       // Should have repaired occupied positions
-      expect(deserializedGrid.occupiedPositions.length, testGrid.occupiedPositions.length);
+      expect(deserializedGrid.occupiedPositions.length,
+          testGrid.occupiedPositions.length);
       expect(deserializedGrid.occupiedPositions, testGrid.occupiedPositions);
     });
 
@@ -101,7 +104,8 @@ void main() {
     test('should handle invalid date strings', () {
       final json = testGrid.toJson();
       // Corrupt a date
-      (json['components'] as Map<String, dynamic>)['comp1']!['createdAt'] = 'invalid-date';
+      (json['components'] as Map<String, dynamic>)['comp1']!['createdAt'] =
+          'invalid-date';
 
       final deserializedGrid = Grid.fromJson(json);
 

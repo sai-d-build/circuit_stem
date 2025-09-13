@@ -34,17 +34,17 @@ class _HintChipState extends State<HintChip>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _pulseAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _scaleAnimation = Tween<double>(
-      begin: 1.0,
+      begin: 1,
       end: 1.05,
     ).animate(CurvedAnimation(
       parent: _animationController,
@@ -79,9 +79,9 @@ class _HintChipState extends State<HintChip>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>()!;
-    
+
     final chipColor = widget.customColor ?? circuitColors.secondary;
-    
+
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
@@ -93,7 +93,8 @@ class _HintChipState extends State<HintChip>
               boxShadow: widget.isActive
                   ? [
                       BoxShadow(
-                        color: chipColor.withValues(alpha: 0.3 + (0.4 * _pulseAnimation.value)),
+                        color: chipColor.withValues(
+                            alpha: 0.3 + (0.4 * _pulseAnimation.value)),
                         offset: const Offset(0, 2),
                         blurRadius: 8 + (6 * _pulseAnimation.value),
                         spreadRadius: 1 + (2 * _pulseAnimation.value),
@@ -113,7 +114,8 @@ class _HintChipState extends State<HintChip>
                 onTap: widget.onTap,
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     gradient: LinearGradient(

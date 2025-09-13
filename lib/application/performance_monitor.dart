@@ -1,14 +1,12 @@
-
 import 'dart:collection';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../common/feature_flags.dart';
 
-
 /// Performance monitoring system for tracking UI rebuild reduction
 /// and validating the 60%+ improvement target from hybrid architecture.
-/// 
+///
 /// This system:
 /// - Tracks widget rebuild frequency
 /// - Measures provider watch frequency
@@ -16,9 +14,9 @@ import '../common/feature_flags.dart';
 /// - Provides detailed performance reports
 /// - Enables A/B testing for performance validation
 class PerformanceMonitor {
-  static final PerformanceMonitor _instance = PerformanceMonitor._internal();
+  static final PerformanceMonitor _instance = PerformanceMonitor._internal(); // ignore: cascade_invocations
   factory PerformanceMonitor() => _instance;
-  PerformanceMonitor._internal();
+  PerformanceMonitor._internal(); // ignore: cascade_invocations
 
   // Performance tracking data structures
   final Map<String, RebuildMetrics> _widgetMetrics = {};
@@ -48,7 +46,7 @@ class PerformanceMonitor {
 
     _currentSession = sessionId;
     _sessionStart = DateTime.now();
-    
+
     _sessionMetrics[sessionId] = SessionMetrics(
       sessionId: sessionId,
       userId: userId,
@@ -56,11 +54,13 @@ class PerformanceMonitor {
       isHybridMode: _isHybridModeActive(),
     );
 
-    debugPrint('PerformanceMonitor: Session $sessionId initialized (Hybrid: ${_isHybridModeActive()})');
+    debugPrint(
+        'PerformanceMonitor: Session $sessionId initialized (Hybrid: ${_isHybridModeActive()})');
   }
 
   /// Track widget rebuild events
-  void trackWidgetRebuild(String widgetName, {
+  void trackWidgetRebuild(
+    String widgetName, {
     String? providerId,
     Map<String, dynamic>? context,
   }) {
@@ -68,18 +68,24 @@ class PerformanceMonitor {
 
     final now = DateTime.now();
     final key = '${_currentSession}_$widgetName';
-    
-    _widgetMetrics.putIfAbsent(key, () => RebuildMetrics(
-      widgetName: widgetName,
-      sessionId: _currentSession!,
-      isHybridMode: _isHybridModeActive(),
-    )).recordRebuild(now, providerId: providerId, context: context);
+
+    _widgetMetrics
+        .putIfAbsent(
+            key,
+            () => RebuildMetrics(
+                  widgetName: widgetName,
+                  sessionId: _currentSession!,
+                  isHybridMode: _isHybridModeActive(),
+                ))
+        .recordRebuild(now, providerId: providerId, context: context);
 
     _updateSessionMetrics();
   }
 
   /// Track provider watch events
-  void trackProviderWatch(String providerId, String widgetName, {
+  void trackProviderWatch(
+    String providerId,
+    String widgetName, {
     bool wasDataChanged = false,
     String? previousValue,
     String? newValue,
@@ -89,21 +95,28 @@ class PerformanceMonitor {
     final now = DateTime.now();
     final key = '${_currentSession}_$providerId';
 
-    _providerMetrics.putIfAbsent(key, () => ProviderMetrics(
-      providerId: providerId,
-      sessionId: _currentSession!,
-      isHybridMode: _isHybridModeActive(),
-    )).recordWatch(now, widgetName,
-      wasDataChanged: wasDataChanged,
-      previousValue: previousValue,
-      newValue: newValue,
-    );
+    _providerMetrics
+        .putIfAbsent(
+            key,
+            () => ProviderMetrics(
+                  providerId: providerId,
+                  sessionId: _currentSession!,
+                  isHybridMode: _isHybridModeActive(),
+                ))
+        .recordWatch(
+          now,
+          widgetName,
+          wasDataChanged: wasDataChanged,
+          previousValue: previousValue,
+          newValue: newValue,
+        );
 
     _updateSessionMetrics();
   }
 
   /// Track animation performance
-  void trackAnimationPerformance(String animationId, {
+  void trackAnimationPerformance(
+    String animationId, {
     required Duration loadTime,
     required Duration playTime,
     required int frameCount,
@@ -113,17 +126,22 @@ class PerformanceMonitor {
     if (!_isMonitoringEnabled || _currentSession == null) return;
 
     final key = '${_currentSession}_$animationId';
-    _animationMetrics.putIfAbsent(key, () => AnimationMetrics(
-      animationId: animationId,
-      sessionId: _currentSession!,
-      animationType: animationType,
-    )).recordPerformance(loadTime, playTime, frameCount, hadFrameDrops);
+    _animationMetrics
+        .putIfAbsent(
+            key,
+            () => AnimationMetrics(
+                  animationId: animationId,
+                  sessionId: _currentSession!,
+                  animationType: animationType,
+                ))
+        .recordPerformance(loadTime, playTime, frameCount, hadFrameDrops);
 
     _updateSessionMetrics();
   }
 
   /// Track educational content loading
-  void trackEducationalContentLoad(String contentId, {
+  void trackEducationalContentLoad(
+    String contentId, {
     required Duration loadTime,
     required int contentSize,
     String? contentType, // 'level', 'hint', 'tutorial'
@@ -132,17 +150,22 @@ class PerformanceMonitor {
     if (!_isMonitoringEnabled || _currentSession == null) return;
 
     final key = '${_currentSession}_$contentId';
-    _educationalMetrics.putIfAbsent(key, () => EducationalMetrics(
-      contentId: contentId,
-      sessionId: _currentSession!,
-      contentType: contentType,
-    )).recordLoad(loadTime, contentSize, fromCache);
+    _educationalMetrics
+        .putIfAbsent(
+            key,
+            () => EducationalMetrics(
+                  contentId: contentId,
+                  sessionId: _currentSession!,
+                  contentType: contentType,
+                ))
+        .recordLoad(loadTime, contentSize, fromCache);
 
     _updateSessionMetrics();
   }
 
   /// Track interactive mechanics performance
-  void trackInteractiveAction(String actionType, {
+  void trackInteractiveAction(
+    String actionType, {
     required Duration responseTime,
     required bool success,
     String? componentId,
@@ -151,10 +174,14 @@ class PerformanceMonitor {
     if (!_isMonitoringEnabled || _currentSession == null) return;
 
     final key = '${_currentSession}_$actionType';
-    _interactiveMetrics.putIfAbsent(key, () => InteractiveMetrics(
-      actionType: actionType,
-      sessionId: _currentSession!,
-    )).recordAction(responseTime, success, componentId, context);
+    _interactiveMetrics
+        .putIfAbsent(
+            key,
+            () => InteractiveMetrics(
+                  actionType: actionType,
+                  sessionId: _currentSession!,
+                ))
+        .recordAction(responseTime, success, componentId, context);
 
     _updateSessionMetrics();
   }
@@ -212,9 +239,9 @@ class PerformanceMonitor {
       providerMetrics: Map.from(_providerMetrics),
     );
 
-    _snapshots.addLast(snapshot);
+    _snapshots.addLast(snapshot); // ignore: cascade_invocations
     if (_snapshots.length > maxSnapshotsCount) {
-      _snapshots.removeFirst();
+      _snapshots.removeFirst(); // ignore: cascade_invocations
     }
 
     return snapshot;
@@ -223,30 +250,37 @@ class PerformanceMonitor {
   /// Generate comprehensive performance report
   PerformanceReport generateReport() {
     final hybridSnapshots = _snapshots.where((s) => s.isHybridMode).toList();
-    final monolithicSnapshots = _snapshots.where((s) => !s.isHybridMode).toList();
+    final monolithicSnapshots =
+        _snapshots.where((s) => !s.isHybridMode).toList();
 
     return PerformanceReport(
       generatedAt: DateTime.now(),
       totalSessions: _sessionMetrics.length,
-      hybridSessions: _sessionMetrics.values.where((s) => s.isHybridMode).length,
-      monolithicSessions: _sessionMetrics.values.where((s) => !s.isHybridMode).length,
+      hybridSessions:
+          _sessionMetrics.values.where((s) => s.isHybridMode).length,
+      monolithicSessions:
+          _sessionMetrics.values.where((s) => !s.isHybridMode).length,
       hybridPerformance: _calculatePerformanceStats(hybridSnapshots),
       monolithicPerformance: _calculatePerformanceStats(monolithicSnapshots),
-      improvementMetrics: _calculateImprovementMetrics(hybridSnapshots, monolithicSnapshots),
-      recommendations: _generateRecommendations(hybridSnapshots, monolithicSnapshots),
+      improvementMetrics:
+          _calculateImprovementMetrics(hybridSnapshots, monolithicSnapshots),
+      recommendations:
+          _generateRecommendations(hybridSnapshots, monolithicSnapshots),
     );
   }
 
   /// Validate if performance improvement meets target
   bool validatePerformanceTarget() {
     final report = generateReport();
-    return report.improvementMetrics.rebuildReduction >= targetImprovementThreshold;
+    return report.improvementMetrics.rebuildReduction >=
+        targetImprovementThreshold;
   }
 
   /// Enable/disable monitoring
   void setMonitoringEnabled(bool enabled) {
     _isMonitoringEnabled = enabled;
-    debugPrint('PerformanceMonitor: Monitoring ${enabled ? 'enabled' : 'disabled'}');
+    debugPrint(
+        'PerformanceMonitor: Monitoring ${enabled ? 'enabled' : 'disabled'}');
   }
 
   /// Clear all monitoring data
@@ -283,7 +317,7 @@ class PerformanceMonitor {
 
   void _updateSessionMetrics() {
     if (_currentSession == null) return;
-    
+
     final session = _sessionMetrics[_currentSession!];
     if (session != null) {
       session.updateStats(
@@ -309,10 +343,10 @@ class PerformanceMonitor {
 
   double _getAverageRebuildFrequency() {
     final sessionStart = _sessionStart;
-    if (sessionStart == null) return 0.0;
+    if (sessionStart == null) return 0;
 
     final duration = DateTime.now().difference(sessionStart).inSeconds;
-    if (duration == 0) return 0.0;
+    if (duration == 0) return 0;
 
     return _getTotalRebuilds() / duration;
   }
@@ -339,19 +373,22 @@ class PerformanceMonitor {
         .toList();
   }
 
-  PerformanceStats _calculatePerformanceStats(List<PerformanceSnapshot> snapshots) {
+  PerformanceStats _calculatePerformanceStats(
+      List<PerformanceSnapshot> snapshots) {
     if (snapshots.isEmpty) return PerformanceStats.empty();
 
     final rebuilds = snapshots.map((s) => s.totalWidgetRebuilds).toList();
     final watches = snapshots.map((s) => s.totalProviderWatches).toList();
-    final frequencies = snapshots.map((s) => s.averageRebuildFrequency).toList();
+    final frequencies =
+        snapshots.map((s) => s.averageRebuildFrequency).toList();
 
     return PerformanceStats(
       averageRebuilds: rebuilds.reduce((a, b) => a + b) / rebuilds.length,
       medianRebuilds: _calculateMedian(rebuilds),
       averageWatches: watches.reduce((a, b) => a + b) / watches.length,
       medianWatches: _calculateMedian(watches),
-      averageRebuildFrequency: frequencies.reduce((a, b) => a + b) / frequencies.length,
+      averageRebuildFrequency:
+          frequencies.reduce((a, b) => a + b) / frequencies.length,
       maxRebuildFrequency: frequencies.reduce(max),
       minRebuildFrequency: frequencies.reduce(min),
       sampleSize: snapshots.length,
@@ -365,20 +402,29 @@ class PerformanceMonitor {
     final hybridStats = _calculatePerformanceStats(hybridSnapshots);
     final monolithicStats = _calculatePerformanceStats(monolithicSnapshots);
 
-    if (monolithicStats.averageRebuilds == 0 || hybridStats.sampleSize == 0 || monolithicStats.sampleSize == 0) {
+    if (monolithicStats.averageRebuilds == 0 ||
+        hybridStats.sampleSize == 0 ||
+        monolithicStats.sampleSize == 0) {
       return ImprovementMetrics.empty();
     }
 
-    final rebuildReduction = (monolithicStats.averageRebuilds - hybridStats.averageRebuilds) / monolithicStats.averageRebuilds;
-    final watchReduction = (monolithicStats.averageWatches - hybridStats.averageWatches) / monolithicStats.averageWatches;
-    final frequencyReduction = (monolithicStats.averageRebuildFrequency - hybridStats.averageRebuildFrequency) / monolithicStats.averageRebuildFrequency;
+    final rebuildReduction =
+        (monolithicStats.averageRebuilds - hybridStats.averageRebuilds) /
+            monolithicStats.averageRebuilds;
+    final watchReduction =
+        (monolithicStats.averageWatches - hybridStats.averageWatches) /
+            monolithicStats.averageWatches;
+    final frequencyReduction = (monolithicStats.averageRebuildFrequency -
+            hybridStats.averageRebuildFrequency) /
+        monolithicStats.averageRebuildFrequency;
 
     return ImprovementMetrics(
       rebuildReduction: rebuildReduction,
       watchReduction: watchReduction,
       frequencyReduction: frequencyReduction,
       meetsTargetThreshold: rebuildReduction >= targetImprovementThreshold,
-      confidenceLevel: _calculateConfidence(hybridSnapshots.length, monolithicSnapshots.length),
+      confidenceLevel: _calculateConfidence(
+          hybridSnapshots.length, monolithicSnapshots.length),
     );
   }
 
@@ -387,32 +433,39 @@ class PerformanceMonitor {
     List<PerformanceSnapshot> monolithicSnapshots,
   ) {
     final recommendations = <String>[];
-    final improvement = _calculateImprovementMetrics(hybridSnapshots, monolithicSnapshots);
+    final improvement =
+        _calculateImprovementMetrics(hybridSnapshots, monolithicSnapshots);
 
     if (improvement.rebuildReduction < targetImprovementThreshold) {
-      recommendations.add('Performance improvement (${(improvement.rebuildReduction * 100).toStringAsFixed(1)}%) is below target (60%)');
-      recommendations.add('Consider migrating more widgets to granular providers');
+      recommendations.add(
+          'Performance improvement (${(improvement.rebuildReduction * 100).toStringAsFixed(1)}%) is below target (60%)');
+      recommendations
+          .add('Consider migrating more widgets to granular providers');
     } else {
-      recommendations.add('Excellent! Performance improvement exceeds target threshold');
+      recommendations
+          .add('Excellent! Performance improvement exceeds target threshold');
     }
 
     if (improvement.confidenceLevel < 0.8) {
-      recommendations.add('Low confidence level - collect more performance data for reliable metrics');
+      recommendations.add(
+          'Low confidence level - collect more performance data for reliable metrics');
     }
 
     if (hybridSnapshots.isEmpty) {
-      recommendations.add('No hybrid mode data available - enable hybrid features for comparison');
+      recommendations.add(
+          'No hybrid mode data available - enable hybrid features for comparison');
     }
 
     if (monolithicSnapshots.isEmpty) {
-      recommendations.add('No baseline (monolithic) data available for comparison');
+      recommendations
+          .add('No baseline (monolithic) data available for comparison');
     }
 
     return recommendations;
   }
 
   double _calculateMedian(List<int> values) {
-    if (values.isEmpty) return 0.0;
+    if (values.isEmpty) return 0;
     values.sort();
     final mid = values.length ~/ 2;
     return values.length % 2 == 0
@@ -445,16 +498,25 @@ class AnimationMetrics {
     this.animationType,
   });
 
-  void recordPerformance(Duration loadTime, Duration playTime, int frameCount, bool hadFrameDrops) {
+  void recordPerformance(Duration loadTime, Duration playTime, int frameCount,
+      bool hadFrameDrops) {
     loadTimes.add(loadTime);
     playTimes.add(playTime);
     frameCounts.add(frameCount);
     frameDropFlags.add(hadFrameDrops);
   }
 
-  double get averageLoadTime => loadTimes.isEmpty ? 0 : loadTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) / loadTimes.length;
-  double get averagePlayTime => playTimes.isEmpty ? 0 : playTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) / playTimes.length;
-  double get averageFrameRate => frameCounts.isEmpty ? 0 : frameCounts.reduce((a, b) => a + b) / frameCounts.length;
+  double get averageLoadTime => loadTimes.isEmpty
+      ? 0
+      : loadTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) /
+          loadTimes.length;
+  double get averagePlayTime => playTimes.isEmpty
+      ? 0
+      : playTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) /
+          playTimes.length;
+  double get averageFrameRate => frameCounts.isEmpty
+      ? 0
+      : frameCounts.reduce((a, b) => a + b) / frameCounts.length;
   int get frameDropCount => frameDropFlags.where((flag) => flag).length;
 }
 
@@ -478,8 +540,13 @@ class EducationalMetrics {
     cacheHits.add(fromCache);
   }
 
-  double get averageLoadTime => loadTimes.isEmpty ? 0 : loadTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) / loadTimes.length;
-  double get cacheHitRate => cacheHits.isEmpty ? 0 : cacheHits.where((hit) => hit).length / cacheHits.length;
+  double get averageLoadTime => loadTimes.isEmpty
+      ? 0
+      : loadTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) /
+          loadTimes.length;
+  double get cacheHitRate => cacheHits.isEmpty
+      ? 0
+      : cacheHits.where((hit) => hit).length / cacheHits.length;
   int get totalContentLoaded => contentSizes.reduce((a, b) => a + b);
 }
 
@@ -496,12 +563,14 @@ class InteractiveMetrics {
     required this.sessionId,
   });
 
-  void recordAction(Duration responseTime, bool success, String? componentId, Map<String, dynamic>? context) {
+  void recordAction(Duration responseTime, bool success, String? componentId,
+      Map<String, dynamic>? context) {
     responseTimes.add(responseTime);
     successes.add(success);
 
     if (componentId != null) {
-      componentInteractions[componentId] = (componentInteractions[componentId] ?? 0) + 1;
+      componentInteractions[componentId] =
+          (componentInteractions[componentId] ?? 0) + 1;
     }
 
     if (context != null) {
@@ -509,8 +578,13 @@ class InteractiveMetrics {
     }
   }
 
-  double get averageResponseTime => responseTimes.isEmpty ? 0 : responseTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) / responseTimes.length;
-  double get successRate => successes.isEmpty ? 0 : successes.where((s) => s).length / successes.length;
+  double get averageResponseTime => responseTimes.isEmpty
+      ? 0
+      : responseTimes.map((d) => d.inMilliseconds).reduce((a, b) => a + b) /
+          responseTimes.length;
+  double get successRate => successes.isEmpty
+      ? 0
+      : successes.where((s) => s).length / successes.length;
   int get totalInteractions => responseTimes.length;
 }
 
@@ -531,7 +605,8 @@ class MemoryMetrics {
     this.context,
   });
 
-  double get heapUsagePercentage => heapTotal > 0 ? (heapUsed / heapTotal) * 100 : 0;
+  double get heapUsagePercentage =>
+      heapTotal > 0 ? (heapUsed / heapTotal) * 100 : 0;
   int get totalMemory => heapUsed + externalSize;
 }
 
@@ -563,8 +638,9 @@ class RebuildMetrics {
   });
 
   int get rebuildCount => rebuildTimes.length;
-  
-  void recordRebuild(DateTime time, {String? providerId, Map<String, dynamic>? context}) {
+
+  void recordRebuild(DateTime time,
+      {String? providerId, Map<String, dynamic>? context}) {
     rebuildTimes.add(time);
     if (providerId != null) {
       providerTriggers[providerId] = (providerTriggers[providerId] ?? 0) + 1;
@@ -590,15 +666,17 @@ class ProviderMetrics {
   });
 
   int get watchCount => watchTimes.length;
-  
-  void recordWatch(DateTime time, String widgetName, {
+
+  void recordWatch(
+    DateTime time,
+    String widgetName, {
     bool wasDataChanged = false,
     String? previousValue,
     String? newValue,
   }) {
     watchTimes.add(time);
     watchingWidgets[widgetName] = (watchingWidgets[widgetName] ?? 0) + 1;
-    
+
     if (wasDataChanged) {
       dataChanges.add('$previousValue → $newValue');
     }
@@ -622,7 +700,7 @@ class SessionMetrics {
   });
 
   Duration get duration => (endTime ?? DateTime.now()).difference(startTime);
-  
+
   void updateStats({required int totalRebuilds, required int totalWatches}) {
     this.totalRebuilds = totalRebuilds;
     this.totalWatches = totalWatches;
@@ -661,7 +739,7 @@ class PerformanceSnapshot {
       isHybridMode: false,
       totalWidgetRebuilds: 0,
       totalProviderWatches: 0,
-      averageRebuildFrequency: 0.0,
+      averageRebuildFrequency: 0,
       widgetMetrics: {},
       providerMetrics: {},
     );
@@ -757,11 +835,15 @@ class PerformanceReport {
       'hybridSessions': hybridSessions,
       'monolithicSessions': monolithicSessions,
       'improvement': {
-        'rebuildReduction': '${(improvementMetrics.rebuildReduction * 100).toStringAsFixed(1)}%',
-        'watchReduction': '${(improvementMetrics.watchReduction * 100).toStringAsFixed(1)}%',
-        'frequencyReduction': '${(improvementMetrics.frequencyReduction * 100).toStringAsFixed(1)}%',
+        'rebuildReduction':
+            '${(improvementMetrics.rebuildReduction * 100).toStringAsFixed(1)}%',
+        'watchReduction':
+            '${(improvementMetrics.watchReduction * 100).toStringAsFixed(1)}%',
+        'frequencyReduction':
+            '${(improvementMetrics.frequencyReduction * 100).toStringAsFixed(1)}%',
         'meetsTarget': improvementMetrics.meetsTargetThreshold,
-        'confidence': '${(improvementMetrics.confidenceLevel * 100).toStringAsFixed(1)}%',
+        'confidence':
+            '${(improvementMetrics.confidenceLevel * 100).toStringAsFixed(1)}%',
       },
       'recommendations': recommendations,
     };

@@ -54,13 +54,13 @@ void main() {
   group('Refactoring Safety Net Tests', () {
     testWidgets('Safety net test framework is operational', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
-              body: Container(
+              body: SizedBox(
                 width: 400,
                 height: 400,
-                child: const Text('Refactoring Safety Net Test - Basic Framework'),
+                child: Text('Refactoring Safety Net Test - Basic Framework'),
               ),
             ),
           ),
@@ -69,19 +69,20 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('Refactoring Safety Net Test - Basic Framework'), findsOneWidget);
+      expect(find.text('Refactoring Safety Net Test - Basic Framework'),
+          findsOneWidget);
       expect(find.text('Exception'), findsNothing);
     });
 
     testWidgets('Mock storage service integration', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
-              body: Container(
+              body: SizedBox(
                 width: 400,
                 height: 400,
-                child: const Text('Storage Service Test'),
+                child: Text('Storage Service Test'),
               ),
             ),
           ),
@@ -91,8 +92,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Test that mock storage service is working
-      final testKey = 'test_key';
-      final testValue = 'test_value';
+      const testKey = 'test_key';
+      const testValue = 'test_value';
 
       await mockStorageService.saveData(testKey, testValue);
       final retrievedValue = mockStorageService.readData<String>(testKey);
@@ -102,13 +103,13 @@ void main() {
 
     testWidgets('Component placement safety validation', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
-              body: Container(
+              body: SizedBox(
                 width: 400,
                 height: 400,
-                child: const Text('Component Placement Safety Test'),
+                child: Text('Component Placement Safety Test'),
               ),
             ),
           ),

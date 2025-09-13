@@ -31,7 +31,7 @@ class PauseMenu extends ConsumerWidget {
     final theme = Theme.of(context);
     final circuitColors = theme.extension<CircuitColorScheme>()!;
     final hudService = ref.watch(hudServiceProvider(levelId));
-    
+
     return Container(
       width: 320,
       padding: const EdgeInsets.all(24),
@@ -70,9 +70,7 @@ class PauseMenu extends ConsumerWidget {
             text: 'Resume',
             icon: Icons.play_arrow,
             isPrimary: true,
-            onPressed: () {
-              hudService.hideOverlay();
-            },
+            onPressed: hudService.hideOverlay,
           ),
           const SizedBox(height: 12),
           MenuButton(
@@ -109,7 +107,8 @@ class PauseMenu extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Restart Level'),
-        content: const Text('Are you sure you want to restart this level? All progress will be lost.'),
+        content: const Text(
+            'Are you sure you want to restart this level? All progress will be lost.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -136,7 +135,8 @@ class PauseMenu extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Exit to Main Menu'),
-        content: const Text('Are you sure you want to exit? Your progress will be saved.'),
+        content: const Text(
+            'Are you sure you want to exit? Your progress will be saved.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

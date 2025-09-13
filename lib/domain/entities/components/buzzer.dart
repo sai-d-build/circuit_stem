@@ -1,18 +1,18 @@
-import 'circuit_component.dart';
 import '../core/component.dart';
+import 'circuit_component.dart';
 
 /// Buzzer component that produces sound when current flows through it
 class Buzzer extends CircuitComponent {
   /// Operating voltage in volts
-  double get operatingVoltage => getProperty<double>('operatingVoltage', 3.0);
+  double get operatingVoltage => getProperty<double>('operatingVoltage', 3);
   set operatingVoltage(double value) => setProperty('operatingVoltage', value);
 
   /// Operating current in milliamperes
-  double get operatingCurrent => getProperty<double>('operatingCurrent', 30.0);
+  double get operatingCurrent => getProperty<double>('operatingCurrent', 30);
   set operatingCurrent(double value) => setProperty('operatingCurrent', value);
 
   /// Sound frequency in Hz
-  double get frequency => getProperty<double>('frequency', 2000.0);
+  double get frequency => getProperty<double>('frequency', 2000);
   set frequency(double value) => setProperty('frequency', value);
 
   /// Whether the buzzer is currently active
@@ -109,6 +109,14 @@ class Buzzer extends CircuitComponent {
   @override
   List<String> get requiredConnections => ['positive', 'negative'];
 
+  @override
+  double get resistance => getEquivalentResistance();
+
+  @override
+  double calculateCurrent(double voltage) {
+    return voltage / getEquivalentResistance();
+  }
+
   /// Calculate equivalent resistance
   double getEquivalentResistance() {
     return operatingVoltage / (operatingCurrent / 1000); // Convert mA to A
@@ -119,16 +127,10 @@ class Buzzer extends CircuitComponent {
     return voltage >= operatingVoltage * 0.8; // 80% of operating voltage
   }
 
-  /// Calculate power consumption
-  double calculatePower(double voltage) {
-    final current = voltage / getEquivalentResistance();
-    return voltage * current;
-  }
-
   /// Get sound volume level (0.0 to 1.0)
   double getVolume(double voltage) {
     if (voltage < operatingVoltage * 0.5) {
-      return 0.0;
+      return 0;
     }
     return (voltage / operatingVoltage).clamp(0.0, 1.0);
   }

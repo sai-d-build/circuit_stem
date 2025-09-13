@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:state_notifier/state_notifier.dart';
-import '../../domain/entities/entities.dart';
+
 import '../../application/states/game_state.dart';
+import '../../domain/entities/entities.dart';
 
 /// Unified Game State Notifier Interface
 /// Consolidates GameEngineNotifierV3 and EnhancedGameStateNotifier implementations

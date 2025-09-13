@@ -1,9 +1,8 @@
 // Grid entity for SparkCircuit
 // Represents the circuit grid and manages component placement
 
-
-import 'component.dart';
 import '../../../common/logger.dart';
+import 'component.dart';
 
 class Grid {
   final int rows;
@@ -22,12 +21,11 @@ class Grid {
     Map<String, List<String>>? connections,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) :
-    components = components ?? {},
-    occupiedPositions = occupiedPositions ?? {},
-    connections = connections ?? {},
-    createdAt = createdAt ?? DateTime.now(),
-    updatedAt = updatedAt ?? DateTime.now();
+  })  : components = components ?? {},
+        occupiedPositions = occupiedPositions ?? {},
+        connections = connections ?? {},
+        createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   Grid copyWith({
     int? rows,
@@ -61,7 +59,8 @@ class Grid {
 
   Grid placeComponent(ComponentModel component) {
     if (!canPlaceComponent(component.row, component.col)) {
-      Logger.w('Cannot place component at position (${component.row}, ${component.col})');
+      Logger.w(
+          'Cannot place component at position (${component.row}, ${component.col})');
       return this;
     }
 
@@ -157,9 +156,11 @@ class Grid {
     final newOccupiedPositions = Set<String>.from(occupiedPositions);
     final oldComponent = components[updatedComponent.id];
     if (oldComponent != null &&
-        (oldComponent.row != updatedComponent.row || oldComponent.col != updatedComponent.col)) {
+        (oldComponent.row != updatedComponent.row ||
+            oldComponent.col != updatedComponent.col)) {
       final oldPositionKey = _positionToKey(oldComponent.row, oldComponent.col);
-      final newPositionKey = _positionToKey(updatedComponent.row, updatedComponent.col);
+      final newPositionKey =
+          _positionToKey(updatedComponent.row, updatedComponent.col);
       newOccupiedPositions.remove(oldPositionKey);
       newOccupiedPositions.add(newPositionKey);
     }
@@ -199,7 +200,9 @@ class Grid {
   Map<String, ComponentModel> get componentsById => components;
 
   List<ComponentModel> getComponentsByType(ComponentType type) {
-    return components.values.where((component) => component.type == type).toList();
+    return components.values
+        .where((component) => component.type == type)
+        .toList();
   }
 
   List<ComponentModel> getAllComponents() {
@@ -224,7 +227,8 @@ class Grid {
       newConnections[componentId2]!.add(componentId1);
     }
 
-    Logger.logComponentEvent(componentId1, 'connected_to', {'target': componentId2});
+    Logger.logComponentEvent(
+        componentId1, 'connected_to', {'target': componentId2});
 
     return copyWith(
       connections: newConnections,
@@ -238,7 +242,8 @@ class Grid {
     newConnections[componentId1]?.remove(componentId2);
     newConnections[componentId2]?.remove(componentId1);
 
-    Logger.logComponentEvent(componentId1, 'disconnected_from', {'target': componentId2});
+    Logger.logComponentEvent(
+        componentId1, 'disconnected_from', {'target': componentId2});
 
     return copyWith(
       connections: newConnections,
@@ -274,15 +279,15 @@ class Grid {
       'rows': rows,
       'cols': cols,
       'components': components.map((key, value) => MapEntry(key, {
-        'id': value.id,
-        'type': value.type.toString(),
-        'row': value.row,
-        'col': value.col,
-        'state': value.state.toString(),
-        'properties': value.properties,
-        'createdAt': value.createdAt.toIso8601String(),
-        'updatedAt': value.updatedAt.toIso8601String(),
-      })),
+            'id': value.id,
+            'type': value.type.toString(),
+            'row': value.row,
+            'col': value.col,
+            'state': value.state.toString(),
+            'properties': value.properties,
+            'createdAt': value.createdAt.toIso8601String(),
+            'updatedAt': value.updatedAt.toIso8601String(),
+          })),
       'occupiedPositions': occupiedPositions.toList(),
       'connections': connections,
       'createdAt': createdAt.toIso8601String(),
@@ -293,7 +298,8 @@ class Grid {
   factory Grid.fromJson(Map<String, dynamic> json) {
     // Schema version handling
     final schemaVersion = json['schemaVersion'] as String? ?? 'legacy';
-    Logger.log('Grid.fromJson: Loading grid with schema version: $schemaVersion');
+    Logger.log(
+        'Grid.fromJson: Loading grid with schema version: $schemaVersion');
 
     final componentsJson = json['components'] as Map<String, dynamic>? ?? {};
     final components = <String, ComponentModel>{};
@@ -312,12 +318,15 @@ class Grid {
               (e) => e.toString() == typeString,
             );
           } catch (e) {
-            parsingErrors.add('Unknown component type: $typeString for component ${entry.key}');
-            Logger.w('Grid.fromJson: Unknown component type $typeString, using default');
+            parsingErrors.add(
+                'Unknown component type: $typeString for component ${entry.key}');
+            Logger.w(
+                'Grid.fromJson: Unknown component type $typeString, using default');
             componentType = ComponentType.wire; // Safe default
           }
         } else {
-          parsingErrors.add('Missing component type for component ${entry.key}');
+          parsingErrors
+              .add('Missing component type for component ${entry.key}');
           componentType = ComponentType.wire;
         }
 
@@ -325,8 +334,10 @@ class Grid {
         DateTime createdAt;
         DateTime updatedAt;
         try {
-          createdAt = DateTime.parse(compJson['createdAt'] ?? DateTime.now().toIso8601String());
-          updatedAt = DateTime.parse(compJson['updatedAt'] ?? DateTime.now().toIso8601String());
+          createdAt = DateTime.parse(
+              compJson['createdAt'] ?? DateTime.now().toIso8601String());
+          updatedAt = DateTime.parse(
+              compJson['updatedAt'] ?? DateTime.now().toIso8601String());
         } catch (e) {
           createdAt = DateTime.now();
           updatedAt = DateTime.now();
@@ -354,7 +365,8 @@ class Grid {
 
     // Log parsing errors if any
     if (parsingErrors.isNotEmpty) {
-      Logger.w('Grid.fromJson: ${parsingErrors.length} parsing errors encountered');
+      Logger.w(
+          'Grid.fromJson: ${parsingErrors.length} parsing errors encountered');
       for (final error in parsingErrors) {
         Logger.w('Grid.fromJson: $error');
       }
@@ -368,8 +380,9 @@ class Grid {
       occupiedPositions: Set<String>.from(json['occupiedPositions'] ?? []),
       connections: Map<String, List<String>>.from(
         (json['connections'] ?? {}).map(
-          (key, value) => MapEntry(key, List<String>.from(value ?? [])),
-        ) ?? {},
+              (key, value) => MapEntry(key, List<String>.from(value ?? [])),
+            ) ??
+            {},
       ),
       createdAt: _safeDateParse(json['createdAt']),
       updatedAt: _safeDateParse(json['updatedAt']),
@@ -405,7 +418,8 @@ class Grid {
 
     if (expectedOccupied.length != grid.occupiedPositions.length ||
         !expectedOccupied.containsAll(grid.occupiedPositions)) {
-      Logger.w('Grid validation: occupiedPositions mismatch detected, repairing');
+      Logger.w(
+          'Grid validation: occupiedPositions mismatch detected, repairing');
       return grid.copyWith(occupiedPositions: expectedOccupied);
     }
 
@@ -427,7 +441,8 @@ class Grid {
           components.length == other.components.length;
 
   @override
-  int get hashCode => rows.hashCode ^ cols.hashCode ^ components.length.hashCode;
+  int get hashCode =>
+      rows.hashCode ^ cols.hashCode ^ components.length.hashCode;
 
   @override
   String toString() {

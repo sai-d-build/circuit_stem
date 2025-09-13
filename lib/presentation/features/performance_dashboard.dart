@@ -7,7 +7,8 @@ class PerformanceDashboard extends ConsumerStatefulWidget {
   const PerformanceDashboard({super.key});
 
   @override
-  ConsumerState<PerformanceDashboard> createState() => _PerformanceDashboardState();
+  ConsumerState<PerformanceDashboard> createState() =>
+      _PerformanceDashboardState();
 }
 
 class _PerformanceDashboardState extends ConsumerState<PerformanceDashboard> {
@@ -62,7 +63,8 @@ class _PerformanceDashboardState extends ConsumerState<PerformanceDashboard> {
           children: [
             _buildStatusCard(),
             const SizedBox(height: 16),
-            _buildMetricCard('Frame Performance', frameStats, 'ms', Icons.speed),
+            _buildMetricCard(
+                'Frame Performance', frameStats, 'ms', Icons.speed),
             const SizedBox(height: 16),
             _buildMetricCard('Memory Usage', memoryStats, 'MB', Icons.memory),
             const SizedBox(height: 16),
@@ -111,7 +113,8 @@ class _PerformanceDashboardState extends ConsumerState<PerformanceDashboard> {
     );
   }
 
-  Widget _buildMetricCard(String title, Map<String, dynamic> stats, String unit, IconData icon) {
+  Widget _buildMetricCard(
+      String title, Map<String, dynamic> stats, String unit, IconData icon) {
     final count = stats['count'] as int? ?? 0;
     final average = stats['average'] as double? ?? 0.0;
     final min = stats['min'] as double? ?? 0.0;
@@ -178,7 +181,7 @@ class _PerformanceDashboardState extends ConsumerState<PerformanceDashboard> {
             if (recentMetrics.isEmpty)
               const Text('No recent metrics')
             else
-              ...recentMetrics.map((metric) => _buildMetricItem(metric)),
+              ...recentMetrics.map(_buildMetricItem),
           ],
         ),
       ),
@@ -242,7 +245,11 @@ class _PerformanceOverlayState extends ConsumerState<PerformanceOverlay> {
     final averageFrameTime = frameStats['average'] as double? ?? 16.67;
 
     final fps = (1000 / averageFrameTime).round();
-    final color = fps >= 60 ? Colors.green : fps >= 30 ? Colors.yellow : Colors.red;
+    final color = fps >= 60
+        ? Colors.green
+        : fps >= 30
+            ? Colors.yellow
+            : Colors.red;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

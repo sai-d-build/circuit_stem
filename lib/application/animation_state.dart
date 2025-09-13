@@ -1,6 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:math' as math;
 
 /// Provides animation state across the app
 final animationStateProvider =
@@ -104,7 +105,7 @@ class AnimationStateNotifier extends StateNotifier<AnimationState> {
 
   void reset() {
     _lastFrameTime = null;
-    state = state.copyWith(elapsedTime: 0.0);
+    state = state.copyWith(elapsedTime: 0);
   }
 
   @override

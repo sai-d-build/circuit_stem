@@ -1,23 +1,21 @@
-
+import 'package:flutter/material.dart'; // Import for Offset
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/application/services/component_factory.dart';
+import 'package:sparkcircuit/application/states/game_state.dart';
+import 'package:sparkcircuit/core/commands/add_connection_command.dart';
 import 'package:sparkcircuit/core/commands/command_stack.dart';
 import 'package:sparkcircuit/core/commands/create_component_command.dart';
 import 'package:sparkcircuit/core/commands/game_command.dart';
 import 'package:sparkcircuit/core/commands/move_component_command.dart';
 import 'package:sparkcircuit/core/commands/rotate_component_command.dart';
-import 'package:sparkcircuit/core/commands/tap_component_command.dart';
-import 'package:sparkcircuit/core/commands/add_connection_command.dart';
 import 'package:sparkcircuit/core/commands/select_component_command.dart';
-
+import 'package:sparkcircuit/core/commands/tap_component_command.dart';
 import 'package:sparkcircuit/core/persistence/storage_service.dart';
+import 'package:sparkcircuit/core/services/drag_service.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
 import 'package:sparkcircuit/core/simulation/simulation_engine.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'package:sparkcircuit/core/services/drag_service.dart';
 import 'package:uuid/uuid.dart';
-import 'package:flutter/material.dart'; // Import for Offset
 
 class EnhancedGameStateNotifier extends StateNotifier<GameState> {
   final SimulationEngine _simulationEngine;
@@ -75,8 +73,7 @@ class EnhancedGameStateNotifier extends StateNotifier<GameState> {
     await _executeCommand(command);
   }
 
-  Future<void> moveComponent(
-      String componentId, int newRow, int newCol) async {
+  Future<void> moveComponent(String componentId, int newRow, int newCol) async {
     final component = state.grid.getComponentById(componentId);
     if (component == null) return;
 
@@ -210,7 +207,8 @@ class EnhancedGameStateNotifier extends StateNotifier<GameState> {
     );
   }
 
-  Future<void> addConnection(String fromComponentId, String toComponentId) async {
+  Future<void> addConnection(
+      String fromComponentId, String toComponentId) async {
     final command = AddConnectionCommand(
       fromComponentId: fromComponentId,
       toComponentId: toComponentId,

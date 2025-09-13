@@ -1,13 +1,13 @@
-import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/canvas_interaction_controller.dart';
 
 enum WireSegmentType {
-  straight,    // Single straight segment
-  corner,      // 90-degree corner
-  junction,    // Connection point for multiple wires
-  bridge,      // Wire crossing over another
+  straight, // Single straight segment
+  corner, // 90-degree corner
+  junction, // Connection point for multiple wires
+  bridge, // Wire crossing over another
 }
 
 class WireSegment {
@@ -15,9 +15,9 @@ class WireSegment {
   final GridPosition startPosition;
   final GridPosition endPosition;
   final WireSegmentType type;
-  final String wireId;  // Parent wire this segment belongs to
+  final String wireId; // Parent wire this segment belongs to
   final DateTime createdAt;
-  final Set<String> connectedWires;  // For junctions
+  final Set<String> connectedWires; // For junctions
 
   const WireSegment({
     required this.id,
@@ -102,9 +102,9 @@ class WireJunction {
 }
 
 enum JunctionType {
-  simple(2, 'Simple'),      // 2 connections
-  complex(4, 'Complex'),    // 4 connections
-  hub(6, 'Hub');           // 6+ connections
+  simple(2, 'Simple'), // 2 connections
+  complex(4, 'Complex'), // 4 connections
+  hub(6, 'Hub'); // 6+ connections
 
   const JunctionType(this.maxConnections, this.displayName);
   final int maxConnections;
@@ -130,7 +130,8 @@ class WireNetwork {
     required this.createdAt,
   });
 
-  int get totalLength => segments.fold(0, (sum, segment) => sum + segment.length);
+  int get totalLength =>
+      segments.fold(0, (sum, segment) => sum + segment.length);
   int get segmentCount => segments.length;
   int get junctionCount => junctions.length;
 
@@ -157,7 +158,8 @@ class WireNetwork {
 
 final wireNetworkServiceProvider = Provider.family<WireNetworkService, String>(
   (ref, levelId) {
-    MigrationTracker.markFileMigrated('wire_network_service.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated(
+        'wire_network_service.dart', DateTime.now().toIso8601String());
     return WireNetworkService(levelId: levelId);
   },
 );
@@ -198,9 +200,8 @@ class WireNetworkService {
     }
 
     // Create junctions at connection points
-    final networkJunctions = await _createJunctionsForNetwork(
-      networkId, startPort, endPort, path
-    );
+    final networkJunctions =
+        await _createJunctionsForNetwork(networkId, startPort, endPort, path);
     junctions.addAll(networkJunctions);
 
     final network = WireNetwork(
@@ -230,12 +231,13 @@ class WireNetworkService {
 
     if (path.length < 2) return segments;
 
-    GridPosition currentStart = path[0];
+    var currentStart = path[0];
     GridPosition? previous;
 
-    for (int i = 1; i < path.length; i++) {
+    for (var i = 1; i < path.length; i++) {
       final current = path[i];
-      final directionChanged = _hasDirectionChanged(previous, currentStart, current);
+      final directionChanged =
+          _hasDirectionChanged(previous, currentStart, current);
 
       if (directionChanged && previous != null) {
         // Create segment for previous direction
@@ -263,7 +265,8 @@ class WireNetworkService {
   }
 
   /// Check if direction changed (indicates corner/junction)
-  bool _hasDirectionChanged(GridPosition? prev, GridPosition start, GridPosition current) {
+  bool _hasDirectionChanged(
+      GridPosition? prev, GridPosition start, GridPosition current) {
     if (prev == null) return false;
 
     final prevDirection = _getDirection(start, prev);
@@ -325,7 +328,8 @@ class WireNetworkService {
     _junctions[endJunction.id] = endJunction;
 
     // Check for intermediate junctions (where wires might cross)
-    final intermediateJunctions = await _findIntermediateJunctions(path, networkId);
+    final intermediateJunctions =
+        await _findIntermediateJunctions(path, networkId);
     junctions.addAll(intermediateJunctions);
 
     return junctions;
@@ -412,26 +416,30 @@ class WireNetworkService {
 
     if (segment.isHorizontal) {
       final startCol = segment.startPosition.col < segment.endPosition.col
-          ? segment.startPosition.col : segment.endPosition.col;
+          ? segment.startPosition.col
+          : segment.endPosition.col;
       final endCol = segment.startPosition.col < segment.endPosition.col
-          ? segment.endPosition.col : segment.startPosition.col;
+          ? segment.endPosition.col
+          : segment.startPosition.col;
 
-      for (int col = startCol; col <= endCol; col++) {
+      for (var col = startCol; col <= endCol; col++) {
         positions.add(GridPosition(row: segment.startPosition.row, col: col));
       }
     } else if (segment.isVertical) {
       final startRow = segment.startPosition.row < segment.endPosition.row
-          ? segment.startPosition.row : segment.endPosition.row;
+          ? segment.startPosition.row
+          : segment.endPosition.row;
       final endRow = segment.startPosition.row < segment.endPosition.row
-          ? segment.endPosition.row : segment.startPosition.row;
+          ? segment.endPosition.row
+          : segment.startPosition.row;
 
-      for (int row = startRow; row <= endRow; row++) {
+      for (var row = startRow; row <= endRow; row++) {
         positions.add(GridPosition(row: row, col: segment.startPosition.col));
       }
     } else {
       // For diagonal segments, add start and end points
-      positions.add(segment.startPosition);
-      positions.add(segment.endPosition);
+      positions.add(segment.startPosition); // ignore: cascade_invocations
+      positions.add(segment.endPosition); // ignore: cascade_invocations
     }
 
     return positions;
@@ -450,7 +458,10 @@ class WireNetworkService {
   /// Get networks at position
   List<WireNetwork> getNetworksAtPosition(GridPosition position) {
     final networkIds = _positionToNetworkMap[position] ?? [];
-    return networkIds.map((id) => _networks[id]).whereType<WireNetwork>().toList();
+    return networkIds
+        .map((id) => _networks[id])
+        .whereType<WireNetwork>()
+        .toList();
   }
 
   /// Get junction at position
@@ -495,13 +506,20 @@ class WireNetworkService {
   Map<String, dynamic> getStatistics() {
     return {
       'totalNetworks': _networks.length,
-      'totalSegments': _networks.values.fold(0, (sum, net) => sum + net.segmentCount),
+      'totalSegments':
+          _networks.values.fold(0, (sum, net) => sum + net.segmentCount),
       'totalJunctions': _junctions.length,
-      'totalLength': _networks.values.fold(0, (sum, net) => sum + net.totalLength),
+      'totalLength':
+          _networks.values.fold(0, (sum, net) => sum + net.totalLength),
       'junctionsByType': {
-        'simple': _junctions.values.where((j) => j.type == JunctionType.simple).length,
-        'complex': _junctions.values.where((j) => j.type == JunctionType.complex).length,
-        'hub': _junctions.values.where((j) => j.type == JunctionType.hub).length,
+        'simple': _junctions.values
+            .where((j) => j.type == JunctionType.simple)
+            .length,
+        'complex': _junctions.values
+            .where((j) => j.type == JunctionType.complex)
+            .length,
+        'hub':
+            _junctions.values.where((j) => j.type == JunctionType.hub).length,
       },
     };
   }

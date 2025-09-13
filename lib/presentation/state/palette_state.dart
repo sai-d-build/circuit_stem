@@ -1,21 +1,22 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'dart:convert';
-import '../../core/persistence/storage_service.dart';
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/application/providers/core_providers.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
+
+import '../../core/persistence/storage_service.dart';
 
 /// Standalone function to get tutorial default quantities
 /// This is used by both the PaletteState class and inventory generation functions
 Map<String, int> _getTutorialDefaultsMap() {
   return {
-    'resistor': 2,    // Essential for basic circuits
-    'switch': 1,      // Important control component
-    'capacitor': 1,   // Advanced but educational
-    'inductor': 1,    // Advanced component for learning
-    'transistor': 1,  // Semiconductor learning
+    'resistor': 2, // Essential for basic circuits
+    'switch': 1, // Important control component
+    'capacitor': 1, // Advanced but educational
+    'inductor': 1, // Advanced component for learning
+    'transistor': 1, // Semiconductor learning
   };
 }
 
@@ -84,7 +85,8 @@ class ComponentDefinition {
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       iconPath: json['iconPath'] ?? '',
-      defaultProperties: Map<String, dynamic>.from(json['defaultProperties'] ?? {}),
+      defaultProperties:
+          Map<String, dynamic>.from(json['defaultProperties'] ?? {}),
       cost: json['cost'] ?? 1,
       isUnlocked: json['isUnlocked'] ?? true,
       requiredLevels: List<String>.from(json['requiredLevels'] ?? []),
@@ -183,7 +185,8 @@ class PaletteState {
     return PaletteState(
       availableComponents: availableComponents ?? this.availableComponents,
       inventory: inventory ?? this.inventory,
-      selectedComponentType: selectedComponentType ?? this.selectedComponentType,
+      selectedComponentType:
+          selectedComponentType ?? this.selectedComponentType,
       searchQuery: searchQuery ?? this.searchQuery,
       activeFilters: activeFilters ?? this.activeFilters,
       isExpanded: isExpanded ?? this.isExpanded,
@@ -197,48 +200,62 @@ class PaletteState {
   List<ComponentDefinition> get filteredComponents {
     // Only log main filtering info if debugFiltering flag is enabled
     if (StructuredLogger.debugFiltering) {
-      StructuredLogger.filtering('🎨 ===== COMPONENT FILTERING START =====', context: {
-        'totalAvailableComponents': availableComponents.length,
-        'availableComponentTypes': availableComponents.map((c) => c.type).toList(),
-        'availableComponentDetails': availableComponents.map((c) => '${c.type}:${c.isUnlocked}').toList(),
-        'inventoryItems': inventory.length,
-        'inventoryKeys': inventory.keys.toList(),
-        'inventoryDetails': inventory.entries.map((e) => '${e.key}:${e.value.available}/${e.value.total}').toList(),
-        'searchQuery': searchQuery,
-        'activeFilters': activeFilters,
-      });
+      StructuredLogger.filtering('🎨 ===== COMPONENT FILTERING START =====',
+          context: {
+            'totalAvailableComponents': availableComponents.length,
+            'availableComponentTypes':
+                availableComponents.map((c) => c.type).toList(),
+            'availableComponentDetails': availableComponents
+                .map((c) => '${c.type}:${c.isUnlocked}')
+                .toList(),
+            'inventoryItems': inventory.length,
+            'inventoryKeys': inventory.keys.toList(),
+            'inventoryDetails': inventory.entries
+                .map((e) => '${e.key}:${e.value.available}/${e.value.total}')
+                .toList(),
+            'searchQuery': searchQuery,
+            'activeFilters': activeFilters,
+          });
     }
 
     // Add detailed step-by-step debug logs only if debugFilterDetails flag is enabled
     if (StructuredLogger.debugFilterDetails) {
-      StructuredLogger.filtering('🎨 FILTER DETAILS: Total available', context: {
-        'availableComponents': availableComponents.length,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
+      StructuredLogger.filtering('🎨 FILTER DETAILS: Total available',
+          context: {
+            'availableComponents': availableComponents.length,
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          });
 
-      StructuredLogger.filtering('🎨 FILTER DETAILS: Available types', context: {
-        'availableTypes': availableComponents.map((c) => c.type).toList(),
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
+      StructuredLogger.filtering('🎨 FILTER DETAILS: Available types',
+          context: {
+            'availableTypes': availableComponents.map((c) => c.type).toList(),
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          });
 
       StructuredLogger.filtering('🎨 FILTER DETAILS: Inventory keys', context: {
         'inventoryKeys': inventory.keys.toList(),
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
 
-      StructuredLogger.filtering('🎨 FILTER DETAILS: Unlocked components', context: {
-        'unlockedComponents': availableComponents.where((c) => c.isUnlocked).length,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
+      StructuredLogger.filtering('🎨 FILTER DETAILS: Unlocked components',
+          context: {
+            'unlockedComponents':
+                availableComponents.where((c) => c.isUnlocked).length,
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          });
     }
 
-    var filtered = availableComponents.where((component) => component.isUnlocked);
+    var filtered =
+        availableComponents.where((component) => component.isUnlocked);
 
     if (StructuredLogger.debugFiltering) {
       StructuredLogger.filtering('🎨 After unlock filter', context: {
         'count': filtered.length,
         'components': filtered.map((c) => '${c.type}:${c.isUnlocked}').toList(),
-        'filteredOut': availableComponents.where((c) => !c.isUnlocked).map((c) => c.type).toList(),
+        'filteredOut': availableComponents
+            .where((c) => !c.isUnlocked)
+            .map((c) => c.type)
+            .toList(),
       });
     }
 
@@ -246,36 +263,51 @@ class PaletteState {
     final beforeInventoryFilter = filtered.length;
     filtered = filtered.where((component) {
       final inInventory = inventory.containsKey(component.type);
-      final hasTutorialDefault = _getTutorialDefaultQuantity(component.type) > 0;
+      final hasTutorialDefault =
+          _getTutorialDefaultQuantity(component.type) > 0;
       return inInventory || hasTutorialDefault;
     });
 
     if (StructuredLogger.debugFiltering) {
-      StructuredLogger.filtering('🎨 After enhanced inventory filter', context: {
-        'before': beforeInventoryFilter,
-        'after': filtered.length,
-        'components': filtered.map((c) => c.type).toList(),
-        'componentsWithInventory': filtered.where((c) => inventory.containsKey(c.type)).map((c) => c.type).toList(),
-        'componentsWithTutorialDefaults': filtered.where((c) => !inventory.containsKey(c.type) && _getTutorialDefaultQuantity(c.type) > 0).map((c) => c.type).toList(),
-        'missingFromInventory': availableComponents
-            .where((c) => c.isUnlocked && !inventory.containsKey(c.type) && _getTutorialDefaultQuantity(c.type) == 0)
-            .map((c) => '${c.type}:${c.isUnlocked}')
-            .toList(),
-        'inventoryLookupResults': availableComponents
-            .where((c) => c.isUnlocked)
-            .map((c) => '${c.type}:inventory=${inventory.containsKey(c.type)}:tutorial=${_getTutorialDefaultQuantity(c.type) > 0}')
-            .toList(),
-      });
+      StructuredLogger.filtering('🎨 After enhanced inventory filter',
+          context: {
+            'before': beforeInventoryFilter,
+            'after': filtered.length,
+            'components': filtered.map((c) => c.type).toList(),
+            'componentsWithInventory': filtered
+                .where((c) => inventory.containsKey(c.type))
+                .map((c) => c.type)
+                .toList(),
+            'componentsWithTutorialDefaults': filtered
+                .where((c) =>
+                    !inventory.containsKey(c.type) &&
+                    _getTutorialDefaultQuantity(c.type) > 0)
+                .map((c) => c.type)
+                .toList(),
+            'missingFromInventory': availableComponents
+                .where((c) =>
+                    c.isUnlocked &&
+                    !inventory.containsKey(c.type) &&
+                    _getTutorialDefaultQuantity(c.type) == 0)
+                .map((c) => '${c.type}:${c.isUnlocked}')
+                .toList(),
+            'inventoryLookupResults': availableComponents
+                .where((c) => c.isUnlocked)
+                .map((c) =>
+                    '${c.type}:inventory=${inventory.containsKey(c.type)}:tutorial=${_getTutorialDefaultQuantity(c.type) > 0}')
+                .toList(),
+          });
     }
 
     // Apply search filter
     if (searchQuery.isNotEmpty) {
       final beforeSearch = filtered.length;
       filtered = filtered.where((component) =>
-        component.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
-        component.description.toLowerCase().contains(searchQuery.toLowerCase()) ||
-        component.type.toLowerCase().contains(searchQuery.toLowerCase())
-      );
+          component.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+          component.description
+              .toLowerCase()
+              .contains(searchQuery.toLowerCase()) ||
+          component.type.toLowerCase().contains(searchQuery.toLowerCase()));
       if (StructuredLogger.debugFilterDetails) {
         StructuredLogger.filtering('After search filter', context: {
           'before': beforeSearch,
@@ -288,9 +320,8 @@ class PaletteState {
     // Apply category filters
     if (activeFilters.isNotEmpty) {
       final beforeCategory = filtered.length;
-      filtered = filtered.where((component) =>
-        activeFilters.any((filter) => _componentMatchesFilter(component, filter))
-      );
+      filtered = filtered.where((component) => activeFilters
+          .any((filter) => _componentMatchesFilter(component, filter)));
       if (StructuredLogger.debugFilterDetails) {
         StructuredLogger.filtering('After category filter', context: {
           'before': beforeCategory,
@@ -305,7 +336,9 @@ class PaletteState {
     if (StructuredLogger.debugFiltering) {
       StructuredLogger.filtering('Component filtering complete', context: {
         'finalCount': result.length,
-        'filteredComponents': result.map((c) => '${c.type}:${inventory[c.type]?.available ?? 0}').toList(),
+        'filteredComponents': result
+            .map((c) => '${c.type}:${inventory[c.type]?.available ?? 0}')
+            .toList(),
       });
     }
 
@@ -322,7 +355,9 @@ class PaletteState {
   }
 
   ComponentDefinition? getComponent(String componentType) {
-    return availableComponents.where((c) => c.type == componentType).firstOrNull;
+    return availableComponents
+        .where((c) => c.type == componentType)
+        .firstOrNull;
   }
 
   bool canUseComponent(String componentType) {
@@ -353,20 +388,21 @@ class PaletteState {
     // Tutorial defaults for components that should be available for educational purposes
     // These provide minimal quantities for learning without overwhelming beginners
     const tutorialDefaults = {
-      'resistor': 2,    // Essential for basic circuits
-      'switch': 1,      // Important control component
-      'capacitor': 1,   // Advanced but educational
-      'inductor': 1,    // Advanced component for learning
-      'transistor': 1,  // Semiconductor learning
+      'resistor': 2, // Essential for basic circuits
+      'switch': 1, // Important control component
+      'capacitor': 1, // Advanced but educational
+      'inductor': 1, // Advanced component for learning
+      'transistor': 1, // Semiconductor learning
     };
 
     return tutorialDefaults[componentType] ?? 0;
   }
-
 }
 
 // Providers
-final paletteStateProvider = StateNotifierProvider.family<PaletteStateNotifier, PaletteState, String>((ref, levelId) {
+final paletteStateProvider =
+    StateNotifierProvider.family<PaletteStateNotifier, PaletteState, String>(
+        (ref, levelId) {
   // Get the level configuration from GameState
   final gameState = ref.watch(enhancedGameStateNotifierProvider);
   final levelConfig = gameState.currentLevel;
@@ -378,13 +414,17 @@ final paletteStateProvider = StateNotifierProvider.family<PaletteStateNotifier, 
     'levelConfigNull': levelConfig == null,
     'gameStateLevel': gameState.currentLevel,
     'availableComponents': levelConfig?.components.available.length ?? 0,
-    'availableComponentsList': levelConfig?.components.available.map((c) => c.type).toList() ?? [],
+    'availableComponentsList':
+        levelConfig?.components.available.map((c) => c.type).toList() ?? [],
   });
 
   debugPrint('🎨 PaletteStateProvider: Initializing for level $levelId');
-  debugPrint('🎨 PaletteStateProvider: Game state level: ${gameState.currentLevel}');
-  debugPrint('🎨 PaletteStateProvider: Level config: ${levelConfig?.levelId ?? "NULL"}');
-  debugPrint('🎨 PaletteStateProvider: Available components: ${levelConfig?.components.available.length ?? 0}');
+  debugPrint(
+      '🎨 PaletteStateProvider: Game state level: ${gameState.currentLevel}');
+  debugPrint(
+      '🎨 PaletteStateProvider: Level config: ${levelConfig?.levelId ?? "NULL"}');
+  debugPrint(
+      '🎨 PaletteStateProvider: Available components: ${levelConfig?.components.available.length ?? 0}');
 
   return PaletteStateNotifier(levelId, storageService, levelConfig);
 });
@@ -394,78 +434,101 @@ class PaletteStateNotifier extends StateNotifier<PaletteState> {
   final StorageService _storageService;
   final LevelDefinition? levelConfig;
 
-  PaletteStateNotifier(this.levelId, this._storageService, [this.levelConfig]) : super(PaletteState(
-    availableComponents: _getAvailableComponentsForLevel(levelConfig),
-    inventory: _getInventoryForLevel(levelId, levelConfig),
-  )) {
-    StructuredLogger.info('🎨 ===== PALETTE STATE NOTIFIER INITIALIZED =====', context: {
-      'levelId': levelId,
-      'levelConfigId': levelConfig?.levelId,
-      'levelConfigNull': levelConfig == null,
-      'availableComponentsCount': levelConfig?.components.available.length ?? 0,
-      'availableComponentsList': levelConfig?.components.available.map((c) => c.type).toList() ?? [],
-      'inventoryFromConfig': _getInventoryForLevel(levelId, levelConfig).keys.toList(),
-      'componentsFromConfig': _getAvailableComponentsForLevel(levelConfig).map((c) => c.type).toList(),
-    });
+  PaletteStateNotifier(this.levelId, this._storageService, [this.levelConfig])
+      : super(PaletteState(
+          availableComponents: _getAvailableComponentsForLevel(levelConfig),
+          inventory: _getInventoryForLevel(levelId, levelConfig),
+        )) {
+    StructuredLogger.info('🎨 ===== PALETTE STATE NOTIFIER INITIALIZED =====',
+        context: {
+          'levelId': levelId,
+          'levelConfigId': levelConfig?.levelId,
+          'levelConfigNull': levelConfig == null,
+          'availableComponentsCount':
+              levelConfig?.components.available.length ?? 0,
+          'availableComponentsList':
+              levelConfig?.components.available.map((c) => c.type).toList() ??
+                  [],
+          'inventoryFromConfig':
+              _getInventoryForLevel(levelId, levelConfig).keys.toList(),
+          'componentsFromConfig': _getAvailableComponentsForLevel(levelConfig)
+              .map((c) => c.type)
+              .toList(),
+        });
     _loadPaletteState();
   }
 
   Future<void> _loadPaletteState() async {
     try {
       // Load inventory for this level
-      final savedInventory = _storageService.readData<String>('inventory_$levelId');
+      final savedInventory =
+          _storageService.readData<String>('inventory_$levelId');
       if (savedInventory != null) {
-        final inventoryJson = jsonDecode(savedInventory) as Map<String, dynamic>;
+        final inventoryJson =
+            jsonDecode(savedInventory) as Map<String, dynamic>;
         final inventory = <String, ComponentInventory>{};
         inventoryJson.forEach((key, value) {
-          inventory[key] = ComponentInventory.fromJson(value as Map<String, dynamic>);
+          inventory[key] =
+              ComponentInventory.fromJson(value as Map<String, dynamic>);
         });
         state = state.copyWith(inventory: inventory);
       }
 
       // Load unlocked components (global, not per level)
-      final unlockedTypes = _storageService.readData<List<String>>('unlocked_components') ?? [];
+      final unlockedTypes =
+          _storageService.readData<List<String>>('unlocked_components') ?? [];
       if (unlockedTypes.isNotEmpty) {
         final updatedComponents = state.availableComponents.map((component) {
-          return component.copyWith(isUnlocked: unlockedTypes.contains(component.type));
+          return component.copyWith(
+              isUnlocked: unlockedTypes.contains(component.type));
         }).toList();
         state = state.copyWith(availableComponents: updatedComponents);
       }
     } catch (e) {
-      StructuredLogger.error('Failed to load palette state', context: {
-        'levelId': levelId,
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.error('Failed to load palette state',
+          context: {
+            'levelId': levelId,
+            'error': e.toString(),
+          },
+          error: e);
     }
   }
 
   Future<void> _savePaletteState() async {
     try {
       // Save inventory for this level
-      final inventoryJson = state.inventory.map((key, value) => MapEntry(key, value.toJson()));
+      final inventoryJson =
+          state.inventory.map((key, value) => MapEntry(key, value.toJson()));
       final inventoryString = jsonEncode(inventoryJson);
-      await _storageService.saveData<String>('inventory_$levelId', inventoryString);
+      await _storageService.saveData<String>(
+          'inventory_$levelId', inventoryString);
     } catch (e) {
-      StructuredLogger.error('Failed to save palette state', context: {
-        'levelId': levelId,
-        'inventoryItems': state.inventory.length,
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.error('Failed to save palette state',
+          context: {
+            'levelId': levelId,
+            'inventoryItems': state.inventory.length,
+            'error': e.toString(),
+          },
+          error: e);
     }
   }
 
   Future<void> _saveUnlockedComponents(String newUnlockedType) async {
     try {
-      final currentUnlocked = _storageService.readData<List<String>>('unlocked_components') ?? [];
+      final currentUnlocked =
+          _storageService.readData<List<String>>('unlocked_components') ?? [];
       if (!currentUnlocked.contains(newUnlockedType)) {
         currentUnlocked.add(newUnlockedType);
-        await _storageService.saveData<List<String>>('unlocked_components', currentUnlocked);
+        await _storageService.saveData<List<String>>(
+            'unlocked_components', currentUnlocked);
       }
     } catch (e) {
-      StructuredLogger.error('Failed to save unlocked components', context: {
-        'levelId': levelId,
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.error('Failed to save unlocked components',
+          context: {
+            'levelId': levelId,
+            'error': e.toString(),
+          },
+          error: e);
     }
   }
 
@@ -579,7 +642,7 @@ class PaletteStateNotifier extends StateNotifier<PaletteState> {
       isExpanded: !state.isExpanded,
       isAnimating: true,
     );
-    
+
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         state = state.copyWith(isAnimating: false);
@@ -662,7 +725,8 @@ class PaletteStateNotifier extends StateNotifier<PaletteState> {
     // Clear saved inventory first to prevent _loadPaletteState override
     // Delete the key entirely by saving an empty collection instead of null
     final emptyInventoryJson = jsonEncode(<String, dynamic>{});
-    await _storageService.saveData<String>('inventory_$levelId', emptyInventoryJson);
+    await _storageService.saveData<String>(
+        'inventory_$levelId', emptyInventoryJson);
 
     // Then recreate fresh state with full inventory
     state = PaletteState(
@@ -673,10 +737,13 @@ class PaletteStateNotifier extends StateNotifier<PaletteState> {
     StructuredLogger.info('🎨 ===== INVENTORY RESET COMPLETED =====', context: {
       'levelId': levelId,
       'freshInventoryItems': state.inventory.length,
-      'totalComponentsRestored': state.inventory.values.fold(0, (sum, item) => sum + item.total),
-      'availableComponentsRestored': state.inventory.values.fold(0, (sum, item) => sum + item.available),
-      'inventoryDetails': state.inventory.entries.map((e) =>
-        '${e.key}: ${e.value.available}/${e.value.total}').toList(),
+      'totalComponentsRestored':
+          state.inventory.values.fold(0, (sum, item) => sum + item.total),
+      'availableComponentsRestored':
+          state.inventory.values.fold(0, (sum, item) => sum + item.available),
+      'inventoryDetails': state.inventory.entries
+          .map((e) => '${e.key}: ${e.value.available}/${e.value.total}')
+          .toList(),
     });
   }
 }
@@ -747,7 +814,8 @@ List<ComponentDefinition> _getAvailableComponents() {
   ];
 }
 
-List<ComponentDefinition> _getAvailableComponentsForLevel(LevelDefinition? levelConfig) {
+List<ComponentDefinition> _getAvailableComponentsForLevel(
+    LevelDefinition? levelConfig) {
   StructuredLogger.info('Getting available components for level', context: {
     'levelId': levelConfig?.levelId ?? 'null',
     'hasLevelConfig': levelConfig != null,
@@ -756,10 +824,13 @@ List<ComponentDefinition> _getAvailableComponentsForLevel(LevelDefinition? level
 
   // If we have a level config, use it as the source of truth
   if (levelConfig != null && levelConfig.components.available.isNotEmpty) {
-    StructuredLogger.debug('Using level config for available components', context: {
-      'levelId': levelConfig.levelId,
-      'components': levelConfig.components.available.map((c) => '${c.type}:${c.quantity}').toList(),
-    });
+    StructuredLogger.debug('Using level config for available components',
+        context: {
+          'levelId': levelConfig.levelId,
+          'components': levelConfig.components.available
+              .map((c) => '${c.type}:${c.quantity}')
+              .toList(),
+        });
 
     final componentDefinitions = <ComponentDefinition>[];
 
@@ -793,25 +864,31 @@ List<ComponentDefinition> _getAvailableComponentsForLevel(LevelDefinition? level
       });
     }
 
-    StructuredLogger.info('Component definitions generated from level config', context: {
-      'levelId': levelConfig.levelId,
-      'definitionsCount': componentDefinitions.length,
-      'componentTypes': componentDefinitions.map((c) => c.type).toList(),
-    });
+    StructuredLogger.info('Component definitions generated from level config',
+        context: {
+          'levelId': levelConfig.levelId,
+          'definitionsCount': componentDefinitions.length,
+          'componentTypes': componentDefinitions.map((c) => c.type).toList(),
+        });
 
     // Add simple debug logs for immediate visibility
-    StructuredLogger.debug('🎨 COMPONENT CREATION: Generated ${componentDefinitions.length} definitions', context: {
-      'componentDefinitionsLength': componentDefinitions.length,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
+    StructuredLogger.debug(
+        '🎨 COMPONENT CREATION: Generated ${componentDefinitions.length} definitions',
+        context: {
+          'componentDefinitionsLength': componentDefinitions.length,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        });
     StructuredLogger.debug('🎨 COMPONENT CREATION: Types', context: {
       'componentTypes': componentDefinitions.map((c) => c.type).toList(),
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
-    StructuredLogger.debug('🎨 COMPONENT CREATION: ${componentDefinitions.where((c) => c.isUnlocked).length} unlocked components', context: {
-      'unlockedComponentsCount': componentDefinitions.where((c) => c.isUnlocked).length,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
+    StructuredLogger.debug(
+        '🎨 COMPONENT CREATION: ${componentDefinitions.where((c) => c.isUnlocked).length} unlocked components',
+        context: {
+          'unlockedComponentsCount':
+              componentDefinitions.where((c) => c.isUnlocked).length,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        });
 
     return componentDefinitions;
   }
@@ -824,7 +901,8 @@ List<ComponentDefinition> _getAvailableComponentsForLevel(LevelDefinition? level
   return _getAvailableComponents();
 }
 
-Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefinition? levelConfig]) {
+Map<String, ComponentInventory> _getInventoryForLevel(String levelId,
+    [LevelDefinition? levelConfig]) {
   StructuredLogger.info('Generating component inventory for level', context: {
     'levelId': levelId,
     'levelConfigProvided': levelConfig != null,
@@ -837,7 +915,9 @@ Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefi
   if (levelConfig != null && levelConfig.components.available.isNotEmpty) {
     StructuredLogger.debug('Using level configuration for inventory', context: {
       'levelId': levelConfig.levelId,
-      'components': levelConfig.components.available.map((c) => '${c.type}:${c.quantity}').toList(),
+      'components': levelConfig.components.available
+          .map((c) => '${c.type}:${c.quantity}')
+          .toList(),
     });
 
     // Create inventory based on available components with their specified quantities
@@ -850,11 +930,12 @@ Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefi
         total: quantity,
       );
 
-      StructuredLogger.trace('Component inventory populated from config', context: {
-        'componentType': componentType,
-        'available': quantity,
-        'total': quantity,
-      });
+      StructuredLogger.trace('Component inventory populated from config',
+          context: {
+            'componentType': componentType,
+            'available': quantity,
+            'total': quantity,
+          });
     }
 
     // ENHANCED: Add tutorial default quantities for components not in level config
@@ -872,22 +953,28 @@ Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefi
           total: defaultQuantity,
         );
 
-        StructuredLogger.trace('Component inventory populated from tutorial defaults', context: {
-          'componentType': componentType,
-          'available': defaultQuantity,
-          'total': defaultQuantity,
-          'source': 'tutorial_default',
-        });
+        StructuredLogger.trace(
+            'Component inventory populated from tutorial defaults',
+            context: {
+              'componentType': componentType,
+              'available': defaultQuantity,
+              'total': defaultQuantity,
+              'source': 'tutorial_default',
+            });
       }
     }
 
-    StructuredLogger.info('Inventory generation complete from config + tutorial defaults', context: {
-      'levelId': levelId,
-      'inventoryItems': inventory.length,
-      'configComponents': levelConfig.components.available.length,
-      'tutorialDefaultsAdded': tutorialDefaults.length - levelConfig.components.available.length,
-      'totalComponents': inventory.values.fold(0, (sum, item) => sum + item.total),
-    });
+    StructuredLogger.info(
+        'Inventory generation complete from config + tutorial defaults',
+        context: {
+          'levelId': levelId,
+          'inventoryItems': inventory.length,
+          'configComponents': levelConfig.components.available.length,
+          'tutorialDefaultsAdded':
+              tutorialDefaults.length - levelConfig.components.available.length,
+          'totalComponents':
+              inventory.values.fold(0, (sum, item) => sum + item.total),
+        });
     return inventory;
   }
 
@@ -898,25 +985,40 @@ Map<String, ComponentInventory> _getInventoryForLevel(String levelId, [LevelDefi
   });
   final levelInventories = {
     '1': {
-      'battery': const ComponentInventory(componentType: 'battery', available: 1, total: 1),
-      'resistor': const ComponentInventory(componentType: 'resistor', available: 2, total: 2),
-      'bulb': const ComponentInventory(componentType: 'bulb', available: 1, total: 1),
-      'wire': const ComponentInventory(componentType: 'wire', available: 5, total: 5),
-      'switch': const ComponentInventory(componentType: 'switch', available: 1, total: 1),
+      'battery': const ComponentInventory(
+          componentType: 'battery', available: 1, total: 1),
+      'resistor': const ComponentInventory(
+          componentType: 'resistor', available: 2, total: 2),
+      'bulb': const ComponentInventory(
+          componentType: 'bulb', available: 1, total: 1),
+      'wire': const ComponentInventory(
+          componentType: 'wire', available: 5, total: 5),
+      'switch': const ComponentInventory(
+          componentType: 'switch', available: 1, total: 1),
     },
     '2': {
-      'battery': const ComponentInventory(componentType: 'battery', available: 1, total: 1),
-      'resistor': const ComponentInventory(componentType: 'resistor', available: 3, total: 3),
-      'bulb': const ComponentInventory(componentType: 'bulb', available: 2, total: 2),
-      'wire': const ComponentInventory(componentType: 'wire', available: 8, total: 8),
-      'switch': const ComponentInventory(componentType: 'switch', available: 1, total: 1),
+      'battery': const ComponentInventory(
+          componentType: 'battery', available: 1, total: 1),
+      'resistor': const ComponentInventory(
+          componentType: 'resistor', available: 3, total: 3),
+      'bulb': const ComponentInventory(
+          componentType: 'bulb', available: 2, total: 2),
+      'wire': const ComponentInventory(
+          componentType: 'wire', available: 8, total: 8),
+      'switch': const ComponentInventory(
+          componentType: 'switch', available: 1, total: 1),
     },
     '3': {
-      'battery': const ComponentInventory(componentType: 'battery', available: 1, total: 1),
-      'resistor': const ComponentInventory(componentType: 'resistor', available: 2, total: 2),
-      'bulb': const ComponentInventory(componentType: 'bulb', available: 2, total: 2),
-      'wire': const ComponentInventory(componentType: 'wire', available: 10, total: 10),
-      'switch': const ComponentInventory(componentType: 'switch', available: 1, total: 1),
+      'battery': const ComponentInventory(
+          componentType: 'battery', available: 1, total: 1),
+      'resistor': const ComponentInventory(
+          componentType: 'resistor', available: 2, total: 2),
+      'bulb': const ComponentInventory(
+          componentType: 'bulb', available: 2, total: 2),
+      'wire': const ComponentInventory(
+          componentType: 'wire', available: 10, total: 10),
+      'switch': const ComponentInventory(
+          componentType: 'switch', available: 1, total: 1),
     },
   };
 

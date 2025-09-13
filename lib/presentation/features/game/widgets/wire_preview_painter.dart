@@ -22,14 +22,15 @@ class WirePreviewPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    final pathPoints = path.map((pos) => coordinateService.gridToLocal(pos, context)).toList();
+    final pathPoints =
+        path.map((pos) => coordinateService.gridToLocal(pos, context)).toList();
 
     if (pathPoints.length >= 2) {
       final path = Path();
-      path.moveTo(pathPoints[0].dx, pathPoints[0].dy);
+      path.moveTo(pathPoints[0].dx, pathPoints[0].dy); // ignore: cascade_invocations
 
-      for (int i = 1; i < pathPoints.length; i++) {
-        path.lineTo(pathPoints[i].dx, pathPoints[i].dy);
+      for (var i = 1; i < pathPoints.length; i++) {
+        path.lineTo(pathPoints[i].dx, pathPoints[i].dy); // ignore: cascade_invocations
       }
 
       canvas.drawPath(path, paint);

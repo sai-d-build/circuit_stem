@@ -1,4 +1,3 @@
-
 import 'package:sparkcircuit/core/commands/game_command.dart';
 
 abstract class CommandStack {

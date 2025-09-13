@@ -1,10 +1,11 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import './game_engine_notifier_v3.dart';
-import '../../../infrastructure/persistence/shared_preferences_storage_service.dart';
-import '../../states/game_state.dart';
-import '../../services/level_service.dart' as level_service;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/debug/structured_logger.dart';
+import '../../../infrastructure/persistence/shared_preferences_storage_service.dart';
+import '../../services/level_service.dart' as level_service;
+import '../../states/game_state.dart';
+import './game_engine_notifier_v3.dart';
 
 // Storage Service Provider
 final storageServiceProvider = Provider<SharedPreferencesStorageService>((ref) {
@@ -12,7 +13,8 @@ final storageServiceProvider = Provider<SharedPreferencesStorageService>((ref) {
 });
 
 // Game Engine V3 Provider - Clean implementation
-final gameEngineNotifierV3Provider = StateNotifierProvider<GameEngineNotifierV3, GameState>((ref) {
+final gameEngineNotifierV3Provider =
+    StateNotifierProvider<GameEngineNotifierV3, GameState>((ref) {
   return GameEngineNotifierV3();
 });
 
@@ -31,10 +33,11 @@ final levelServiceProvider = Provider<level_service.LevelService>((ref) {
 
   final service = level_service.LevelService(rootBundle);
 
-  StructuredLogger.info('✅ LevelService provider created successfully', context: {
-    'serviceType': service.runtimeType.toString(),
-    'timestamp': DateTime.now().toIso8601String(),
-  });
+  StructuredLogger.info('✅ LevelService provider created successfully',
+      context: {
+        'serviceType': service.runtimeType.toString(),
+        'timestamp': DateTime.now().toIso8601String(),
+      });
 
   return service;
 });

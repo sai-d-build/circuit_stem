@@ -5,7 +5,8 @@ class PerformanceOptimizer {
   // Temporarily empty due to missing dependencies
   void trackFrameTime(Duration frameTime) {}
   Map<String, dynamic> getPerformanceMetrics() => {};
-  Future<void> optimizeComponentRendering(List<String> visibleComponents) async {}
+  Future<void> optimizeComponentRendering(
+      List<String> visibleComponents) async {}
   Future<void> optimizeMemoryUsage() async {}
   dynamic getFromPool<T>(String poolName) => null;
   void returnToPool<T>(String poolName, T object) {}

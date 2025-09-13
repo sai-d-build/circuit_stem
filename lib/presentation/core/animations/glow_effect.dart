@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
 
 class GlowEffect extends StatefulWidget {
   final Widget child;
@@ -75,7 +76,8 @@ class _GlowEffectState extends State<GlowEffect>
             boxShadow: widget.isGlowing
                 ? [
                     BoxShadow(
-                      color: widget.glowColor.withValues(alpha: _animation.value),
+                      color:
+                          widget.glowColor.withValues(alpha: _animation.value),
                       blurRadius: widget.glowRadius,
                       spreadRadius: widget.glowRadius * 0.3,
                     ),
@@ -191,8 +193,8 @@ class _ShakeEffectState extends State<ShakeEffect>
     super.initState();
     _controller = AnimationController(duration: widget.duration, vsync: this);
     _animation = Tween<double>(
-      begin: -1.0,
-      end: 1.0,
+      begin: -1,
+      end: 1,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticIn));
   }
 
@@ -223,7 +225,9 @@ class _ShakeEffectState extends State<ShakeEffect>
         return Transform.translate(
           offset: widget.isShaking
               ? Offset(
-                  _animation.value * widget.shakeIntensity * math.sin(_animation.value * math.pi * widget.shakeCount),
+                  _animation.value *
+                      widget.shakeIntensity *
+                      math.sin(_animation.value * math.pi * widget.shakeCount),
                   0,
                 )
               : Offset.zero,
@@ -265,7 +269,7 @@ class _HighlightEffectState extends State<HighlightEffect>
   void initState() {
     super.initState();
     _controller = AnimationController(duration: widget.duration, vsync: this);
-    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _animation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
@@ -306,7 +310,8 @@ class _HighlightEffectState extends State<HighlightEffect>
             borderRadius: widget.borderRadius,
             boxShadow: [
               BoxShadow(
-                color: widget.highlightColor.withValues(alpha: _animation.value * 0.3),
+                color: widget.highlightColor
+                    .withValues(alpha: _animation.value * 0.3),
                 blurRadius: 8 * _animation.value,
                 spreadRadius: 2 * _animation.value,
               ),
@@ -348,7 +353,7 @@ class _ElectricCurrentEffectState extends State<ElectricCurrentEffect>
   void initState() {
     super.initState();
     _controller = AnimationController(duration: widget.duration, vsync: this);
-    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
+    _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
 
     if (widget.isFlowing) {
       _controller.repeat();
@@ -422,7 +427,7 @@ class ElectricCurrentPainter extends CustomPainter {
     final totalLength = size.width;
     final offset = progress * (dashLength + gapLength);
 
-    for (double x = -offset; x < totalLength; x += dashLength + gapLength) {
+    for (var x = -offset; x < totalLength; x += dashLength + gapLength) {
       final startX = math.max(0.0, x);
       final endX = math.min(totalLength, x + dashLength);
 
@@ -439,8 +444,8 @@ class ElectricCurrentPainter extends CustomPainter {
   @override
   bool shouldRepaint(ElectricCurrentPainter oldDelegate) {
     return oldDelegate.progress != progress ||
-           oldDelegate.currentColor != currentColor ||
-           oldDelegate.strokeWidth != strokeWidth ||
-           oldDelegate.isFlowing != isFlowing;
+        oldDelegate.currentColor != currentColor ||
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.isFlowing != isFlowing;
   }
 }

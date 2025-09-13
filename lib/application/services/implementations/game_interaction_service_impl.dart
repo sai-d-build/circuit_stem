@@ -1,24 +1,25 @@
 import 'dart:ui';
-import 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart';
+
 import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';
+import 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart';
 import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart'
     as orchestrator;
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 // Import orchestrator classes
 typedef GestureInputEvent = orchestrator.GestureInputEvent;
 typedef GestureEventType = orchestrator.GestureEventType;
 typedef FeedbackSideEffect = orchestrator.FeedbackSideEffect;
 typedef FeedbackType = orchestrator.FeedbackType;
-typedef ComponentPlacementSideEffect = orchestrator.ComponentPlacementSideEffect;
+typedef ComponentPlacementSideEffect
+    = orchestrator.ComponentPlacementSideEffect;
 
 /// Implementation of the GameInteractionService
 /// Handles gesture processing and interaction state management
 class GameInteractionServiceImpl implements GameInteractionService {
-
   GameInteractionServiceImpl();
 
   @override
@@ -52,11 +53,13 @@ class GameInteractionServiceImpl implements GameInteractionService {
           return _handleScaleEnd(event, currentState);
       }
     } catch (e, stackTrace) {
-      StructuredLogger.error('Gesture processing error', context: {
-        'gestureType': event.type.toString(),
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-      }, error: e);
+      StructuredLogger.error('Gesture processing error',
+          context: {
+            'gestureType': event.type.toString(),
+            'error': e.toString(),
+            'stackTrace': stackTrace.toString(),
+          },
+          error: e);
 
       // Return current state with error
       return GestureProcessingResult(
@@ -231,16 +234,19 @@ class GameInteractionServiceImpl implements GameInteractionService {
     final dragEnd = currentState.interactionState.currentDragPosition;
 
     if (currentState.interactionState.draggedComponentId != null &&
-        dragStart != null && dragEnd != null) {
+        dragStart != null &&
+        dragEnd != null) {
       // Component was dragged - create placement side effect
       // TODO: Convert GameCanvasState to GameState for component placement
       // For now, skip the side effect until proper conversion is implemented
       final moveSideEffect = ComponentPlacementSideEffect(
         ComponentPlacementRequest(
-          componentType: ComponentType.wire, // This would need to be determined from the component
+          componentType: ComponentType
+              .wire, // This would need to be determined from the component
           row: dragEnd.row,
           col: dragEnd.col,
-          currentGameState: GameState.initial(currentState.currentLevel), // Placeholder - needs proper conversion
+          currentGameState: GameState.initial(currentState
+              .currentLevel), // Placeholder - needs proper conversion
           levelId: currentState.currentLevel?.levelId ?? '',
         ),
       );
@@ -299,7 +305,8 @@ class GameInteractionServiceImpl implements GameInteractionService {
   ) {
     if (event.pointerCount > 1 && event.data is double) {
       // Multi-touch scaling
-      final newScale = currentState.viewportState.scale * (event.data as double);
+      final newScale =
+          currentState.viewportState.scale * (event.data as double);
 
       final newState = currentState.copyWith(
         viewportState: currentState.viewportState.copyWith(
@@ -339,9 +346,13 @@ class GameInteractionServiceImpl implements GameInteractionService {
     GameCanvasState currentState,
   ) {
     // Simplified conversion for now - TODO: Implement proper coordinate transformation
-    final cellSize = 60.0; // Default cell size
-    final scaledX = (screenPosition.dx - currentState.viewportState.panOffset.dx) / currentState.viewportState.scale;
-    final scaledY = (screenPosition.dy - currentState.viewportState.panOffset.dy) / currentState.viewportState.scale;
+    const cellSize = 60.0; // Default cell size
+    final scaledX =
+        (screenPosition.dx - currentState.viewportState.panOffset.dx) /
+            currentState.viewportState.scale;
+    final scaledY =
+        (screenPosition.dy - currentState.viewportState.panOffset.dy) /
+            currentState.viewportState.scale;
 
     final gridX = (scaledX / cellSize).floor();
     final gridY = (scaledY / cellSize).floor();

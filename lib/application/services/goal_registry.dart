@@ -9,7 +9,8 @@ class GoalRegistry {
     // This is a simplified implementation that doesn't actually instantiate types
     // In a real implementation, you would need a proper factory or DI system
     // For now, we'll throw an error to indicate the missing implementation
-    throw UnsupportedError('Behavior instantiation for type $type is not yet implemented');
+    throw UnsupportedError(
+        'Behavior instantiation for type $type is not yet implemented');
   }
 
   static void register({
@@ -31,8 +32,7 @@ class GoalRegistry {
       throw Exception('Unknown goal type: $type');
     }
 
-    final behaviorInstances =
-        behaviorTypes.map((t) => _getBehaviorByType(t)).toList();
+    final behaviorInstances = behaviorTypes.map(_getBehaviorByType).toList();
     Logger.log(
         'GoalRegistry: Instantiated behaviors for \'$type\': $behaviorInstances');
 

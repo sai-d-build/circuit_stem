@@ -151,7 +151,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
             child: Column(
@@ -205,7 +205,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(value)) {
                       return 'Please enter a valid email';
                     }
                     return null;
@@ -222,7 +223,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   prefixIcon: Icons.lock_outlined,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                     onPressed: () {
@@ -274,7 +277,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : const Text('Sign In'),

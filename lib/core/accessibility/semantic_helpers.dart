@@ -40,10 +40,16 @@ class SemanticHelpers {
       value: valueLabel,
       slider: true,
       enabled: enabled,
-      increasedValue: (value + (max - min) * 0.1).clamp(min, max).toStringAsFixed(1),
-      decreasedValue: (value - (max - min) * 0.1).clamp(min, max).toStringAsFixed(1),
-      onIncrease: enabled ? () => onChanged((value + (max - min) * 0.1).clamp(min, max)) : null,
-      onDecrease: enabled ? () => onChanged((value - (max - min) * 0.1).clamp(min, max)) : null,
+      increasedValue:
+          (value + (max - min) * 0.1).clamp(min, max).toStringAsFixed(1),
+      decreasedValue:
+          (value - (max - min) * 0.1).clamp(min, max).toStringAsFixed(1),
+      onIncrease: enabled
+          ? () => onChanged((value + (max - min) * 0.1).clamp(min, max))
+          : null,
+      onDecrease: enabled
+          ? () => onChanged((value - (max - min) * 0.1).clamp(min, max))
+          : null,
       child: ExcludeSemantics(
         child: child,
       ),
@@ -85,7 +91,8 @@ class SemanticHelpers {
   }
 
   // Announce important events
-  static void announce(String message, {LiveRegionMode mode = LiveRegionMode.polite}) {
+  static void announce(String message,
+      {LiveRegionMode mode = LiveRegionMode.polite}) {
     try {
       // Use SemanticsService.announce with proper parameters
       // Note: The API only supports 2 parameters, assertiveness is handled via live regions

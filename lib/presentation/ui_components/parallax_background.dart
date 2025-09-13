@@ -14,13 +14,15 @@ class ParallaxBackground extends StatefulWidget {
     required this.speeds,
     this.height,
     this.animate = true,
-  }) : assert(layers.length == speeds.length, 'Layers and speeds must have the same length');
+  }) : assert(layers.length == speeds.length,
+            'Layers and speeds must have the same length');
 
   @override
   State<ParallaxBackground> createState() => _ParallaxBackgroundState();
 }
 
-class _ParallaxBackgroundState extends State<ParallaxBackground> with SingleTickerProviderStateMixin {
+class _ParallaxBackgroundState extends State<ParallaxBackground>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late List<Animation<double>> _animations;
 
@@ -38,7 +40,7 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> with SingleTick
 
     _animations = widget.speeds.map((speed) {
       return Tween<double>(
-        begin: 0.0,
+        begin: 0,
         end: 2 * pi,
       ).animate(
         CurvedAnimation(
@@ -75,10 +77,14 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> with SingleTick
       child: Stack(
         children: List.generate(widget.layers.length, (index) {
           return AnimatedBuilder(
-            animation: widget.animate ? _animations[index] : AlwaysStoppedAnimation(0.0),
+            animation: widget.animate
+                ? _animations[index]
+                : const AlwaysStoppedAnimation(0),
             builder: (context, child) {
               final speed = widget.speeds[index];
-              final offset = widget.animate ? sin(_animations[index].value) * speed * 20 : 0.0;
+              final offset = widget.animate
+                  ? sin(_animations[index].value) * speed * 20
+                  : 0.0;
 
               return Positioned(
                 left: offset,
@@ -137,7 +143,7 @@ class CircuitPatternPainter extends CustomPainter {
     final random = Random(42); // Fixed seed for consistent pattern
 
     // Draw circuit-like patterns
-    for (int i = 0; i < 50; i++) {
+    for (var i = 0; i < 50; i++) {
       final startX = random.nextDouble() * size.width;
       final startY = random.nextDouble() * size.height;
       final endX = startX + (random.nextDouble() - 0.5) * 100;
@@ -151,8 +157,10 @@ class CircuitPatternPainter extends CustomPainter {
 
       // Add some nodes
       if (random.nextDouble() < 0.3) {
-        canvas.drawCircle(Offset(startX, startY), 2.0, paint..style = PaintingStyle.fill);
-        canvas.drawCircle(Offset(endX, endY), 2.0, paint..style = PaintingStyle.fill);
+        canvas.drawCircle(
+            Offset(startX, startY), 2, paint..style = PaintingStyle.fill);
+        canvas.drawCircle(
+            Offset(endX, endY), 2, paint..style = PaintingStyle.fill);
         paint.style = PaintingStyle.stroke;
       }
     }

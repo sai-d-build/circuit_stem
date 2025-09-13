@@ -1,4 +1,3 @@
-
 // Dummy CircuitWire for the painter, will be replaced by a proper model
 class CircuitWire {
   final String id;

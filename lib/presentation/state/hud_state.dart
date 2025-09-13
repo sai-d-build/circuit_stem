@@ -1,8 +1,10 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
-import '../../core/persistence/storage_service.dart';
-import '../../application/game_engine/v3/providers_v3.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+
+import '../../application/game_engine/v3/providers_v3.dart';
+import '../../core/persistence/storage_service.dart';
 
 enum HudOverlayType {
   none,
@@ -70,7 +72,7 @@ class ProgressData {
   }
 
   double get progressPercentage {
-    if (totalStars == 0) return 0.0;
+    if (totalStars == 0) return 0;
     return starsEarned / totalStars;
   }
 
@@ -158,7 +160,9 @@ class HudState {
 }
 
 // Providers
-final hudStateProvider = StateNotifierProvider.family<HudStateNotifier, HudState, String>((ref, levelId) {
+final hudStateProvider =
+    StateNotifierProvider.family<HudStateNotifier, HudState, String>(
+        (ref, levelId) {
   final storageService = ref.watch(storageServiceProvider);
   return HudStateNotifier(levelId, storageService);
 });
@@ -167,20 +171,21 @@ class HudStateNotifier extends StateNotifier<HudState> {
   final String levelId;
   final StorageService _storageService;
 
-  HudStateNotifier(this.levelId, this._storageService) : super(HudState(
-    progress: ProgressData(
-      levelId: levelId,
-      currentScore: 0,
-      bestScore: _getBestScore(levelId),
-      starsEarned: 0,
-      totalStars: 3,
-      hintsUsed: 0,
-      totalHints: _getAvailableHints(levelId).length,
-      elapsedTime: Duration.zero,
-      isComplete: false,
-    ),
-    availableHints: _getAvailableHints(levelId),
-  )) {
+  HudStateNotifier(this.levelId, this._storageService)
+      : super(HudState(
+          progress: ProgressData(
+            levelId: levelId,
+            currentScore: 0,
+            bestScore: _getBestScore(levelId),
+            starsEarned: 0,
+            totalStars: 3,
+            hintsUsed: 0,
+            totalHints: _getAvailableHints(levelId).length,
+            elapsedTime: Duration.zero,
+            isComplete: false,
+          ),
+          availableHints: _getAvailableHints(levelId),
+        )) {
     _loadProgress();
   }
 
@@ -193,11 +198,13 @@ class HudStateNotifier extends StateNotifier<HudState> {
         state = state.copyWith(progress: savedProgress);
       } catch (e) {
         // If loading fails, keep default progress
-        StructuredLogger.warning('Failed to load HUD progress data', context: {
-          'levelId': levelId,
-          'dataKey': 'progress_$levelId',
-          'error': e.toString(),
-        }, error: e);
+        StructuredLogger.warning('Failed to load HUD progress data',
+            context: {
+              'levelId': levelId,
+              'dataKey': 'progress_$levelId',
+              'error': e.toString(),
+            },
+            error: e);
       }
     }
   }
@@ -206,15 +213,18 @@ class HudStateNotifier extends StateNotifier<HudState> {
     try {
       final progressJson = state.progress.toJson();
       final progressString = jsonEncode(progressJson);
-      await _storageService.saveData<String>('progress_$levelId', progressString);
+      await _storageService.saveData<String>(
+          'progress_$levelId', progressString);
     } catch (e) {
-      StructuredLogger.error('Failed to save HUD progress data', context: {
-        'levelId': levelId,
-        'dataKey': 'progress_$levelId',
-        'currentScore': state.progress.currentScore,
-        'isComplete': state.progress.isComplete,
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.error('Failed to save HUD progress data',
+          context: {
+            'levelId': levelId,
+            'dataKey': 'progress_$levelId',
+            'currentScore': state.progress.currentScore,
+            'isComplete': state.progress.isComplete,
+            'error': e.toString(),
+          },
+          error: e);
     }
   }
 
@@ -223,7 +233,7 @@ class HudStateNotifier extends StateNotifier<HudState> {
       currentOverlay: overlayType,
       isAnimating: true,
     );
-    
+
     // Reset animation flag after a brief delay
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
@@ -237,7 +247,7 @@ class HudStateNotifier extends StateNotifier<HudState> {
       currentOverlay: HudOverlayType.none,
       isAnimating: true,
     );
-    
+
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         state = state.copyWith(isAnimating: false);

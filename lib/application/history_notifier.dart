@@ -21,7 +21,8 @@ class HistoryNotifier extends StateNotifier<List<GameStateSnapshot>> {
   HistoryNotifier() : super([]);
 
   /// Add a new state to history
-  void pushState(Map<String, dynamic> gridState, Map<String, dynamic> componentStates) {
+  void pushState(
+      Map<String, dynamic> gridState, Map<String, dynamic> componentStates) {
     final snapshot = GameStateSnapshot(
       gridState: gridState,
       componentStates: componentStates,
@@ -83,6 +84,7 @@ class HistoryNotifier extends StateNotifier<List<GameStateSnapshot>> {
 }
 
 // Provider for HistoryNotifier
-final historyNotifierProvider = StateNotifierProvider<HistoryNotifier, List<GameStateSnapshot>>((ref) {
+final historyNotifierProvider =
+    StateNotifierProvider<HistoryNotifier, List<GameStateSnapshot>>((ref) {
   return HistoryNotifier();
 });

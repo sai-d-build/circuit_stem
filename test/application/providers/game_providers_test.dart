@@ -1,6 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:flutter_test/flutter_test.dart';
 // Import the game providers we want to test
 import 'package:sparkcircuit/application/providers/game_providers.dart';
 
@@ -99,7 +98,9 @@ void main() {
       expect(engine, isNotNull);
     });
 
-    test('gameEngineProvider switches implementation based on feature flag - V1', () {
+    test(
+        'gameEngineProvider switches implementation based on feature flag - V1',
+        () {
       // Arrange - Force V1 selection
       final testContainer = ProviderContainer(overrides: [
         useV3EngineProvider.overrideWithValue(false),
@@ -114,7 +115,9 @@ void main() {
       testContainer.dispose();
     });
 
-    test('gameEngineProvider switches implementation based on feature flag - V3', () {
+    test(
+        'gameEngineProvider switches implementation based on feature flag - V3',
+        () {
       // Arrange - Force V3 selection
       final testContainer = ProviderContainer(overrides: [
         useV3EngineProvider.overrideWithValue(true),
@@ -136,7 +139,8 @@ void main() {
         returnsNormally,
       );
 
-      final backwardCompatProvider = container.read(enhancedGameStateNotifierProvider);
+      final backwardCompatProvider =
+          container.read(enhancedGameStateNotifierProvider);
       expect(backwardCompatProvider, isNotNull);
     });
 
@@ -191,7 +195,8 @@ void main() {
       expect(() => container.read(useV3EngineProvider), returnsNormally);
       expect(() => container.read(gameEngineVersionProvider), returnsNormally);
       expect(() => container.read(gameEngineProvider), returnsNormally);
-      expect(() => container.read(enhancedGameStateNotifierProvider), returnsNormally);
+      expect(() => container.read(enhancedGameStateNotifierProvider),
+          returnsNormally);
     });
 
     test('providers have correct dependency relationships', () {
@@ -229,7 +234,7 @@ void main() {
       final synchronizer = container.read(gameEngineStateSynchronizerProvider);
 
       // Test that methods exist and don't throw
-      expect(() => synchronizer.resetEngines(), returnsNormally);
+      expect(synchronizer.resetEngines, returnsNormally);
 
       // Note: validateEngineConsistency may need mock data
     });
@@ -246,7 +251,8 @@ void main() {
       final flag = testContainer.read(useV3EngineProvider);
       final version = testContainer.read(gameEngineVersionProvider);
       final engine = testContainer.read(gameEngineProvider);
-      final synchronizer = testContainer.read(gameEngineStateSynchronizerProvider);
+      final synchronizer =
+          testContainer.read(gameEngineStateSynchronizerProvider);
 
       // Assert - All should be resolvable and non-null
       expect(flag, isNotNull);

@@ -16,28 +16,25 @@
 // ⚠️  IMPORTANT: Game engine selection affects user experience.
 // ⚠️  Always validate performance before deploying new engines.
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../component_selection_notifier.dart'
+    show componentSelectionNotifierProvider;
+import '../game_engine/v3/game_engine_notifier_v3.dart';
 // Core engine types
 import '../game_engine_notifier.dart';
-import '../game_engine/v3/game_engine_notifier_v3.dart';
 import '../game_engine_state.dart'; // For V1 GameEngineState
-import '../states/game_state.dart'; // For V3 GameState
-
-// Import service providers from main facade
-import '../providers.dart' show
-  audioServiceProvider,
-  animationSchedulerProvider;
-
+import '../game_progress_notifier.dart' show gameProgressNotifierProvider;
 // Import missing providers
 import '../grid_notifier.dart' show gridNotifierProvider;
 import '../history_notifier.dart' show historyNotifierProvider;
-import '../game_progress_notifier.dart' show gameProgressNotifierProvider;
-import '../component_selection_notifier.dart' show componentSelectionNotifierProvider;
+// Import service providers from main facade
+import '../providers.dart'
+    show audioServiceProvider, animationSchedulerProvider;
 import '../providers/core_providers.dart' show interactionStateProvider;
 import '../services/component_palette_manager.dart';
-
+import '../states/game_state.dart'; // For V3 GameState
 // Import use case providers
 import '../use_cases/providers.dart' as use_case_providers;
 
@@ -84,7 +81,8 @@ final gameEngineVersionProvider = Provider<GameEngineVersion>((ref) {
 /// Engine state synchronization provider
 /// Ensures both engines maintain consistent state when switching
 /// Useful for state validation and rollback scenarios
-final gameEngineStateSynchronizerProvider = Provider<GameEngineStateSynchronizer>((ref) {
+final gameEngineStateSynchronizerProvider =
+    Provider<GameEngineStateSynchronizer>((ref) {
   return GameEngineStateSynchronizer(
     v1Engine: ref.watch(gameEngineV1Provider.notifier),
     v3Engine: ref.watch(gameEngineV3Provider.notifier),
@@ -122,7 +120,8 @@ class GameEngineStateSynchronizer {
 /// V1 Game Engine Provider (Stable, Current Production)
 /// Provides the current stable game engine implementation
 /// Architecture: Uses middleware pattern and use case orchestration
-final gameEngineV1Provider = StateNotifierProvider<GameEngineNotifier, GameEngineState>((ref) {
+final gameEngineV1Provider =
+    StateNotifierProvider<GameEngineNotifier, GameEngineState>((ref) {
   return GameEngineNotifier(
     audioService: ref.watch(audioServiceProvider),
     animationScheduler: ref.watch(animationSchedulerProvider),
@@ -130,17 +129,26 @@ final gameEngineV1Provider = StateNotifierProvider<GameEngineNotifier, GameEngin
     historyNotifier: ref.watch(historyNotifierProvider.notifier),
     progressNotifier: ref.watch(gameProgressNotifierProvider.notifier),
     selectionNotifier: ref.watch(componentSelectionNotifierProvider.notifier),
-    interactionNotifier: ref.watch(interactionStateProvider('default').notifier),
+    interactionNotifier:
+        ref.watch(interactionStateProvider('default').notifier),
     paletteManager: const ComponentPaletteManager(availableTemplates: []),
     loadLevelUseCase: ref.watch(use_case_providers.loadLevelUseCaseProvider),
-    createComponentUseCase: ref.watch(use_case_providers.createComponentUseCaseProvider),
-    rotateComponentUseCase: ref.watch(use_case_providers.rotateComponentUseCaseProvider),
-    moveComponentUseCase: ref.watch(use_case_providers.moveComponentUseCaseProvider),
-    tapComponentUseCase: ref.watch(use_case_providers.tapComponentUseCaseProvider),
-    updateComponentUseCase: ref.watch(use_case_providers.updateComponentUseCaseProvider),
-    restartLevelUseCase: ref.watch(use_case_providers.restartLevelUseCaseProvider),
-    selectPaletteComponentUseCase: ref.watch(use_case_providers.selectPaletteComponentUseCaseProvider),
-    togglePauseUseCase: ref.watch(use_case_providers.togglePauseUseCaseProvider),
+    createComponentUseCase:
+        ref.watch(use_case_providers.createComponentUseCaseProvider),
+    rotateComponentUseCase:
+        ref.watch(use_case_providers.rotateComponentUseCaseProvider),
+    moveComponentUseCase:
+        ref.watch(use_case_providers.moveComponentUseCaseProvider),
+    tapComponentUseCase:
+        ref.watch(use_case_providers.tapComponentUseCaseProvider),
+    updateComponentUseCase:
+        ref.watch(use_case_providers.updateComponentUseCaseProvider),
+    restartLevelUseCase:
+        ref.watch(use_case_providers.restartLevelUseCaseProvider),
+    selectPaletteComponentUseCase:
+        ref.watch(use_case_providers.selectPaletteComponentUseCaseProvider),
+    togglePauseUseCase:
+        ref.watch(use_case_providers.togglePauseUseCaseProvider),
     undoUseCase: ref.watch(use_case_providers.undoUseCaseProvider),
   );
 });
@@ -148,7 +156,8 @@ final gameEngineV1Provider = StateNotifierProvider<GameEngineNotifier, GameEngin
 /// V3 Game Engine Provider (Experimental)
 /// Provides the new experimental game engine implementation
 /// Architecture: Direct state management, redesigned from scratch
-final gameEngineV3Provider = StateNotifierProvider<GameEngineNotifierV3, GameState>((ref) {
+final gameEngineV3Provider =
+    StateNotifierProvider<GameEngineNotifierV3, GameState>((ref) {
   return GameEngineNotifierV3();
 });
 

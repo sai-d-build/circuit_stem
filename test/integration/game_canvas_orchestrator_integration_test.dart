@@ -3,7 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Basic Integration Tests', () {
-    testWidgets('should initialize basic Flutter test environment', (tester) async {
+    testWidgets('should initialize basic Flutter test environment',
+        (tester) async {
       // Arrange
       const testWidget = MaterialApp(
         home: Scaffold(
@@ -22,7 +23,7 @@ void main() {
 
     testWidgets('should handle basic widget interactions', (tester) async {
       // Arrange
-      bool buttonPressed = false;
+      var buttonPressed = false;
       final testWidget = MaterialApp(
         home: Scaffold(
           body: Center(
@@ -46,7 +47,7 @@ void main() {
 
     testWidgets('should handle state changes', (tester) async {
       // Arrange
-      int counter = 0;
+      var counter = 0;
       final testWidget = MaterialApp(
         home: Scaffold(
           body: StatefulBuilder(

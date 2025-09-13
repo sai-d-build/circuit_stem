@@ -1,5 +1,6 @@
-import '../../application/services/power_simulation_service.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
+
+import '../../application/services/power_simulation_service.dart';
 import '../../common/logger.dart';
 
 /// Service for validating educational objectives and learning progress
@@ -10,7 +11,8 @@ class EducationalValidator {
 
   /// Validate if a circuit meets educational objectives
   bool validateCircuit(Grid grid, Map<String, dynamic> objectives) {
-    Logger.log('EducationalValidator: Validating circuit with ${objectives.length} objectives');
+    Logger.log(
+        'EducationalValidator: Validating circuit with ${objectives.length} objectives');
 
     // Run simulation to get current state
     final simulatedGrid = _simulationEngine.simulatePowerFlow(grid);
@@ -48,9 +50,12 @@ class EducationalValidator {
     final simulatedGrid = _simulationEngine.simulatePowerFlow(grid);
 
     return {
-      'hasPowerSource': grid.getAllComponents().any((c) => c.type == ComponentType.battery),
-      'hasLights': grid.getAllComponents().any((c) => c.type == ComponentType.bulb),
-      'poweredLights': simulatedGrid.getAllComponents()
+      'hasPowerSource':
+          grid.getAllComponents().any((c) => c.type == ComponentType.battery),
+      'hasLights':
+          grid.getAllComponents().any((c) => c.type == ComponentType.bulb),
+      'poweredLights': simulatedGrid
+          .getAllComponents()
           .where((c) => c.type == ComponentType.bulb && c.isPowered)
           .length,
       'totalComponents': grid.getComponentCount(),

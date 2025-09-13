@@ -23,7 +23,7 @@ void main() {
       expect(service.state.scale, 1.5);
 
       // Test scale clamping
-      service.updateScale(10.0); // Above max
+      service.updateScale(10); // Above max
       expect(service.state.scale, 5.0);
 
       service.updateScale(0.1); // Below min
@@ -31,7 +31,7 @@ void main() {
     });
 
     test('should update pan offset correctly', () {
-      final delta = const Offset(10, 20);
+      const delta = Offset(10, 20);
       service.updatePan(delta);
 
       expect(service.state.panOffset, delta);
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('should update canvas size correctly', () {
-      final newSize = const Size(800, 600);
+      const newSize = Size(800, 600);
       service.setCanvasSize(newSize);
 
       expect(service.state.canvasSize, newSize);
@@ -50,7 +50,7 @@ void main() {
 
     test('should reset to initial state', () {
       // Modify state
-      service.updateScale(2.0);
+      service.updateScale(2);
       service.updatePan(const Offset(100, 100));
       service.setCanvasSize(const Size(800, 600));
 
@@ -77,7 +77,7 @@ void main() {
     });
 
     test('should handle scale transformations correctly', () {
-      service.updateScale(2.0); // 2x zoom
+      service.updateScale(2); // 2x zoom
 
       // Scale should be updated
       expect(service.state.scale, 2.0);

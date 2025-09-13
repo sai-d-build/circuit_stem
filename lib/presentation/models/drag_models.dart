@@ -24,11 +24,11 @@ class ComponentDragData {
     if (identical(this, other)) return true;
     if (other is! ComponentDragData) return false;
     return componentType == other.componentType &&
-           componentName == other.componentName &&
-           description == other.description &&
-           _mapEquals(defaultProperties, other.defaultProperties) &&
-           cost == other.cost &&
-           icon == other.icon;
+        componentName == other.componentName &&
+        description == other.description &&
+        _mapEquals(defaultProperties, other.defaultProperties) &&
+        cost == other.cost &&
+        icon == other.icon;
   }
 
   @override
@@ -55,7 +55,7 @@ class ComponentDragData {
 
   int _mapHash(Map<String, dynamic>? map) {
     if (map == null) return 0;
-    int hash = 0;
+    var hash = 0;
     for (final entry in map.entries) {
       hash ^= entry.key.hashCode;
       hash ^= entry.value.hashCode;
@@ -67,7 +67,8 @@ class ComponentDragData {
   factory ComponentDragData.fromPaletteComponentDefinition(dynamic definition) {
     // Handle both domain ComponentDefinition and palette ComponentDefinition
     final type = definition.type;
-    final componentType = type is ComponentType ? type : _stringToComponentType(type);
+    final componentType =
+        type is ComponentType ? type : _stringToComponentType(type);
 
     return ComponentDragData(
       componentType: componentType,
@@ -138,11 +139,13 @@ class ComponentDragFeedback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer( // Prevent interaction with drag feedback to eliminate ghost behavior
+    return IgnorePointer(
+      // Prevent interaction with drag feedback to eliminate ghost behavior
       child: Transform.scale(
         scale: 0.9, // Slightly smaller to reduce ghost confusion
         child: Opacity(
-          opacity: 0.6, // Semi-transparent to distinguish from placed components
+          opacity:
+              0.6, // Semi-transparent to distinguish from placed components
           child: Material(
             elevation: 8,
             borderRadius: BorderRadius.circular(12),
@@ -150,7 +153,10 @@ class ComponentDragFeedback extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.9),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: Theme.of(context).colorScheme.primary,
@@ -169,9 +175,10 @@ class ComponentDragFeedback extends StatelessWidget {
                   Text(
                     dragData.componentName,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color:
+                              Theme.of(context).colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w600,
+                        ),
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

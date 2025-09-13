@@ -1,4 +1,3 @@
-
 import 'package:sparkcircuit/core/simulation/circuit_netlist.dart';
 import 'package:sparkcircuit/core/simulation/simulation_result.dart';
 

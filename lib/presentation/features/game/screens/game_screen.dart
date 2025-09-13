@@ -1,18 +1,20 @@
 // Game screen for SparkCircuit educational gaming platform
 
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sparkcircuit/application/providers/unified_providers.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
+import 'package:sparkcircuit/presentation/features/palette/widgets/horizontal_component_palette.dart';
+import 'package:sparkcircuit/presentation/state/palette_state.dart';
+
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/responsive_utils.dart';
 import '../../../core/utils/animation_utils.dart';
 import '../../../core/utils/error_utils.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../widgets/game_canvas.dart';
-import 'package:sparkcircuit/presentation/features/palette/widgets/horizontal_component_palette.dart';
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
-import 'package:sparkcircuit/application/providers/unified_providers.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
-import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 
 // ✅ CLEAN ARCHITECTURE: Game Screen Service
 class GameScreenService {
@@ -34,7 +36,8 @@ class GameScreenService {
   }
 }
 
-final gameScreenServiceProvider = Provider.family<GameScreenService, String>((ref, levelId) {
+final gameScreenServiceProvider =
+    Provider.family<GameScreenService, String>((ref, levelId) {
   final gameStateNotifier = ref.watch(unifiedGameStateProvider.notifier);
   final paletteNotifier = ref.watch(paletteStateProvider(levelId).notifier);
   return GameScreenService(gameStateNotifier, paletteNotifier);
@@ -49,7 +52,8 @@ class GameScreen extends ConsumerStatefulWidget {
   ConsumerState<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStateMixin {
+class _GameScreenState extends ConsumerState<GameScreen>
+    with TickerProviderStateMixin {
   late Timer _levelTimer;
   Duration _elapsedTime = Duration.zero;
   bool _isTimerRunning = false;
@@ -115,7 +119,9 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
     });
 
     // Mark file as migrated to unified provider
-    MigrationTracker.markFileMigrated('lib/presentation/features/game/screens/game_screen.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated(
+        'lib/presentation/features/game/screens/game_screen.dart',
+        DateTime.now().toIso8601String());
 
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.colorScheme.surface,
@@ -124,7 +130,8 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
     );
   }
 
-  PreferredSizeWidget _buildResponsiveAppBar(BuildContext context, GameScreenService gameService) {
+  PreferredSizeWidget _buildResponsiveAppBar(
+      BuildContext context, GameScreenService gameService) {
     final isMobile = context.isMobile;
     final appBarHeight = isMobile ? kToolbarHeight * 0.9 : kToolbarHeight;
 
@@ -148,10 +155,11 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
               size: context.responsiveIconSize(24),
             ),
             onPressed: () async {
-              StructuredLogger.info('🌀 ===== RESET BUTTON PRESSED =====', context: {
-                'levelId': widget.levelId,
-                'timestamp': DateTime.now(),
-              });
+              StructuredLogger.info('🌀 ===== RESET BUTTON PRESSED =====',
+                  context: {
+                    'levelId': widget.levelId,
+                    'timestamp': DateTime.now(),
+                  });
 
               try {
                 // Restart level functionality
@@ -161,7 +169,8 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
                 // Also reset palette inventory - this clears components AND replenishes inventory
                 gameService.resetPalette();
 
-                StructuredLogger.info('🌀 ===== RESET OPERATION COMPLETED SUCCESSFULLY =====');
+                StructuredLogger.info(
+                    '🌀 ===== RESET OPERATION COMPLETED SUCCESSFULLY =====');
 
                 // Show success feedback
                 if (context.mounted) {
@@ -172,15 +181,19 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
                   );
                 }
               } catch (e, stack) {
-                StructuredLogger.error('🌀 ===== RESET OPERATION FAILED =====', error: e, context: {
-                  'levelId': widget.levelId,
-                  'error': e.toString(),
-                  'stackTrace': stack.toString(),
-                });
+                StructuredLogger.error('🌀 ===== RESET OPERATION FAILED =====',
+                    error: e,
+                    context: {
+                      'levelId': widget.levelId,
+                      'error': e.toString(),
+                      'stackTrace': stack.toString(),
+                    });
 
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Reset failed: ${e.toString()}'), backgroundColor: Colors.red),
+                    SnackBar(
+                        content: Text('Reset failed: ${e.toString()}'),
+                        backgroundColor: Colors.red),
                   );
                 }
               }
@@ -205,24 +218,28 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildResponsiveBody(BuildContext context, String levelIdStr, bool isLandscape, bool isMobile) {
+  Widget _buildResponsiveBody(BuildContext context, String levelIdStr,
+      bool isLandscape, bool isMobile) {
     StructuredLogger.info('Building responsive game screen layout', context: {
       'levelId': levelIdStr,
       'device': {
         'isLandscape': isLandscape,
         'isMobile': isMobile,
       },
-      'layoutStrategy': isLandscape && isMobile ? 'horizontal_mobile' : 'vertical_default',
+      'layoutStrategy':
+          isLandscape && isMobile ? 'horizontal_mobile' : 'vertical_default',
     });
 
     // Add debug logging for component initialization
     debugPrint('🎮 GameScreen: Building body for level $levelIdStr');
     debugPrint('🎮 GameScreen: Passing levelId to GameCanvas: $levelIdStr');
-    debugPrint('🎮 GameScreen: Passing levelId to HorizontalComponentPalette: $levelIdStr');
+    debugPrint(
+        '🎮 GameScreen: Passing levelId to HorizontalComponentPalette: $levelIdStr');
 
     if (isLandscape && isMobile) {
       // Landscape mobile: horizontal layout
-      StructuredLogger.debug('Using horizontal mobile layout for optimal screen usage');
+      StructuredLogger.debug(
+          'Using horizontal mobile layout for optimal screen usage');
       return Row(
         children: [
           // Game Canvas takes most space
@@ -246,14 +263,20 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
       );
     } else {
       // Portrait or tablet/desktop: vertical layout
-      StructuredLogger.debug('Using vertical layout for portrait/tablet/desktop', context: {
-        'orientation': isLandscape ? 'landscape' : 'portrait',
-        'palettePlacement': 'bottom_explicit_sized',
-      });
+      StructuredLogger.debug(
+          'Using vertical layout for portrait/tablet/desktop',
+          context: {
+            'orientation': isLandscape ? 'landscape' : 'portrait',
+            'palettePlacement': 'bottom_explicit_sized',
+          });
 
       // Calculate available height
       final screenHeight = MediaQuery.of(context).size.height;
-      final availableHeight = screenHeight - kToolbarHeight - context.hudHeight - context.paletteHeight - 32; // 32 for padding
+      final availableHeight = screenHeight -
+          kToolbarHeight -
+          context.hudHeight -
+          context.paletteHeight -
+          32; // 32 for padding
 
       StructuredLogger.debug('Grid sizing calculation', context: {
         'screenHeight': screenHeight,
@@ -261,7 +284,9 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
         'hudHeight': context.hudHeight,
         'paletteHeight': context.paletteHeight,
         'availableHeight': availableHeight,
-        'calculatedGridHeight': availableHeight > 0 ? availableHeight : 400, // Fallback if calculation fails
+        'calculatedGridHeight': availableHeight > 0
+            ? availableHeight
+            : 400, // Fallback if calculation fails
       });
 
       return Column(
@@ -269,7 +294,9 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
           _buildResponsiveHud(context),
           // Game Canvas with explicit sizing to fix zero-width issue
           SizedBox(
-            height: availableHeight > 0 ? availableHeight : 400, // Use calculated height or fallback
+            height: availableHeight > 0
+                ? availableHeight
+                : 400, // Use calculated height or fallback
             width: double.infinity,
             child: GameCanvas(levelId: levelIdStr),
           ),
@@ -291,7 +318,7 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
     return AnimatedListItem(
       index: 0,
       delay: AnimationUtils.fast,
-      slideBegin: const Offset(0.0, -0.2),
+      slideBegin: const Offset(0, -0.2),
       child: Container(
         height: context.hudHeight,
         padding: EdgeInsets.symmetric(
@@ -316,7 +343,7 @@ class _GameScreenState extends ConsumerState<GameScreen> with TickerProviderStat
             AnimatedListItem(
               index: 1,
               delay: AnimationUtils.fast,
-              slideBegin: const Offset(0.2, 0.0),
+              slideBegin: const Offset(0.2, 0),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

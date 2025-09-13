@@ -1,15 +1,16 @@
-import '../services/power_simulation_service.dart';
-import '../services/component_factory.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
-import '../../core/debug/structured_logger.dart';
-import '../../common/logger.dart';
-import '../core/result.dart';
-import '../transaction.dart';
-import 'component_action.dart';
-import 'notifier_integrated_use_case.dart';
+
 import '../../../core/interfaces/game_state_notifier_interface.dart';
 // ignore_for_file: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
 import '../../../core/migration/migration_tracker.dart';
+import '../../common/logger.dart';
+import '../../core/debug/structured_logger.dart';
+import '../core/result.dart';
+import '../services/component_factory.dart';
+import '../services/power_simulation_service.dart';
+import '../transaction.dart';
+import 'component_action.dart';
+import 'notifier_integrated_use_case.dart';
 
 // Helper function to get Grid from notifier context
 Grid _getGrid(dynamic notifier) {
@@ -39,25 +40,27 @@ Grid _getGrid(dynamic notifier) {
       throw Exception('Unknown notifier type: ${notifier.runtimeType}');
     }
   } catch (e, stackTrace) {
-    StructuredLogger.error('💥 FAILED TO GET GRID FROM NOTIFIER', context: {
-      'error': e.toString(),
-      'stackTrace': stackTrace.toString(),
-      'notifierType': notifier.runtimeType.toString(),
-      'timestamp': DateTime.now().toIso8601String(),
-    }, error: e);
+    StructuredLogger.error('💥 FAILED TO GET GRID FROM NOTIFIER',
+        context: {
+          'error': e.toString(),
+          'stackTrace': stackTrace.toString(),
+          'notifierType': notifier.runtimeType.toString(),
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+        error: e);
     rethrow;
   }
 }
 
-class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFromTemplateAction> {
+class CreateComponentUseCase
+    extends NotifierIntegratedUseCase<CreateComponentFromTemplateAction> {
   final ComponentFactory _factory;
 
   CreateComponentUseCase(PowerSimulationService simulation, this._factory) {
     // Mark file as migrated to unified provider
     MigrationTracker.markFileMigrated(
-      'lib/application/use_cases/create_component_use_case.dart',
-      DateTime.now().toIso8601String()
-    );
+        'lib/application/use_cases/create_component_use_case.dart',
+        DateTime.now().toIso8601String());
   }
 
   @override
@@ -84,11 +87,14 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
 
       // Validate template ID
       if (action.templateId.isEmpty) {
-        StructuredLogger.error('🚫 Template ID validation failed - empty template ID', context: {
-          'templateId': action.templateId,
-          'validation_result': 'EMPTY_TEMPLATE_ID',
-        });
-        return const Failure('Invalid component type: template ID cannot be empty');
+        StructuredLogger.error(
+            '🚫 Template ID validation failed - empty template ID',
+            context: {
+              'templateId': action.templateId,
+              'validation_result': 'EMPTY_TEMPLATE_ID',
+            });
+        return const Failure(
+            'Invalid component type: template ID cannot be empty');
       }
 
       // Validate component type exists
@@ -99,23 +105,28 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
           orElse: () => throw StateError('Component type not found'),
         );
       } catch (e) {
-        StructuredLogger.error('🚫 Component type validation failed - unknown type', context: {
-          'templateId': action.templateId,
-          'availableTypes': ComponentType.values.map((t) => t.name).toList(),
-          'validation_result': 'UNKNOWN_COMPONENT_TYPE',
-        });
+        StructuredLogger.error(
+            '🚫 Component type validation failed - unknown type',
+            context: {
+              'templateId': action.templateId,
+              'availableTypes':
+                  ComponentType.values.map((t) => t.name).toList(),
+              'validation_result': 'UNKNOWN_COMPONENT_TYPE',
+            });
         return Failure('Unknown component type: ${action.templateId}');
       }
 
-
       // Validate position coordinates
       if (action.row < 0 || action.col < 0) {
-        StructuredLogger.warning('🚫 Position validation failed - coordinates must be non-negative', context: {
-          'invalid_row': action.row,
-          'invalid_col': action.col,
-          'validation_result': 'INVALID_COORDINATES',
-        });
-        return const Failure('Invalid position: coordinates must be non-negative');
+        StructuredLogger.warning(
+            '🚫 Position validation failed - coordinates must be non-negative',
+            context: {
+              'invalid_row': action.row,
+              'invalid_col': action.col,
+              'validation_result': 'INVALID_COORDINATES',
+            });
+        return const Failure(
+            'Invalid position: coordinates must be non-negative');
       }
 
       StructuredLogger.debug('✅ Input validation passed', context: {
@@ -134,12 +145,15 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
 
       // Validate grid state consistency
       if (grid.rows <= 0 || grid.cols <= 0) {
-        StructuredLogger.error('🚫 Grid state validation failed - invalid dimensions', context: {
-          'grid_rows': grid.rows,
-          'grid_cols': grid.cols,
-          'validation_result': 'INVALID_GRID_DIMENSIONS',
-        });
-        return const Failure('Grid state is invalid: dimensions must be positive');
+        StructuredLogger.error(
+            '🚫 Grid state validation failed - invalid dimensions',
+            context: {
+              'grid_rows': grid.rows,
+              'grid_cols': grid.cols,
+              'validation_result': 'INVALID_GRID_DIMENSIONS',
+            });
+        return const Failure(
+            'Grid state is invalid: dimensions must be positive');
       }
 
       StructuredLogger.debug('🔍 Grid state analysis', context: {
@@ -152,24 +166,30 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
 
       // Validate bounds
       if (action.row >= grid.rows || action.col >= grid.cols) {
-        StructuredLogger.warning('🚫 Bounds validation failed - position out of bounds', context: {
-          'requested_position': {'row': action.row, 'col': action.col},
-          'grid_bounds': {'rows': grid.rows, 'cols': grid.cols},
-          'validation_result': 'OUT_OF_BOUNDS',
-        });
-        return Failure('Position (${action.row}, ${action.col}) is out of bounds for grid ${grid.rows}x${grid.cols}');
+        StructuredLogger.warning(
+            '🚫 Bounds validation failed - position out of bounds',
+            context: {
+              'requested_position': {'row': action.row, 'col': action.col},
+              'grid_bounds': {'rows': grid.rows, 'cols': grid.cols},
+              'validation_result': 'OUT_OF_BOUNDS',
+            });
+        return Failure(
+            'Position (${action.row}, ${action.col}) is out of bounds for grid ${grid.rows}x${grid.cols}');
       }
 
       // Check for existing component
       final existingComponent = grid.componentAt(action.row, action.col);
       if (existingComponent != null) {
-        StructuredLogger.warning('🚫 Occupancy validation failed - cell already occupied', context: {
-          'position': {'row': action.row, 'col': action.col},
-          'existing_component_id': existingComponent.id,
-          'existing_component_type': existingComponent.type.name,
-          'validation_result': 'CELL_OCCUPIED',
-        });
-        return Failure('Cell (${action.row}, ${action.col}) is already occupied by ${existingComponent.type.name}');
+        StructuredLogger.warning(
+            '🚫 Occupancy validation failed - cell already occupied',
+            context: {
+              'position': {'row': action.row, 'col': action.col},
+              'existing_component_id': existingComponent.id,
+              'existing_component_type': existingComponent.type.name,
+              'validation_result': 'CELL_OCCUPIED',
+            });
+        return Failure(
+            'Cell (${action.row}, ${action.col}) is already occupied by ${existingComponent.type.name}');
       }
 
       StructuredLogger.debug('✅ All validations passed', context: {
@@ -188,12 +208,13 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
 
       // Register grid update with transaction using command pattern
       transaction.onCommit(() async {
-        StructuredLogger.debug('🔄 COMPONENT PLACEMENT TRANSACTION COMMIT', context: {
-          'templateId': action.templateId,
-          'position': {'row': action.row, 'col': action.col},
-          'notifierType': notifiers.grid.runtimeType.toString(),
-          'timestamp': DateTime.now().toIso8601String(),
-        });
+        StructuredLogger.debug('🔄 COMPONENT PLACEMENT TRANSACTION COMMIT',
+            context: {
+              'templateId': action.templateId,
+              'position': {'row': action.row, 'col': action.col},
+              'notifierType': notifiers.grid.runtimeType.toString(),
+              'timestamp': DateTime.now().toIso8601String(),
+            });
 
         try {
           // Use unified interface for component placement
@@ -201,33 +222,38 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
 
           StructuredLogger.debug('🔄 ATTEMPTING COMPONENT PLACEMENT', context: {
             'notifierType': unifiedNotifier.runtimeType.toString(),
-            'hasPlaceComponentAsync': unifiedNotifier.runtimeType.toString().contains('placeComponentAsync'),
+            'hasPlaceComponentAsync': unifiedNotifier.runtimeType
+                .toString()
+                .contains('placeComponentAsync'),
             'templateId': action.templateId,
             'componentType': componentType!.name,
           });
 
           // Try async placement first (for Enhanced features), fall back to sync
-          bool placementSuccessful = false;
+          var placementSuccessful = false;
           try {
             await unifiedNotifier.placeComponentAsync(
               componentType,
               action.row,
               action.col,
             );
-            StructuredLogger.info('✅ COMPONENT PLACEMENT SUCCESSFUL (async)', context: {
-              'templateId': action.templateId,
-              'componentType': componentType.name,
-              'position': {'row': action.row, 'col': action.col},
-              'placement_method': 'async',
-            });
+            StructuredLogger.info('✅ COMPONENT PLACEMENT SUCCESSFUL (async)',
+                context: {
+                  'templateId': action.templateId,
+                  'componentType': componentType.name,
+                  'position': {'row': action.row, 'col': action.col},
+                  'placement_method': 'async',
+                });
             placementSuccessful = true;
           } catch (asyncError) {
-            StructuredLogger.warning('🔄 ASYNC PLACEMENT FAILED, TRYING SYNC FALLBACK', context: {
-              'asyncError': asyncError.toString(),
-              'templateId': action.templateId,
-              'componentType': componentType.name,
-              'fallback_attempted': true,
-            });
+            StructuredLogger.warning(
+                '🔄 ASYNC PLACEMENT FAILED, TRYING SYNC FALLBACK',
+                context: {
+                  'asyncError': asyncError.toString(),
+                  'templateId': action.templateId,
+                  'componentType': componentType.name,
+                  'fallback_attempted': true,
+                });
 
             // Fallback to sync placement
             try {
@@ -236,40 +262,47 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
                 action.row,
                 action.col,
               );
-              StructuredLogger.info('✅ COMPONENT PLACEMENT SUCCESSFUL (sync fallback)', context: {
-                'templateId': action.templateId,
-                'componentType': componentType.name,
-                'position': {'row': action.row, 'col': action.col},
-                'placement_method': 'sync_fallback',
-              });
+              StructuredLogger.info(
+                  '✅ COMPONENT PLACEMENT SUCCESSFUL (sync fallback)',
+                  context: {
+                    'templateId': action.templateId,
+                    'componentType': componentType.name,
+                    'position': {'row': action.row, 'col': action.col},
+                    'placement_method': 'sync_fallback',
+                  });
               placementSuccessful = true;
             } catch (syncError) {
-              StructuredLogger.error('💥 BOTH ASYNC AND SYNC PLACEMENT FAILED', context: {
-                'asyncError': asyncError.toString(),
-                'syncError': syncError.toString(),
-                'templateId': action.templateId,
-                'componentType': componentType.name,
-                'position': {'row': action.row, 'col': action.col},
-                'placement_method': 'both_failed',
-              });
-              throw Exception('Component placement failed for both async and sync methods: async=${asyncError.toString()}, sync=${syncError.toString()}');
+              StructuredLogger.error('💥 BOTH ASYNC AND SYNC PLACEMENT FAILED',
+                  context: {
+                    'asyncError': asyncError.toString(),
+                    'syncError': syncError.toString(),
+                    'templateId': action.templateId,
+                    'componentType': componentType.name,
+                    'position': {'row': action.row, 'col': action.col},
+                    'placement_method': 'both_failed',
+                  });
+              throw Exception(
+                  'Component placement failed for both async and sync methods: async=${asyncError.toString()}, sync=${syncError.toString()}');
             }
           }
 
           if (placementSuccessful) {
-            Logger.log('CreateComponent: successfully added ${componentType.name} from template ${action.templateId} at (${action.row}, ${action.col})');
+            Logger.log(
+                'CreateComponent: successfully added ${componentType.name} from template ${action.templateId} at (${action.row}, ${action.col})');
           }
         } catch (e, stackTrace) {
-          StructuredLogger.error('💥 COMPONENT PLACEMENT FAILED IN TRANSACTION', context: {
-            'error': e.toString(),
-            'stackTrace': stackTrace.toString(),
-            'templateId': action.templateId,
-            'componentType': componentType?.name ?? 'unknown',
-            'position': {'row': action.row, 'col': action.col},
-            'notifierType': notifiers.grid.runtimeType.toString(),
-            'timestamp': DateTime.now().toIso8601String(),
-            'error_type': e.runtimeType.toString(),
-          }, error: e);
+          StructuredLogger.error('💥 COMPONENT PLACEMENT FAILED IN TRANSACTION',
+              context: {
+                'error': e.toString(),
+                'stackTrace': stackTrace.toString(),
+                'templateId': action.templateId,
+                'componentType': componentType?.name ?? 'unknown',
+                'position': {'row': action.row, 'col': action.col},
+                'notifierType': notifiers.grid.runtimeType.toString(),
+                'timestamp': DateTime.now().toIso8601String(),
+                'error_type': e.runtimeType.toString(),
+              },
+              error: e);
           rethrow;
         }
       });
@@ -285,36 +318,49 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
       String errorMessage;
       String errorCategory;
 
-      if (e.toString().contains('out of bounds') || e.toString().contains('bounds')) {
+      if (e.toString().contains('out of bounds') ||
+          e.toString().contains('bounds')) {
         errorCategory = 'BOUNDS_VALIDATION_ERROR';
-        errorMessage = 'Component placement failed due to bounds validation: ${e.toString()}';
-      } else if (e.toString().contains('occupied') || e.toString().contains('collision')) {
+        errorMessage =
+            'Component placement failed due to bounds validation: ${e.toString()}';
+      } else if (e.toString().contains('occupied') ||
+          e.toString().contains('collision')) {
         errorCategory = 'OCCUPANCY_VALIDATION_ERROR';
-        errorMessage = 'Component placement failed due to cell occupancy: ${e.toString()}';
-      } else if (e.toString().contains('component type') || e.toString().contains('template')) {
+        errorMessage =
+            'Component placement failed due to cell occupancy: ${e.toString()}';
+      } else if (e.toString().contains('component type') ||
+          e.toString().contains('template')) {
         errorCategory = 'COMPONENT_TYPE_ERROR';
-        errorMessage = 'Component placement failed due to invalid component type: ${e.toString()}';
-      } else if (e.toString().contains('grid') || e.toString().contains('state')) {
+        errorMessage =
+            'Component placement failed due to invalid component type: ${e.toString()}';
+      } else if (e.toString().contains('grid') ||
+          e.toString().contains('state')) {
         errorCategory = 'GRID_STATE_ERROR';
-        errorMessage = 'Component placement failed due to grid state issues: ${e.toString()}';
-      } else if (e.toString().contains('notifier') || e.toString().contains('interface')) {
+        errorMessage =
+            'Component placement failed due to grid state issues: ${e.toString()}';
+      } else if (e.toString().contains('notifier') ||
+          e.toString().contains('interface')) {
         errorCategory = 'NOTIFIER_INTERFACE_ERROR';
-        errorMessage = 'Component placement failed due to notifier interface issues: ${e.toString()}';
+        errorMessage =
+            'Component placement failed due to notifier interface issues: ${e.toString()}';
       } else {
         errorCategory = 'UNKNOWN_ERROR';
-        errorMessage = 'Component placement failed with unknown error: ${e.toString()}';
+        errorMessage =
+            'Component placement failed with unknown error: ${e.toString()}';
       }
 
-      StructuredLogger.error('💥 COMPONENT PLACEMENT USE CASE FAILED', context: {
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-        'errorCategory': errorCategory,
-        'templateId': action.templateId,
-        'position': {'row': action.row, 'col': action.col},
-        'notifierType': notifiers.grid.runtimeType.toString(),
-        'timestamp': DateTime.now().toIso8601String(),
-        'recovery_suggestion': _getRecoverySuggestion(errorCategory),
-      }, error: e);
+      StructuredLogger.error('💥 COMPONENT PLACEMENT USE CASE FAILED',
+          context: {
+            'error': e.toString(),
+            'stackTrace': stackTrace.toString(),
+            'errorCategory': errorCategory,
+            'templateId': action.templateId,
+            'position': {'row': action.row, 'col': action.col},
+            'notifierType': notifiers.grid.runtimeType.toString(),
+            'timestamp': DateTime.now().toIso8601String(),
+            'recovery_suggestion': _getRecoverySuggestion(errorCategory),
+          },
+          error: e);
 
       Logger.log('❌ CreateComponent error [$errorCategory]: $errorMessage');
       return Failure(errorMessage);
@@ -335,7 +381,8 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
       row: row,
       col: col,
     );
-    final useCase = CreateComponentUseCase(PowerSimulationService(), ComponentFactory());
+    final useCase =
+        CreateComponentUseCase(PowerSimulationService(), ComponentFactory());
     return useCase.executeWithNotifiers(action, notifiers, transaction);
   }
 
@@ -379,14 +426,15 @@ class CreateComponentUseCase extends NotifierIntegratedUseCase<CreateComponentFr
 
       return occupiedPositions;
     } catch (e, stackTrace) {
-      StructuredLogger.error('💥 FAILED TO GET OCCUPIED POSITIONS', context: {
-        'error': e.toString(),
-        'stackTrace': stackTrace.toString(),
-        'notifierType': notifiers.grid.runtimeType.toString(),
-        'timestamp': DateTime.now().toIso8601String(),
-      }, error: e);
+      StructuredLogger.error('💥 FAILED TO GET OCCUPIED POSITIONS',
+          context: {
+            'error': e.toString(),
+            'stackTrace': stackTrace.toString(),
+            'notifierType': notifiers.grid.runtimeType.toString(),
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+          error: e);
       return {};
     }
   }
-
 }

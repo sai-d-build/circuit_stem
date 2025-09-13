@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:sparkcircuit/core/services/unified_coordinate_service.dart' as ucs;
-import 'package:sparkcircuit/domain/entities/core/component.dart';
 import 'package:sparkcircuit/application/states/game_canvas_state.dart';
+import 'package:sparkcircuit/application/transaction.dart';
 import 'package:sparkcircuit/application/use_cases/create_component_use_case.dart';
 import 'package:sparkcircuit/application/use_cases/notifier_integrated_use_case.dart';
-import 'package:sparkcircuit/application/transaction.dart';
 import 'package:sparkcircuit/core/migration/migration_tracker.dart';
+import 'package:sparkcircuit/core/services/unified_coordinate_service.dart'
+    as ucs;
+import 'package:sparkcircuit/domain/entities/core/component.dart';
 
 class PlacementServiceAdapter {
   final dynamic gameStateNotifier;
@@ -20,9 +21,11 @@ class PlacementServiceAdapter {
     required this.levelId,
   });
 
-  Future<bool> placeComponent(ComponentType componentType, int row, int col) async {
+  Future<bool> placeComponent(
+      ComponentType componentType, int row, int col) async {
     // Mark file as migrated to unified provider
-    MigrationTracker.markFileMigrated('placement_service_adapter.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated(
+        'placement_service_adapter.dart', DateTime.now().toIso8601String());
 
     try {
       // Get game state for validation
@@ -32,23 +35,23 @@ class PlacementServiceAdapter {
       final config = ucs.GridConfiguration(
         rows: gameState.grid.rows,
         cols: gameState.grid.cols,
-        cellSize: 60.0, // Default cell size
-        scale: 1.0,
+        cellSize: 60, // Default cell size
+        scale: 1,
         panOffset: Offset.zero,
       );
 
       // Check if position is valid using UnifiedCoordinateService
       final gridPos = Offset(col.toDouble(), row.toDouble());
-      final isValid = ucs.UnifiedCoordinateService().isInGridBounds(gridPos, config);
+      final isValid =
+          ucs.UnifiedCoordinateService().isInGridBounds(gridPos, config);
 
       if (!isValid) {
         return false;
       }
 
       // Check if position is occupied
-      final isOccupied = gameState.grid.components.values.any(
-        (component) => component.row == row && component.col == col
-      );
+      final isOccupied = gameState.grid.components.values
+          .any((component) => component.row == row && component.col == col);
 
       if (isOccupied) {
         return false;
@@ -109,5 +112,4 @@ class PlacementServiceAdapter {
       paletteManager: null,
     );
   }
-
 }

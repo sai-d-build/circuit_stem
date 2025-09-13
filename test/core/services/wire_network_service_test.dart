@@ -1,8 +1,8 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sparkcircuit/core/services/wire_network_service.dart';
 import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
+import 'package:sparkcircuit/core/services/wire_network_service.dart';
 import 'package:sparkcircuit/presentation/features/game/controllers/canvas_interaction_controller.dart';
 
 // Mock classes
@@ -25,13 +25,13 @@ void main() {
       });
 
       test('WireNetwork has correct properties', () {
-        final startPort = ComponentPort(
+        const startPort = ComponentPort(
           id: 'start_port',
           position: GridPosition(row: 0, col: 0),
           type: PortType.output,
         );
 
-        final endPort = ComponentPort(
+        const endPort = ComponentPort(
           id: 'end_port',
           position: GridPosition(row: 2, col: 2),
           type: PortType.input,
@@ -40,8 +40,8 @@ void main() {
         final segments = [
           WireSegment(
             id: 'segment1',
-            startPosition: GridPosition(row: 0, col: 0),
-            endPosition: GridPosition(row: 0, col: 2),
+            startPosition: const GridPosition(row: 0, col: 0),
+            endPosition: const GridPosition(row: 0, col: 2),
             type: WireSegmentType.straight,
             wireId: 'network1',
             createdAt: DateTime.now(),
@@ -51,7 +51,7 @@ void main() {
         final junctions = [
           WireJunction(
             id: 'junction1',
-            position: GridPosition(row: 0, col: 0),
+            position: const GridPosition(row: 0, col: 0),
             connectedWireIds: {'network1'},
             type: JunctionType.simple,
             createdAt: DateTime.now(),
@@ -80,8 +80,8 @@ void main() {
       test('WireSegment calculates length correctly', () {
         final horizontalSegment = WireSegment(
           id: 'h_segment',
-          startPosition: GridPosition(row: 0, col: 0),
-          endPosition: GridPosition(row: 0, col: 3),
+          startPosition: const GridPosition(row: 0, col: 0),
+          endPosition: const GridPosition(row: 0, col: 3),
           type: WireSegmentType.straight,
           wireId: 'test',
           createdAt: DateTime.now(),
@@ -89,8 +89,8 @@ void main() {
 
         final verticalSegment = WireSegment(
           id: 'v_segment',
-          startPosition: GridPosition(row: 0, col: 0),
-          endPosition: GridPosition(row: 4, col: 0),
+          startPosition: const GridPosition(row: 0, col: 0),
+          endPosition: const GridPosition(row: 4, col: 0),
           type: WireSegmentType.straight,
           wireId: 'test',
           createdAt: DateTime.now(),
@@ -108,8 +108,8 @@ void main() {
       test('WireSegment copyWith works correctly', () {
         final original = WireSegment(
           id: 'original',
-          startPosition: GridPosition(row: 0, col: 0),
-          endPosition: GridPosition(row: 0, col: 2),
+          startPosition: const GridPosition(row: 0, col: 0),
+          endPosition: const GridPosition(row: 0, col: 2),
           type: WireSegmentType.straight,
           wireId: 'test',
           createdAt: DateTime.now(),
@@ -131,7 +131,7 @@ void main() {
       test('WireJunction connection management', () {
         final junction = WireJunction(
           id: 'test_junction',
-          position: GridPosition(row: 1, col: 1),
+          position: const GridPosition(row: 1, col: 1),
           connectedWireIds: {'wire1', 'wire2'},
           type: JunctionType.simple,
           createdAt: DateTime.now(),
@@ -139,7 +139,8 @@ void main() {
 
         expect(junction.connectionCount, 2);
         expect(junction.isEmpty, false);
-        expect(junction.isFull, true); // Simple junction allows 2 connections, has 2
+        expect(junction.isFull,
+            true); // Simple junction allows 2 connections, has 2
       });
 
       test('JunctionType properties', () {
@@ -151,7 +152,7 @@ void main() {
       test('WireJunction copyWith works correctly', () {
         final original = WireJunction(
           id: 'original',
-          position: GridPosition(row: 0, col: 0),
+          position: const GridPosition(row: 0, col: 0),
           connectedWireIds: {'wire1'},
           type: JunctionType.simple,
           createdAt: DateTime.now(),
@@ -171,9 +172,9 @@ void main() {
 
     group('GridPosition Operations', () {
       test('GridPosition equality and hashing', () {
-        final pos1 = GridPosition(row: 1, col: 2);
-        final pos2 = GridPosition(row: 1, col: 2);
-        final pos3 = GridPosition(row: 2, col: 1);
+        const pos1 = GridPosition(row: 1, col: 2);
+        const pos2 = GridPosition(row: 1, col: 2);
+        const pos3 = GridPosition(row: 2, col: 1);
 
         expect(pos1 == pos2, true);
         expect(pos1 == pos3, false);
@@ -181,8 +182,8 @@ void main() {
       });
 
       test('GridPosition distance calculation', () {
-        final pos1 = GridPosition(row: 0, col: 0);
-        final pos2 = GridPosition(row: 3, col: 4);
+        const pos1 = GridPosition(row: 0, col: 0);
+        const pos2 = GridPosition(row: 3, col: 4);
 
         // Distance should be sqrt(3^2 + 4^2) = 5
         expect(pos1.distanceTo(pos2), closeTo(5.0, 0.1));
@@ -191,7 +192,7 @@ void main() {
 
     group('ComponentPort Operations', () {
       test('ComponentPort creation and properties', () {
-        final port = ComponentPort(
+        const port = ComponentPort(
           id: 'test_port',
           position: GridPosition(row: 1, col: 1),
           type: PortType.output,
@@ -249,8 +250,8 @@ void main() {
 
     group('Integration Tests', () {
       test('Wire network integrates with coordinate system', () {
-        final start = GridPosition(row: 0, col: 0);
-        final end = GridPosition(row: 5, col: 5);
+        const start = GridPosition(row: 0, col: 0);
+        const end = GridPosition(row: 5, col: 5);
 
         // Verify positions are valid GridPosition instances
         expect(start.row, 0);
@@ -263,8 +264,8 @@ void main() {
         // Test single-point segment
         final singlePoint = WireSegment(
           id: 'single',
-          startPosition: GridPosition(row: 0, col: 0),
-          endPosition: GridPosition(row: 0, col: 0),
+          startPosition: const GridPosition(row: 0, col: 0),
+          endPosition: const GridPosition(row: 0, col: 0),
           type: WireSegmentType.straight,
           wireId: 'test',
           createdAt: DateTime.now(),
@@ -272,7 +273,7 @@ void main() {
 
         expect(singlePoint.length, 0);
         expect(singlePoint.isHorizontal, true); // Same row
-        expect(singlePoint.isVertical, true);  // Same column
+        expect(singlePoint.isVertical, true); // Same column
       });
     });
   });

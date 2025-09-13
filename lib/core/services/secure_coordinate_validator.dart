@@ -4,11 +4,11 @@ import '../../../core/debug/structured_logger.dart';
 
 /// Secure coordinate validator to prevent overflow attacks and ensure boundary compliance
 class SecureCoordinateValidator {
-  static const double maxGridWidth = 1000.0;
-  static const double maxGridHeight = 1000.0;
-  static const double minGridWidth = 1.0;
-  static const double minGridHeight = 1.0;
-  static const double cellSize = 50.0; // Standard cell size
+  static const double maxGridWidth = 1000;
+  static const double maxGridHeight = 1000;
+  static const double minGridWidth = 1;
+  static const double minGridHeight = 1;
+  static const double cellSize = 50; // Standard cell size
 
   /// Sanitize a single coordinate position
   static Offset sanitizePosition(Offset position) {
@@ -59,7 +59,8 @@ class SecureCoordinateValidator {
   /// Check if position is within safe bounds
   static bool isPositionSafe(Offset position, Size gridDimensions) {
     final sanitizedGrid = sanitizeGridDimensions(gridDimensions);
-    final gridBounds = Rect.fromLTWH(0, 0, sanitizedGrid.width * cellSize, sanitizedGrid.height * cellSize);
+    final gridBounds = Rect.fromLTWH(
+        0, 0, sanitizedGrid.width * cellSize, sanitizedGrid.height * cellSize);
 
     return gridBounds.contains(position);
   }
@@ -83,10 +84,11 @@ class SecureCoordinateValidator {
 
       return true;
     } catch (e) {
-      StructuredLogger.error('🛡️ Drag data validation failed with exception', context: {
-        'error': e.toString(),
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
+      StructuredLogger.error('🛡️ Drag data validation failed with exception',
+          context: {
+            'error': e.toString(),
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          });
       return false;
     }
   }
@@ -119,13 +121,15 @@ class SecureCoordinateValidator {
       final normalized = panOffset / distance;
       final clamped = normalized * maxPanDistance;
 
-      StructuredLogger.warning('🛡️ Pan offset clamped to prevent excessive panning', context: {
-        'originalOffset': panOffset.toString(),
-        'clampedOffset': clamped.toString(),
-        'originalDistance': distance,
-        'maxDistance': maxPanDistance,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
+      StructuredLogger.warning(
+          '🛡️ Pan offset clamped to prevent excessive panning',
+          context: {
+            'originalOffset': panOffset.toString(),
+            'clampedOffset': clamped.toString(),
+            'originalDistance': distance,
+            'maxDistance': maxPanDistance,
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          });
 
       return clamped;
     }
@@ -143,11 +147,11 @@ class SecureCoordinateValidator {
         'isInfinite': value.isInfinite,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
-      return 0.0;
+      return 0;
     }
 
     // Clamp to reasonable grid bounds
-    final maxCoordinate = maxGridWidth * cellSize;
+    const maxCoordinate = maxGridWidth * cellSize;
     final clamped = math.max(0.0, math.min(maxCoordinate, value));
 
     if (clamped != value) {
@@ -167,24 +171,27 @@ class SecureCoordinateValidator {
     try {
       // Basic validation for now
       if (context == null) {
-        StructuredLogger.error('🛡️ Invalid coordinate context: null context', context: {
-          'timestamp': DateTime.now().millisecondsSinceEpoch,
-        });
+        StructuredLogger.error('🛡️ Invalid coordinate context: null context',
+            context: {
+              'timestamp': DateTime.now().millisecondsSinceEpoch,
+            });
         return false;
       }
 
       // TODO: Implement full validation when CoordinateContext class is available
-      StructuredLogger.debug('🛡️ Coordinate context validation placeholder', context: {
-        'contextType': context.runtimeType.toString(),
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
+      StructuredLogger.debug('🛡️ Coordinate context validation placeholder',
+          context: {
+            'contextType': context.runtimeType.toString(),
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          });
 
       return true;
     } catch (e) {
-      StructuredLogger.error('🛡️ Coordinate context validation failed', context: {
-        'error': e.toString(),
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
+      StructuredLogger.error('🛡️ Coordinate context validation failed',
+          context: {
+            'error': e.toString(),
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          });
       return false;
     }
   }
@@ -196,7 +203,8 @@ extension SecureOffsetExtension on Offset {
   Offset sanitized() => SecureCoordinateValidator.sanitizePosition(this);
 
   /// Check if this offset is within safe bounds
-  bool isSafe(Size gridDimensions) => SecureCoordinateValidator.isPositionSafe(this, gridDimensions);
+  bool isSafe(Size gridDimensions) =>
+      SecureCoordinateValidator.isPositionSafe(this, gridDimensions);
 }
 
 extension SecureSizeExtension on Size {

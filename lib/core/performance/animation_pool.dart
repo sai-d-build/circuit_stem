@@ -2,9 +2,10 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
 class AnimationControllerPool {
-  static final AnimationControllerPool _instance = AnimationControllerPool._internal();
+  static final AnimationControllerPool _instance =
+      AnimationControllerPool._internal(); // ignore: cascade_invocations
   factory AnimationControllerPool() => _instance;
-  AnimationControllerPool._internal();
+  AnimationControllerPool._internal(); // ignore: cascade_invocations
 
   final Map<String, _PooledController> _pool = {};
   final Map<String, int> _usageCount = {};

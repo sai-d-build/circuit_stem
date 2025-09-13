@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'color_contrast.dart';
 
 class AccessibilityManager {
-  static final AccessibilityManager _instance = AccessibilityManager._internal();
+  static final AccessibilityManager _instance =
+      AccessibilityManager._internal(); // ignore: cascade_invocations
   factory AccessibilityManager() => _instance;
-  AccessibilityManager._internal();
+  AccessibilityManager._internal(); // ignore: cascade_invocations
 
   // Accessibility preferences
   bool _isHighContrastMode = false;
@@ -48,7 +49,8 @@ class AccessibilityManager {
 
   static bool _isBrightColor(Color color) {
     // Calculate perceived brightness
-    final double brightness = (color.r * 0.299 + color.g * 0.587 + color.b * 0.114) / 255;
+    final brightness =
+        (color.r * 0.299 + color.g * 0.587 + color.b * 0.114) / 255;
     return brightness > 0.5;
   }
 

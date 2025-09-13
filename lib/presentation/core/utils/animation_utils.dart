@@ -37,9 +37,10 @@ class AnimationUtils {
   }
 
   /// Create a bounce animation for successful actions
-  static Animation<double> createBounceAnimation(AnimationController controller) {
+  static Animation<double> createBounceAnimation(
+      AnimationController controller) {
     return Tween<double>(
-      begin: 1.0,
+      begin: 1,
       end: 1.1,
     ).animate(
       CurvedAnimation(
@@ -50,10 +51,11 @@ class AnimationUtils {
   }
 
   /// Create a fade-in animation
-  static Animation<double> createFadeInAnimation(AnimationController controller) {
+  static Animation<double> createFadeInAnimation(
+      AnimationController controller) {
     return Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(
       CurvedAnimation(
         parent: controller,
@@ -65,7 +67,7 @@ class AnimationUtils {
   /// Create a slide-in animation
   static Animation<Offset> createSlideInAnimation(
     AnimationController controller, {
-    Offset begin = const Offset(0.0, 1.0),
+    Offset begin = const Offset(0, 1),
   }) {
     return Tween<Offset>(
       begin: begin,
@@ -79,10 +81,11 @@ class AnimationUtils {
   }
 
   /// Create a scale-in animation
-  static Animation<double> createScaleInAnimation(AnimationController controller) {
+  static Animation<double> createScaleInAnimation(
+      AnimationController controller) {
     return Tween<double>(
       begin: 0.8,
-      end: 1.0,
+      end: 1,
     ).animate(
       CurvedAnimation(
         parent: controller,
@@ -101,8 +104,8 @@ class AnimationUtils {
     final endDelay = (index + 1) / totalItems;
 
     return Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(
       CurvedAnimation(
         parent: controller,
@@ -133,9 +136,10 @@ class AnimationUtils {
   }
 
   /// Create a pulse animation for loading states
-  static Animation<double> createPulseAnimation(AnimationController controller) {
+  static Animation<double> createPulseAnimation(
+      AnimationController controller) {
     return Tween<double>(
-      begin: 1.0,
+      begin: 1,
       end: 1.2,
     ).animate(
       CurvedAnimation(
@@ -146,10 +150,11 @@ class AnimationUtils {
   }
 
   /// Create a shimmer animation for skeleton loading
-  static Animation<double> createShimmerAnimation(AnimationController controller) {
+  static Animation<double> createShimmerAnimation(
+      AnimationController controller) {
     return Tween<double>(
-      begin: -1.0,
-      end: 1.0,
+      begin: -1,
+      end: 1,
     ).animate(
       CurvedAnimation(
         parent: controller,
@@ -213,7 +218,7 @@ class _AnimatedComponentCardState extends State<AnimatedComponentCard>
     );
 
     _scaleAnimation = Tween<double>(
-      begin: 1.0,
+      begin: 1,
       end: widget.isSelected ? 1.05 : 1.0,
     ).animate(
       CurvedAnimation(
@@ -276,7 +281,7 @@ class AnimatedListItem extends StatefulWidget {
     required this.child,
     this.index = 0,
     this.delay = Duration.zero,
-    this.slideBegin = const Offset(0.0, 0.2),
+    this.slideBegin = const Offset(0, 0.2),
   });
 
   @override

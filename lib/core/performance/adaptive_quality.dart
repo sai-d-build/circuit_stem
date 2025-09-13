@@ -48,11 +48,11 @@ class AdaptiveQualityManager {
   static double getAdaptiveBlurStrength() {
     switch (_currentLevel) {
       case QualityLevel.low:
-        return 3.0;
+        return 3;
       case QualityLevel.medium:
-        return 6.0;
+        return 6;
       case QualityLevel.high:
-        return 10.0;
+        return 10;
     }
   }
 

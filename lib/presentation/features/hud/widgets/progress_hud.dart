@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/state/hud_state.dart';
 import 'package:sparkcircuit/presentation/ui_components/glass_panel.dart';
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 class ProgressHud extends ConsumerWidget {
   final String levelId;
@@ -16,21 +16,21 @@ class ProgressHud extends ConsumerWidget {
     final circuitColors = theme.extension<CircuitColorScheme>()!;
     final hudState = ref.watch(hudStateProvider(levelId));
     final progress = hudState.progress;
-    
+
     return GlassPanel(
       child: Padding(
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           horizontal: UIConstants.progressHudHorizontalPadding,
           vertical: UIConstants.progressHudVerticalPadding,
         ),
         child: Row(
           children: [
             _buildStarsIndicator(theme, circuitColors, progress),
-            SizedBox(width: UIConstants.progressHudSpacing),
+            const SizedBox(width: UIConstants.progressHudSpacing),
             _buildScoreDisplay(theme, circuitColors, progress),
             const Spacer(),
             _buildTimeDisplay(theme, circuitColors, progress),
-            SizedBox(width: UIConstants.progressHudSpacing),
+            const SizedBox(width: UIConstants.progressHudSpacing),
             _buildHintsDisplay(theme, circuitColors, progress),
           ],
         ),
@@ -51,7 +51,8 @@ class ProgressHud extends ConsumerWidget {
           child: Icon(
             isEarned ? Icons.star : Icons.star_outline,
             color: isEarned
-                ? circuitColors.highlightAccent // Use neon highlight for earned stars
+                ? circuitColors
+                    .highlightAccent // Use neon highlight for earned stars
                 : circuitColors.onSurface.withValues(alpha: 0.3),
             size: 20,
           ),
@@ -82,7 +83,7 @@ class ProgressHud extends ConsumerWidget {
             shadows: [
               BoxShadow(
                 color: circuitColors.neonPrimary.withValues(alpha: 0.3),
-                blurRadius: 5.0,
+                blurRadius: 5,
               ),
             ],
           ),
@@ -113,7 +114,7 @@ class ProgressHud extends ConsumerWidget {
             shadows: [
               BoxShadow(
                 color: circuitColors.neonPrimary.withValues(alpha: 0.3),
-                blurRadius: 5.0,
+                blurRadius: 5,
               ),
             ],
           ),
@@ -149,7 +150,7 @@ class ProgressHud extends ConsumerWidget {
             shadows: [
               BoxShadow(
                 color: hintsColor.withValues(alpha: 0.5),
-                blurRadius: 5.0,
+                blurRadius: 5,
               ),
             ],
           ),

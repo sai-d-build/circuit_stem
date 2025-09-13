@@ -1,5 +1,5 @@
-import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sparkcircuit/core/migration/migration_tracker.dart';
 import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
 
@@ -34,25 +34,28 @@ class SelectionState {
     );
   }
 }
-final selectionServiceProvider = StateNotifierProvider.family<SelectionService, SelectionState, String>(
+
+final selectionServiceProvider =
+    StateNotifierProvider.family<SelectionService, SelectionState, String>(
   (ref, levelId) {
-    MigrationTracker.markFileMigrated('selection_service.dart', DateTime.now().toIso8601String());
+    MigrationTracker.markFileMigrated(
+        'selection_service.dart', DateTime.now().toIso8601String());
     return SelectionService(levelId: levelId);
   },
 );
 
-
 class SelectionService extends StateNotifier<SelectionState> {
   final String levelId;
 
-  SelectionService({required this.levelId})
-      : super(const SelectionState());
+  SelectionService({required this.levelId}) : super(const SelectionState());
 
   void selectComponent(ComponentModel component) {
     state = state.copyWith(
       selectedComponent: component,
       selectedPosition: GridPosition(row: component.row, col: component.col),
-      multiSelection: state.isMultiSelectMode ? [...state.multiSelection, component] : [component],
+      multiSelection: state.isMultiSelectMode
+          ? [...state.multiSelection, component]
+          : [component],
     );
   }
 

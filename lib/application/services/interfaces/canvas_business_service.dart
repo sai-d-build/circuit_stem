@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
-import 'package:sparkcircuit/presentation/state/palette_state.dart';
-import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
+import 'package:sparkcircuit/presentation/models/drag_models.dart';
+import 'package:sparkcircuit/presentation/state/palette_state.dart';
 
 /// Service interface for canvas business logic operations
 abstract class CanvasBusinessService {
@@ -50,7 +50,8 @@ class ComponentPlacementResult {
     this.col,
   });
 
-  factory ComponentPlacementResult.success(ComponentType componentType, int row, int col) {
+  factory ComponentPlacementResult.success(
+      ComponentType componentType, int row, int col) {
     return ComponentPlacementResult._(
       isSuccess: true,
       componentType: componentType,
@@ -83,7 +84,8 @@ class ComponentDropResult {
     this.col,
   });
 
-  factory ComponentDropResult.success(ComponentType componentType, int row, int col) {
+  factory ComponentDropResult.success(
+      ComponentType componentType, int row, int col) {
     return ComponentDropResult._(
       isSuccess: true,
       componentType: componentType,

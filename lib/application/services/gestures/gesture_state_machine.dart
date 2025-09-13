@@ -1,10 +1,12 @@
 import 'dart:ui';
-import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart';
+
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_orchestrator.dart';
 
 /// Gesture state machine for handling canvas interactions
 class GestureStateMachine {
-  GestureProcessingResult process(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult process(
+      GestureInputEvent event, GameCanvasState state) {
     StructuredLogger.debug('Processing gesture in state machine', context: {
       'gestureType': event.type.toString(),
       'currentMode': state.interactionState.mode.toString(),
@@ -13,8 +15,7 @@ class GestureStateMachine {
 
     return switch ((state.interactionState.mode, event.type)) {
       // Idle state transitions
-      (GestureMode.idle, GestureEventType.tap) =>
-        _handleIdleTap(event, state),
+      (GestureMode.idle, GestureEventType.tap) => _handleIdleTap(event, state),
       (GestureMode.idle, GestureEventType.longPress) =>
         _handleIdleLongPress(event, state),
       (GestureMode.idle, GestureEventType.dragStart) =>
@@ -51,7 +52,8 @@ class GestureStateMachine {
     };
   }
 
-  GestureProcessingResult _handleIdleTap(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleIdleTap(
+      GestureInputEvent event, GameCanvasState state) {
     StructuredLogger.debug('Handling idle tap', context: {
       'position': event.position.toString(),
       'gridPosition': event.gridPosition?.toString(),
@@ -89,7 +91,8 @@ class GestureStateMachine {
     }
   }
 
-  GestureProcessingResult _handleIdleLongPress(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleIdleLongPress(
+      GestureInputEvent event, GameCanvasState state) {
     StructuredLogger.debug('Handling idle long press', context: {
       'position': event.position.toString(),
     });
@@ -98,7 +101,8 @@ class GestureStateMachine {
     return GestureProcessingResult.noChange(state);
   }
 
-  GestureProcessingResult _handleIdleDragStart(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleIdleDragStart(
+      GestureInputEvent event, GameCanvasState state) {
     StructuredLogger.debug('Handling idle drag start', context: {
       'position': event.position.toString(),
       'hasComponent': event.hitTestResult?.hasComponent ?? false,
@@ -141,7 +145,8 @@ class GestureStateMachine {
     }
   }
 
-  GestureProcessingResult _handleComponentDragUpdate(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleComponentDragUpdate(
+      GestureInputEvent event, GameCanvasState state) {
     final newInteractionState = state.interactionState.copyWith(
       currentDragPosition: event.gridPosition,
     );
@@ -157,7 +162,8 @@ class GestureStateMachine {
     );
   }
 
-  GestureProcessingResult _handleComponentDragEnd(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleComponentDragEnd(
+      GestureInputEvent event, GameCanvasState state) {
     StructuredLogger.debug('Handling component drag end', context: {
       'componentId': state.interactionState.draggedComponentId,
       'endPosition': event.gridPosition.toString(),
@@ -182,7 +188,8 @@ class GestureStateMachine {
     );
   }
 
-  GestureProcessingResult _handleCanvasPanUpdate(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleCanvasPanUpdate(
+      GestureInputEvent event, GameCanvasState state) {
     // Calculate pan delta from drag event
     final delta = event.data as Offset? ?? Offset.zero;
 
@@ -198,7 +205,8 @@ class GestureStateMachine {
     );
   }
 
-  GestureProcessingResult _handleCanvasPanEnd(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleCanvasPanEnd(
+      GestureInputEvent event, GameCanvasState state) {
     final newInteractionState = state.interactionState.copyWith(
       mode: GestureMode.idle,
       dragStartPosition: null,
@@ -210,7 +218,8 @@ class GestureStateMachine {
     );
   }
 
-  GestureProcessingResult _handleMultiTouchScaleStart(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleMultiTouchScaleStart(
+      GestureInputEvent event, GameCanvasState state) {
     final newInteractionState = state.interactionState.copyWith(
       mode: GestureMode.multiTouchScaling,
     );
@@ -221,7 +230,8 @@ class GestureStateMachine {
     );
   }
 
-  GestureProcessingResult _handleMultiTouchScaleUpdate(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleMultiTouchScaleUpdate(
+      GestureInputEvent event, GameCanvasState state) {
     final scale = event.data as double? ?? 1.0;
 
     return GestureProcessingResult(
@@ -236,7 +246,8 @@ class GestureStateMachine {
     );
   }
 
-  GestureProcessingResult _handleMultiTouchScaleEnd(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleMultiTouchScaleEnd(
+      GestureInputEvent event, GameCanvasState state) {
     final newInteractionState = state.interactionState.copyWith(
       mode: GestureMode.idle,
     );
@@ -247,7 +258,8 @@ class GestureStateMachine {
     );
   }
 
-  GestureProcessingResult _handleWireDrawingUpdate(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleWireDrawingUpdate(
+      GestureInputEvent event, GameCanvasState state) {
     // Update wire drawing preview
     return GestureProcessingResult(
       newState: state,
@@ -259,7 +271,8 @@ class GestureStateMachine {
     );
   }
 
-  GestureProcessingResult _handleWireDrawingEnd(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleWireDrawingEnd(
+      GestureInputEvent event, GameCanvasState state) {
     final newInteractionState = state.interactionState.copyWith(
       mode: GestureMode.idle,
     );
@@ -274,7 +287,8 @@ class GestureStateMachine {
     );
   }
 
-  GestureProcessingResult _handleUnknownTransition(GestureInputEvent event, GameCanvasState state) {
+  GestureProcessingResult _handleUnknownTransition(
+      GestureInputEvent event, GameCanvasState state) {
     StructuredLogger.warning('Unknown gesture transition', context: {
       'currentMode': state.interactionState.mode.toString(),
       'gestureType': event.type.toString(),

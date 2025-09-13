@@ -113,14 +113,14 @@ class PerformanceMonitor {
     ),
     PerformanceThreshold(
       metric: PerformanceMetric.memoryUsage,
-      warningThreshold: 100.0, // 100 MB
-      errorThreshold: 200.0, // 200 MB
+      warningThreshold: 100, // 100 MB
+      errorThreshold: 200, // 200 MB
       description: 'Memory usage should be under 100MB',
     ),
     PerformanceThreshold(
       metric: PerformanceMetric.buildTime,
-      warningThreshold: 8.0,
-      errorThreshold: 16.0,
+      warningThreshold: 8,
+      errorThreshold: 16,
       description: 'Widget build time should be under 8ms',
     ),
   ];
@@ -195,7 +195,8 @@ class PerformanceMonitor {
     if (stopwatch != null) {
       stopwatch.stop();
       final elapsedMs = stopwatch.elapsedMilliseconds.toDouble();
-      recordMeasurement(metric, elapsedMs, metadata: {'operation': operationId});
+      recordMeasurement(metric, elapsedMs,
+          metadata: {'operation': operationId});
     }
   }
 
@@ -222,9 +223,8 @@ class PerformanceMonitor {
     Duration? timeWindow,
     List<PerformanceMetric>? metrics,
   }) {
-    final cutoff = timeWindow != null
-        ? DateTime.now().subtract(timeWindow)
-        : null;
+    final cutoff =
+        timeWindow != null ? DateTime.now().subtract(timeWindow) : null;
 
     final relevantMeasurements = _measurements.where((m) {
       if (cutoff != null && m.timestamp.isBefore(cutoff)) return false;
@@ -235,9 +235,8 @@ class PerformanceMonitor {
     final stats = <String, dynamic>{};
 
     for (final metric in PerformanceMetric.values) {
-      final metricMeasurements = relevantMeasurements
-          .where((m) => m.metric == metric)
-          .toList();
+      final metricMeasurements =
+          relevantMeasurements.where((m) => m.metric == metric).toList();
 
       if (metricMeasurements.isEmpty) continue;
 
@@ -321,9 +320,8 @@ class PerformanceMonitor {
 
   /// Get metric statistics
   Map<String, dynamic> getMetricStats(String metricName) {
-    final metricMeasurements = _measurements
-        .where((m) => m.metric.name == metricName)
-        .toList();
+    final metricMeasurements =
+        _measurements.where((m) => m.metric.name == metricName).toList();
 
     if (metricMeasurements.isEmpty) {
       return {'count': 0, 'avg': 0.0, 'min': 0.0, 'max': 0.0};
@@ -351,20 +349,24 @@ class PerformanceMonitor {
   Map<String, dynamic> exportData() {
     return {
       'measurements': _measurements.map((m) => m.toJson()).toList(),
-      'alerts': _alerts.map((a) => {
-        'metric': a.metric.name,
-        'value': a.value,
-        'threshold': a.threshold,
-        'level': a.level.name,
-        'timestamp': a.timestamp.toIso8601String(),
-        'message': a.message,
-      }).toList(),
-      'thresholds': _thresholds.map((t) => {
-        'metric': t.metric.name,
-        'warningThreshold': t.warningThreshold,
-        'errorThreshold': t.errorThreshold,
-        'description': t.description,
-      }).toList(),
+      'alerts': _alerts
+          .map((a) => {
+                'metric': a.metric.name,
+                'value': a.value,
+                'threshold': a.threshold,
+                'level': a.level.name,
+                'timestamp': a.timestamp.toIso8601String(),
+                'message': a.message,
+              })
+          .toList(),
+      'thresholds': _thresholds
+          .map((t) => {
+                'metric': t.metric.name,
+                'warningThreshold': t.warningThreshold,
+                'errorThreshold': t.errorThreshold,
+                'description': t.description,
+              })
+          .toList(),
       'exportedAt': DateTime.now().toIso8601String(),
     };
   }
@@ -379,7 +381,7 @@ class PerformanceMonitor {
       // In production, you might use platform-specific APIs
       recordMeasurement(
         PerformanceMetric.memoryUsage,
-        50.0, // Placeholder memory usage in MB
+        50, // Placeholder memory usage in MB
         metadata: {'source': 'debug_mode'},
       );
     }
@@ -417,7 +419,8 @@ class PerformanceMonitor {
               : threshold.warningThreshold,
           level: level,
           timestamp: DateTime.now(),
-          message: '${measurement.metric.displayName} exceeded ${level.displayName.toLowerCase()} threshold '
+          message:
+              '${measurement.metric.displayName} exceeded ${level.displayName.toLowerCase()} threshold '
               '(${measurement.value.toStringAsFixed(2)}${measurement.metric.unit} >= '
               '${level == AlertLevel.error ? threshold.errorThreshold : threshold.warningThreshold}${measurement.metric.unit})',
         );
@@ -502,7 +505,8 @@ class _PerformanceOverlayState extends State<PerformanceOverlay> {
                 children: [
                   const Text(
                     'Performance Monitor',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   ..._stats.entries.map((entry) {

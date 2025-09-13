@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
 
 /// A reusable grid widget for drawing grid patterns
 class GridWidget extends StatelessWidget {
@@ -76,11 +77,11 @@ class GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     _drawGrid(canvas, size);
-    
+
     if (showOrigin) {
       _drawOrigin(canvas, size);
     }
-    
+
     if (showCoordinates) {
       _drawCoordinates(canvas, size);
     }
@@ -99,12 +100,14 @@ class GridPainter extends CustomPainter {
 
     // Calculate visible range
     final startX = math.max(0, (-offset.dx / cellSize).floor());
-    final endX = math.min(gridSize.width.toInt(), ((size.width - offset.dx) / cellSize).ceil());
+    final endX = math.min(
+        gridSize.width.toInt(), ((size.width - offset.dx) / cellSize).ceil());
     final startY = math.max(0, (-offset.dy / cellSize).floor());
-    final endY = math.min(gridSize.height.toInt(), ((size.height - offset.dy) / cellSize).ceil());
+    final endY = math.min(
+        gridSize.height.toInt(), ((size.height - offset.dy) / cellSize).ceil());
 
     // Draw vertical lines
-    for (int i = startX; i <= endX; i++) {
+    for (var i = startX; i <= endX; i++) {
       final x = i * cellSize + offset.dx;
       if (x >= -strokeWidth && x <= size.width + strokeWidth) {
         final paint = (i % majorGridInterval == 0) ? majorPaint : regularPaint;
@@ -117,7 +120,7 @@ class GridPainter extends CustomPainter {
     }
 
     // Draw horizontal lines
-    for (int i = startY; i <= endY; i++) {
+    for (var i = startY; i <= endY; i++) {
       final y = i * cellSize + offset.dy;
       if (y >= -strokeWidth && y <= size.height + strokeWidth) {
         final paint = (i % majorGridInterval == 0) ? majorPaint : regularPaint;
@@ -135,9 +138,10 @@ class GridPainter extends CustomPainter {
     final originY = offset.dy;
 
     // Only draw if origin is visible
-    if (originX >= -20 && originX <= size.width + 20 &&
-        originY >= -20 && originY <= size.height + 20) {
-      
+    if (originX >= -20 &&
+        originX <= size.width + 20 &&
+        originY >= -20 &&
+        originY <= size.height + 20) {
       final originPaint = Paint()
         ..color = Colors.red.withValues(alpha: 0.8)
         ..strokeWidth = 2.0
@@ -148,17 +152,19 @@ class GridPainter extends CustomPainter {
         ..style = PaintingStyle.fill;
 
       // Draw origin point
-      canvas.drawCircle(Offset(originX, originY), 4, originCenter);
-      canvas.drawCircle(Offset(originX, originY), 4, originPaint);
+      canvas.drawCircle( // ignore: cascade_invocations
+          Offset(originX, originY), 4, originCenter);
+      canvas.drawCircle( // ignore: cascade_invocations
+          Offset(originX, originY), 4, originPaint);
 
       // Draw axes indicators
       const axisLength = 15.0;
-      canvas.drawLine(
+      canvas.drawLine( // ignore: cascade_invocations
         Offset(originX - axisLength, originY),
         Offset(originX + axisLength, originY),
         originPaint,
       );
-      canvas.drawLine(
+      canvas.drawLine( // ignore: cascade_invocations
         Offset(originX, originY - axisLength),
         Offset(originX, originY + axisLength),
         originPaint,
@@ -173,21 +179,29 @@ class GridPainter extends CustomPainter {
     );
 
     // Calculate visible major grid lines for coordinate display
-    final startX = math.max(0, (-offset.dx / cellSize / majorGridInterval).floor() * majorGridInterval);
+    final startX = math.max(
+        0,
+        (-offset.dx / cellSize / majorGridInterval).floor() *
+            majorGridInterval);
     final endX = math.min(
       gridSize.width.toInt(),
-      ((size.width - offset.dx) / cellSize / majorGridInterval).ceil() * majorGridInterval,
+      ((size.width - offset.dx) / cellSize / majorGridInterval).ceil() *
+          majorGridInterval,
     );
-    final startY = math.max(0, (-offset.dy / cellSize / majorGridInterval).floor() * majorGridInterval);
+    final startY = math.max(
+        0,
+        (-offset.dy / cellSize / majorGridInterval).floor() *
+            majorGridInterval);
     final endY = math.min(
       gridSize.height.toInt(),
-      ((size.height - offset.dy) / cellSize / majorGridInterval).ceil() * majorGridInterval,
+      ((size.height - offset.dy) / cellSize / majorGridInterval).ceil() *
+          majorGridInterval,
     );
 
     // Draw X coordinates
-    for (int i = startX; i <= endX; i += majorGridInterval) {
+    for (var i = startX; i <= endX; i += majorGridInterval) {
       if (i == 0) continue; // Skip origin
-      
+
       final x = i * cellSize + offset.dx;
       if (x >= 20 && x <= size.width - 20) {
         textPainter.text = TextSpan(
@@ -198,30 +212,30 @@ class GridPainter extends CustomPainter {
             fontWeight: FontWeight.w500,
           ),
         );
-        textPainter.layout();
-        
+        textPainter // ignore: cascade_invocations
+          ..layout()
+          ..paint(
+            canvas,
+            Offset(x - textPainter.width / 2, 15 - textPainter.height / 2),
+          );
+
         // Draw background
         final bgRect = Rect.fromCenter(
           center: Offset(x, 15),
           width: textPainter.width + 6,
           height: textPainter.height + 2,
         );
-        canvas.drawRRect(
+        canvas.drawRRect( // ignore: cascade_invocations
           RRect.fromRectAndRadius(bgRect, const Radius.circular(2)),
           Paint()..color = Colors.white.withValues(alpha: 0.9),
-        );
-        
-        textPainter.paint(
-          canvas,
-          Offset(x - textPainter.width / 2, 15 - textPainter.height / 2),
         );
       }
     }
 
     // Draw Y coordinates
-    for (int i = startY; i <= endY; i += majorGridInterval) {
+    for (var i = startY; i <= endY; i += majorGridInterval) {
       if (i == 0) continue; // Skip origin
-      
+
       final y = i * cellSize + offset.dy;
       if (y >= 20 && y <= size.height - 20) {
         textPainter.text = TextSpan(
@@ -232,22 +246,22 @@ class GridPainter extends CustomPainter {
             fontWeight: FontWeight.w500,
           ),
         );
-        textPainter.layout();
-        
+        textPainter // ignore: cascade_invocations
+          ..layout()
+          ..paint(
+            canvas,
+            Offset(15 - textPainter.width / 2, y - textPainter.height / 2),
+          );
+
         // Draw background
         final bgRect = Rect.fromCenter(
           center: Offset(15, y),
           width: textPainter.width + 6,
           height: textPainter.height + 2,
         );
-        canvas.drawRRect(
+        canvas.drawRRect( // ignore: cascade_invocations
           RRect.fromRectAndRadius(bgRect, const Radius.circular(2)),
           Paint()..color = Colors.white.withValues(alpha: 0.9),
-        );
-        
-        textPainter.paint(
-          canvas,
-          Offset(15 - textPainter.width / 2, y - textPainter.height / 2),
         );
       }
     }
@@ -255,8 +269,10 @@ class GridPainter extends CustomPainter {
     // Draw origin coordinate
     final originX = offset.dx;
     final originY = offset.dy;
-    if (originX >= 10 && originX <= size.width - 30 &&
-        originY >= 10 && originY <= size.height - 30) {
+    if (originX >= 10 &&
+        originX <= size.width - 30 &&
+        originY >= 10 &&
+        originY <= size.height - 30) {
       textPainter.text = const TextSpan(
         text: '(0,0)',
         style: TextStyle(
@@ -265,24 +281,24 @@ class GridPainter extends CustomPainter {
           fontWeight: FontWeight.bold,
         ),
       );
-      textPainter.layout();
-      
+      textPainter // ignore: cascade_invocations
+        ..layout()
+        ..paint(
+          canvas,
+          Offset(
+            originX + 15 - textPainter.width / 2,
+            originY - 15 - textPainter.height / 2,
+          ),
+        );
+
       final bgRect = Rect.fromCenter(
         center: Offset(originX + 15, originY - 15),
         width: textPainter.width + 6,
         height: textPainter.height + 2,
       );
-      canvas.drawRRect(
+      canvas.drawRRect( // ignore: cascade_invocations
         RRect.fromRectAndRadius(bgRect, const Radius.circular(2)),
         Paint()..color = Colors.white.withValues(alpha: 0.95),
-      );
-      
-      textPainter.paint(
-        canvas,
-        Offset(
-          originX + 15 - textPainter.width / 2,
-          originY - 15 - textPainter.height / 2,
-        ),
       );
     }
   }
@@ -290,14 +306,14 @@ class GridPainter extends CustomPainter {
   @override
   bool shouldRepaint(GridPainter oldDelegate) {
     return oldDelegate.cellSize != cellSize ||
-           oldDelegate.gridColor != gridColor ||
-           oldDelegate.majorGridColor != majorGridColor ||
-           oldDelegate.strokeWidth != strokeWidth ||
-           oldDelegate.majorStrokeWidth != majorStrokeWidth ||
-           oldDelegate.majorGridInterval != majorGridInterval ||
-           oldDelegate.offset != offset ||
-           oldDelegate.gridSize != gridSize ||
-           oldDelegate.showOrigin != showOrigin ||
-           oldDelegate.showCoordinates != showCoordinates;
+        oldDelegate.gridColor != gridColor ||
+        oldDelegate.majorGridColor != majorGridColor ||
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.majorStrokeWidth != majorStrokeWidth ||
+        oldDelegate.majorGridInterval != majorGridInterval ||
+        oldDelegate.offset != offset ||
+        oldDelegate.gridSize != gridSize ||
+        oldDelegate.showOrigin != showOrigin ||
+        oldDelegate.showCoordinates != showCoordinates;
   }
 }

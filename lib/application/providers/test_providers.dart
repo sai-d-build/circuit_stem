@@ -44,6 +44,8 @@
 
 /// Creates a test provider container with common mock overrides
 /// Usage: Use this in setUp() methods for consistent test setup
+library;
+
 class TestProviderHelper {
   // TODO: Implement provider container creation
   // TODO: Add standard test overrides

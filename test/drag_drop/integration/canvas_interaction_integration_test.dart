@@ -11,20 +11,21 @@ void main() {
     });
 
     test('should handle complete coordinate transformation workflow', () {
-      final context = CoordinateContext(
-        gridDimensions: const Size(20, 15),
-        cellSize: 50.0,
-        scale: 1.0,
+      const context = CoordinateContext(
+        gridDimensions: Size(20, 15),
+        cellSize: 50,
+        scale: 1,
         panOffset: Offset.zero,
-        canvasSize: const Size(1000, 750),
-        devicePixelRatio: 1.0,
+        canvasSize: Size(1000, 750),
+        devicePixelRatio: 1,
       );
 
       final mockRenderBox = MockRenderBox();
 
       // Test screen to grid conversion
-      final screenPos = const Offset(250, 200);
-      final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
+      const screenPos = Offset(250, 200);
+      final gridPos = coordinateService.screenToGrid(screenPos, context,
+          renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       expect(gridPos!.row, 4); // 200 / 50 = 4
@@ -37,20 +38,21 @@ void main() {
     });
 
     test('should handle scaled coordinate transformations', () {
-      final context = CoordinateContext(
-        gridDimensions: const Size(20, 15),
-        cellSize: 50.0,
-        scale: 2.0, // 2x zoom
+      const context = CoordinateContext(
+        gridDimensions: Size(20, 15),
+        cellSize: 50,
+        scale: 2, // 2x zoom
         panOffset: Offset.zero,
-        canvasSize: const Size(1000, 750),
-        devicePixelRatio: 1.0,
+        canvasSize: Size(1000, 750),
+        devicePixelRatio: 1,
       );
 
       final mockRenderBox = MockRenderBox();
 
       // At 2x scale, screen coordinates should map to smaller grid coordinates
-      final screenPos = const Offset(200, 150);
-      final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
+      const screenPos = Offset(200, 150);
+      final gridPos = coordinateService.screenToGrid(screenPos, context,
+          renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       expect(gridPos!.row, 2); // (150 / 2) / 50 = 1.5 -> 2 (rounded)
@@ -58,20 +60,21 @@ void main() {
     });
 
     test('should handle panned coordinate transformations', () {
-      final context = CoordinateContext(
-        gridDimensions: const Size(20, 15),
-        cellSize: 50.0,
-        scale: 1.0,
-        panOffset: const Offset(100, 50), // Panned
-        canvasSize: const Size(1000, 750),
-        devicePixelRatio: 1.0,
+      const context = CoordinateContext(
+        gridDimensions: Size(20, 15),
+        cellSize: 50,
+        scale: 1,
+        panOffset: Offset(100, 50), // Panned
+        canvasSize: Size(1000, 750),
+        devicePixelRatio: 1,
       );
 
       final mockRenderBox = MockRenderBox();
 
       // With pan offset, screen coordinates should account for the offset
-      final screenPos = const Offset(200, 150);
-      final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
+      const screenPos = Offset(200, 150);
+      final gridPos = coordinateService.screenToGrid(screenPos, context,
+          renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       expect(gridPos!.row, 2); // (150 - 50) / 50 = 2
@@ -79,13 +82,13 @@ void main() {
     });
 
     test('should validate drop positions correctly', () {
-      final context = CoordinateContext(
-        gridDimensions: const Size(10, 10),
-        cellSize: 50.0,
-        scale: 1.0,
+      const context = CoordinateContext(
+        gridDimensions: Size(10, 10),
+        cellSize: 50,
+        scale: 1,
         panOffset: Offset.zero,
-        canvasSize: const Size(500, 500),
-        devicePixelRatio: 1.0,
+        canvasSize: Size(500, 500),
+        devicePixelRatio: 1,
       );
 
       final mockRenderBox = MockRenderBox();
@@ -113,19 +116,19 @@ void main() {
     });
 
     test('should handle boundary validation with occupied positions', () {
-      final context = CoordinateContext(
-        gridDimensions: const Size(10, 10),
-        cellSize: 50.0,
-        scale: 1.0,
+      const context = CoordinateContext(
+        gridDimensions: Size(10, 10),
+        cellSize: 50,
+        scale: 1,
         panOffset: Offset.zero,
-        canvasSize: const Size(500, 500),
-        devicePixelRatio: 1.0,
+        canvasSize: Size(500, 500),
+        devicePixelRatio: 1,
       );
 
       final mockRenderBox = MockRenderBox();
       final occupiedPositions = {
-        GridPosition(row: 2, col: 2),
-        GridPosition(row: 3, col: 3),
+        const GridPosition(row: 2, col: 2),
+        const GridPosition(row: 3, col: 3),
       };
 
       // Test dropping on occupied position
@@ -147,38 +150,41 @@ void main() {
         occupiedPositions: occupiedPositions,
       );
 
-      expect(freeResult.isValid, false); // Should be invalid because (3,3) is occupied
+      expect(freeResult.isValid,
+          false); // Should be invalid because (3,3) is occupied
     });
 
     test('should handle high DPI coordinate transformations', () {
-      final context = CoordinateContext(
-        gridDimensions: const Size(20, 15),
-        cellSize: 50.0,
-        scale: 1.0,
+      const context = CoordinateContext(
+        gridDimensions: Size(20, 15),
+        cellSize: 50,
+        scale: 1,
         panOffset: Offset.zero,
-        canvasSize: const Size(1000, 750),
-        devicePixelRatio: 2.0, // High DPI
+        canvasSize: Size(1000, 750),
+        devicePixelRatio: 2, // High DPI
       );
 
       final mockRenderBox = MockRenderBox();
 
       // High DPI should not affect grid calculations (handled at widget level)
-      final screenPos = const Offset(200, 150);
-      final gridPos = coordinateService.screenToGrid(screenPos, context, renderBox: mockRenderBox);
+      const screenPos = Offset(200, 150);
+      final gridPos = coordinateService.screenToGrid(screenPos, context,
+          renderBox: mockRenderBox);
 
       expect(gridPos, isNotNull);
       expect(gridPos!.row, 3); // 150 / 50 = 3
       expect(gridPos.col, 4); // 200 / 50 = 4
     });
 
-    test('should maintain coordinate accuracy across multiple transformations', () {
-      final context = CoordinateContext(
-        gridDimensions: const Size(20, 15),
-        cellSize: 60.0, // Non-round cell size
+    test('should maintain coordinate accuracy across multiple transformations',
+        () {
+      const context = CoordinateContext(
+        gridDimensions: Size(20, 15),
+        cellSize: 60, // Non-round cell size
         scale: 1.5,
-        panOffset: const Offset(30, 20),
-        canvasSize: const Size(1200, 900),
-        devicePixelRatio: 1.0,
+        panOffset: Offset(30, 20),
+        canvasSize: Size(1200, 900),
+        devicePixelRatio: 1,
       );
 
       final mockRenderBox = MockRenderBox();
@@ -191,7 +197,8 @@ void main() {
       ];
 
       for (final originalPos in originalPositions) {
-        final gridPos = coordinateService.screenToGrid(originalPos, context, renderBox: mockRenderBox);
+        final gridPos = coordinateService.screenToGrid(originalPos, context,
+            renderBox: mockRenderBox);
         expect(gridPos, isNotNull);
 
         final screenPos = coordinateService.gridToLocal(gridPos!, context);
@@ -203,27 +210,28 @@ void main() {
     });
 
     test('should handle edge cases at grid boundaries', () {
-      final context = CoordinateContext(
-        gridDimensions: const Size(10, 10),
-        cellSize: 50.0,
-        scale: 1.0,
+      const context = CoordinateContext(
+        gridDimensions: Size(10, 10),
+        cellSize: 50,
+        scale: 1,
         panOffset: Offset.zero,
-        canvasSize: const Size(500, 500),
-        devicePixelRatio: 1.0,
+        canvasSize: Size(500, 500),
+        devicePixelRatio: 1,
       );
 
       final mockRenderBox = MockRenderBox();
 
       // Test positions at grid boundaries
       final boundaryPositions = [
-        const Offset(0, 0),     // Top-left corner
-        const Offset(450, 0),   // Top-right corner
-        const Offset(0, 450),   // Bottom-left corner
+        const Offset(0, 0), // Top-left corner
+        const Offset(450, 0), // Top-right corner
+        const Offset(0, 450), // Bottom-left corner
         const Offset(450, 450), // Bottom-right corner
       ];
 
       for (final pos in boundaryPositions) {
-        final gridPos = coordinateService.screenToGrid(pos, context, renderBox: mockRenderBox);
+        final gridPos = coordinateService.screenToGrid(pos, context,
+            renderBox: mockRenderBox);
         expect(gridPos, isNotNull);
 
         // Verify position is within bounds
@@ -239,5 +247,6 @@ class MockRenderBox extends RenderBox {
   bool get attached => true;
 
   @override
-  Offset globalToLocal(Offset globalPosition, {RenderObject? ancestor}) => globalPosition;
+  Offset globalToLocal(Offset globalPosition, {RenderObject? ancestor}) =>
+      globalPosition;
 }

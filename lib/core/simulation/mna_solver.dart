@@ -1,7 +1,6 @@
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 import 'circuit_netlist.dart';
-
-import 'package:sparkcircuit/domain/entities/entities.dart';
 
 // Missing classes for simulation results
 class SimulationResult {
@@ -112,8 +111,9 @@ class BasicMNASolver {
     final matrixSize = nodeCount + voltageSourceCount;
 
     // Initialize matrices using Lists
-    final a = List.generate(matrixSize, (_) => List<double>.filled(matrixSize, 0.0));
-    final b = List<double>.filled(matrixSize, 0.0);
+    final a =
+        List.generate(matrixSize, (_) => List<double>.filled(matrixSize, 0));
+    final b = List<double>.filled(matrixSize, 0);
 
     // Build conductance matrix (G part)
     _buildConductanceMatrix(netlist, a);
@@ -191,7 +191,7 @@ class BasicMNASolver {
 
     if (node1 >= 0 && node2 >= 0) {
       // Simplified forward conductance
-      final forwardConductance = 0.01; // Simplified value
+      const forwardConductance = 0.01; // Simplified value
       a[node1][node1] += forwardConductance;
       a[node2][node2] += forwardConductance;
       a[node1][node2] -= forwardConductance;
@@ -201,7 +201,7 @@ class BasicMNASolver {
 
   void _buildVoltageSourceMatrix(CircuitNetlist netlist, List<List<double>> a) {
     // Add B and C matrices for voltage sources
-    int voltageSourceIndex = netlist.nodes.length; // Start after node variables
+    var voltageSourceIndex = netlist.nodes.length; // Start after node variables
 
     for (final component in netlist.components) {
       if (component.type == ComponentType.voltageSource) {
@@ -237,7 +237,7 @@ class BasicMNASolver {
     }
 
     // Add voltage sources to b vector
-    int voltageSourceIndex = netlist.nodes.length;
+    var voltageSourceIndex = netlist.nodes.length;
     for (final component in netlist.components) {
       if (component.type == ComponentType.voltageSource) {
         final voltage = component.properties['voltage'] ?? 0.0;
@@ -252,21 +252,21 @@ class BasicMNASolver {
     // Simple Gaussian elimination (for educational purposes)
     // In production, would use more robust numerical methods
     final n = a.length;
-    final augmented = List.generate(n, (_) => List<double>.filled(n + 1, 0.0));
+    final augmented = List.generate(n, (_) => List<double>.filled(n + 1, 0));
 
     // Create augmented matrix [A|b]
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
+    for (var i = 0; i < n; i++) {
+      for (var j = 0; j < n; j++) {
         augmented[i][j] = a[i][j];
       }
       augmented[i][n] = b[i];
     }
 
     // Forward elimination
-    for (int p = 0; p < n; p++) {
+    for (var p = 0; p < n; p++) {
       // Find pivot row
-      int max = p;
-      for (int i = p + 1; i < n; i++) {
+      var max = p;
+      for (var i = p + 1; i < n; i++) {
         if (augmented[i][p].abs() > augmented[max][p].abs()) {
           max = i;
         }
@@ -279,23 +279,24 @@ class BasicMNASolver {
 
       // Check for singular matrix
       if (augmented[p][p].abs() < tolerance) {
-        throw Exception('Singular matrix - circuit may be improperly connected');
+        throw Exception(
+            'Singular matrix - circuit may be improperly connected');
       }
 
       // Eliminate column
-      for (int i = p + 1; i < n; i++) {
+      for (var i = p + 1; i < n; i++) {
         final alpha = augmented[i][p] / augmented[p][p];
-        for (int j = p; j < n + 1; j++) {
+        for (var j = p; j < n + 1; j++) {
           augmented[i][j] -= alpha * augmented[p][j];
         }
       }
     }
 
     // Back substitution
-    final x = List<double>.filled(n, 0.0);
-    for (int i = n - 1; i >= 0; i--) {
+    final x = List<double>.filled(n, 0);
+    for (var i = n - 1; i >= 0; i--) {
       x[i] = augmented[i][n];
-      for (int j = i + 1; j < n; j++) {
+      for (var j = i + 1; j < n; j++) {
         x[i] -= augmented[i][j] * x[j];
       }
       x[i] /= augmented[i][i];
@@ -304,12 +305,13 @@ class BasicMNASolver {
     return x;
   }
 
-  SimulationResult _extractResults(CircuitNetlist netlist, List<double> solution) {
+  SimulationResult _extractResults(
+      CircuitNetlist netlist, List<double> solution) {
     final nodeCount = netlist.nodes.length;
 
     // Extract node voltages
     final nodeVoltages = <String, double>{};
-    for (int i = 0; i < nodeCount; i++) {
+    for (var i = 0; i < nodeCount; i++) {
       final nodeId = netlist.nodes.keys.elementAt(i);
       nodeVoltages[nodeId] = solution[i];
     }
@@ -357,7 +359,8 @@ class BasicMNASolver {
     return int.tryParse(terminal) ?? -1;
   }
 
-  bool _isComponentPowered(SimComponent component, Map<String, double> nodeVoltages) {
+  bool _isComponentPowered(
+      SimComponent component, Map<String, double> nodeVoltages) {
     // Simplified power check
     for (final terminal in component.connectedNodes) {
       final voltage = nodeVoltages[terminal] ?? 0.0;
@@ -366,14 +369,15 @@ class BasicMNASolver {
     return false;
   }
 
-  double _getComponentVoltage(SimComponent component, Map<String, double> nodeVoltages) {
+  double _getComponentVoltage(
+      SimComponent component, Map<String, double> nodeVoltages) {
     // Simplified voltage calculation
     if (component.connectedNodes.length >= 2) {
       final v1 = nodeVoltages[component.connectedNodes[0]] ?? 0.0;
       final v2 = nodeVoltages[component.connectedNodes[1]] ?? 0.0;
       return (v1 - v2).abs();
     }
-    return 0.0;
+    return 0;
   }
 }
 

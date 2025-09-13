@@ -1,15 +1,14 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-import '../domain/behaviors/drawing_behavior.dart';
-import '../domain/behaviors/logic_behavior.dart';
-
-import '../application/services/component_factory.dart';
+import 'package:flutter/material.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 
-import '../infrastructure/rendering/asset_manager.dart';
-import '../common/theme.dart';
+import '../application/services/component_factory.dart';
 import '../common/logger.dart';
+import '../common/theme.dart';
+import '../domain/behaviors/drawing_behavior.dart';
+import '../domain/behaviors/logic_behavior.dart';
+import '../infrastructure/rendering/asset_manager.dart';
 
 // --- Battery --- //
 
@@ -33,19 +32,20 @@ class BatteryDrawingBehavior implements DrawingBehavior {
     canvas.save();
     final center = Offset(size.width / 2, size.height / 2);
     final rotationAngle = (component.rotation % 360) * (math.pi / 180);
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(rotationAngle);
-    canvas.translate(-center.dx, -center.dy);
+    canvas
+      ..translate(center.dx, center.dy)
+      ..rotate(rotationAngle)
+      ..translate(-center.dx, -center.dy);
 
     // Draw battery body
     final batteryWidth = size.width * 0.8;
     final batteryHeight = size.height * 0.8;
     final batteryRect = Rect.fromCenter(
         center: center, width: batteryWidth, height: batteryHeight);
-    canvas.drawRRect(
+    canvas.drawRRect( // ignore: cascade_invocations
         RRect.fromRectAndRadius(batteryRect, const Radius.circular(4)),
         fillPaint);
-    canvas.drawRRect(
+    canvas.drawRRect( // ignore: cascade_invocations
         RRect.fromRectAndRadius(batteryRect, const Radius.circular(4)), paint);
 
     // Draw terminals
@@ -54,29 +54,31 @@ class BatteryDrawingBehavior implements DrawingBehavior {
 
     // Positive terminal (top)
     canvas.drawRect(
-      Rect.fromLTWH(center.dx - terminalWidth / 2, // Center horizontally
+      Rect.fromLTWH(
+          center.dx - terminalWidth / 2, // Center horizontally
           batteryRect.top, // Align with battery body top
-          terminalWidth, terminalHeight),
+          terminalWidth,
+          terminalHeight),
       fillPaint,
     );
-    canvas.drawRect(
-      Rect.fromLTWH(center.dx - terminalWidth / 2,
-          batteryRect.top,
+    canvas.drawRect( // ignore: cascade_invocations
+      Rect.fromLTWH(center.dx - terminalWidth / 2, batteryRect.top,
           terminalWidth, terminalHeight),
       paint,
     );
 
     // Negative terminal (bottom)
-    canvas.drawRect(
-      Rect.fromLTWH(center.dx - terminalWidth / 2, // Center horizontally
+    canvas.drawRect( // ignore: cascade_invocations
+      Rect.fromLTWH(
+          center.dx - terminalWidth / 2, // Center horizontally
           batteryRect.bottom - terminalHeight, // Align with battery body bottom
-          terminalWidth, terminalHeight),
+          terminalWidth,
+          terminalHeight),
       fillPaint,
     );
-    canvas.drawRect(
+    canvas.drawRect( // ignore: cascade_invocations
       Rect.fromLTWH(center.dx - terminalWidth / 2,
-          batteryRect.bottom - terminalHeight,
-          terminalWidth, terminalHeight),
+          batteryRect.bottom - terminalHeight, terminalWidth, terminalHeight),
       paint,
     );
 
@@ -93,12 +95,12 @@ class BatteryDrawingBehavior implements DrawingBehavior {
       ),
       textDirection: TextDirection.ltr,
     );
-    textPainterPlus.layout();
-    textPainterPlus.paint(
-        canvas,
-        Offset(
-            center.dx - textPainterPlus.width / 2,
-            batteryRect.top + terminalHeight / 2 - textPainterPlus.height / 2));
+    textPainterPlus
+      ..layout()
+      ..paint(
+          canvas,
+          Offset(center.dx - textPainterPlus.width / 2,
+              batteryRect.top + terminalHeight / 2 - textPainterPlus.height / 2));
 
     final textPainterMinus = TextPainter(
       text: TextSpan(
@@ -112,12 +114,15 @@ class BatteryDrawingBehavior implements DrawingBehavior {
       ),
       textDirection: TextDirection.ltr,
     );
-    textPainterMinus.layout();
-    textPainterMinus.paint(
-        canvas,
-        Offset(
-            center.dx - textPainterMinus.width / 2,
-            batteryRect.bottom - terminalHeight / 2 - textPainterMinus.height / 2));
+    textPainterMinus
+      ..layout()
+      ..paint(
+          canvas,
+          Offset(
+              center.dx - textPainterMinus.width / 2,
+              batteryRect.bottom -
+                  terminalHeight / 2 -
+                  textPainterMinus.height / 2));
 
     canvas.restore();
   }
@@ -136,14 +141,14 @@ class BatteryLogicBehavior extends BaseLogicBehavior {
 
 void registerBattery(ComponentFactory factory) {
   Logger.log('registerBattery() called.');
-  factory.registerBehavior<BatteryDrawingBehavior>(() => BatteryDrawingBehavior());
-  factory.registerBehavior<BatteryLogicBehavior>(() => BatteryLogicBehavior());
-
-  factory.register(
-    type: 'Component.Battery',
-    displayName: 'Battery',
-    behaviors: [BatteryDrawingBehavior, BatteryLogicBehavior],
-    isDraggable: false,
-  );
+  factory
+    ..registerBehavior<BatteryDrawingBehavior>(BatteryDrawingBehavior.new)
+    ..registerBehavior<BatteryLogicBehavior>(BatteryLogicBehavior.new)
+    ..register(
+      type: 'Component.Battery',
+      displayName: 'Battery',
+      behaviors: [BatteryDrawingBehavior, BatteryLogicBehavior],
+      isDraggable: false,
+    );
   Logger.log('registerBattery() completed.');
 }

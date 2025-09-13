@@ -1,4 +1,3 @@
-
 import 'package:sparkcircuit/domain/entities/entities.dart';
 import '../../application/states/game_state.dart';
 import 'game_command.dart';

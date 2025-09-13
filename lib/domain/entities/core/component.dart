@@ -70,13 +70,12 @@ class ComponentModel {
     int? rotation,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) :
-    state = state ?? ComponentState.normal,
-    properties = properties ?? {},
-    behaviors = behaviors ?? [],
-    rotation = rotation ?? 0,
-    createdAt = createdAt ?? DateTime.now(),
-    updatedAt = updatedAt ?? DateTime.now();
+  })  : state = state ?? ComponentState.normal,
+        properties = properties ?? {},
+        behaviors = behaviors ?? [],
+        rotation = rotation ?? 0,
+        createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   ComponentModel copyWith({
     String? id,

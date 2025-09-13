@@ -1,7 +1,8 @@
-import 'structured_logger.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
 import '../../application/enhanced_game_state.dart';
+import 'structured_logger.dart';
 
 /// Debug overlay for in-app developer tools
 class DebugOverlay extends StatelessWidget {
@@ -52,13 +53,13 @@ class DebugOverlay extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return Row(
+    return const Row(
       children: [
-        const Icon(Icons.bug_report, color: Colors.orange, size: 16),
-        const SizedBox(width: 8),
+        Icon(Icons.bug_report, color: Colors.orange, size: 16),
+        SizedBox(width: 8),
         Text(
           'Debug Panel',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.bold,
@@ -72,9 +73,9 @@ class DebugOverlay extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Performance',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.cyan,
             fontSize: 12,
             fontWeight: FontWeight.bold,
@@ -89,7 +90,9 @@ class DebugOverlay extends StatelessWidget {
         _buildMetricItem(
           'Memory',
           '${(performanceData.memoryUsage / 1024 / 1024).toStringAsFixed(1)}MB',
-          performanceData.memoryUsage > 100 * 1024 * 1024 ? Colors.red : Colors.green,
+          performanceData.memoryUsage > 100 * 1024 * 1024
+              ? Colors.red
+              : Colors.green,
         ),
         _buildMetricItem(
           'CPU',
@@ -104,9 +107,9 @@ class DebugOverlay extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Game State',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.green,
             fontSize: 12,
             fontWeight: FontWeight.bold,
@@ -142,9 +145,9 @@ class DebugOverlay extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Actions',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.yellow,
             fontSize: 12,
             fontWeight: FontWeight.bold,
@@ -239,8 +242,8 @@ class PerformanceMonitor {
 
   /// Time an operation and automatically log if slow
   T timeOperation<T>(String operationName, T Function() operation) {
-    _watcher.reset();
-    _watcher.start();
+    _watcher.reset(); // ignore: cascade_invocations
+    _watcher.start(); // ignore: cascade_invocations
 
     final result = operation();
 
@@ -248,7 +251,8 @@ class PerformanceMonitor {
     _operationDurations[operationName] = _watcher.elapsed;
 
     // Auto-warn for slow operations
-    if (_watcher.elapsed > const Duration(milliseconds: 16)) { // Below 60 FPS
+    if (_watcher.elapsed > const Duration(milliseconds: 16)) {
+      // Below 60 FPS
       StructuredLogger.warning('Slow operation detected', context: {
         'operation': operationName,
         'durationMs': _watcher.elapsed.inMilliseconds,
@@ -270,7 +274,7 @@ class PerformanceMonitor {
 
   double _calculateAverageFPS() {
     // TODO: Implement FPS calculation using frame callbacks
-    return 60.0; // Placeholder
+    return 60; // Placeholder
   }
 
   int _getMemoryUsage() {
@@ -281,7 +285,7 @@ class PerformanceMonitor {
 
   double _calculateCPUUsage() {
     // TODO: Implement CPU usage tracking
-    return 0.0; // Placeholder
+    return 0; // Placeholder
   }
 }
 
@@ -316,14 +320,16 @@ class DebugConsole extends InheritedWidget {
     if (handler != null) {
       handler(args);
     } else {
-      StructuredLogger.info('Unknown command: $cmd', context: {'input': command});
+      StructuredLogger.info('Unknown command: $cmd',
+          context: {'input': command});
     }
 
     _commandHistory.add(command);
   }
 
   void _cmdHelp(List<String> args) {
-    StructuredLogger.info('Available commands:', context: {'commands': _commands.keys.toList()});
+    StructuredLogger.info('Available commands:',
+        context: {'commands': _commands.keys.toList()});
   }
 
   void _cmdClear(List<String> args) {
@@ -339,12 +345,14 @@ class DebugConsole extends InheritedWidget {
     final level = args[0].toUpperCase();
     final message = args.sublist(1).join(' ');
     // Log at specified level
-    StructuredLogger.info('User command log: $message', context: {'userLevel': level});
+    StructuredLogger.info('User command log: $message',
+        context: {'userLevel': level});
   }
 
   void _cmdPerformance(List<String> args) {
     // TODO: Show performance stats via overlay
-    StructuredLogger.info('Performance command executed', context: {'args': args});
+    StructuredLogger.info('Performance command executed',
+        context: {'args': args});
   }
 
   @override

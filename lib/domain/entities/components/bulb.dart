@@ -1,14 +1,15 @@
-import 'circuit_component.dart';
 import '../core/component.dart';
+import 'circuit_component.dart';
 
 /// Light bulb component that illuminates when current flows through it
 class Bulb extends CircuitComponent {
   /// Resistance value in ohms
-  double get resistance => getProperty<double>('resistance', 100.0);
+  @override
+  double get resistance => getProperty<double>('resistance', 100);
   set resistance(double value) => setProperty('resistance', value);
 
   /// Power consumption in watts
-  double get powerRating => getProperty<double>('powerRating', 1.0);
+  double get powerRating => getProperty<double>('powerRating', 1);
   set powerRating(double value) => setProperty('powerRating', value);
 
   /// Whether the bulb is currently lit
@@ -96,17 +97,6 @@ class Bulb extends CircuitComponent {
 
   @override
   List<String> get requiredConnections => ['positive', 'negative'];
-
-  /// Calculate current through bulb given voltage
-  double calculateCurrent(double voltage) {
-    return voltage / resistance;
-  }
-
-  /// Calculate power consumption
-  double calculatePower(double voltage) {
-    final current = calculateCurrent(voltage);
-    return voltage * current;
-  }
 
   /// Check if bulb should be lit based on current
   bool shouldBeLit(double voltage) {

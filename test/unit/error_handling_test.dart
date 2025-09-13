@@ -1,6 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'dart:async';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 /// Test suite for error handling scenarios identified in RCA
@@ -36,21 +37,21 @@ void main() {
 
         for (final invalidProvider in invalidProviders) {
           // When & Then
-          expect(() {
-            // Simulate trying to access notifier methods on invalid types
-            // This will fail because these types don't have the expected methods
-            return invalidProvider.toString();
-          }, returnsNormally);
+          expect(invalidProvider.toString, returnsNormally);
         }
       });
 
       test('should handle provider initialization failures', () {
         // Given - simulate provider that throws during initialization
-        ProviderThrowingException throwingProvider() => throw Exception('Provider init failed');
+        ProviderThrowingException throwingProvider() =>
+            throw Exception('Provider init failed');
 
         // When & Then
         expect(throwingProvider, throwsA(isA<Exception>()));
-        expect(() => throwingProvider(), throwsA(predicate((e) => e.toString().contains('Provider init failed'))));
+        expect(
+            throwingProvider,
+            throwsA(predicate(
+                (e) => e.toString().contains('Provider init failed'))));
       });
     });
 
@@ -73,7 +74,7 @@ void main() {
 
       test('should handle very large coordinate values', () {
         // Given - extremely large coordinates that might cause overflow
-        const globalOffset = Offset(1e10, 1e10);
+        const globalOffset = Offset(10000000000, 10000000000);
         const scale = 1.0;
         const panOffset = Offset(0, 0);
         const cellSize = 60.0;
@@ -93,7 +94,7 @@ void main() {
 
       test('should handle negative infinity results', () {
         // Given - values that result in negative infinity
-        const globalOffset = Offset(-1e10, -1e10);
+        const globalOffset = Offset(-10000000000, -10000000000);
         const scale = 1.0;
         const panOffset = Offset(0, 0);
         const cellSize = 60.0;
@@ -144,20 +145,18 @@ void main() {
         // Given
         GlobalKey? nullKey;
 
-        // When & Then
-        expect(() {
-          final currentContext = nullKey?.currentContext;
-          final renderBox = currentContext?.findRenderObject() as RenderBox?;
-          return renderBox?.size;
-        }, returnsNormally);
-
-        // Should return null without throwing
-        expect(nullKey?.currentContext, isNull);
+        // When & Then - should handle null keys gracefully
+        try {
+          final context = nullKey?.currentContext;
+          expect(context, isNull);
+        } catch (e) {
+          fail('Accessing currentContext on null GlobalKey should not throw: $e');
+        }
       });
 
       test('should handle invalid render object casting', () {
         // Given - simulate wrong render object type
-        final mockRenderObject = 'not_a_render_box';
+        const mockRenderObject = 'not_a_render_box';
 
         // When & Then
         expect(() {
@@ -198,14 +197,15 @@ void main() {
         completer.completeError('Operation cancelled');
 
         // Then
-        expect(completer.future, throwsA(predicate((e) => e.toString().contains('cancelled'))));
+        expect(completer.future,
+            throwsA(predicate((e) => e.toString().contains('cancelled'))));
       });
 
       test('should handle multiple concurrent async operations', () async {
         // Given
         final operations = <Future<String>>[];
 
-        for (int i = 0; i < 10; i++) {
+        for (var i = 0; i < 10; i++) {
           operations.add(Future.value('operation_$i'));
         }
 
@@ -248,8 +248,8 @@ void main() {
 
         // When - simulate concurrent modifications
         final futures = <Future>[];
-        for (int i = 0; i < 100; i++) {
-          futures.add(Future(() => sharedState.increment()));
+        for (var i = 0; i < 100; i++) {
+          futures.add(Future(sharedState.increment));
         }
 
         // Then - should complete without race conditions
@@ -270,11 +270,12 @@ void main() {
             failingLogger('test message');
           } catch (e) {
             // Should handle logging failure without crashing
-            StructuredLogger.warning('Logging failed but app continues', context: {
-              'operation': 'logging_error_handling_test',
-              'error': e.toString(),
-              'error_type': e.runtimeType.toString(),
-            });
+            StructuredLogger.warning('Logging failed but app continues',
+                context: {
+                  'operation': 'logging_error_handling_test',
+                  'error': e.toString(),
+                  'error_type': e.runtimeType.toString(),
+                });
           }
         }, returnsNormally);
       });

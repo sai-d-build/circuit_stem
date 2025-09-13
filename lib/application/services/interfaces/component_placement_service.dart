@@ -1,8 +1,8 @@
 // lib/application/services/interfaces/component_placement_service.dart
 // Interface for component placement business logic
 
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 
 /// Result of placement validation
 class PlacementValidationResult {
@@ -12,10 +12,10 @@ class PlacementValidationResult {
   const PlacementValidationResult._(this.isValid, this.reason);
 
   factory PlacementValidationResult.valid() =>
-    const PlacementValidationResult._(true, null);
+      const PlacementValidationResult._(true, null);
 
   factory PlacementValidationResult.invalid(String reason) =>
-    PlacementValidationResult._(false, reason);
+      PlacementValidationResult._(false, reason);
 }
 
 /// Result of placement execution
@@ -26,10 +26,10 @@ class PlacementExecutionResult {
   const PlacementExecutionResult._(this.isSuccess, this.errorMessage);
 
   factory PlacementExecutionResult.success() =>
-    const PlacementExecutionResult._(true, null);
+      const PlacementExecutionResult._(true, null);
 
   factory PlacementExecutionResult.failed(String errorMessage) =>
-    PlacementExecutionResult._(false, errorMessage);
+      PlacementExecutionResult._(false, errorMessage);
 }
 
 /// Request for component placement
@@ -61,6 +61,5 @@ abstract class ComponentPlacementService {
 
   /// Executes component placement with all business logic
   Future<PlacementExecutionResult> executeComponentPlacement(
-    ComponentPlacementRequest request
-  );
+      ComponentPlacementRequest request);
 }

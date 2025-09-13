@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../common/feature_flags.dart';
 import '../../core/migration/migration_tracker.dart';
+import '../../domain/entities/core/component.dart';
 
 // Simplified classes without Freezed
 class InteractiveMechanics {
@@ -59,7 +60,15 @@ class DragState {
   });
 }
 
-enum DragPhase { idle, started, dragging, hovering, dropping, completed, cancelled }
+enum DragPhase {
+  idle,
+  started,
+  dragging,
+  hovering,
+  dropping,
+  completed,
+  cancelled
+}
 
 class DragSession {
   String sessionId;
@@ -117,7 +126,13 @@ class DropZone {
   });
 }
 
-enum DropZoneType { gridCell, componentSlot, trashZone, paletteArea, circuitArea }
+enum DropZoneType {
+  gridCell,
+  componentSlot,
+  trashZone,
+  paletteArea,
+  circuitArea
+}
 
 class ComponentPlacementValidator {
   List<ValidationRule> placementRules;
@@ -131,6 +146,50 @@ class ComponentPlacementValidator {
     required this.circuitValidator,
     required this.realTimeValidationEnabled,
   });
+
+  /// Validate component placement using all configured rules
+  PlacementValidation validatePlacement(
+    ComponentType componentType,
+    int targetRow,
+    int targetCol,
+    List<ComponentModel> existingComponents,
+  ) {
+    // Check nearness rules
+    for (final rule in placementRules) {
+      if (rule.ruleType == 'nearness' && rule is NearnessRule) {
+        if (rule.violatesNearness(targetRow, targetCol, existingComponents)) {
+          return PlacementValidation.invalid(rule.errorMessage);
+        }
+      }
+    }
+
+    // Check component-specific constraints
+    final constraints = componentConstraints[componentType.toString()];
+    if (constraints != null) {
+      // Add component-specific validation logic here
+    }
+
+    return PlacementValidation.valid();
+  }
+
+  /// Get all positions that would violate nearness rules for a given center position
+  List<String> getNearnessViolationPositions(
+    int centerRow,
+    int centerCol,
+    int gridRows,
+    int gridCols,
+  ) {
+    final violations = <String>[];
+
+    for (final rule in placementRules) {
+      if (rule.ruleType == 'nearness' && rule is NearnessRule) {
+        violations.addAll(rule.getViolationPositions(
+            centerRow, centerCol, gridRows, gridCols));
+      }
+    }
+
+    return violations.toSet().toList(); // Remove duplicates
+  }
 }
 
 class ValidationRule {
@@ -149,6 +208,76 @@ class ValidationRule {
     required this.errorMessage,
     required this.successMessage,
   });
+}
+
+/// NearnessRule implementation for preventing components from being placed too close to each other
+class NearnessRule extends ValidationRule {
+  final int minDistance; // Minimum grid cells between components
+  final bool includeDiagonals; // Whether to consider diagonal adjacency
+
+  NearnessRule({
+    required super.ruleId,
+    required this.minDistance,
+    this.includeDiagonals = true,
+    super.severity = ValidationSeverity.warning,
+  }) : super(
+          ruleType: 'nearness',
+          parameters: {
+            'minDistance': minDistance,
+            'includeDiagonals': includeDiagonals,
+          },
+          errorMessage:
+              'Component too close to another component (minimum distance: $minDistance cells)',
+          successMessage:
+              'Component placement respects minimum distance requirement',
+        );
+
+  /// Check if a position violates the nearness rule
+  bool violatesNearness(
+      int targetRow, int targetCol, List<ComponentModel> existingComponents) {
+    for (final component in existingComponents) {
+      final distance =
+          calculateDistance(targetRow, targetCol, component.row, component.col);
+      if (distance <= minDistance) {
+        // Violation if too close or at same position
+        return true; // Violation found
+      }
+    }
+    return false; // No violations
+  }
+
+  /// Calculate Manhattan or Chebyshev distance based on includeDiagonals setting
+  int calculateDistance(int row1, int col1, int row2, int col2) {
+    final rowDiff = (row1 - row2).abs();
+    final colDiff = (col1 - col2).abs();
+
+    if (includeDiagonals) {
+      // Chebyshev distance (diagonals count as 1)
+      return rowDiff > colDiff ? rowDiff : colDiff;
+    } else {
+      // Manhattan distance (diagonals count as 2)
+      return rowDiff + colDiff;
+    }
+  }
+
+  /// Get all positions that would violate nearness if a component were placed there
+  List<String> getViolationPositions(
+      int centerRow, int centerCol, int gridRows, int gridCols) {
+    final violations = <String>[];
+
+    for (var row = 0; row < gridRows; row++) {
+      for (var col = 0; col < gridCols; col++) {
+        // Exclude the center position itself
+        if (row == centerRow && col == centerCol) continue;
+
+        if (calculateDistance(centerRow, centerCol, row, col) <= minDistance) {
+          violations.add('$col,$row');
+        }
+      }
+    }
+
+    return violations;
+  }
 }
 
 enum ValidationSeverity { info, warning, error, critical }
@@ -497,7 +626,16 @@ class GestureRecognizer {
   });
 }
 
-enum GestureType { drag, rotate, toggle, pinch, swipe, tap, doubleTap, longPress }
+enum GestureType {
+  drag,
+  rotate,
+  toggle,
+  pinch,
+  swipe,
+  tap,
+  doubleTap,
+  longPress
+}
 
 class GestureConfig {
   double dragThreshold;
@@ -727,7 +865,14 @@ class InteractionState {
   });
 }
 
-enum InteractionMode { idle, dragging, rotating, toggling, multiSelect, connecting }
+enum InteractionMode {
+  idle,
+  dragging,
+  rotating,
+  toggling,
+  multiSelect,
+  connecting
+}
 
 class InteractionHistory {
   String historyId;
@@ -747,11 +892,21 @@ class InteractionHistory {
   });
 }
 
-enum InteractionType { drag, rotate, toggle, connect, disconnect, delete, create }
+enum InteractionType {
+  drag,
+  rotate,
+  toggle,
+  connect,
+  disconnect,
+  delete,
+  create
+}
 
 // Provider for InteractiveMechanicsService
-final interactiveMechanicsServiceProvider = Provider<InteractiveMechanicsService>((ref) {
-  MigrationTracker.markFileMigrated('interactive_mechanics.dart', DateTime.now().toIso8601String());
+final interactiveMechanicsServiceProvider =
+    Provider<InteractiveMechanicsService>((ref) {
+  MigrationTracker.markFileMigrated(
+      'interactive_mechanics.dart', DateTime.now().toIso8601String());
   return InteractiveMechanicsService();
 });
 
@@ -794,10 +949,17 @@ class InteractiveMechanicsService {
         activeDropZones: [],
         dropZoneRegistry: {},
         snapToGridEnabled: true,
-        gridSize: 20.0,
+        gridSize: 20,
       ),
       placementValidator: ComponentPlacementValidator(
-        placementRules: [],
+        placementRules: [
+          NearnessRule(
+            ruleId: 'default_nearness',
+            minDistance: 1,
+            includeDiagonals: true,
+            severity: ValidationSeverity.warning,
+          ),
+        ],
         componentConstraints: {},
         circuitValidator: CircuitStateValidator(
           circuitRules: [],
@@ -819,16 +981,16 @@ class InteractiveMechanicsService {
         dropAnimationConfig: AnimationConfig(
           duration: const Duration(milliseconds: 300),
           curve: Curves.elasticOut,
-          scale: 1.0,
+          scale: 1,
           highlightColor: Colors.green,
-          opacity: 1.0,
+          opacity: 1,
         ),
         snapAnimationConfig: AnimationConfig(
           duration: const Duration(milliseconds: 150),
           curve: Curves.easeInOut,
-          scale: 1.0,
+          scale: 1,
           highlightColor: Colors.yellow,
-          opacity: 1.0,
+          opacity: 1,
         ),
       ),
       activeDragSessions: {},
@@ -841,7 +1003,7 @@ class InteractiveMechanicsService {
       gestureHandler: RotationGestureHandler(
         activeGestures: {},
         rotationSensitivity: 0.5,
-        minRotationDistance: 20.0,
+        minRotationDistance: 20,
         multiTouchEnabled: true,
       ),
       animationController: RotationAnimationController(
@@ -852,7 +1014,7 @@ class InteractiveMechanicsService {
       ),
       allowedAngles: [0, 90, 180, 270],
       snapToAngles: true,
-      rotationStep: 90.0,
+      rotationStep: 90,
     );
   }
 
@@ -861,7 +1023,7 @@ class InteractiveMechanicsService {
       componentToggles: {},
       gestureHandler: ToggleGestureHandler(
         activeGestures: {},
-        tapThreshold: 10.0,
+        tapThreshold: 10,
         doubleTapDelay: const Duration(milliseconds: 300),
         hapticFeedbackEnabled: true,
       ),
@@ -879,8 +1041,8 @@ class InteractiveMechanicsService {
     return GestureHandler(
       activeRecognizers: {},
       config: GestureConfig(
-        dragThreshold: 10.0,
-        rotationThreshold: 15.0,
+        dragThreshold: 10,
+        rotationThreshold: 15,
         tapTimeout: const Duration(milliseconds: 200),
         longPressTimeout: const Duration(milliseconds: 500),
         multiTouchEnabled: true,
@@ -902,13 +1064,13 @@ class InteractiveMechanicsService {
         hapticEnabled: true,
         audioEnabled: true,
         visualEnabled: true,
-        feedbackIntensity: 1.0,
+        feedbackIntensity: 1,
         feedbackSettings: {},
       ),
       hapticController: HapticFeedbackController(
         isEnabled: true,
         patterns: {},
-        intensity: 1.0,
+        intensity: 1,
       ),
       audioController: AudioFeedbackController(
         isEnabled: true,
@@ -918,7 +1080,7 @@ class InteractiveMechanicsService {
       visualController: VisualFeedbackController(
         isEnabled: true,
         effects: {},
-        opacity: 1.0,
+        opacity: 1,
       ),
     );
   }
@@ -966,7 +1128,8 @@ class DragResult {
     );
   }
 
-  factory DragResult.failure(String errorMessage, {
+  factory DragResult.failure(
+    String errorMessage, {
     String? sessionId,
     String? componentId,
   }) {

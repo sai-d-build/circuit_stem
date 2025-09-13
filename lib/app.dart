@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'routes.dart';
+
 import 'presentation/core/theme/app_theme.dart';
 import 'presentation/features/onboarding/screens/onboarding_screen.dart';
+import 'routes.dart';
 
 class App extends StatefulWidget {
   const App({super.key});

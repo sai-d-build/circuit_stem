@@ -14,7 +14,7 @@ void main() {
       test('should handle tap on component correctly', () {
         // Arrange
         final initialState = GameCanvasState.initial();
-        final event = GestureInputEvent.tap(Offset(100, 100))
+        final event = GestureInputEvent.tap(const Offset(100, 100))
             .copyWith(hitTestResult: HitTestResult.component('comp-1'));
 
         // Act
@@ -24,18 +24,19 @@ void main() {
         expect(result.newState.interactionState.selectedComponentId, 'comp-1');
         expect(result.sideEffects.length, 1);
         expect(result.sideEffects.first, isA<FeedbackSideEffect>());
-        expect((result.sideEffects.first as FeedbackSideEffect).feedbackType, FeedbackType.selection);
+        expect((result.sideEffects.first as FeedbackSideEffect).feedbackType,
+            FeedbackType.selection);
       });
 
       test('should handle tap on empty space correctly', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(
+          interactionState: const InteractionState(
             mode: GestureMode.idle,
             selectedComponentId: 'existing-selection',
           ),
         );
-        final event = GestureInputEvent.tap(Offset(100, 100))
+        final event = GestureInputEvent.tap(const Offset(100, 100))
             .copyWith(hitTestResult: HitTestResult.empty());
 
         // Act
@@ -45,25 +46,28 @@ void main() {
         expect(result.newState.interactionState.selectedComponentId, null);
         expect(result.sideEffects.length, 1);
         expect(result.sideEffects.first, isA<FeedbackSideEffect>());
-        expect((result.sideEffects.first as FeedbackSideEffect).feedbackType, FeedbackType.light);
+        expect((result.sideEffects.first as FeedbackSideEffect).feedbackType,
+            FeedbackType.light);
       });
 
       test('should start dragging component when drag starts on component', () {
         // Arrange
         final initialState = GameCanvasState.initial();
-        final event = GestureInputEvent.dragStart(Offset(100, 100))
-            .copyWith(
-              hitTestResult: HitTestResult.component('comp-1'),
-              gridPosition: GridPosition(row: 1, col: 1),
-            );
+        final event =
+            GestureInputEvent.dragStart(const Offset(100, 100)).copyWith(
+          hitTestResult: HitTestResult.component('comp-1'),
+          gridPosition: const GridPosition(row: 1, col: 1),
+        );
 
         // Act
         final result = stateMachine.process(event, initialState);
 
         // Assert
-        expect(result.newState.interactionState.mode, GestureMode.draggingExistingComponent);
+        expect(result.newState.interactionState.mode,
+            GestureMode.draggingExistingComponent);
         expect(result.newState.interactionState.draggedComponentId, 'comp-1');
-        expect(result.newState.interactionState.dragStartPosition, GridPosition(row: 1, col: 1));
+        expect(result.newState.interactionState.dragStartPosition,
+            const GridPosition(row: 1, col: 1));
         expect(result.sideEffects.length, 1);
         expect(result.sideEffects.first, isA<FeedbackSideEffect>());
       });
@@ -71,18 +75,19 @@ void main() {
       test('should start canvas panning when drag starts on empty space', () {
         // Arrange
         final initialState = GameCanvasState.initial();
-        final event = GestureInputEvent.dragStart(Offset(100, 100))
-            .copyWith(
-              hitTestResult: HitTestResult.empty(),
-              gridPosition: GridPosition(row: 1, col: 1),
-            );
+        final event =
+            GestureInputEvent.dragStart(const Offset(100, 100)).copyWith(
+          hitTestResult: HitTestResult.empty(),
+          gridPosition: const GridPosition(row: 1, col: 1),
+        );
 
         // Act
         final result = stateMachine.process(event, initialState);
 
         // Assert
         expect(result.newState.interactionState.mode, GestureMode.panning);
-        expect(result.newState.interactionState.dragStartPosition, GridPosition(row: 1, col: 1));
+        expect(result.newState.interactionState.dragStartPosition,
+            const GridPosition(row: 1, col: 1));
         expect(result.sideEffects.length, 0);
       });
     });
@@ -91,38 +96,41 @@ void main() {
       test('should update drag position during component drag', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(
+          interactionState: const InteractionState(
             mode: GestureMode.draggingExistingComponent,
             draggedComponentId: 'comp-1',
             dragStartPosition: GridPosition(row: 1, col: 1),
           ),
         );
-        final event = GestureInputEvent.dragUpdate(Offset(150, 150), Offset(50, 50))
-            .copyWith(gridPosition: GridPosition(row: 2, col: 2));
+        final event = GestureInputEvent.dragUpdate(
+                const Offset(150, 150), const Offset(50, 50))
+            .copyWith(gridPosition: const GridPosition(row: 2, col: 2));
 
         // Act
         final result = stateMachine.process(event, initialState);
 
         // Assert
-        expect(result.newState.interactionState.currentDragPosition, GridPosition(row: 2, col: 2));
+        expect(result.newState.interactionState.currentDragPosition,
+            const GridPosition(row: 2, col: 2));
         expect(result.sideEffects.length, 1);
         expect(result.sideEffects.first, isA<ComponentDragUpdateSideEffect>());
-        final sideEffect = result.sideEffects.first as ComponentDragUpdateSideEffect;
+        final sideEffect =
+            result.sideEffects.first as ComponentDragUpdateSideEffect;
         expect(sideEffect.componentId, 'comp-1');
-        expect(sideEffect.newPosition, GridPosition(row: 2, col: 2));
+        expect(sideEffect.newPosition, const GridPosition(row: 2, col: 2));
       });
 
       test('should end component drag and return to idle', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(
+          interactionState: const InteractionState(
             mode: GestureMode.draggingExistingComponent,
             draggedComponentId: 'comp-1',
             dragStartPosition: GridPosition(row: 1, col: 1),
           ),
         );
-        final event = GestureInputEvent.dragEnd(Offset(150, 150))
-            .copyWith(gridPosition: GridPosition(row: 2, col: 2));
+        final event = GestureInputEvent.dragEnd(const Offset(150, 150))
+            .copyWith(gridPosition: const GridPosition(row: 2, col: 2));
 
         // Act
         final result = stateMachine.process(event, initialState);
@@ -141,12 +149,13 @@ void main() {
       test('should update viewport during pan', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(
+          interactionState: const InteractionState(
             mode: GestureMode.panning,
             dragStartPosition: GridPosition(row: 1, col: 1),
           ),
         );
-        final event = GestureInputEvent.dragUpdate(Offset(150, 150), Offset(50, 50));
+        final event = GestureInputEvent.dragUpdate(
+            const Offset(150, 150), const Offset(50, 50));
 
         // Act
         final result = stateMachine.process(event, initialState);
@@ -159,12 +168,12 @@ void main() {
       test('should end panning and return to idle', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(
+          interactionState: const InteractionState(
             mode: GestureMode.panning,
             dragStartPosition: GridPosition(row: 1, col: 1),
           ),
         );
-        final event = GestureInputEvent.dragEnd(Offset(150, 150));
+        final event = GestureInputEvent.dragEnd(const Offset(150, 150));
 
         // Act
         final result = stateMachine.process(event, initialState);
@@ -180,22 +189,25 @@ void main() {
       test('should start multi-touch scaling', () {
         // Arrange
         final initialState = GameCanvasState.initial();
-        final event = GestureInputEvent.scaleStart(Offset(100, 100), 2);
+        final event = GestureInputEvent.scaleStart(const Offset(100, 100), 2);
 
         // Act
         final result = stateMachine.process(event, initialState);
 
         // Assert
-        expect(result.newState.interactionState.mode, GestureMode.multiTouchScaling);
+        expect(result.newState.interactionState.mode,
+            GestureMode.multiTouchScaling);
         expect(result.sideEffects.length, 0);
       });
 
       test('should update scale during multi-touch', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(mode: GestureMode.multiTouchScaling),
+          interactionState:
+              const InteractionState(mode: GestureMode.multiTouchScaling),
         );
-        final event = GestureInputEvent.scaleUpdate(Offset(100, 100), 1.5, 2);
+        final event =
+            GestureInputEvent.scaleUpdate(const Offset(100, 100), 1.5, 2);
 
         // Act
         final result = stateMachine.process(event, initialState);
@@ -208,9 +220,10 @@ void main() {
       test('should end multi-touch scaling', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(mode: GestureMode.multiTouchScaling),
+          interactionState:
+              const InteractionState(mode: GestureMode.multiTouchScaling),
         );
-        final event = GestureInputEvent.scaleEnd(Offset(100, 100), 2);
+        final event = GestureInputEvent.scaleEnd(const Offset(100, 100), 2);
 
         // Act
         final result = stateMachine.process(event, initialState);
@@ -227,7 +240,7 @@ void main() {
         final initialState = GameCanvasState.initial();
         final event = GestureInputEvent(
           type: GestureEventType.scaleEnd, // This might not match current state
-          position: Offset(100, 100),
+          position: const Offset(100, 100),
         );
 
         // Act
@@ -243,8 +256,9 @@ void main() {
       test('should handle null grid position gracefully', () {
         // Arrange
         final initialState = GameCanvasState.initial();
-        final event = GestureInputEvent.tap(Offset(100, 100))
-            .copyWith(hitTestResult: HitTestResult.component('comp-1'), gridPosition: null);
+        final event = GestureInputEvent.tap(const Offset(100, 100)).copyWith(
+            hitTestResult: HitTestResult.component('comp-1'),
+            gridPosition: null);
 
         // Act
         final result = stateMachine.process(event, initialState);
@@ -259,13 +273,13 @@ void main() {
         var state = GameCanvasState.initial();
 
         // First tap
-        final tap1 = GestureInputEvent.tap(Offset(100, 100))
+        final tap1 = GestureInputEvent.tap(const Offset(100, 100))
             .copyWith(hitTestResult: HitTestResult.component('comp-1'));
         var result = stateMachine.process(tap1, state);
         state = result.newState;
 
         // Second tap on different component
-        final tap2 = GestureInputEvent.tap(Offset(200, 200))
+        final tap2 = GestureInputEvent.tap(const Offset(200, 200))
             .copyWith(hitTestResult: HitTestResult.component('comp-2'));
         result = stateMachine.process(tap2, state);
 
@@ -277,7 +291,7 @@ void main() {
       test('should handle gesture cancellation during drag', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(
+          interactionState: const InteractionState(
             mode: GestureMode.draggingExistingComponent,
             draggedComponentId: 'comp-1',
             dragStartPosition: GridPosition(row: 1, col: 1),
@@ -285,7 +299,7 @@ void main() {
         );
 
         // Simulate drag end without proper cleanup
-        final event = GestureInputEvent.dragEnd(Offset(150, 150))
+        final event = GestureInputEvent.dragEnd(const Offset(150, 150))
             .copyWith(gridPosition: null); // Null grid position
 
         // Act
@@ -301,11 +315,13 @@ void main() {
       test('should handle multi-touch gesture interruption', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(mode: GestureMode.multiTouchScaling),
+          interactionState:
+              const InteractionState(mode: GestureMode.multiTouchScaling),
         );
 
         // Simulate scale end with different pointer count
-        final event = GestureInputEvent.scaleEnd(Offset(100, 100), 1); // Changed from 2 to 1
+        final event = GestureInputEvent.scaleEnd(
+            const Offset(100, 100), 1); // Changed from 2 to 1
 
         // Act
         final result = stateMachine.process(event, initialState);
@@ -320,7 +336,7 @@ void main() {
       test('should handle component selection during drag operation', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(
+          interactionState: const InteractionState(
             mode: GestureMode.draggingExistingComponent,
             draggedComponentId: 'comp-1',
             selectedComponentId: 'comp-1',
@@ -328,22 +344,24 @@ void main() {
         );
 
         // Simulate tap on same component during drag
-        final event = GestureInputEvent.tap(Offset(100, 100))
+        final event = GestureInputEvent.tap(const Offset(100, 100))
             .copyWith(hitTestResult: HitTestResult.component('comp-1'));
 
         // Act
         final result = stateMachine.process(event, initialState);
 
         // Assert - should maintain drag state but update selection
-        expect(result.newState.interactionState.mode, GestureMode.draggingExistingComponent);
+        expect(result.newState.interactionState.mode,
+            GestureMode.draggingExistingComponent);
         expect(result.newState.interactionState.draggedComponentId, 'comp-1');
         expect(result.newState.interactionState.selectedComponentId, 'comp-1');
       });
 
-      test('should handle long press to context menu during component drag', () {
+      test('should handle long press to context menu during component drag',
+          () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(
+          interactionState: const InteractionState(
             mode: GestureMode.draggingExistingComponent,
             draggedComponentId: 'comp-1',
           ),
@@ -352,7 +370,7 @@ void main() {
         // Simulate long press during drag
         final event = GestureInputEvent(
           type: GestureEventType.longPress,
-          position: Offset(100, 100),
+          position: const Offset(100, 100),
         ).copyWith(hitTestResult: HitTestResult.component('comp-1'));
 
         // Act
@@ -368,7 +386,7 @@ void main() {
       test('should handle viewport constraints during pan operations', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(
+          interactionState: const InteractionState(
             mode: GestureMode.panning,
             dragStartPosition: GridPosition(row: 0, col: 0),
           ),
@@ -376,8 +394,8 @@ void main() {
 
         // Simulate pan beyond viewport bounds
         final event = GestureInputEvent.dragUpdate(
-          Offset(100, 100),
-          Offset(-1000, -1000), // Large negative offset
+          const Offset(100, 100),
+          const Offset(-1000, -1000), // Large negative offset
         );
 
         // Act
@@ -388,18 +406,22 @@ void main() {
         expect(result.sideEffects.first, isA<ViewportUpdateSideEffect>());
         final sideEffect = result.sideEffects.first as ViewportUpdateSideEffect;
         // Viewport should be constrained to valid bounds
-        expect(sideEffect.newViewportState.panOffset.dx, greaterThanOrEqualTo(0));
-        expect(sideEffect.newViewportState.panOffset.dy, greaterThanOrEqualTo(0));
+        expect(
+            sideEffect.newViewportState.panOffset.dx, greaterThanOrEqualTo(0));
+        expect(
+            sideEffect.newViewportState.panOffset.dy, greaterThanOrEqualTo(0));
       });
 
       test('should handle scale limits during multi-touch operations', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(mode: GestureMode.multiTouchScaling),
+          interactionState:
+              const InteractionState(mode: GestureMode.multiTouchScaling),
         );
 
         // Simulate extreme scale values
-        final event = GestureInputEvent.scaleUpdate(Offset(100, 100), 10.0, 2); // 10x zoom
+        final event = GestureInputEvent.scaleUpdate(
+            const Offset(100, 100), 10, 2); // 10x zoom
 
         // Act
         final result = stateMachine.process(event, initialState);
@@ -420,8 +442,8 @@ void main() {
         var state = GameCanvasState.initial();
 
         // Perform multiple operations
-        for (int i = 0; i < 10; i++) {
-          final event = GestureInputEvent.tap(Offset(100, 100))
+        for (var i = 0; i < 10; i++) {
+          final event = GestureInputEvent.tap(const Offset(100, 100))
               .copyWith(hitTestResult: HitTestResult.component('comp-1'));
           final result = stateMachine.process(event, state);
           state = result.newState;
@@ -434,7 +456,7 @@ void main() {
       test('should properly clean up drag state on interruption', () {
         // Arrange
         final initialState = GameCanvasState.initial().copyWith(
-          interactionState: InteractionState(
+          interactionState: const InteractionState(
             mode: GestureMode.draggingExistingComponent,
             draggedComponentId: 'comp-1',
             dragStartPosition: GridPosition(row: 1, col: 1),
@@ -445,7 +467,7 @@ void main() {
         // Simulate unexpected state reset (like app going to background)
         final event = GestureInputEvent(
           type: GestureEventType.tap,
-          position: Offset(100, 100),
+          position: const Offset(100, 100),
         );
 
         // Act

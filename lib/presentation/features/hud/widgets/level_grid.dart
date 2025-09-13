@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sparkcircuit/presentation/features/hud/widgets/level_card.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/presentation/features/hud/widgets/level_card.dart';
 
 class LevelGrid extends StatelessWidget {
   final List<LevelData> levels;
@@ -16,7 +16,7 @@ class LevelGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       padding: UIConstants.standardInsets,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: UIConstants.levelGridCrossAxisCount,
         childAspectRatio: UIConstants.levelGridAspectRatio,
         crossAxisSpacing: UIConstants.standardSpacing,

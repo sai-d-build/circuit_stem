@@ -13,7 +13,8 @@ import 'dart:io';
 /// - Type compatibility
 /// - Missing dependency injection patterns
 class ProviderValidator {
-  static const String _providersFile = 'lib/application/providers/core_providers.dart';
+  static const String _providersFile =
+      'lib/application/providers/core_providers.dart';
   static Map<String, dynamic> _validationResults = {};
 
 // ignore_for_file: avoid_print
@@ -49,7 +50,6 @@ class ProviderValidator {
 
       print('✅ Provider validation completed successfully');
       print('.'.padRight(50, '.'));
-
     } catch (e, stackTrace) {
       _logFatalError('Provider validation failed: $e\n$stackTrace');
       exitCode = 1;
@@ -96,7 +96,6 @@ class ProviderValidator {
           providers[providerName] = ProviderInfo(name: providerName);
         }
       }
-
     } catch (e) {
       _logError('Failed to analyze provider definitions: $e');
     }
@@ -121,7 +120,6 @@ class ProviderValidator {
 
     for (final MapEntry(key: providerName, value: dependenciesList)
         in criticalDependencies.entries) {
-
       if (!providers.containsKey(providerName)) {
         _logError('Critical provider missing: $providerName');
         continue;
@@ -246,7 +244,8 @@ void main() {
   ProviderValidator.validate();
 
   // Exit with appropriate code for CI/CD pipelines
-  final hasErrors = ProviderValidator._validationResults['errors']?.isNotEmpty ?? false;
+  final hasErrors =
+      ProviderValidator._validationResults['errors']?.isNotEmpty ?? false;
   exitCode = hasErrors ? 1 : 0;
 
   print('\nValidation script execution completed.');

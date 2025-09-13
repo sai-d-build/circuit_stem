@@ -1,4 +1,5 @@
 #!/usr/bin/env dart
+
 import 'dart:io';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
@@ -37,7 +38,8 @@ class AutomatedMigrationChecker {
         : 0;
 
     report.violationPercentage = report.businessLogicViolations > 0
-        ? (report.businessLogicViolations / report.totalRefReadCalls * 100).round()
+        ? (report.businessLogicViolations / report.totalRefReadCalls * 100)
+            .round()
         : 0;
 
     return report;
@@ -45,9 +47,14 @@ class AutomatedMigrationChecker {
 
   /// Count total Dart files in lib/
   static Future<int> _countDartFiles() async {
-    final result = await Process.run('find', [libPath, '-name', '*.dart', '-type', 'f']);
+    final result =
+        await Process.run('find', [libPath, '-name', '*.dart', '-type', 'f']);
     if (result.exitCode == 0) {
-      final files = result.stdout.toString().trim().split('\n').where((line) => line.isNotEmpty);
+      final files = result.stdout
+          .toString()
+          .trim()
+          .split('\n')
+          .where((line) => line.isNotEmpty);
       return files.length;
     }
     return 0;
@@ -55,9 +62,18 @@ class AutomatedMigrationChecker {
 
   /// Count files with migration tracking
   static Future<int> _countMigratedFiles() async {
-    final result = await Process.run('grep', ['-r', 'MigrationTracker.markFileMigrated', libPath, '--include=*.dart']);
+    final result = await Process.run('grep', [
+      '-r',
+      'MigrationTracker.markFileMigrated',
+      libPath,
+      '--include=*.dart'
+    ]);
     if (result.exitCode == 0) {
-      final matches = result.stdout.toString().trim().split('\n').where((line) => line.isNotEmpty);
+      final matches = result.stdout
+          .toString()
+          .trim()
+          .split('\n')
+          .where((line) => line.isNotEmpty);
       return matches.length;
     }
     return 0;
@@ -65,9 +81,14 @@ class AutomatedMigrationChecker {
 
   /// Count files using unified provider
   static Future<int> _countUnifiedProviderUsage() async {
-    final result = await Process.run('grep', ['-r', 'unifiedGameStateProvider', libPath, '--include=*.dart']);
+    final result = await Process.run('grep',
+        ['-r', 'unifiedGameStateProvider', libPath, '--include=*.dart']);
     if (result.exitCode == 0) {
-      final matches = result.stdout.toString().trim().split('\n').where((line) => line.isNotEmpty);
+      final matches = result.stdout
+          .toString()
+          .trim()
+          .split('\n')
+          .where((line) => line.isNotEmpty);
       // Filter out test files and provider definitions
       final filtered = matches.where((match) =>
           !match.contains('/test/') &&
@@ -80,9 +101,18 @@ class AutomatedMigrationChecker {
 
   /// Count files using old providers
   static Future<int> _countOldProviderUsage() async {
-    final result = await Process.run('grep', ['-r', 'gameEngineV1Provider\\|gameEngineV3Provider\\|enhancedGameStateNotifierProvider', libPath, '--include=*.dart']);
+    final result = await Process.run('grep', [
+      '-r',
+      'gameEngineV1Provider\\|gameEngineV3Provider\\|enhancedGameStateNotifierProvider',
+      libPath,
+      '--include=*.dart'
+    ]);
     if (result.exitCode == 0) {
-      final matches = result.stdout.toString().trim().split('\n').where((line) => line.isNotEmpty);
+      final matches = result.stdout
+          .toString()
+          .trim()
+          .split('\n')
+          .where((line) => line.isNotEmpty);
       // Filter out provider definitions themselves
       final filtered = matches.where((match) => !match.contains('/providers/'));
       return filtered.length;
@@ -92,9 +122,14 @@ class AutomatedMigrationChecker {
 
   /// Count total ref.read() calls
   static Future<int> _countRefReadCalls() async {
-    final result = await Process.run('grep', ['-r', 'ref\\.read(', libPath, '--include=*.dart']);
+    final result = await Process.run(
+        'grep', ['-r', 'ref\\.read(', libPath, '--include=*.dart']);
     if (result.exitCode == 0) {
-      final matches = result.stdout.toString().trim().split('\n').where((line) => line.isNotEmpty);
+      final matches = result.stdout
+          .toString()
+          .trim()
+          .split('\n')
+          .where((line) => line.isNotEmpty);
       // Filter out test files
       final filtered = matches.where((match) => !match.contains('/test/'));
       return filtered.length;
@@ -106,14 +141,21 @@ class AutomatedMigrationChecker {
   static Future<int> _countBusinessLogicViolations() async {
     final violations = await analyzeRefReadViolations();
     // Count only critical violations
-    return violations.where((v) => v.severity == ViolationSeverity.critical).length;
+    return violations
+        .where((v) => v.severity == ViolationSeverity.critical)
+        .length;
   }
 
   /// Count acceptable ref.read() in presentation layer
   static Future<int> _countPresentationRefReads() async {
-    final result = await Process.run('grep', ['-r', 'ref\\.read(', '$libPath/presentation/', '--include=*.dart']);
+    final result = await Process.run('grep',
+        ['-r', 'ref\\.read(', '$libPath/presentation/', '--include=*.dart']);
     if (result.exitCode == 0) {
-      final matches = result.stdout.toString().trim().split('\n').where((line) => line.isNotEmpty);
+      final matches = result.stdout
+          .toString()
+          .trim()
+          .split('\n')
+          .where((line) => line.isNotEmpty);
       // Filter out test files
       final filtered = matches.where((match) => !match.contains('/test/'));
       return filtered.length;
@@ -123,9 +165,18 @@ class AutomatedMigrationChecker {
 
   /// Count ref.read() in provider factories (acceptable)
   static Future<int> _countProviderFactoryRefReads() async {
-    final result = await Process.run('grep', ['-r', 'ref\\.read(', '$libPath/application/providers/', '--include=*.dart']);
+    final result = await Process.run('grep', [
+      '-r',
+      'ref\\.read(',
+      '$libPath/application/providers/',
+      '--include=*.dart'
+    ]);
     if (result.exitCode == 0) {
-      final matches = result.stdout.toString().trim().split('\n').where((line) => line.isNotEmpty);
+      final matches = result.stdout
+          .toString()
+          .trim()
+          .split('\n')
+          .where((line) => line.isNotEmpty);
       return matches.length;
     }
     return 0;
@@ -150,7 +201,14 @@ class AutomatedMigrationChecker {
     final violations = <RefReadViolation>[];
 
     // Check business logic violations
-    final businessLogicResult = await Process.run('grep', ['-rn', 'ref\\.read(', '$libPath/application/', '$libPath/core/', '$libPath/domain/', '--include=*.dart']);
+    final businessLogicResult = await Process.run('grep', [
+      '-rn',
+      'ref\\.read(',
+      '$libPath/application/',
+      '$libPath/core/',
+      '$libPath/domain/',
+      '--include=*.dart'
+    ]);
 
     if (businessLogicResult.exitCode == 0) {
       final lines = businessLogicResult.stdout.toString().trim().split('\n');
@@ -187,8 +245,11 @@ class AutomatedMigrationChecker {
         code.contains('final ') && code.contains('Provider') ||
         code.contains('Provider(') ||
         (code.contains('ref.read(') && code.contains('return ')) ||
-        (code.contains('ref.read(') && code.contains(':')) || // Constructor parameter assignment
-        (code.contains('ref.read(') && filePath.contains('use_cases') && code.contains('InteractionUseCaseInjected'))) {
+        (code.contains('ref.read(') &&
+            code.contains(':')) || // Constructor parameter assignment
+        (code.contains('ref.read(') &&
+            filePath.contains('use_cases') &&
+            code.contains('InteractionUseCaseInjected'))) {
       return ViolationSeverity.acceptable;
     }
 
@@ -198,8 +259,11 @@ class AutomatedMigrationChecker {
     }
 
     // Business logic violations are critical
-    if ((filePath.contains('/application/') || filePath.contains('/core/') || filePath.contains('/domain/'))
-        && !code.contains('Provider.family') && !code.contains('StateNotifierProvider')) {
+    if ((filePath.contains('/application/') ||
+            filePath.contains('/core/') ||
+            filePath.contains('/domain/')) &&
+        !code.contains('Provider.family') &&
+        !code.contains('StateNotifierProvider')) {
       return ViolationSeverity.critical;
     }
 
@@ -221,7 +285,9 @@ class AutomatedMigrationChecker {
       return 'ACCEPTABLE: Presentation layer - one-time service access';
     }
 
-    if (filePath.contains('/application/') || filePath.contains('/core/') || filePath.contains('/domain/')) {
+    if (filePath.contains('/application/') ||
+        filePath.contains('/core/') ||
+        filePath.contains('/domain/')) {
       return 'VIOLATION: Use constructor injection instead of ref.read()';
     }
 
@@ -292,8 +358,11 @@ class RefReadViolation {
 
   @override
   String toString() {
-    final severityIcon = severity == ViolationSeverity.critical ? '🚨' :
-                        severity == ViolationSeverity.warning ? '⚠️' : '✅';
+    final severityIcon = severity == ViolationSeverity.critical
+        ? '🚨'
+        : severity == ViolationSeverity.warning
+            ? '⚠️'
+            : '✅';
     return '$severityIcon $filePath:$lineNumber\n    $code\n    $recommendation\n';
   }
 }
@@ -323,7 +392,8 @@ void main() async {
     });
 
     // Generate detailed violation report
-    final violations = await AutomatedMigrationChecker.analyzeRefReadViolations();
+    final violations =
+        await AutomatedMigrationChecker.analyzeRefReadViolations();
 
     if (violations.isEmpty) {
       StructuredLogger.info('No ref.read() violations found', context: {
@@ -334,26 +404,37 @@ void main() async {
       StructuredLogger.info('Found ref.read() instances to analyze', context: {
         'operation': 'violation_analysis_found',
         'total_violations': violations.length,
-        'critical_count': violations.where((v) => v.severity == ViolationSeverity.critical).length,
-        'warning_count': violations.where((v) => v.severity == ViolationSeverity.warning).length,
-        'acceptable_count': violations.where((v) => v.severity == ViolationSeverity.acceptable).length,
+        'critical_count': violations
+            .where((v) => v.severity == ViolationSeverity.critical)
+            .length,
+        'warning_count': violations
+            .where((v) => v.severity == ViolationSeverity.warning)
+            .length,
+        'acceptable_count': violations
+            .where((v) => v.severity == ViolationSeverity.acceptable)
+            .length,
       });
 
       // Group by severity
-      final critical = violations.where((v) => v.severity == ViolationSeverity.critical);
-      final warnings = violations.where((v) => v.severity == ViolationSeverity.warning);
-      final acceptable = violations.where((v) => v.severity == ViolationSeverity.acceptable);
+      final critical =
+          violations.where((v) => v.severity == ViolationSeverity.critical);
+      final warnings =
+          violations.where((v) => v.severity == ViolationSeverity.warning);
+      final acceptable =
+          violations.where((v) => v.severity == ViolationSeverity.acceptable);
 
       if (critical.isNotEmpty) {
         StructuredLogger.error('CRITICAL VIOLATIONS found', context: {
           'operation': 'critical_violations_report',
           'count': critical.length,
-          'violations': critical.map((v) => {
-            'file': v.filePath,
-            'line': v.lineNumber,
-            'code': v.code,
-            'recommendation': v.recommendation,
-          }).toList(),
+          'violations': critical
+              .map((v) => {
+                    'file': v.filePath,
+                    'line': v.lineNumber,
+                    'code': v.code,
+                    'recommendation': v.recommendation,
+                  })
+              .toList(),
         });
       }
 
@@ -361,12 +442,14 @@ void main() async {
         StructuredLogger.warning('WARNINGS found', context: {
           'operation': 'warning_violations_report',
           'count': warnings.length,
-          'violations': warnings.map((v) => {
-            'file': v.filePath,
-            'line': v.lineNumber,
-            'code': v.code,
-            'recommendation': v.recommendation,
-          }).toList(),
+          'violations': warnings
+              .map((v) => {
+                    'file': v.filePath,
+                    'line': v.lineNumber,
+                    'code': v.code,
+                    'recommendation': v.recommendation,
+                  })
+              .toList(),
         });
       }
 
@@ -374,12 +457,15 @@ void main() async {
         StructuredLogger.info('ACCEPTABLE USAGE found', context: {
           'operation': 'acceptable_violations_report',
           'count': acceptable.length,
-          'sample_violations': acceptable.take(5).map((v) => {
-            'file': v.filePath,
-            'line': v.lineNumber,
-            'code': v.code,
-            'recommendation': v.recommendation,
-          }).toList(),
+          'sample_violations': acceptable
+              .take(5)
+              .map((v) => {
+                    'file': v.filePath,
+                    'line': v.lineNumber,
+                    'code': v.code,
+                    'recommendation': v.recommendation,
+                  })
+              .toList(),
           'additional_count': acceptable.length > 5 ? acceptable.length - 5 : 0,
         });
       }
@@ -395,12 +481,13 @@ void main() async {
       ],
       'timestamp': DateTime.now().toIso8601String(),
     });
-
   } catch (e) {
-    StructuredLogger.error('Error running automated checker', context: {
-      'operation': 'migration_checker_error',
-      'error': e.toString(),
-    }, error: e);
+    StructuredLogger.error('Error running automated checker',
+        context: {
+          'operation': 'migration_checker_error',
+          'error': e.toString(),
+        },
+        error: e);
     exit(1);
   }
 }

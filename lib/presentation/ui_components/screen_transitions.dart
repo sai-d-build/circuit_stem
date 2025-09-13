@@ -31,7 +31,8 @@ class ScreenTransition extends StatefulWidget {
   State<ScreenTransition> createState() => _ScreenTransitionState();
 }
 
-class _ScreenTransitionState extends State<ScreenTransition> with SingleTickerProviderStateMixin {
+class _ScreenTransitionState extends State<ScreenTransition>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -144,7 +145,8 @@ class _ScreenTransitionState extends State<ScreenTransition> with SingleTickerPr
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: colors.neonPrimary.withValues(alpha: _animation.value * 0.5),
+                    color: colors.neonPrimary
+                        .withValues(alpha: _animation.value * 0.5),
                     blurRadius: 20.0 * _animation.value,
                     spreadRadius: 5.0 * _animation.value,
                   ),
@@ -231,12 +233,12 @@ class TransitionRoute<T> extends PageRouteBuilder<T> {
     required this.page,
     this.transitionType = TransitionType.fade,
   }) : super(
-    pageBuilder: (context, animation, secondaryAnimation) => page,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      return ScreenTransition(
-        type: transitionType,
-        child: child,
-      );
-    },
-  );
+          pageBuilder: (context, animation, secondaryAnimation) => page,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return ScreenTransition(
+              type: transitionType,
+              child: child,
+            );
+          },
+        );
 }

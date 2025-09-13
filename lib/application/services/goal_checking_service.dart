@@ -49,7 +49,7 @@ class ConnectGoalValidator extends GoalValidator {
     final visited = <String>{};
     final toVisit = [sourceId];
 
-    for (int i = 0; i < toVisit.length; i++) {
+    for (var i = 0; i < toVisit.length; i++) {
       final currentId = toVisit[i];
 
       if (visited.contains(currentId)) continue;
@@ -78,9 +78,9 @@ class ConnectGoalValidator extends GoalValidator {
     // Simplified neighbor finding - check adjacent cells
     final directions = [
       (-1, 0), // North
-      (1, 0),  // South
+      (1, 0), // South
       (0, -1), // West
-      (0, 1),  // East
+      (0, 1), // East
     ];
 
     for (final (dr, dc) in directions) {

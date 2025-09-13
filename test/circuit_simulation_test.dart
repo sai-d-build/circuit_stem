@@ -1,11 +1,11 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:sparkcircuit/application/providers.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/application/services/component_factory.dart';
 import 'package:sparkcircuit/core/commands/in_memory_command_stack.dart';
 import 'package:sparkcircuit/core/simulation/basic_simulation_engine.dart';
 import 'package:sparkcircuit/core/simulation/netlist_builder.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
 
 void main() {
@@ -17,7 +17,8 @@ void main() {
         commandStackProvider.overrideWithValue(InMemoryCommandStack()),
         simulationEngineProvider.overrideWithValue(BasicSimulationEngine()),
         netlistBuilderProvider.overrideWithValue(NetlistBuilder()),
-        storageServiceProvider.overrideWithValue(SharedPreferencesStorageService()),
+        storageServiceProvider
+            .overrideWithValue(SharedPreferencesStorageService()),
         componentFactoryProvider.overrideWithValue(ComponentFactory()),
       ]);
     });
@@ -27,7 +28,8 @@ void main() {
     });
 
     test('Simulation should run correctly', () async {
-      final gameStateNotifier = container.read(enhancedGameStateNotifierProvider.notifier);
+      final gameStateNotifier =
+          container.read(enhancedGameStateNotifierProvider.notifier);
 
       gameStateNotifier.placeComponent(ComponentType.battery, 0, 0);
       gameStateNotifier.placeComponent(ComponentType.wire, 0, 1);

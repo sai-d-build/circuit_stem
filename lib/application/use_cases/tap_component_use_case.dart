@@ -1,14 +1,16 @@
-import '../services/power_simulation_service.dart';
-import '../../domain/behaviors/behavior.dart';
-import '../game_context.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
+
 import '../../common/logger.dart';
+import '../../domain/behaviors/behavior.dart';
 import '../core/result.dart';
+import '../game_context.dart';
+import '../services/power_simulation_service.dart';
 import '../transaction.dart';
 import 'component_action.dart';
 import 'notifier_integrated_use_case.dart';
 
-class TapComponentUseCase extends NotifierIntegratedUseCase<TapComponentAction> {
+class TapComponentUseCase
+    extends NotifierIntegratedUseCase<TapComponentAction> {
   final PowerSimulationService _simulation;
 
   const TapComponentUseCase(this._simulation);
@@ -40,11 +42,13 @@ class TapComponentUseCase extends NotifierIntegratedUseCase<TapComponentAction> 
       ComponentModel? updatedComponent;
       final gameContext = GameContext(grid: currentGrid);
 
-      for (final behavior in component.behaviors.whereType<ComponentBehavior>()) {
+      for (final behavior
+          in component.behaviors.whereType<ComponentBehavior>()) {
         final result = behavior.handle(component, 'tap', gameContext);
         if (result != null) {
           updatedComponent = result;
-          Logger.log('TapComponent: behavior updated component ${component.id}');
+          Logger.log(
+              'TapComponent: behavior updated component ${component.id}');
           break; // Assuming only one behavior handles a 'tap' action
         }
       }
@@ -55,7 +59,7 @@ class TapComponentUseCase extends NotifierIntegratedUseCase<TapComponentAction> 
           var newGrid = currentGrid.copyWithUpdatedComponent(updatedComponent!);
           newGrid = _simulation.simulatePowerFlow(newGrid);
           notifiers.grid.setState(newGrid);
-          
+
           // Check win condition and update progress
           // Note: We'll need to get the current level from somewhere else
           // For now, skip win condition checking as it requires level context

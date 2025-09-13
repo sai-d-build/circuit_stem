@@ -10,7 +10,7 @@ class NeonHUD extends StatefulWidget {
   const NeonHUD({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(16.0),
+    this.padding = const EdgeInsets.all(16),
     this.opacity = 0.8,
     this.showGlow = true,
   });
@@ -52,27 +52,31 @@ class _NeonHUDState extends State<NeonHUD> with SingleTickerProviderStateMixin {
         return Container(
           margin: widget.padding,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: BorderRadius.circular(12),
             color: colors.surface.withValues(alpha: widget.opacity),
             border: Border.all(
               color: colors.neonPrimary.withValues(alpha: 0.6),
               width: 1.5,
             ),
-            boxShadow: widget.showGlow ? [
-              BoxShadow(
-                color: colors.neonPrimary.withValues(alpha: _glowAnimation.value * 0.4),
-                blurRadius: 15.0,
-                spreadRadius: 2.0,
-              ),
-              BoxShadow(
-                color: colors.neonAccent.withValues(alpha: _glowAnimation.value * 0.2),
-                blurRadius: 25.0,
-                spreadRadius: 1.0,
-              ),
-            ] : null,
+            boxShadow: widget.showGlow
+                ? [
+                    BoxShadow(
+                      color: colors.neonPrimary
+                          .withValues(alpha: _glowAnimation.value * 0.4),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    ),
+                    BoxShadow(
+                      color: colors.neonAccent
+                          .withValues(alpha: _glowAnimation.value * 0.2),
+                      blurRadius: 25,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : null,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(10),
             child: widget.child,
           ),
         );

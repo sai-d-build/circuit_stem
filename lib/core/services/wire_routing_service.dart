@@ -1,7 +1,7 @@
-import 'package:sparkcircuit/core/services/pathfinding_service.dart';
-import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
-import 'package:sparkcircuit/core/debug/structured_logger.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
+import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/core/services/coordinate_system_service.dart';
+import 'package:sparkcircuit/core/services/pathfinding_service.dart';
 
 // Wire routing result
 class WireRoutingResult {
@@ -68,12 +68,14 @@ class WireRoutingService {
       );
 
       if (!pathResult.success || pathResult.path.isEmpty) {
-        StructuredLogger.warning('🎯 WIRE ROUTING FAILED - No path found', context: {
-          'startPosition': {'row': start.row, 'col': start.col},
-          'endPosition': {'row': end.row, 'col': end.col},
-          'occupiedPositions': occupiedPositions.length,
-        });
-        return const WireRoutingResult.failure('No valid path found between points');
+        StructuredLogger.warning('🎯 WIRE ROUTING FAILED - No path found',
+            context: {
+              'startPosition': {'row': start.row, 'col': start.col},
+              'endPosition': {'row': end.row, 'col': end.col},
+              'occupiedPositions': occupiedPositions.length,
+            });
+        return const WireRoutingResult.failure(
+            'No valid path found between points');
       }
 
       // Create wire path from path
@@ -91,7 +93,6 @@ class WireRoutingService {
       });
 
       return WireRoutingResult.success(pathResult.path, wirePath);
-
     } catch (e, stackTrace) {
       StructuredLogger.error('🎯 WIRE ROUTING ERROR', context: {
         'error': e.toString(),
@@ -126,5 +127,4 @@ class WireRoutingService {
 
     return occupied;
   }
-
 }

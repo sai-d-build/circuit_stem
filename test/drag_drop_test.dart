@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
+import 'package:sparkcircuit/presentation/models/drag_models.dart';
 
 void main() {
   group('Drag and Drop Tests', () {
     test('ComponentDragData creation from palette definition', () {
       // Test data creation from palette component definition
-      final mockDefinition = _MockComponentDefinition(
+      const mockDefinition = _MockComponentDefinition(
         type: 'battery',
         name: 'Battery',
         description: 'Power source',
@@ -15,7 +15,8 @@ void main() {
         cost: 1,
       );
 
-      final dragData = ComponentDragData.fromPaletteComponentDefinition(mockDefinition);
+      final dragData =
+          ComponentDragData.fromPaletteComponentDefinition(mockDefinition);
 
       expect(dragData.componentType, equals(ComponentType.battery));
       expect(dragData.componentName, equals('Battery'));
@@ -27,7 +28,7 @@ void main() {
 
     test('ComponentDragData creation from domain definition', () {
       // Test data creation from domain component definition
-      final mockDefinition = _MockDomainComponentDefinition(
+      const mockDefinition = _MockDomainComponentDefinition(
         type: ComponentType.resistor,
         name: 'Resistor',
         description: 'Limits current flow',
@@ -35,7 +36,8 @@ void main() {
         cost: 1,
       );
 
-      final dragData = ComponentDragData.fromPaletteComponentDefinition(mockDefinition);
+      final dragData =
+          ComponentDragData.fromPaletteComponentDefinition(mockDefinition);
 
       expect(dragData.componentType, equals(ComponentType.resistor));
       expect(dragData.componentName, equals('Resistor'));
@@ -47,15 +49,18 @@ void main() {
     test('String to ComponentType conversion', () {
       // Test the internal conversion method
       expect(_stringToComponentType('battery'), equals(ComponentType.battery));
-      expect(_stringToComponentType('resistor'), equals(ComponentType.resistor));
+      expect(
+          _stringToComponentType('resistor'), equals(ComponentType.resistor));
       expect(_stringToComponentType('bulb'), equals(ComponentType.bulb));
       expect(_stringToComponentType('wire'), equals(ComponentType.wire));
       expect(_stringToComponentType('switch'), equals(ComponentType.switch_));
-      expect(_stringToComponentType('unknown'), equals(ComponentType.wire)); // Default
+      expect(_stringToComponentType('unknown'),
+          equals(ComponentType.wire)); // Default
     });
 
-    testWidgets('ComponentDragFeedback widget renders correctly', (WidgetTester tester) async {
-      final dragData = ComponentDragData(
+    testWidgets('ComponentDragFeedback widget renders correctly',
+        (WidgetTester tester) async {
+      const dragData = ComponentDragData(
         componentType: ComponentType.battery,
         componentName: 'Battery',
         description: 'Power source',
@@ -65,7 +70,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: ComponentDragFeedback(dragData: dragData),
         ),
       );
@@ -76,9 +81,10 @@ void main() {
       expect(find.byIcon(Icons.battery_full), findsOneWidget);
     });
 
-    testWidgets('Drag data creation handles edge cases', (WidgetTester tester) async {
+    testWidgets('Drag data creation handles edge cases',
+        (WidgetTester tester) async {
       // Test with minimal definition
-      final minimalDefinition = _MockComponentDefinition(
+      const minimalDefinition = _MockComponentDefinition(
         type: 'wire',
         name: 'Wire',
         description: '',
@@ -86,15 +92,17 @@ void main() {
         cost: 0,
       );
 
-      final dragData = ComponentDragData.fromPaletteComponentDefinition(minimalDefinition);
+      final dragData =
+          ComponentDragData.fromPaletteComponentDefinition(minimalDefinition);
 
       expect(dragData.componentType, equals(ComponentType.wire));
       expect(dragData.componentName, equals('Wire'));
       expect(dragData.cost, equals(0));
     });
 
-    testWidgets('Drag feedback shows component details correctly', (WidgetTester tester) async {
-      final dragData = ComponentDragData(
+    testWidgets('Drag feedback shows component details correctly',
+        (WidgetTester tester) async {
+      const dragData = ComponentDragData(
         componentType: ComponentType.resistor,
         componentName: 'Resistor',
         description: 'Limits current flow',
@@ -104,7 +112,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: ComponentDragFeedback(dragData: dragData),
           ),
@@ -117,19 +125,22 @@ void main() {
 
       // Check the container styling
       final container = find.byType(Container).first;
-      final Container containerWidget = tester.widget(container);
-      expect(containerWidget.decoration, isNotNull);
+      final containerWidget = tester.widget(container);
+      expect((containerWidget as Container).decoration, isNotNull);
     });
 
     test('Component type conversion handles all valid types', () {
       // Test all component types
       expect(_stringToComponentType('battery'), equals(ComponentType.battery));
-      expect(_stringToComponentType('resistor'), equals(ComponentType.resistor));
+      expect(
+          _stringToComponentType('resistor'), equals(ComponentType.resistor));
       expect(_stringToComponentType('led'), equals(ComponentType.bulb));
       expect(_stringToComponentType('wire'), equals(ComponentType.wire));
       expect(_stringToComponentType('switch'), equals(ComponentType.switch_));
-      expect(_stringToComponentType('capacitor'), equals(ComponentType.capacitor));
-      expect(_stringToComponentType('inductor'), equals(ComponentType.inductor));
+      expect(
+          _stringToComponentType('capacitor'), equals(ComponentType.capacitor));
+      expect(
+          _stringToComponentType('inductor'), equals(ComponentType.inductor));
       expect(_stringToComponentType('buzzer'), equals(ComponentType.buzzer));
     });
 
@@ -139,8 +150,9 @@ void main() {
       expect(_stringToComponentType(''), equals(ComponentType.wire));
     });
 
-    testWidgets('Drag data equality works correctly', (WidgetTester tester) async {
-      final dragData1 = ComponentDragData(
+    testWidgets('Drag data equality works correctly',
+        (WidgetTester tester) async {
+      const dragData1 = ComponentDragData(
         componentType: ComponentType.battery,
         componentName: 'Battery',
         description: 'Power source',
@@ -149,7 +161,7 @@ void main() {
         icon: Icons.battery_full,
       );
 
-      final dragData2 = ComponentDragData(
+      const dragData2 = ComponentDragData(
         componentType: ComponentType.battery,
         componentName: 'Battery',
         description: 'Power source',
@@ -158,7 +170,7 @@ void main() {
         icon: Icons.battery_full,
       );
 
-      final dragData3 = ComponentDragData(
+      const dragData3 = ComponentDragData(
         componentType: ComponentType.resistor,
         componentName: 'Resistor',
         description: 'Limits current',
@@ -172,7 +184,7 @@ void main() {
     });
 
     test('ComponentDragData handles null cost gracefully', () {
-      final mockDefinition = _MockComponentDefinition(
+      const mockDefinition = _MockComponentDefinition(
         type: 'wire',
         name: 'Wire',
         description: 'Connects components',
@@ -180,13 +192,14 @@ void main() {
         cost: null, // Test null cost
       );
 
-      final dragData = ComponentDragData.fromPaletteComponentDefinition(mockDefinition);
+      final dragData =
+          ComponentDragData.fromPaletteComponentDefinition(mockDefinition);
 
       expect(dragData.cost, equals(1)); // Should default to 1
     });
 
     test('ComponentDragData handles null properties gracefully', () {
-      final mockDefinition = _MockComponentDefinition(
+      const mockDefinition = _MockComponentDefinition(
         type: 'resistor',
         name: 'Resistor',
         description: 'Limits current',
@@ -194,27 +207,33 @@ void main() {
         cost: 2,
       );
 
-      final dragData = ComponentDragData.fromPaletteComponentDefinition(mockDefinition);
+      final dragData =
+          ComponentDragData.fromPaletteComponentDefinition(mockDefinition);
 
-      expect(dragData.defaultProperties, equals({})); // Should default to empty map
+      expect(dragData.defaultProperties,
+          equals({})); // Should default to empty map
     });
 
     test('String to ComponentType conversion handles all component types', () {
       // Test all supported component types
       expect(_stringToComponentType('battery'), equals(ComponentType.battery));
-      expect(_stringToComponentType('resistor'), equals(ComponentType.resistor));
+      expect(
+          _stringToComponentType('resistor'), equals(ComponentType.resistor));
       expect(_stringToComponentType('led'), equals(ComponentType.bulb));
       expect(_stringToComponentType('bulb'), equals(ComponentType.bulb));
       expect(_stringToComponentType('wire'), equals(ComponentType.wire));
       expect(_stringToComponentType('switch'), equals(ComponentType.switch_));
-      expect(_stringToComponentType('capacitor'), equals(ComponentType.capacitor));
-      expect(_stringToComponentType('inductor'), equals(ComponentType.inductor));
+      expect(
+          _stringToComponentType('capacitor'), equals(ComponentType.capacitor));
+      expect(
+          _stringToComponentType('inductor'), equals(ComponentType.inductor));
       expect(_stringToComponentType('buzzer'), equals(ComponentType.buzzer));
-      expect(_stringToComponentType('unknown_type'), equals(ComponentType.wire)); // Default
+      expect(_stringToComponentType('unknown_type'),
+          equals(ComponentType.wire)); // Default
     });
 
     test('ComponentDragData equality works correctly', () {
-      final dragData1 = ComponentDragData(
+      const dragData1 = ComponentDragData(
         componentType: ComponentType.battery,
         componentName: 'Battery',
         description: 'Power source',
@@ -223,7 +242,7 @@ void main() {
         icon: Icons.battery_full,
       );
 
-      final dragData2 = ComponentDragData(
+      const dragData2 = ComponentDragData(
         componentType: ComponentType.battery,
         componentName: 'Battery',
         description: 'Power source',
@@ -232,7 +251,7 @@ void main() {
         icon: Icons.battery_full,
       );
 
-      final dragData3 = ComponentDragData(
+      const dragData3 = ComponentDragData(
         componentType: ComponentType.resistor,
         componentName: 'Resistor',
         description: 'Limits current',

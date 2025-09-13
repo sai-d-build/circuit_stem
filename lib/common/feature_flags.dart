@@ -139,7 +139,6 @@ class FeatureFlagService {
     }
   }
 
-
   // Persist flag to storage
   static void _persistFlag(FeatureFlag flag, bool value) {
     // TODO: Access storage service - this needs to be injected or accessed via provider
@@ -155,11 +154,13 @@ class FeatureFlagService {
       });
       // Future enhancement: Use storageService.saveData('feature_flag_${flag.name}', value);
     } catch (e) {
-      StructuredLogger.error('Failed to persist feature flag', context: {
-        'flagName': flag.name,
-        'targetValue': value.toString(),
-        'error': e.toString(),
-      }, error: e);
+      StructuredLogger.error('Failed to persist feature flag',
+          context: {
+            'flagName': flag.name,
+            'targetValue': value.toString(),
+            'error': e.toString(),
+          },
+          error: e);
     }
   }
 
@@ -176,9 +177,9 @@ class FeatureFlagService {
   // Check if migration is complete
   static bool isMigrationComplete() {
     return isEnabled(FeatureFlag.useNewSimulationEngine) &&
-           isEnabled(FeatureFlag.enableAchievementSystem) &&
-           isEnabled(FeatureFlag.enableHintSystem) &&
-           isEnabled(FeatureFlag.enableMultipleSolutions) &&
-           isEnabled(FeatureFlag.migrationComplete);
+        isEnabled(FeatureFlag.enableAchievementSystem) &&
+        isEnabled(FeatureFlag.enableHintSystem) &&
+        isEnabled(FeatureFlag.enableMultipleSolutions) &&
+        isEnabled(FeatureFlag.migrationComplete);
   }
 }

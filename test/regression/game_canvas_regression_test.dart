@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sparkcircuit/presentation/features/game/widgets/game_canvas.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
+import 'package:sparkcircuit/presentation/features/game/widgets/game_canvas.dart';
 
 void main() {
   group('GameCanvas Regression Tests', () {
@@ -155,12 +155,12 @@ void main() {
 }
 
 Widget createTestApp() {
-  return ProviderScope(
+  return const ProviderScope(
     overrides: [
       // Add necessary provider overrides for testing
       // Override providers that might cause issues in tests
     ],
-    child: const MaterialApp(
+    child: MaterialApp(
       home: GameCanvas(levelId: '1'),
     ),
   );

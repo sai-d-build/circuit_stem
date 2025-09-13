@@ -2,8 +2,8 @@
 // Testing utilities for cloud functionality
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sparkcircuit/common/cloud_config.dart';
 import 'package:sparkcircuit/application/services/cloud_service_manager.dart';
+import 'package:sparkcircuit/common/cloud_config.dart';
 import 'package:sparkcircuit/core/debug/structured_logger.dart';
 
 /// Test utilities for cloud functionality
@@ -49,10 +49,12 @@ class CloudTestingUtils {
 
     switch (expectedMode) {
       case CloudServiceMode.localOnly:
-        expect(service, anyOf(isA<LocalAuthService>(), isA<LocalCloudStorageService>()));
+        expect(service,
+            anyOf(isA<LocalAuthService>(), isA<LocalCloudStorageService>()));
         break;
       case CloudServiceMode.mocked:
-        expect(service, anyOf(isA<MockAuthService>(), isA<MockCloudStorageService>()));
+        expect(service,
+            anyOf(isA<MockAuthService>(), isA<MockCloudStorageService>()));
         break;
       case CloudServiceMode.emulator:
       case CloudServiceMode.real:
@@ -91,8 +93,10 @@ class CloudTestingUtils {
         }
       } else {
         // Other modes might throw expected errors
-        StructuredLogger.debug('Expected error in cloud operation: $operationName',
-          error: e, context: {'operation': operationName, 'mode': mode.toString()});
+        StructuredLogger.debug(
+            'Expected error in cloud operation: $operationName',
+            error: e,
+            context: {'operation': operationName, 'mode': mode.toString()});
       }
     }
   }
@@ -116,8 +120,10 @@ class CloudTestingUtils {
   /// Enable detailed cloud logging for tests
   static void _enableCloudLogging() {
     // This would enable detailed logging in a real implementation
-    StructuredLogger.info('Cloud logging enabled for testing',
-      context: {'test_mode': true, 'timestamp': DateTime.now().toIso8601String()});
+    StructuredLogger.info('Cloud logging enabled for testing', context: {
+      'test_mode': true,
+      'timestamp': DateTime.now().toIso8601String()
+    });
   }
 
   /// Enable cloud sync for testing
@@ -146,7 +152,8 @@ class CloudTestingUtils {
   }
 
   /// Check if cloud sync is currently enabled
-  static bool get isCloudEnabled => _currentCloudMode != CloudServiceMode.localOnly;
+  static bool get isCloudEnabled =>
+      _currentCloudMode != CloudServiceMode.localOnly;
 
   /// Check if using mocked services
   static bool get isUsingMock => _currentCloudMode == CloudServiceMode.mocked;
@@ -179,10 +186,7 @@ void testCloudFunctionality(String description, void Function() body) {
       );
     });
 
-    tearDown(() {
-      // Cleanup after each test
-      CloudTestingUtils.resetCloudConfiguration();
-    });
+    tearDown(CloudTestingUtils.resetCloudConfiguration);
 
     body();
   });

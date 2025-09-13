@@ -100,21 +100,21 @@ extension CustomTextStyles on TextTheme {
 }
 
 class FontSizes {
-  static const double displayLarge = 57.0;
-  static const double displayMedium = 45.0;
-  static const double displaySmall = 36.0;
-  static const double headlineLarge = 32.0;
-  static const double headlineMedium = 24.0;
-  static const double headlineSmall = 22.0;
-  static const double titleLarge = 22.0;
-  static const double titleMedium = 18.0;
-  static const double titleSmall = 16.0;
-  static const double labelLarge = 16.0;
-  static const double labelMedium = 14.0;
-  static const double labelSmall = 12.0;
-  static const double bodyLarge = 16.0;
-  static const double bodyMedium = 14.0;
-  static const double bodySmall = 12.0;
+  static const double displayLarge = 57;
+  static const double displayMedium = 45;
+  static const double displaySmall = 36;
+  static const double headlineLarge = 32;
+  static const double headlineMedium = 24;
+  static const double headlineSmall = 22;
+  static const double titleLarge = 22;
+  static const double titleMedium = 18;
+  static const double titleSmall = 16;
+  static const double labelLarge = 16;
+  static const double labelMedium = 14;
+  static const double labelSmall = 12;
+  static const double bodyLarge = 16;
+  static const double bodyMedium = 14;
+  static const double bodySmall = 12;
 }
 
 ThemeData get lightTheme => ThemeData(

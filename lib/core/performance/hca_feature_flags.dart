@@ -9,10 +9,11 @@ import 'package:sparkcircuit/core/performance/performance_monitor.dart';
 /// Phase 2: Progressive rollout with rollback capabilities
 class HCAFeatureFlags {
   // Phase 2 Features - Disabled by default for safety
-  static bool hybridCaching = false;           // Core: Enables HCA (Phase 1)
-  static bool advancedInvalidation = false;    // Phase 2A: Smart invalidation
-  static bool predictiveCaching = false;      // Phase 2B: AI-driven pre-rendering
-  static bool deviceAdaptation = false;       // Phase 2B: Device-specific optimization
+  static bool hybridCaching = false; // Core: Enables HCA (Phase 1)
+  static bool advancedInvalidation = false; // Phase 2A: Smart invalidation
+  static bool predictiveCaching = false; // Phase 2B: AI-driven pre-rendering
+  static bool deviceAdaptation =
+      false; // Phase 2B: Device-specific optimization
 
   // Deployment Control
   static RolloutPhase _currentPhase = RolloutPhase.inactive;
@@ -36,7 +37,7 @@ class HCAFeatureFlags {
 
     // Validate startup configuration
     await _validateConfiguration();
-    
+
     // Initialize performance monitoring
     if (anyFeaturesEnabled()) {
       PerformanceMonitor.startStaticMonitoring();
@@ -45,12 +46,13 @@ class HCAFeatureFlags {
 
   /// Progressive rollout activation
   static Future<String> activatePhase(RolloutPhase targetPhase) async {
-    StructuredLogger.info('HCA PHASE 2: ACTIVATING ${targetPhase.toString().toUpperCase()}',
-      context: {
-        'phase': targetPhase.toString(),
-        'timestamp': DateTime.now().toIso8601String(),
-        'separator': '=' * 60
-      });
+    StructuredLogger.info(
+        'HCA PHASE 2: ACTIVATING ${targetPhase.toString().toUpperCase()}',
+        context: {
+          'phase': targetPhase.toString(),
+          'timestamp': DateTime.now().toIso8601String(),
+          'separator': '=' * 60
+        });
 
     final previousPhase = _currentPhase;
     final success = await _activatePhaseSafely(targetPhase);
@@ -58,7 +60,7 @@ class HCAFeatureFlags {
     if (success.contains('SUCCESS')) {
       _currentPhase = targetPhase;
       await _configurePhaseFeatures(targetPhase);
-      
+
       StructuredLogger.info('Phase activation successful', context: {
         'previousPhase': previousPhase.toString(),
         'newPhase': targetPhase.toString(),
@@ -80,7 +82,7 @@ class HCAFeatureFlags {
     _emergencyTriggers++;
 
     final rollbackResult = await _performEmergencyRollback(reason);
-    
+
     StructuredLogger.fatal('Emergency rollback executed', context: {
       'reason': reason,
       'emergencyCount': _emergencyTriggers,
@@ -97,7 +99,8 @@ class HCAFeatureFlags {
       'currentPhase': _currentPhase.toString(),
       'uptime': DateTime.now().difference(_phaseStartTime).toString(),
       'emergencyTriggers': _emergencyTriggers,
-      'cacheHitRate': ComponentCacheManager().getPerformanceStats()['cacheHitRate'] ?? 0.0,
+      'cacheHitRate':
+          ComponentCacheManager().getPerformanceStats()['cacheHitRate'] ?? 0.0,
       'performanceScore': PerformanceMonitor.devicePerformanceScore,
       'featureUsage': {
         'hybridCaching': hybridCaching,
@@ -126,9 +129,8 @@ class HCAFeatureFlags {
 
       return true;
     } catch (e) {
-      StructuredLogger.error('Safety check failed', context: {
-        'error': e.toString()
-      }, error: e);
+      StructuredLogger.error('Safety check failed',
+          context: {'error': e.toString()}, error: e);
       return false;
     }
   }
@@ -136,7 +138,7 @@ class HCAFeatureFlags {
   /// Get current deployment status report
   static String generateStatusReport() {
     final metrics = getRolloutMetrics();
-    
+
     return '''
 🏁 HCA DEPLOYMENT STATUS REPORT
 Generated: ${DateTime.now().toIso8601String()}
@@ -156,25 +158,31 @@ ${_formatFeatureStatus(metrics['featureUsage'] as Map<String, bool>)}
 
 DEPLOYMENT HEALTH: ${_calculateHealthScore()}% Healthy
 ${_generateRecommendations()}
-    '''.trim();
+    '''
+        .trim();
   }
 
   // MARK: Private Implementation Methods
 
   static bool anyFeaturesEnabled() {
-    return hybridCaching || advancedInvalidation || predictiveCaching || deviceAdaptation;
+    return hybridCaching ||
+        advancedInvalidation ||
+        predictiveCaching ||
+        deviceAdaptation;
   }
 
   static Future<void> _validateConfiguration() async {
     // Validate feature flag consistency
     if (advancedInvalidation && !hybridCaching) {
       advancedInvalidation = false;
-      StructuredLogger.warning('Advanced invalidation disabled - requires hybrid caching');
+      StructuredLogger.warning(
+          'Advanced invalidation disabled - requires hybrid caching');
     }
 
     if (predictiveCaching && !advancedInvalidation) {
       predictiveCaching = false;
-      StructuredLogger.warning('Predictive caching disabled - requires advanced invalidation');
+      StructuredLogger.warning(
+          'Predictive caching disabled - requires advanced invalidation');
     }
   }
 
@@ -264,8 +272,8 @@ ${_generateRecommendations()}
       RolloutPhase.advance
     ];
 
-    final fromIndex = phaseOrder.indexOf(from);
-    final toIndex = phaseOrder.indexOf(to);
+    final fromIndex = phaseOrder.indexOf(from); // ignore: cascade_invocations
+    final toIndex = phaseOrder.indexOf(to); // ignore: cascade_invocations
 
     return toIndex >= fromIndex;
   }
@@ -296,21 +304,21 @@ ${_generateRecommendations()}
 
   static Future<void> _configurePhaseFeatures(RolloutPhase phase) async {
     _rolloutMetrics['lastPhaseChange'] = DateTime.now().toIso8601String();
-    _rolloutMetrics['phaseChanges'] = (_rolloutMetrics['phaseChanges'] ?? 0) + 1;
+    _rolloutMetrics['phaseChanges'] =
+        (_rolloutMetrics['phaseChanges'] ?? 0) + 1;
   }
-
 
   static String _formatFeatureStatus(Map<String, bool> features) {
     final buffer = StringBuffer();
     features.forEach((feature, enabled) {
-      buffer.writeln('- $feature: ${enabled ? '✅ ENABLED' : '❌ DISABLED'}');
+      buffer.writeln('- $feature: ${enabled ? '✅ ENABLED' : '❌ DISABLED'}'); // ignore: cascade_invocations
     });
-    return buffer.toString();
+    return buffer.toString(); // ignore: cascade_invocations
   }
 
   static int _calculateHealthScore() {
     final metrics = getRolloutMetrics();
-    int score = 100;
+    var score = 100;
 
     // Deductions for issues
     if ((metrics['cacheHitRate'] as double? ?? 0.0) < 0.8) score -= 20;
@@ -328,7 +336,8 @@ ${_generateRecommendations()}
 
     final cacheHitRate = metrics['cacheHitRate'] as double? ?? 0.0;
     if (cacheHitRate < 0.85) {
-      recommendations.writeln('• Improve cache hit rate through better key generation');
+      recommendations
+          .writeln('• Improve cache hit rate through better key generation');
     }
 
     final emergencyTriggers = metrics['emergencyTriggers'] as int;
@@ -337,7 +346,8 @@ ${_generateRecommendations()}
     }
 
     if (_currentPhase == RolloutPhase.beta) {
-      recommendations.writeln('• Consider production rollout if metrics remain stable');
+      recommendations
+          .writeln('• Consider production rollout if metrics remain stable');
     }
 
     return recommendations.toString();
@@ -346,11 +356,11 @@ ${_generateRecommendations()}
 
 /// Phase progression enumeration with safety controls
 enum RolloutPhase {
-  inactive,    // Default state - no HCA features
-  safe,        // Safe baseline with rollback capability
-  beta,        // Beta users with basic HCA features
-  production,  // Full production with advanced features
-  advance      // Future features with AI optimization
+  inactive, // Default state - no HCA features
+  safe, // Safe baseline with rollback capability
+  beta, // Beta users with basic HCA features
+  production, // Full production with advanced features
+  advance // Future features with AI optimization
 }
 
 /// Emergency alert system for critical failures
@@ -366,12 +376,13 @@ class HCAEmergencySystems {
 
     // Check if emergency threshold exceeded
     if (HCAFeatureFlags._emergencyTriggers >= _maxEmergencyTriggers) {
-      StructuredLogger.fatal('CRITICAL: Emergency threshold exceeded. Forcing immediate rollback.',
-        context: {
-          'emergencyTriggers': HCAFeatureFlags._emergencyTriggers,
-          'maxTriggers': _maxEmergencyTriggers,
-          'timestamp': DateTime.now().toIso8601String()
-        });
+      StructuredLogger.fatal(
+          'CRITICAL: Emergency threshold exceeded. Forcing immediate rollback.',
+          context: {
+            'emergencyTriggers': HCAFeatureFlags._emergencyTriggers,
+            'maxTriggers': _maxEmergencyTriggers,
+            'timestamp': DateTime.now().toIso8601String()
+          });
       await HCAFeatureFlags.emergencyRollback('Emergency threshold exceeded');
 
       // Could trigger additional enterprise notifications here
@@ -394,13 +405,16 @@ class HCAMonitoringSystem {
     final avgFrameTime = PerformanceMonitor.averageFrameTime;
 
     // Evaluate health conditions
-    final frameTimeCritical = (_alertThresholds['frameTime']!['critical'] as num).toDouble();
+    final frameTimeCritical =
+        (_alertThresholds['frameTime']!['critical'] as num).toDouble();
     if (avgFrameTime > frameTimeCritical) {
-      HCAEmergencySystems.triggerCriticalAlert('Frame time exceeded critical threshold');
+      HCAEmergencySystems.triggerCriticalAlert(
+          'Frame time exceeded critical threshold');
       return;
     }
 
-    final cacheHitRateCritical = (_alertThresholds['cacheHitRate']!['critical'] as num).toDouble();
+    final cacheHitRateCritical =
+        (_alertThresholds['cacheHitRate']!['critical'] as num).toDouble();
     if (cacheHitRate < cacheHitRateCritical) {
       HCAEmergencySystems.triggerCriticalAlert('Cache hit rate critically low');
       return;

@@ -3,11 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:sparkcircuit/application/providers.dart';
+import 'package:sparkcircuit/application/services/level_service.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
+import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'package:sparkcircuit/infrastructure/audio/audio_service.dart';
 import 'package:sparkcircuit/infrastructure/rendering/asset_manager.dart';
-import 'package:sparkcircuit/application/services/level_service.dart';
-import 'package:sparkcircuit/domain/entities/entities.dart';
+
 // Mock classes for testing - using direct imports to avoid path issues
 class MockAudioService extends Mock implements AudioService {}
 
@@ -29,7 +30,9 @@ class MockLevelService extends Mock implements LevelService {
   Future<List<String>> getAvailableLevelIds() async => [];
 
   @override
-  Future<List<LevelDefinition>> getLevelsByDifficulty(String difficulty) async => [];
+  Future<List<LevelDefinition>> getLevelsByDifficulty(
+          String difficulty) async =>
+      [];
 
   @override
   Future<List<LevelDefinition>> getLevelsByTag(String tag) async => [];
@@ -56,8 +59,8 @@ List<Override> createTestProviderOverrides() {
       const GridConfiguration(
         rows: 10,
         cols: 10,
-        cellSize: 60.0,
-        scale: 1.0,
+        cellSize: 60,
+        scale: 1,
         panOffset: Offset.zero,
       ),
     ),
@@ -102,14 +105,14 @@ Widget wrapWithTestProviders(Widget child) {
 // Helper matcher for grid coordinate comparisons
 Matcher equalsOffset(Offset expected) {
   return predicate<Offset>(
-    (actual) => actual.dx == expected.dx && actual.dy == expected.dy,
-    'equals $expected'
-  );
+      (actual) => actual.dx == expected.dx && actual.dy == expected.dy,
+      'equals $expected');
 }
 
 // Helper function to create test gestures
-Future<TestGesture> createTestGestureAt(WidgetTester tester, Offset position) async {
-  final TestGesture gesture = await tester.createGesture();
+Future<TestGesture> createTestGestureAt(
+    WidgetTester tester, Offset position) async {
+  final gesture = await tester.createGesture();
   await gesture.down(position);
   return gesture;
 }

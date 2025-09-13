@@ -1,8 +1,9 @@
 import 'dart:ui';
+
 import '../../../core/debug/structured_logger.dart';
-import '../../../domain/entities/core/component.dart';
-import '../../../core/services/optimized_grid_manager.dart';
 import '../../../core/events/domain_events.dart';
+import '../../../core/services/optimized_grid_manager.dart';
+import '../../../domain/entities/core/component.dart';
 
 /// Request DTOs for component use cases
 class PlaceComponentRequest {
@@ -52,16 +53,18 @@ class ComponentPlacementResult {
   factory ComponentPlacementResult.success({
     required String componentId,
     required ComponentModel component,
-  }) => ComponentPlacementResult._(
-    success: true,
-    componentId: componentId,
-    component: component,
-  );
+  }) =>
+      ComponentPlacementResult._(
+        success: true,
+        componentId: componentId,
+        component: component,
+      );
 
-  factory ComponentPlacementResult.failure(String error) => ComponentPlacementResult._(
-    success: false,
-    errorMessage: error,
-  );
+  factory ComponentPlacementResult.failure(String error) =>
+      ComponentPlacementResult._(
+        success: false,
+        errorMessage: error,
+      );
 }
 
 /// Component repository interface (Clean Architecture)
@@ -95,12 +98,14 @@ class PlaceComponentUseCase {
     required this.gridManager,
   });
 
-  Future<ComponentPlacementResult> execute(PlaceComponentRequest request) async {
+  Future<ComponentPlacementResult> execute(
+      PlaceComponentRequest request) async {
     try {
-      StructuredLogger.info('PlaceComponentUseCase: Executing place component', context: {
-        'position': request.position.toString(),
-        'componentType': request.componentType.toString(),
-      });
+      StructuredLogger.info('PlaceComponentUseCase: Executing place component',
+          context: {
+            'position': request.position.toString(),
+            'componentType': request.componentType.toString(),
+          });
 
       // Business rule: Check if position is available
       if (!gridManager.canPlaceComponent(request.position)) {
@@ -135,21 +140,24 @@ class PlaceComponentUseCase {
         componentType: request.componentType.toString(),
       ));
 
-      StructuredLogger.info('PlaceComponentUseCase: Component placed successfully', context: {
-        'componentId': component.id,
-        'position': request.position.toString(),
-      });
+      StructuredLogger.info(
+          'PlaceComponentUseCase: Component placed successfully',
+          context: {
+            'componentId': component.id,
+            'position': request.position.toString(),
+          });
 
       return ComponentPlacementResult.success(
         componentId: component.id,
         component: component,
       );
     } catch (e) {
-      StructuredLogger.error('PlaceComponentUseCase: Failed to place component', context: {
-        'error': e.toString(),
-        'position': request.position.toString(),
-        'componentType': request.componentType.toString(),
-      });
+      StructuredLogger.error('PlaceComponentUseCase: Failed to place component',
+          context: {
+            'error': e.toString(),
+            'position': request.position.toString(),
+            'componentType': request.componentType.toString(),
+          });
 
       return ComponentPlacementResult.failure('Failed to place component: $e');
     }
@@ -180,11 +188,14 @@ class RemoveComponentUseCase {
     required this.gridManager,
   });
 
-  Future<ComponentPlacementResult> execute(RemoveComponentRequest request) async {
+  Future<ComponentPlacementResult> execute(
+      RemoveComponentRequest request) async {
     try {
-      StructuredLogger.info('RemoveComponentUseCase: Executing remove component', context: {
-        'position': request.position.toString(),
-      });
+      StructuredLogger.info(
+          'RemoveComponentUseCase: Executing remove component',
+          context: {
+            'position': request.position.toString(),
+          });
 
       // Get component at position
       final component = await repository.getComponentAt(request.position);
@@ -205,20 +216,24 @@ class RemoveComponentUseCase {
         componentType: component.type.toString(),
       ));
 
-      StructuredLogger.info('RemoveComponentUseCase: Component removed successfully', context: {
-        'componentId': component.id,
-        'position': request.position.toString(),
-      });
+      StructuredLogger.info(
+          'RemoveComponentUseCase: Component removed successfully',
+          context: {
+            'componentId': component.id,
+            'position': request.position.toString(),
+          });
 
       return ComponentPlacementResult.success(
         componentId: component.id,
         component: component,
       );
     } catch (e) {
-      StructuredLogger.error('RemoveComponentUseCase: Failed to remove component', context: {
-        'error': e.toString(),
-        'position': request.position.toString(),
-      });
+      StructuredLogger.error(
+          'RemoveComponentUseCase: Failed to remove component',
+          context: {
+            'error': e.toString(),
+            'position': request.position.toString(),
+          });
 
       return ComponentPlacementResult.failure('Failed to remove component: $e');
     }
@@ -237,20 +252,23 @@ class MoveComponentUseCase {
 
   Future<ComponentPlacementResult> execute(MoveComponentRequest request) async {
     try {
-      StructuredLogger.info('MoveComponentUseCase: Executing move component', context: {
-        'fromPosition': request.fromPosition.toString(),
-        'toPosition': request.toPosition.toString(),
-      });
+      StructuredLogger.info('MoveComponentUseCase: Executing move component',
+          context: {
+            'fromPosition': request.fromPosition.toString(),
+            'toPosition': request.toPosition.toString(),
+          });
 
       // Get component at source position
       final component = await repository.getComponentAt(request.fromPosition);
       if (component == null) {
-        return ComponentPlacementResult.failure('No component at source position');
+        return ComponentPlacementResult.failure(
+            'No component at source position');
       }
 
       // Check if destination is available
       if (!gridManager.canPlaceComponent(request.toPosition)) {
-        return ComponentPlacementResult.failure('Destination position is not available');
+        return ComponentPlacementResult.failure(
+            'Destination position is not available');
       }
 
       // Update component position
@@ -267,8 +285,8 @@ class MoveComponentUseCase {
       await repository.updateComponent(updatedComponent);
 
       // Update grid manager
-      gridManager.removeComponent(request.fromPosition);
-      gridManager.placeComponent(request.toPosition);
+      gridManager.removeComponent(request.fromPosition); // ignore: cascade_invocations
+      gridManager.placeComponent(request.toPosition); // ignore: cascade_invocations
 
       // Publish domain event
       domainEventBus.publish(ComponentMovedEvent(
@@ -278,22 +296,25 @@ class MoveComponentUseCase {
         componentType: component.type.toString(),
       ));
 
-      StructuredLogger.info('MoveComponentUseCase: Component moved successfully', context: {
-        'componentId': component.id,
-        'fromPosition': request.fromPosition.toString(),
-        'toPosition': request.toPosition.toString(),
-      });
+      StructuredLogger.info(
+          'MoveComponentUseCase: Component moved successfully',
+          context: {
+            'componentId': component.id,
+            'fromPosition': request.fromPosition.toString(),
+            'toPosition': request.toPosition.toString(),
+          });
 
       return ComponentPlacementResult.success(
         componentId: component.id,
         component: updatedComponent,
       );
     } catch (e) {
-      StructuredLogger.error('MoveComponentUseCase: Failed to move component', context: {
-        'error': e.toString(),
-        'fromPosition': request.fromPosition.toString(),
-        'toPosition': request.toPosition.toString(),
-      });
+      StructuredLogger.error('MoveComponentUseCase: Failed to move component',
+          context: {
+            'error': e.toString(),
+            'fromPosition': request.fromPosition.toString(),
+            'toPosition': request.toPosition.toString(),
+          });
 
       return ComponentPlacementResult.failure('Failed to move component: $e');
     }
@@ -312,7 +333,8 @@ class ValidateCircuitUseCase {
 
   Future<CircuitValidationResult> execute() async {
     try {
-      StructuredLogger.info('ValidateCircuitUseCase: Executing circuit validation');
+      StructuredLogger.info(
+          'ValidateCircuitUseCase: Executing circuit validation');
 
       final components = await repository.getAllComponents();
       final errors = <String>[];
@@ -321,7 +343,8 @@ class ValidateCircuitUseCase {
       // Business rule: Check for isolated components
       final connectedComponents = await _findConnectedComponents(components);
       if (connectedComponents.length < components.length) {
-        warnings.add('${components.length - connectedComponents.length} components are isolated');
+        warnings.add(
+            '${components.length - connectedComponents.length} components are isolated');
       }
 
       // Business rule: Check for voltage sources
@@ -331,7 +354,8 @@ class ValidateCircuitUseCase {
       }
 
       // Business rule: Check for complete circuits
-      final hasLoad = components.any((c) => c.type == ComponentType.bulb || c.type == ComponentType.buzzer);
+      final hasLoad = components.any((c) =>
+          c.type == ComponentType.bulb || c.type == ComponentType.buzzer);
       if (!hasLoad) {
         warnings.add('Circuit has no load (bulb or buzzer)');
       }
@@ -342,12 +366,14 @@ class ValidateCircuitUseCase {
 
       final isValid = errors.isEmpty;
 
-      StructuredLogger.info('ValidateCircuitUseCase: Circuit validation completed', context: {
-        'isValid': isValid,
-        'errorCount': errors.length,
-        'warningCount': warnings.length,
-        'componentCount': components.length,
-      });
+      StructuredLogger.info(
+          'ValidateCircuitUseCase: Circuit validation completed',
+          context: {
+            'isValid': isValid,
+            'errorCount': errors.length,
+            'warningCount': warnings.length,
+            'componentCount': components.length,
+          });
 
       return CircuitValidationResult(
         isValid: isValid,
@@ -356,9 +382,11 @@ class ValidateCircuitUseCase {
         componentCount: components.length,
       );
     } catch (e) {
-      StructuredLogger.error('ValidateCircuitUseCase: Circuit validation failed', context: {
-        'error': e.toString(),
-      });
+      StructuredLogger.error(
+          'ValidateCircuitUseCase: Circuit validation failed',
+          context: {
+            'error': e.toString(),
+          });
 
       return CircuitValidationResult(
         isValid: false,
@@ -369,18 +397,23 @@ class ValidateCircuitUseCase {
     }
   }
 
-  Future<List<ComponentModel>> _findConnectedComponents(List<ComponentModel> components) async {
+  Future<List<ComponentModel>> _findConnectedComponents(
+      List<ComponentModel> components) async {
     // Simplified connectivity check - in real implementation, this would use
     // wire network analysis to determine actual connectivity
-    return components.where((component) => component.type != ComponentType.wire).toList();
+    return components
+        .where((component) => component.type != ComponentType.wire)
+        .toList();
   }
 
-  Future<List<String>> _validateConnections(List<ComponentModel> components) async {
+  Future<List<String>> _validateConnections(
+      List<ComponentModel> components) async {
     final errors = <String>[];
 
     // Check for components with invalid positions
     for (final component in components) {
-      final position = Offset(component.col.toDouble(), component.row.toDouble());
+      final position =
+          Offset(component.col.toDouble(), component.row.toDouble());
       if (!gridManager.isWithinBounds(position)) {
         errors.add('Component ${component.id} is outside grid bounds');
       }

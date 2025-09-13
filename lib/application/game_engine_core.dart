@@ -3,7 +3,6 @@ import 'package:sparkcircuit/domain/entities/entities.dart';
 import 'game_engine_state.dart'; // Corrected import
 import 'render_state.dart'; // Corrected import
 
-
 /// The pure engine core that applies updates and produces new GameEngineState.
 class GameEngineCore {
   GameEngineCore(); // No longer takes SimulationManager

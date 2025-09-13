@@ -173,7 +173,8 @@ class InteractionStateNotifier extends StateNotifier<InteractionState> {
   /// Set state directly (for V2 API compatibility)
   void setState(InteractionState newState) {
     state = newState;
-    Logger.log('Interaction: State set directly - mode: ${newState.interactionMode}');
+    Logger.log(
+        'Interaction: State set directly - mode: ${newState.interactionMode}');
   }
 
   /// Start drag operation (for V2 API compatibility)
@@ -188,6 +189,7 @@ class InteractionStateNotifier extends StateNotifier<InteractionState> {
 }
 
 // Provider for InteractionStateNotifier
-final interactionStateNotifierProvider = StateNotifierProvider<InteractionStateNotifier, InteractionState>((ref) {
+final interactionStateNotifierProvider =
+    StateNotifierProvider<InteractionStateNotifier, InteractionState>((ref) {
   return InteractionStateNotifier();
 });

@@ -1,18 +1,19 @@
 import '../core/result.dart';
-import '../transaction.dart';
 import '../services/power_simulation_service.dart';
+import '../transaction.dart';
+import 'notifier_integrated_use_case.dart';
 import 'simulate_power_flow_action.dart';
 
-import 'notifier_integrated_use_case.dart';
-
 /// Use case for simulating power flow and applying result directly to GridNotifier
-class SimulatePowerFlowUseCase extends NotifierIntegratedUseCase<SimulatePowerFlowAction> {
+class SimulatePowerFlowUseCase
+    extends NotifierIntegratedUseCase<SimulatePowerFlowAction> {
   final PowerSimulationService _simulationService;
 
   const SimulatePowerFlowUseCase(this._simulationService);
 
   @override
-  Result<void> validate(SimulatePowerFlowAction action, NotifierContext notifiers) {
+  Result<void> validate(
+      SimulatePowerFlowAction action, NotifierContext notifiers) {
     // No-op validation for now; grid always exists
     return const Success(null);
   }

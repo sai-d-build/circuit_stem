@@ -6,8 +6,10 @@ import 'package:sparkcircuit/core/debug/structured_logger.dart';
 class DefaultGridValidationService implements GridValidationService {
   @override
   GridValidationResult validateBounds(int row, int col, GameState gameState) {
-    final isValid = row >= 0 && row < gameState.grid.rows &&
-                   col >= 0 && col < gameState.grid.cols;
+    final isValid = row >= 0 &&
+        row < gameState.grid.rows &&
+        col >= 0 &&
+        col < gameState.grid.cols;
 
     StructuredLogger.debug('Grid bounds validation', context: {
       'position': '($row, $col)',
@@ -18,12 +20,14 @@ class DefaultGridValidationService implements GridValidationService {
     if (isValid) {
       return GridValidationResult.valid();
     } else {
-      return GridValidationResult.invalid('Position ($row, $col) is outside grid bounds');
+      return GridValidationResult.invalid(
+          'Position ($row, $col) is outside grid bounds');
     }
   }
 
   @override
-  GridValidationResult validateAvailability(int row, int col, GameState gameState) {
+  GridValidationResult validateAvailability(
+      int row, int col, GameState gameState) {
     // Check if position is occupied by an existing component
     final isOccupied = gameState.grid.components.values
         .any((component) => component.row == row && component.col == col);
@@ -37,7 +41,8 @@ class DefaultGridValidationService implements GridValidationService {
     if (!isOccupied) {
       return GridValidationResult.valid();
     } else {
-      return GridValidationResult.invalid('Position ($row, $col) is already occupied');
+      return GridValidationResult.invalid(
+          'Position ($row, $col) is already occupied');
     }
   }
 
@@ -68,7 +73,8 @@ class DefaultGridValidationService implements GridValidationService {
   }
 
   @override
-  GridValidationResult findNearestAvailablePosition(int row, int col, GameState gameState) {
+  GridValidationResult findNearestAvailablePosition(
+      int row, int col, GameState gameState) {
     StructuredLogger.debug('Finding nearest available position', context: {
       'targetPosition': '($row, $col)',
       'gridSize': '${gameState.grid.rows}x${gameState.grid.cols}',
@@ -83,10 +89,10 @@ class DefaultGridValidationService implements GridValidationService {
     // Search in expanding squares around the target position
     const maxSearchRadius = 5; // Limit search to avoid performance issues
 
-    for (int radius = 1; radius <= maxSearchRadius; radius++) {
+    for (var radius = 1; radius <= maxSearchRadius; radius++) {
       // Check all positions at this radius
-      for (int dr = -radius; dr <= radius; dr++) {
-        for (int dc = -radius; dc <= radius; dc++) {
+      for (var dr = -radius; dr <= radius; dr++) {
+        for (var dc = -radius; dc <= radius; dc++) {
           // Only check perimeter positions to avoid re-checking center
           if (dr.abs() == radius || dc.abs() == radius) {
             final checkRow = row + dr;
@@ -101,21 +107,21 @@ class DefaultGridValidationService implements GridValidationService {
               });
 
               return GridValidationResult.suggestion(
-                'Position ($row, $col) occupied, suggested ($checkRow, $checkCol)',
-                checkRow,
-                checkCol
-              );
+                  'Position ($row, $col) occupied, suggested ($checkRow, $checkCol)',
+                  checkRow,
+                  checkCol);
             }
           }
         }
       }
     }
 
-    StructuredLogger.warning('No available position found within search radius', context: {
-      'targetPosition': '($row, $col)',
-      'maxSearchRadius': maxSearchRadius,
-      'totalOccupied': gameState.grid.components.length,
-    });
+    StructuredLogger.warning('No available position found within search radius',
+        context: {
+          'targetPosition': '($row, $col)',
+          'maxSearchRadius': maxSearchRadius,
+          'totalOccupied': gameState.grid.components.length,
+        });
 
     return GridValidationResult.invalid('No available positions found nearby');
   }
@@ -124,8 +130,8 @@ class DefaultGridValidationService implements GridValidationService {
   List<(int, int)> getAvailablePositions(GameState gameState) {
     final availablePositions = <(int, int)>[];
 
-    for (int row = 0; row < gameState.grid.rows; row++) {
-      for (int col = 0; col < gameState.grid.cols; col++) {
+    for (var row = 0; row < gameState.grid.rows; row++) {
+      for (var col = 0; col < gameState.grid.cols; col++) {
         final validation = validatePosition(row, col, gameState);
         if (validation.isValid) {
           availablePositions.add((row, col));
@@ -153,7 +159,7 @@ class DefaultGridValidationService implements GridValidationService {
     final totalCells = gameState.grid.rows * gameState.grid.cols;
     final occupiedCells = gameState.grid.components.length;
 
-    if (totalCells == 0) return 0.0;
+    if (totalCells == 0) return 0;
 
     return (occupiedCells / totalCells) * 100.0;
   }

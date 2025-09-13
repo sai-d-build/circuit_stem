@@ -3,11 +3,13 @@ import '../transaction.dart';
 import 'component_action.dart';
 import 'notifier_integrated_use_case.dart';
 
-class RotateComponentUseCase extends NotifierIntegratedUseCase<RotateComponentAction> {
+class RotateComponentUseCase
+    extends NotifierIntegratedUseCase<RotateComponentAction> {
   const RotateComponentUseCase();
 
   @override
-  Result<void> validate(RotateComponentAction action, NotifierContext notifiers) {
+  Result<void> validate(
+      RotateComponentAction action, NotifierContext notifiers) {
     final component = notifiers.grid.current.componentsById[action.componentId];
     if (component == null) {
       return const Failure('Component not found');
@@ -27,7 +29,7 @@ class RotateComponentUseCase extends NotifierIntegratedUseCase<RotateComponentAc
     GameTransaction transaction,
   ) async {
     try {
-            final currentGrid = notifiers.grid.current;
+      final currentGrid = notifiers.grid.current;
       final component = currentGrid.componentsById[action.componentId];
 
       if (component == null) {

@@ -1,8 +1,10 @@
-import 'dart:ui' as ui;
 import 'dart:math';
+import 'dart:ui' as ui;
+
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../core/debug/structured_logger.dart';
 
 class AssetManager {
@@ -187,7 +189,7 @@ class AssetManager {
       paint.style = PaintingStyle.stroke;
       paint.color = Colors.orange;
       paint.strokeWidth = 2;
-      for (int i = 0; i < 8; i++) {
+      for (var i = 0; i < 8; i++) {
         final angle = (i * 45) * (3.14159 / 180);
         final startX = center.dx + (radius + 5) * cos(angle);
         final startY = center.dy + (radius + 5) * sin(angle);

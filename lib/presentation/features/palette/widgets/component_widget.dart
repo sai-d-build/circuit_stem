@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sparkcircuit/presentation/core/animations/glow_effect.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
 import 'package:sparkcircuit/presentation/state/palette_state.dart';
-import 'package:sparkcircuit/presentation/core/animations/glow_effect.dart';
 
 class ComponentWidget extends StatefulWidget {
   final ComponentDefinition component;
@@ -35,9 +35,9 @@ class _ComponentWidgetState extends State<ComponentWidget>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
-      begin: 1.0,
+      begin: 1,
       end: 0.95,
     ).animate(CurvedAnimation(
       parent: _animationController,
@@ -57,7 +57,7 @@ class _ComponentWidgetState extends State<ComponentWidget>
     final circuitColors = theme.extension<CircuitColorScheme>()!;
     final canUse = widget.inventory?.canUse ?? false;
     final isExhausted = widget.inventory?.isExhausted ?? false;
-    
+
     return AnimatedBuilder(
       animation: _scaleAnimation,
       builder: (context, child) {
@@ -71,14 +71,16 @@ class _ComponentWidgetState extends State<ComponentWidget>
               color: Colors.transparent,
               child: InkWell(
                 onTap: canUse ? widget.onTap : null,
-                onTapDown: canUse ? (_) => _animationController.forward() : null,
+                onTapDown:
+                    canUse ? (_) => _animationController.forward() : null,
                 onTapUp: canUse ? (_) => _animationController.reverse() : null,
                 onTapCancel: () => _animationController.reverse(),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: _getBackgroundColor(circuitColors, canUse, isExhausted),
+                    color:
+                        _getBackgroundColor(circuitColors, canUse, isExhausted),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: widget.isSelected && canUse
@@ -89,7 +91,8 @@ class _ComponentWidgetState extends State<ComponentWidget>
                     boxShadow: widget.isSelected && canUse
                         ? [
                             BoxShadow(
-                              color: circuitColors.primary.withValues(alpha: 0.2),
+                              color:
+                                  circuitColors.primary.withValues(alpha: 0.2),
                               offset: const Offset(0, 2),
                               blurRadius: 8,
                             ),
@@ -101,7 +104,8 @@ class _ComponentWidgetState extends State<ComponentWidget>
                       _buildIcon(circuitColors, canUse, isExhausted),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _buildInfo(theme, circuitColors, canUse, isExhausted),
+                        child: _buildInfo(
+                            theme, circuitColors, canUse, isExhausted),
                       ),
                       _buildInventoryIndicator(theme, circuitColors, canUse),
                     ],

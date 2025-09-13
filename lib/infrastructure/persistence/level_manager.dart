@@ -1,12 +1,14 @@
 import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meta/meta.dart';
-import '../../common/logger.dart';
-import '../../common/assets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
-import 'level_manager_state.dart';
+
+import '../../common/assets.dart';
+import '../../common/logger.dart';
 import '../rendering/asset_manager.dart';
+import 'level_manager_state.dart';
 
 /// Notifier for managing level state, including loading, progress, and persistence.
 class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
@@ -59,7 +61,7 @@ class LevelManagerNotifier extends StateNotifier<LevelManagerState> {
       }
 
       // Unlock levels based on progress
-      for (int i = 1; i < allLevels.length; i++) {
+      for (var i = 1; i < allLevels.length; i++) {
         if (completedIds.contains(allLevels[i - 1].id)) {
           allLevels[i] = allLevels[i].copyWith(unlocked: true);
         }

@@ -33,11 +33,11 @@ class GameCanvasState with _$GameCanvasState {
   }) = _GameCanvasState;
 
   factory GameCanvasState.initial() => GameCanvasState(
-    currentLevel: null,
-    renderingData: CanvasRenderingData.empty(),
-    interactionState: InteractionState.idle(),
-    viewportState: ViewportState.defaultViewport(),
-  );
+        currentLevel: null,
+        renderingData: CanvasRenderingData.empty(),
+        interactionState: InteractionState.idle(),
+        viewportState: ViewportState.defaultViewport(),
+      );
 }
 
 @freezed
@@ -55,11 +55,11 @@ class InteractionState with _$InteractionState {
   }) = _InteractionState;
 
   factory InteractionState.idle() => const InteractionState(
-    mode: GestureMode.idle,
-    dragPosition: null,
-    draggedComponentType: null,
-    mousePosition: null,
-  );
+        mode: GestureMode.idle,
+        dragPosition: null,
+        draggedComponentType: null,
+        mousePosition: null,
+      );
 
   factory InteractionState.fromJson(Map<String, dynamic> json) =>
       _$InteractionStateFromJson(json);
@@ -75,11 +75,11 @@ class ViewportState with _$ViewportState {
   }) = _ViewportState;
 
   factory ViewportState.defaultViewport() => ViewportState(
-    scale: 1.0,
-    panOffset: Offset.zero,
-    canvasSize: const Size(800, 600),
-    gridConfiguration: GridConfiguration.standard(),
-  );
+        scale: 1,
+        panOffset: Offset.zero,
+        canvasSize: const Size(800, 600),
+        gridConfiguration: GridConfiguration.standard(),
+      );
 }
 
 @freezed
@@ -93,8 +93,8 @@ class CanvasRenderingData with _$CanvasRenderingData {
   }) = _CanvasRenderingData;
 
   factory CanvasRenderingData.empty() => CanvasRenderingData(
-    gridConfiguration: GridConfiguration.standard(),
-  );
+        gridConfiguration: GridConfiguration.standard(),
+      );
 
   factory CanvasRenderingData.fromJson(Map<String, dynamic> json) =>
       _$CanvasRenderingDataFromJson(json);

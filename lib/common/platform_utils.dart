@@ -6,16 +6,19 @@ class PlatformUtils {
   static bool get isIOS => !kIsWeb && Platform.isIOS;
   static bool get isAndroid => !kIsWeb && Platform.isAndroid;
   static bool get isWeb => kIsWeb;
-  static bool get isDesktop => !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
+  static bool get isDesktop =>
+      !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
 
   // Device capability detection
   static bool get isHighEndDevice {
     // This would be expanded with actual device detection
     // For now, use screen size and pixel ratio as proxy
-    final pixelRatio = WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
-    final screenSize = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
+    final pixelRatio =
+        WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+    final screenSize =
+        WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
     final width = screenSize.width / pixelRatio;
-        // final height = screenSize.height / pixelRatio;
+    // final height = screenSize.height / pixelRatio;
 
     // Consider devices with screen width > 400dp and pixel ratio > 2.5 as high-end
     return width > 400 && pixelRatio > 2.5;
@@ -26,8 +29,8 @@ class PlatformUtils {
   // Platform-specific rendering adjustments
   static double get platformBlurMultiplier {
     if (isIOS) return 0.8; // iOS Metal handles blur differently
-    if (isAndroid) return 1.0; // Android OpenGL baseline
-    return 1.0;
+    if (isAndroid) return 1; // Android OpenGL baseline
+    return 1;
   }
 
   static Color getPlatformAdjustedColor(Color color) {

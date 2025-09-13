@@ -11,7 +11,7 @@ class CloudDebugPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // final cloudStatus = ref.watch(cloudStatusProvider); // Temporarily commented out
-    final cloudStatus = "disabled"; // Placeholder
+    const cloudStatus = 'disabled'; // Placeholder
 
     // Only show in debug mode
     if (!CloudConfig.enableCloudLogging) {
@@ -38,9 +38,9 @@ class CloudDebugPanel extends ConsumerWidget {
               Text(
                 'Cloud Debug Panel',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Colors.yellow,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Colors.yellow,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const Spacer(),
               IconButton(
@@ -60,8 +60,8 @@ class CloudDebugPanel extends ConsumerWidget {
           Text(
             'Status: $cloudStatus',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white,
-            ),
+                  color: Colors.white,
+                ),
           ),
 
           const SizedBox(height: 8),
@@ -76,28 +76,28 @@ class CloudDebugPanel extends ConsumerWidget {
                 'Local Only',
                 CloudServiceMode.localOnly,
                 currentCloudMode == CloudServiceMode.localOnly,
-                () => CloudTestingUtils.disableCloudSync(),
+                CloudTestingUtils.disableCloudSync,
               ),
               _buildModeButton(
                 context,
                 'Mock Cloud',
                 CloudServiceMode.mocked,
                 currentCloudMode == CloudServiceMode.mocked,
-                () => CloudTestingUtils.useMockedCloud(),
+                CloudTestingUtils.useMockedCloud,
               ),
               _buildModeButton(
                 context,
                 'Emulator',
                 CloudServiceMode.emulator,
                 currentCloudMode == CloudServiceMode.emulator,
-                () => CloudTestingUtils.useEmulator(),
+                CloudTestingUtils.useEmulator,
               ),
               _buildModeButton(
                 context,
                 'Real Cloud',
                 CloudServiceMode.real,
                 currentCloudMode == CloudServiceMode.real,
-                () => CloudTestingUtils.enableCloudSync(),
+                CloudTestingUtils.enableCloudSync,
               ),
             ],
           ),
@@ -133,9 +133,9 @@ class CloudDebugPanel extends ConsumerWidget {
           Text(
             '⚠️ Debug panel only visible in debug mode',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.orange,
-              fontSize: 10,
-            ),
+                  color: Colors.orange,
+                  fontSize: 10,
+                ),
           ),
         ],
       ),
@@ -157,8 +157,8 @@ class CloudDebugPanel extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         minimumSize: const Size(0, 32),
         textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-          fontSize: 11,
-        ),
+              fontSize: 11,
+            ),
       ),
       child: Text(label),
     );
@@ -174,10 +174,10 @@ extension CloudDebugExtension on Widget {
     return Stack(
       children: [
         this,
-        Positioned(
+        const Positioned(
           top: 80,
           right: 8,
-          child: const CloudDebugPanel(),
+          child: CloudDebugPanel(),
         ),
       ],
     );

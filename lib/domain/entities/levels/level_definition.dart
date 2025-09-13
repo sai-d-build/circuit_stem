@@ -48,10 +48,49 @@ class GridConfig with _$GridConfig {
     required int width,
     required int height,
     String? background,
+    BoundaryConfig? boundaries,
   }) = _GridConfig;
 
   factory GridConfig.fromJson(Map<String, dynamic> json) =>
       _$GridConfigFromJson(json);
+}
+
+@freezed
+class BoundaryConfig with _$BoundaryConfig {
+  const factory BoundaryConfig({
+    required PlayableArea playableArea,
+    required VisualArea visualArea,
+    String? style,
+    String? behavior,
+    Map<String, dynamic>? settings,
+  }) = _BoundaryConfig;
+
+  factory BoundaryConfig.fromJson(Map<String, dynamic> json) =>
+      _$BoundaryConfigFromJson(json);
+}
+
+@freezed
+class PlayableArea with _$PlayableArea {
+  const factory PlayableArea({
+    required int width,
+    required int height,
+    String? description,
+  }) = _PlayableArea;
+
+  factory PlayableArea.fromJson(Map<String, dynamic> json) =>
+      _$PlayableAreaFromJson(json);
+}
+
+@freezed
+class VisualArea with _$VisualArea {
+  const factory VisualArea({
+    required int width,
+    required int height,
+    String? description,
+  }) = _VisualArea;
+
+  factory VisualArea.fromJson(Map<String, dynamic> json) =>
+      _$VisualAreaFromJson(json);
 }
 
 @freezed

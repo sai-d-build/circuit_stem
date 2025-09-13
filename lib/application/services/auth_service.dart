@@ -159,7 +159,8 @@ class FirebaseAuthService implements AuthService {
     return domain.User(
       id: firebaseUser.uid,
       uid: firebaseUser.uid,
-      username: firebaseUser.displayName ?? firebaseUser.email!.split('@').first,
+      username:
+          firebaseUser.displayName ?? firebaseUser.email!.split('@').first,
       email: firebaseUser.email!,
       displayName: firebaseUser.displayName,
       photoUrl: firebaseUser.photoURL,
@@ -171,21 +172,21 @@ class FirebaseAuthService implements AuthService {
   AuthException _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
-        return AuthException.userNotFound();
+        return AuthException.userNotFound(); // ignore: cascade_invocations
       case 'wrong-password':
-        return AuthException.invalidCredentials();
+        return AuthException.invalidCredentials(); // ignore: cascade_invocations
       case 'email-already-in-use':
-        return AuthException.emailAlreadyInUse();
+        return AuthException.emailAlreadyInUse(); // ignore: cascade_invocations
       case 'weak-password':
-        return AuthException.weakPassword();
+        return AuthException.weakPassword(); // ignore: cascade_invocations
       case 'invalid-email':
-        return AuthException.invalidEmail();
+        return AuthException.invalidEmail(); // ignore: cascade_invocations
       case 'user-disabled':
-        return AuthException.userDisabled();
+        return AuthException.userDisabled(); // ignore: cascade_invocations
       case 'too-many-requests':
-        return AuthException.tooManyRequests();
+        return AuthException.tooManyRequests(); // ignore: cascade_invocations
       default:
-        return AuthException.unknown(e.message ?? 'Unknown error');
+        return AuthException.unknown(e.message ?? 'Unknown error'); // ignore: cascade_invocations
     }
   }
 }
@@ -215,8 +216,8 @@ class AuthException implements Exception {
   factory AuthException.userDisabled() =>
       AuthException._('user-disabled', 'This account has been disabled');
 
-  factory AuthException.tooManyRequests() =>
-      AuthException._('too-many-requests', 'Too many failed attempts. Try again later');
+  factory AuthException.tooManyRequests() => AuthException._(
+      'too-many-requests', 'Too many failed attempts. Try again later');
 
   factory AuthException.unknown(String message) =>
       AuthException._('unknown', message);

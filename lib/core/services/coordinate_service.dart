@@ -5,7 +5,7 @@ import 'unified_coordinate_service.dart';
 /// Canonical coordinate conversion service that provides a single source of truth
 /// for all screen ↔ grid transformations in the application.
 class CoordinateService {
-  static const double defaultCellSize = 60.0;
+  static const double defaultCellSize = 60;
 
   /// Configuration for coordinate transformations
   final double cellSize;
@@ -81,15 +81,16 @@ class CoordinateService {
       scale: scale,
       panOffset: panOffset,
     );
-    return UnifiedCoordinateService().getValidGridPosition(screenPosition, config);
+    return UnifiedCoordinateService()
+        .getValidGridPosition(screenPosition, config);
   }
 
   /// Check if grid coordinates are within bounds
   bool isValidGridPosition(Offset gridPos) {
     return gridPos.dx >= 0 &&
-           gridPos.dy >= 0 &&
-           gridPos.dx < gridWidth &&
-           gridPos.dy < gridHeight;
+        gridPos.dy >= 0 &&
+        gridPos.dx < gridWidth &&
+        gridPos.dy < gridHeight;
   }
 
   /// Check if screen coordinates are within grid bounds
@@ -101,7 +102,8 @@ class CoordinateService {
       scale: scale,
       panOffset: panOffset,
     );
-    return UnifiedCoordinateService().isWithinGridBounds(screenPosition, config);
+    return UnifiedCoordinateService()
+        .isWithinGridBounds(screenPosition, config);
   }
 
   /// Get the center position of a grid cell in screen coordinates
@@ -118,7 +120,8 @@ class CoordinateService {
       scale: scale,
       panOffset: panOffset,
     );
-    return UnifiedCoordinateService().calculateVisibleGridBounds(config, screenSize);
+    return UnifiedCoordinateService()
+        .calculateVisibleGridBounds(config, screenSize);
   }
 
   /// Check if a grid position is visible on screen
@@ -161,10 +164,10 @@ class CoordinateService {
     if (identical(this, other)) return true;
     if (other is! CoordinateService) return false;
     return cellSize == other.cellSize &&
-           scale == other.scale &&
-           panOffset == other.panOffset &&
-           gridWidth == other.gridWidth &&
-           gridHeight == other.gridHeight;
+        scale == other.scale &&
+        panOffset == other.panOffset &&
+        gridWidth == other.gridWidth &&
+        gridHeight == other.gridHeight;
   }
 
   @override

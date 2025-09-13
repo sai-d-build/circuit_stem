@@ -1,10 +1,12 @@
 import 'dart:ui';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'command.dart';
+
 import '../../../core/debug/structured_logger.dart';
+import '../../../core/services/optimized_grid_manager.dart';
 import '../../../domain/entities/core/component.dart';
 import '../../../presentation/features/game/controllers/game_canvas_state_notifier.dart';
-import '../../../core/services/optimized_grid_manager.dart';
+import 'command.dart';
 
 /// Command for placing a component on the grid
 class PlaceComponentCommand implements Command {
@@ -23,9 +25,8 @@ class PlaceComponentCommand implements Command {
     required this.componentType,
     required this.canvasController,
     required this.manager,
-  }) :
-    _commandId = 'PlaceComponent_${DateTime.now().millisecondsSinceEpoch}',
-    _timestamp = DateTime.now();
+  })  : _commandId = 'PlaceComponent_${DateTime.now().millisecondsSinceEpoch}',
+        _timestamp = DateTime.now();
 
   @override
   String get id => _commandId;
@@ -40,7 +41,8 @@ class PlaceComponentCommand implements Command {
   bool get canRedo => true;
 
   @override
-  String get description => 'Place ${componentType.toString().split('.').last} at ${position.toString()}';
+  String get description =>
+      'Place ${componentType.toString().split('.').last} at ${position.toString()}';
 
   @override
   Future<CommandResult> execute() async {
@@ -54,8 +56,12 @@ class PlaceComponentCommand implements Command {
       // Check if position is available
       if (!manager.canPlaceComponent(position)) {
         return CommandResult.failure(
-          errorMessage: 'Position ${position.toString()} is not available for component placement',
-          data: {'position': position.toString(), 'componentType': componentType.toString()},
+          errorMessage:
+              'Position ${position.toString()} is not available for component placement',
+          data: {
+            'position': position.toString(),
+            'componentType': componentType.toString()
+          },
         );
       }
 
@@ -173,9 +179,8 @@ class RemoveComponentCommand implements Command {
     required this.position,
     required this.canvasController,
     required this.manager,
-  }) :
-    _commandId = 'RemoveComponent_${DateTime.now().millisecondsSinceEpoch}',
-    _timestamp = DateTime.now();
+  })  : _commandId = 'RemoveComponent_${DateTime.now().millisecondsSinceEpoch}',
+        _timestamp = DateTime.now();
 
   @override
   String get id => _commandId;
@@ -318,9 +323,8 @@ class MoveComponentCommand implements Command {
     required this.toPosition,
     required this.canvasController,
     required this.manager,
-  }) :
-    _commandId = 'MoveComponent_${DateTime.now().millisecondsSinceEpoch}',
-    _timestamp = DateTime.now();
+  })  : _commandId = 'MoveComponent_${DateTime.now().millisecondsSinceEpoch}',
+        _timestamp = DateTime.now();
 
   @override
   String get id => _commandId;
@@ -335,7 +339,8 @@ class MoveComponentCommand implements Command {
   bool get canRedo => true;
 
   @override
-  String get description => 'Move component from ${fromPosition.toString()} to ${toPosition.toString()}';
+  String get description =>
+      'Move component from ${fromPosition.toString()} to ${toPosition.toString()}';
 
   @override
   Future<CommandResult> execute() async {
@@ -349,14 +354,16 @@ class MoveComponentCommand implements Command {
       // Validate the move
       if (!manager.isPositionOccupied(fromPosition)) {
         return CommandResult.failure(
-          errorMessage: 'No component at source position ${fromPosition.toString()}',
+          errorMessage:
+              'No component at source position ${fromPosition.toString()}',
           data: {'fromPosition': fromPosition.toString()},
         );
       }
 
       if (!manager.canPlaceComponent(toPosition)) {
         return CommandResult.failure(
-          errorMessage: 'Destination position ${toPosition.toString()} is not available',
+          errorMessage:
+              'Destination position ${toPosition.toString()} is not available',
           data: {'toPosition': toPosition.toString()},
         );
       }
@@ -372,8 +379,8 @@ class MoveComponentCommand implements Command {
       );
 
       // Perform the move
-      manager.removeComponent(fromPosition);
-      manager.placeComponent(toPosition);
+      manager.removeComponent(fromPosition); // ignore: cascade_invocations
+      manager.placeComponent(toPosition); // ignore: cascade_invocations
 
       StructuredLogger.info('Component moved successfully', context: {
         'fromPosition': fromPosition.toString(),
@@ -413,8 +420,8 @@ class MoveComponentCommand implements Command {
       });
 
       // Move back to original position
-      manager.removeComponent(toPosition);
-      manager.placeComponent(fromPosition);
+      manager.removeComponent(toPosition); // ignore: cascade_invocations
+      manager.placeComponent(fromPosition); // ignore: cascade_invocations
 
       StructuredLogger.info('Component move undone successfully', context: {
         'fromPosition': fromPosition.toString(),

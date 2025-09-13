@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sparkcircuit/presentation/models/drag_models.dart';
 import 'package:sparkcircuit/domain/entities/core/component.dart';
+import 'package:sparkcircuit/presentation/models/drag_models.dart';
 
 void main() {
   group('ComponentDragFeedback Widget Tests', () {
     late ComponentDragData testDragData;
 
     setUp(() {
-      testDragData = ComponentDragData(
+      testDragData = const ComponentDragData(
         componentType: ComponentType.battery,
         componentName: 'Battery',
         description: 'Power source component',
@@ -18,7 +18,8 @@ void main() {
       );
     });
 
-    testWidgets('ComponentDragFeedback renders correctly', (WidgetTester tester) async {
+    testWidgets('ComponentDragFeedback renders correctly',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: ComponentDragFeedback(dragData: testDragData),
@@ -35,7 +36,9 @@ void main() {
       expect(find.text('Battery'), findsOneWidget);
     });
 
-    testWidgets('ComponentDragFeedback shows correct icon for different component types', (WidgetTester tester) async {
+    testWidgets(
+        'ComponentDragFeedback shows correct icon for different component types',
+        (WidgetTester tester) async {
       final testCases = [
         (ComponentType.resistor, Icons.linear_scale),
         (ComponentType.bulb, Icons.lightbulb),
@@ -65,7 +68,8 @@ void main() {
       }
     });
 
-    testWidgets('ComponentDragFeedback has correct size and styling', (WidgetTester tester) async {
+    testWidgets('ComponentDragFeedback has correct size and styling',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: ComponentDragFeedback(dragData: testDragData),
@@ -73,10 +77,12 @@ void main() {
       );
 
       final container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(ComponentDragFeedback),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(ComponentDragFeedback),
+              matching: find.byType(Container),
+            )
+            .first,
       );
 
       // Verify container has correct dimensions
@@ -88,8 +94,9 @@ void main() {
       expect(decoration?.borderRadius, isNotNull);
     });
 
-    testWidgets('ComponentDragFeedback handles long component names', (WidgetTester tester) async {
-      final longNameDragData = ComponentDragData(
+    testWidgets('ComponentDragFeedback handles long component names',
+        (WidgetTester tester) async {
+      const longNameDragData = ComponentDragData(
         componentType: ComponentType.battery,
         componentName: 'Very Long Component Name That Should Be Truncated',
         description: 'Test component with long name',
@@ -99,7 +106,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: SizedBox(
             width: 100,
             height: 100,
@@ -109,7 +116,8 @@ void main() {
       );
 
       // The text should still be findable even if truncated
-      expect(find.text('Very Long Component Name That Should Be Truncated'), findsOneWidget);
+      expect(find.text('Very Long Component Name That Should Be Truncated'),
+          findsOneWidget);
     });
   });
 }

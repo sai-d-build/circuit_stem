@@ -2,13 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../../application/game_engine/v3/providers_v3.dart';
-import '../../../../application/audio_manager.dart';
 import 'package:sparkcircuit/presentation/ui_components/glass_panel.dart';
-import 'package:sparkcircuit/presentation/ui_components/neon_switch.dart';
-import 'package:sparkcircuit/presentation/ui_components/neon_slider.dart';
 import 'package:sparkcircuit/presentation/ui_components/neon_dropdown.dart';
+import 'package:sparkcircuit/presentation/ui_components/neon_slider.dart';
+import 'package:sparkcircuit/presentation/ui_components/neon_switch.dart';
+
+import '../../../../application/audio_manager.dart';
+import '../../../../application/game_engine/v3/providers_v3.dart';
+import '../../../core/theme/app_theme.dart';
 
 // ✅ CLEAN ARCHITECTURE: Settings Service
 class SettingsService {
@@ -19,7 +20,8 @@ class SettingsService {
 
   // Storage operations
   T? readData<T>(String key) => storageService.readData<T>(key);
-  Future<void> saveData<T>(String key, T value) => storageService.saveData<T>(key, value);
+  Future<void> saveData<T>(String key, T value) =>
+      storageService.saveData<T>(key, value);
 
   // Audio operations
   void setSfxVolume(double volume) => audioManager.setSfxVolume(volume);
@@ -44,7 +46,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _musicEnabled = true;
   bool _hintsEnabled = true;
   String _difficulty = 'Normal';
-  double _soundVolume = 1.0;
+  double _soundVolume = 1;
   double _musicVolume = 0.5;
 
   @override
@@ -54,8 +56,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _loadAudioSettings(SettingsService settingsService) async {
-    final soundEnabled = settingsService.readData<bool>('sound_enabled') ?? true;
-    final musicEnabled = settingsService.readData<bool>('music_enabled') ?? true;
+    final soundEnabled =
+        settingsService.readData<bool>('sound_enabled') ?? true;
+    final musicEnabled =
+        settingsService.readData<bool>('music_enabled') ?? true;
     final soundVolume = settingsService.readData<double>('sound_volume') ?? 1.0;
     final musicVolume = settingsService.readData<double>('music_volume') ?? 0.5;
 
@@ -89,7 +93,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // Reset settings to defaults
     await settingsService.saveData<bool>('sound_enabled', true);
     await settingsService.saveData<bool>('music_enabled', true);
-    await settingsService.saveData<double>('sound_volume', 1.0);
+    await settingsService.saveData<double>('sound_volume', 1);
     await settingsService.saveData<double>('music_volume', 0.5);
 
     // Update local state
@@ -103,7 +107,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
 
     // Apply default audio settings
-    settingsService.setSfxVolume(1.0);
+    settingsService.setSfxVolume(1);
     settingsService.setBgmVolume(0.5);
   }
 
@@ -112,43 +116,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final settingsService = ref.watch(settingsServiceProvider);
 
     // Load audio settings on first build
-    if (_soundEnabled == true && _musicEnabled == true && _soundVolume == 1.0 && _musicVolume == 0.5) {
+    if (_soundEnabled == true &&
+        _musicEnabled == true &&
+        _soundVolume == 1.0 &&
+        _musicVolume == 0.5) {
       // This is likely the first build, load settings
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadAudioSettings(settingsService);
       });
     }
 
-    final colors = Theme.of(context).extension<CircuitColorScheme>() ?? const CircuitColorScheme(
-      primary: Color(0xFF1E88E5),
-      onPrimary: Color(0xFFFFFFFF),
-      primaryContainer: Color(0xFFE3F2FD),
-      onPrimaryContainer: Color(0xFF0D47A1),
-      secondary: Color(0xFF43A047),
-      onSecondary: Color(0xFFFFFFFF),
-      tertiary: Color(0xFFFF8F00),
-      onTertiary: Color(0xFFFFFFFF),
-      error: Color(0xFFD32F2F),
-      onError: Color(0xFFFFFFFF),
-      errorContainer: Color(0xFFFFEBEE),
-      onErrorContainer: Color(0xFFB71C1C),
-      surface: Color(0xFFFAFAFA),
-      onSurface: Color(0xFF1C1C1C),
-      surfaceContainer: Color(0xFFEFEFEF),
-      onSurfaceVariant: Color(0xFF424242),
-      shadow: Color(0xFF000000),
-      outline: Color(0xFFBDBDBD),
-      wireActive: Color(0xFF00E676),
-      wireInactive: Color(0xFF616161),
-      componentBase: Color(0xFF2196F3),
-      gridLine: Color(0xFFE0E0E0),
-      glowEffect: Color(0xFF00E5FF),
-      neonPrimary: Color(0xFF00FFFF),
-      neonAccent: Color(0xFFFF00FF),
-      errorGlow: Color(0xFFFF0040),
-      energyPulse: Color(0xFF39FF14),
-      highlightAccent: Color(0xFFFFFF00),
-    );
+    final colors = Theme.of(context).extension<CircuitColorScheme>() ??
+        const CircuitColorScheme(
+          primary: Color(0xFF1E88E5),
+          onPrimary: Color(0xFFFFFFFF),
+          primaryContainer: Color(0xFFE3F2FD),
+          onPrimaryContainer: Color(0xFF0D47A1),
+          secondary: Color(0xFF43A047),
+          onSecondary: Color(0xFFFFFFFF),
+          tertiary: Color(0xFFFF8F00),
+          onTertiary: Color(0xFFFFFFFF),
+          error: Color(0xFFD32F2F),
+          onError: Color(0xFFFFFFFF),
+          errorContainer: Color(0xFFFFEBEE),
+          onErrorContainer: Color(0xFFB71C1C),
+          surface: Color(0xFFFAFAFA),
+          onSurface: Color(0xFF1C1C1C),
+          surfaceContainer: Color(0xFFEFEFEF),
+          onSurfaceVariant: Color(0xFF424242),
+          shadow: Color(0xFF000000),
+          outline: Color(0xFFBDBDBD),
+          wireActive: Color(0xFF00E676),
+          wireInactive: Color(0xFF616161),
+          componentBase: Color(0xFF2196F3),
+          gridLine: Color(0xFFE0E0E0),
+          glowEffect: Color(0xFF00E5FF),
+          neonPrimary: Color(0xFF00FFFF),
+          neonAccent: Color(0xFFFF00FF),
+          errorGlow: Color(0xFFFF0040),
+          energyPulse: Color(0xFF39FF14),
+          highlightAccent: Color(0xFFFFFF00),
+        );
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -161,8 +169,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             shadows: [
               BoxShadow(
                 color: colors.neonPrimary.withValues(alpha: 0.5),
-                blurRadius: 10.0,
-                spreadRadius: 2.0,
+                blurRadius: 10,
+                spreadRadius: 2,
               ),
             ],
           ),
@@ -200,12 +208,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           if (_soundEnabled)
             Padding(
-              padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+              padding: const EdgeInsets.only(left: 16, top: 8),
               child: NeonSlider(
                 label: 'Sound Volume',
                 value: _soundVolume,
-                min: 0.0,
-                max: 1.0,
+                min: 0,
+                max: 1,
                 divisions: 10,
                 onChanged: (value) {
                   setState(() => _soundVolume = value);
@@ -216,12 +224,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           if (_musicEnabled)
             Padding(
-              padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+              padding: const EdgeInsets.only(left: 16, top: 8),
               child: NeonSlider(
                 label: 'Music Volume',
                 value: _musicVolume,
-                min: 0.0,
-                max: 1.0,
+                min: 0,
+                max: 1,
                 divisions: 10,
                 onChanged: (value) {
                   setState(() => _musicVolume = value);
@@ -231,7 +239,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           const SizedBox(height: 24),
-
           _buildSectionHeader('Gameplay', colors, textTheme),
           _buildSwitchTile(
             'Show Hints',
@@ -249,12 +256,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             textTheme,
           ),
           const SizedBox(height: 24),
-
           _buildSectionHeader('About', colors, textTheme),
           _buildInfoTile('Version', '1.0.0', colors, textTheme),
-          _buildInfoTile('Educational Platform', 'SparkCircuit', colors, textTheme),
+          _buildInfoTile(
+              'Educational Platform', 'SparkCircuit', colors, textTheme),
           const SizedBox(height: 24),
-
           ElevatedButton(
             onPressed: () {
               _showResetDialog(colors, textTheme, settingsService);
@@ -262,7 +268,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.errorGlow,
               foregroundColor: colors.onError,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
             child: Text('Reset Progress', style: textTheme.titleMedium),
@@ -272,7 +279,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, CircuitColorScheme colors, TextTheme textTheme) {
+  Widget _buildSectionHeader(
+      String title, CircuitColorScheme colors, TextTheme textTheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Text(
@@ -283,8 +291,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           shadows: [
             BoxShadow(
               color: colors.neonPrimary.withValues(alpha: 0.5),
-              blurRadius: 8.0,
-              spreadRadius: 1.0,
+              blurRadius: 8,
+              spreadRadius: 1,
             ),
           ],
         ),
@@ -292,14 +300,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildSwitchTile(String title, bool value, Function(bool) onChanged, CircuitColorScheme colors, TextTheme textTheme) {
+  Widget _buildSwitchTile(String title, bool value, Function(bool) onChanged,
+      CircuitColorScheme colors, TextTheme textTheme) {
     return GlassPanel(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: textTheme.bodyLarge?.copyWith(color: colors.onSurface)),
+            Text(title,
+                style: textTheme.bodyLarge?.copyWith(color: colors.onSurface)),
             NeonSwitch(
               value: value,
               onChanged: onChanged,
@@ -324,21 +334,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       items: options.map((option) {
         return DropdownMenuItem(
           value: option,
-          child: Text(option, style: textTheme.bodyMedium?.copyWith(color: colors.onSurface)),
+          child: Text(option,
+              style: textTheme.bodyMedium?.copyWith(color: colors.onSurface)),
         );
       }).toList(),
       onChanged: onChanged,
     );
   }
 
-  Widget _buildInfoTile(String title, String value, CircuitColorScheme colors, TextTheme textTheme) {
+  Widget _buildInfoTile(String title, String value, CircuitColorScheme colors,
+      TextTheme textTheme) {
     return GlassPanel(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: textTheme.bodyLarge?.copyWith(color: colors.onSurface)),
+            Text(title,
+                style: textTheme.bodyLarge?.copyWith(color: colors.onSurface)),
             Text(
               value,
               style: textTheme.bodyMedium?.copyWith(
@@ -351,20 +364,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _showResetDialog(CircuitColorScheme colors, TextTheme textTheme, SettingsService settingsService) {
+  void _showResetDialog(CircuitColorScheme colors, TextTheme textTheme,
+      SettingsService settingsService) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: colors.surfaceContainer,
-        title: Text('Reset Progress', style: textTheme.titleLarge?.copyWith(color: colors.onSurface)),
+        title: Text('Reset Progress',
+            style: textTheme.titleLarge?.copyWith(color: colors.onSurface)),
         content: Text(
           'Are you sure you want to reset all progress? This action cannot be undone.',
-          style: textTheme.bodyMedium?.copyWith(color: colors.onSurface.withValues(alpha: 0.8)),
+          style: textTheme.bodyMedium
+              ?.copyWith(color: colors.onSurface.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel', style: textTheme.labelLarge?.copyWith(color: colors.onSurface)),
+            child: Text('Cancel',
+                style: textTheme.labelLarge?.copyWith(color: colors.onSurface)),
           ),
           TextButton(
             onPressed: () async {
@@ -373,7 +390,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Progress reset successfully', style: TextStyle(color: colors.onPrimary)),
+                    content: Text('Progress reset successfully',
+                        style: TextStyle(color: colors.onPrimary)),
                     backgroundColor: colors.neonPrimary,
                   ),
                 );

@@ -10,7 +10,7 @@ class NotifierContext {
   final dynamic selection;
   final dynamic interaction;
   final dynamic paletteManager;
-  
+
   const NotifierContext({
     required this.grid,
     required this.history,
@@ -20,12 +20,12 @@ class NotifierContext {
     required this.paletteManager,
   });
 }
- 
+
 /// Interface for use cases that work directly with granular notifiers
 /// instead of producing a full GameEngineState diff
 abstract class NotifierIntegratedUseCase<TAction extends ComponentAction> {
   const NotifierIntegratedUseCase();
- 
+
   /// Execute the use case by applying changes directly to notifiers within a transaction
   /// This is more efficient than the legacy approach as it avoids state diff computation
   Future<Result<void>> executeWithNotifiers(
@@ -33,7 +33,7 @@ abstract class NotifierIntegratedUseCase<TAction extends ComponentAction> {
     NotifierContext notifiers,
     GameTransaction transaction,
   );
- 
+
   /// Validate the action before execution (optional override)
   Result<void> validate(TAction action, NotifierContext notifiers) {
     return const Success(null);

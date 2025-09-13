@@ -112,6 +112,12 @@ _$GridConfigImpl _$$GridConfigImplFromJson(Map json) => $checkedCreate(
           width: $checkedConvert('width', (v) => (v as num).toInt()),
           height: $checkedConvert('height', (v) => (v as num).toInt()),
           background: $checkedConvert('background', (v) => v as String?),
+          boundaries: $checkedConvert(
+              'boundaries',
+              (v) => v == null
+                  ? null
+                  : BoundaryConfig.fromJson(
+                      Map<String, dynamic>.from(v as Map))),
         );
         return val;
       },
@@ -122,6 +128,80 @@ Map<String, dynamic> _$$GridConfigImplToJson(_$GridConfigImpl instance) =>
       'width': instance.width,
       'height': instance.height,
       'background': instance.background,
+      'boundaries': instance.boundaries?.toJson(),
+    };
+
+_$BoundaryConfigImpl _$$BoundaryConfigImplFromJson(Map json) => $checkedCreate(
+      r'_$BoundaryConfigImpl',
+      json,
+      ($checkedConvert) {
+        final val = _$BoundaryConfigImpl(
+          playableArea: $checkedConvert(
+              'playableArea',
+              (v) =>
+                  PlayableArea.fromJson(Map<String, dynamic>.from(v as Map))),
+          visualArea: $checkedConvert('visualArea',
+              (v) => VisualArea.fromJson(Map<String, dynamic>.from(v as Map))),
+          style: $checkedConvert('style', (v) => v as String?),
+          behavior: $checkedConvert('behavior', (v) => v as String?),
+          settings: $checkedConvert(
+              'settings',
+              (v) => (v as Map?)?.map(
+                    (k, e) => MapEntry(k as String, e),
+                  )),
+        );
+        return val;
+      },
+    );
+
+Map<String, dynamic> _$$BoundaryConfigImplToJson(
+        _$BoundaryConfigImpl instance) =>
+    <String, dynamic>{
+      'playableArea': instance.playableArea.toJson(),
+      'visualArea': instance.visualArea.toJson(),
+      'style': instance.style,
+      'behavior': instance.behavior,
+      'settings': instance.settings,
+    };
+
+_$PlayableAreaImpl _$$PlayableAreaImplFromJson(Map json) => $checkedCreate(
+      r'_$PlayableAreaImpl',
+      json,
+      ($checkedConvert) {
+        final val = _$PlayableAreaImpl(
+          width: $checkedConvert('width', (v) => (v as num).toInt()),
+          height: $checkedConvert('height', (v) => (v as num).toInt()),
+          description: $checkedConvert('description', (v) => v as String?),
+        );
+        return val;
+      },
+    );
+
+Map<String, dynamic> _$$PlayableAreaImplToJson(_$PlayableAreaImpl instance) =>
+    <String, dynamic>{
+      'width': instance.width,
+      'height': instance.height,
+      'description': instance.description,
+    };
+
+_$VisualAreaImpl _$$VisualAreaImplFromJson(Map json) => $checkedCreate(
+      r'_$VisualAreaImpl',
+      json,
+      ($checkedConvert) {
+        final val = _$VisualAreaImpl(
+          width: $checkedConvert('width', (v) => (v as num).toInt()),
+          height: $checkedConvert('height', (v) => (v as num).toInt()),
+          description: $checkedConvert('description', (v) => v as String?),
+        );
+        return val;
+      },
+    );
+
+Map<String, dynamic> _$$VisualAreaImplToJson(_$VisualAreaImpl instance) =>
+    <String, dynamic>{
+      'width': instance.width,
+      'height': instance.height,
+      'description': instance.description,
     };
 
 _$ComponentAvailabilityImpl _$$ComponentAvailabilityImplFromJson(Map json) =>

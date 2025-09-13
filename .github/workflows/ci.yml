@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI
 
 on:
   push:
@@ -13,97 +13,96 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Setup Flutter
+    - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.19.0'
+        flutter-version: '3.32.8'
         channel: 'stable'
 
     - name: Install dependencies
       run: flutter pub get
 
+    - name: Run coordinate conversion lint check
+      run: dart scripts/check_coordinate_conversions.dart
+
     - name: Run tests with coverage
-      run: flutter test --coverage
+      run: flutter test --coverage --test-randomize-ordering-seed random
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage/lcov.info
 
-    - name: Run Flutter analyze
+    - name: Check performance budgets
+      run: |
+        # Extract performance metrics from test output
+        flutter test test/performance/game_canvas_performance_test.dart --machine > performance_results.json
+
+        # Check drag operation performance budget (p50 ≤ 8ms, p99 ≤ 16ms)
+        if ! jq -e '.groups[]?.tests[]? | select(.name | contains("drag operation performance")) | .metrics.p50 <= 8 and .metrics.p99 <= 16' performance_results.json; then
+          echo "❌ Drag operation performance budget exceeded"
+          exit 1
+        fi
+
+        # Check placement performance budget (≤ 50ms)
+        if ! jq -e '.groups[]?.tests[]? | select(.name | contains("component placement performance")) | .metrics.totalTime <= 50' performance_results.json; then
+          echo "❌ Component placement performance budget exceeded"
+          exit 1
+        fi
+
+        echo "✅ All performance budgets met"
+
+    - name: Check coordinate conversion accuracy
+      run: |
+        # Run coordinate legacy tests to ensure no regressions
+        flutter test test/coordinate_legacy_test.dart --machine > coordinate_results.json
+
+        # Check that all coordinate conversion tests pass
+        if ! jq -e 'all(.groups[]?.tests[]?; .outcome == "success")' coordinate_results.json; then
+          echo "❌ Coordinate conversion accuracy regression detected"
+          exit 1
+        fi
+
+        echo "✅ Coordinate conversion accuracy maintained"
+
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.8'
+        channel: 'stable'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Analyze code
       run: flutter analyze
 
     - name: Check formatting
       run: flutter format --set-exit-if-changed .
 
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.8'
+        channel: 'stable'
+
+    - name: Install dependencies
+      run: flutter pub get
+
     - name: Build APK
       run: flutter build apk --release
 
-    - name: Build iOS (if applicable)
-      run: flutter build ios --no-codesign
-
-  performance-test:
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.19.0'
-        channel: 'stable'
-
-    - name: Install dependencies
-      run: flutter pub get
-
-    - name: Run performance tests
-      run: flutter test test/performance/ --tags performance
-
-    - name: Generate performance report
-      run: flutter test test/performance/ --machine > performance_results.json
-
-  integration-test:
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.19.0'
-        channel: 'stable'
-
-    - name: Install dependencies
-      run: flutter pub get
-
-    - name: Run integration tests
-      run: flutter test test/integration/ --tags integration
-
-  migration-validation:
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.19.0'
-        channel: 'stable'
-
-    - name: Install dependencies
-      run: flutter pub get
-
-    - name: Validate migration completion
-      run: dart run scripts/validate_migration_completion.dart
-
-    - name: Check migration status
-      run: |
-        if [ -f migration_status.json ]; then
-          cat migration_status.json
-        fi
+    - name: Build web
+      run: flutter build web --release

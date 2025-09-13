@@ -81,10 +81,12 @@ class ComponentFactory {
     int col,
   ) {
     // Generate new unique ID
-    final newId = '${template.type.toString().split('.').last}_${DateTime.now().millisecondsSinceEpoch}';
+    final newId =
+        '${template.type.toString().split('.').last}_${DateTime.now().millisecondsSinceEpoch}';
 
     // Convert ComponentModel to CircuitComponent using factory method
-    final circuitComponent = CircuitComponent.fromComponentModel(template.copyWith(
+    final circuitComponent =
+        CircuitComponent.fromComponentModel(template.copyWith(
       id: newId,
       row: row,
       col: col,

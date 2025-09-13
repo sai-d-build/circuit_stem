@@ -1,13 +1,14 @@
-import '../game_context.dart' as game_context;
-import '../../domain/behaviors/move_behavior.dart' as move_behavior;
-import '../services/power_simulation_service.dart';
 import '../../common/logger.dart';
+import '../../domain/behaviors/move_behavior.dart' as move_behavior;
 import '../core/result.dart';
+import '../game_context.dart' as game_context;
+import '../services/power_simulation_service.dart';
 import '../transaction.dart';
 import 'component_action.dart';
 import 'notifier_integrated_use_case.dart';
 
-class MoveComponentUseCase extends NotifierIntegratedUseCase<MoveComponentAction> {
+class MoveComponentUseCase
+    extends NotifierIntegratedUseCase<MoveComponentAction> {
   final PowerSimulationService _simulation;
 
   const MoveComponentUseCase(this._simulation);
@@ -18,16 +19,19 @@ class MoveComponentUseCase extends NotifierIntegratedUseCase<MoveComponentAction
     if (component == null) {
       return const Failure('Component not found');
     }
-    
+
     if (action.newRow < 0 || action.newCol < 0) {
-      return const Failure('Invalid position: coordinates must be non-negative');
+      return const Failure(
+          'Invalid position: coordinates must be non-negative');
     }
-    
-    final existingComponent = notifiers.grid.current.componentAt(action.newRow, action.newCol);
-    if (existingComponent != null && existingComponent.id != action.componentId) {
+
+    final existingComponent =
+        notifiers.grid.current.componentAt(action.newRow, action.newCol);
+    if (existingComponent != null &&
+        existingComponent.id != action.componentId) {
       return const Failure('Target cell already occupied');
     }
-    
+
     return const Success(null);
   }
 
@@ -40,17 +44,21 @@ class MoveComponentUseCase extends NotifierIntegratedUseCase<MoveComponentAction
     try {
       final currentGrid = notifiers.grid.current;
       final component = currentGrid.componentsById[action.componentId];
-      
+
       if (component == null) {
-        Logger.log('[MoveComponentUseCase] Component with id ${action.componentId} not found.');
+        Logger.log(
+            '[MoveComponentUseCase] Component with id ${action.componentId} not found.');
         return const Failure('Component not found');
       }
 
       Logger.log('[MoveComponentUseCase] Found component: ${component.id}');
 
-      final moveBehavior = component.behaviors.whereType<move_behavior.MoveBehavior>().firstOrNull;
+      final moveBehavior = component.behaviors
+          .whereType<move_behavior.MoveBehavior>()
+          .firstOrNull;
       if (moveBehavior == null) {
-        Logger.log('❌ MoveComponentUseCase: MoveBehavior not found for ${component.id}');
+        Logger.log(
+            '❌ MoveComponentUseCase: MoveBehavior not found for ${component.id}');
         return const Failure('MoveBehavior not found');
       }
 
@@ -62,7 +70,8 @@ class MoveComponentUseCase extends NotifierIntegratedUseCase<MoveComponentAction
 
       final updatedComponent = moveBehavior.handle(component, 'move', context);
       if (updatedComponent == null) {
-        Logger.log('❌ MoveComponentUseCase: handle returned null for ${component.id}');
+        Logger.log(
+            '❌ MoveComponentUseCase: handle returned null for ${component.id}');
         return const Failure('Move operation failed');
       }
 

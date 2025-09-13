@@ -21,8 +21,7 @@ class User with _$User {
     Map<String, dynamic>? preferences,
   }) = _User;
 
-  factory User.fromJson(Map<String, dynamic> json) =>
-      _$UserFromJson(json);
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 }
 
 @freezed

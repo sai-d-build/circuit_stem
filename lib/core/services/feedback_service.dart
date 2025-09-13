@@ -20,7 +20,8 @@ class FeedbackMessage {
   });
 }
 
-final feedbackServiceProvider = Provider<FeedbackService>((ref) => FeedbackService());
+final feedbackServiceProvider =
+    Provider<FeedbackService>((ref) => FeedbackService());
 
 class FeedbackService {
   void showSnackBar(BuildContext context, FeedbackMessage message) {
@@ -52,32 +53,40 @@ class FeedbackService {
   }
 
   void showSuccess(BuildContext context, String message) {
-    showSnackBar(context, FeedbackMessage(
-      message: message,
-      type: FeedbackType.success,
-    ));
+    showSnackBar(
+        context,
+        FeedbackMessage(
+          message: message,
+          type: FeedbackType.success,
+        ));
   }
 
   void showError(BuildContext context, String message) {
-    showSnackBar(context, FeedbackMessage(
-      message: message,
-      type: FeedbackType.error,
-      duration: const Duration(seconds: 5),
-    ));
+    showSnackBar(
+        context,
+        FeedbackMessage(
+          message: message,
+          type: FeedbackType.error,
+          duration: const Duration(seconds: 5),
+        ));
   }
 
   void showWarning(BuildContext context, String message) {
-    showSnackBar(context, FeedbackMessage(
-      message: message,
-      type: FeedbackType.warning,
-    ));
+    showSnackBar(
+        context,
+        FeedbackMessage(
+          message: message,
+          type: FeedbackType.warning,
+        ));
   }
 
   void showInfo(BuildContext context, String message) {
-    showSnackBar(context, FeedbackMessage(
-      message: message,
-      type: FeedbackType.info,
-    ));
+    showSnackBar(
+        context,
+        FeedbackMessage(
+          message: message,
+          type: FeedbackType.info,
+        ));
   }
 
   Color _getColorForType(FeedbackType type) {

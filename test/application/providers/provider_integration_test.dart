@@ -1,9 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-
 // Import the actual providers we want to test
-import 'package:sparkcircuit/application/providers/core_providers.dart' hide enhancedGameStateNotifierProvider;
+import 'package:sparkcircuit/application/providers/core_providers.dart'
+    hide enhancedGameStateNotifierProvider;
 import 'package:sparkcircuit/application/providers/game_providers.dart';
 
 /// Provider Integration Test Suite
@@ -96,7 +96,7 @@ void main() {
       testContainer.read(gameEngineProvider);
 
       // Should dispose without issues
-      expect(() => testContainer.dispose(), returnsNormally);
+      expect(testContainer.dispose, returnsNormally);
     });
 
     // =========================================================================
@@ -129,7 +129,7 @@ void main() {
       // Test that switching engines doesn't break the provider ecosystem
 
       // Start with V1
-      var engine = container.read(gameEngineProvider);
+      final engine = container.read(gameEngineProvider);
       expect(engine, isNotNull);
 
       // Test that both engines are available through the synchronizer

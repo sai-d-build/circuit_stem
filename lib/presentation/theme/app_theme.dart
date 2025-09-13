@@ -48,9 +48,9 @@ class AppTheme {
   static const Duration longAnimation = Duration(milliseconds: 500);
 
   // Border radius
-  static const double smallBorderRadius = 4.0;
-  static const double mediumBorderRadius = 8.0;
-  static const double largeBorderRadius = 12.0;
+  static const double smallBorderRadius = 4;
+  static const double mediumBorderRadius = 8;
+  static const double largeBorderRadius = 12;
 
   // Shadows
   static const BoxShadow lightShadow = BoxShadow(
@@ -222,7 +222,7 @@ class CircuitColorScheme extends ThemeExtension<CircuitColorScheme> {
   final Color surface;
   final Color onSurface;
   final Color outline;
-  
+
   // Neon Palette
   final Color neonPrimary;
   final Color neonAccent;

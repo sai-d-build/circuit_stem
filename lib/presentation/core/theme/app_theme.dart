@@ -101,11 +101,15 @@ class AppTheme {
     highlightAccent: Color(0xFFFFFF00), // Yellow
   );
 
-  static ThemeData get lightTheme => _buildTheme(_lightCircuitColors, Brightness.light);
-  static ThemeData get darkTheme => _buildTheme(_darkCircuitColors, Brightness.dark);
-  static ThemeData get highContrastTheme => _buildTheme(_highContrastColors, Brightness.light);
+  static ThemeData get lightTheme =>
+      _buildTheme(_lightCircuitColors, Brightness.light);
+  static ThemeData get darkTheme =>
+      _buildTheme(_darkCircuitColors, Brightness.dark);
+  static ThemeData get highContrastTheme =>
+      _buildTheme(_highContrastColors, Brightness.light);
 
-  static ThemeData _buildTheme(CircuitColorScheme colors, Brightness brightness) {
+  static ThemeData _buildTheme(
+      CircuitColorScheme colors, Brightness brightness) {
     final colorScheme = ColorScheme(
       brightness: brightness,
       primary: colors.primary,
@@ -151,7 +155,8 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           elevation: 4,
           shadowColor: colors.shadow.withValues(alpha: 0.3),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -296,7 +301,7 @@ class CircuitColorScheme extends ThemeExtension<CircuitColorScheme> {
   final Color onSurfaceVariant;
   final Color shadow;
   final Color outline;
-  
+
   // Circuit-specific colors
   final Color wireActive;
   final Color wireInactive;
@@ -382,8 +387,10 @@ class CircuitColorScheme extends ThemeExtension<CircuitColorScheme> {
     return CircuitColorScheme(
       primary: Color.lerp(primary, other.primary, t)!,
       onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
-      primaryContainer: Color.lerp(primaryContainer, other.primaryContainer, t)!,
-      onPrimaryContainer: Color.lerp(onPrimaryContainer, other.onPrimaryContainer, t)!,
+      primaryContainer:
+          Color.lerp(primaryContainer, other.primaryContainer, t)!,
+      onPrimaryContainer:
+          Color.lerp(onPrimaryContainer, other.onPrimaryContainer, t)!,
       secondary: Color.lerp(secondary, other.secondary, t)!,
       onSecondary: Color.lerp(onSecondary, other.onSecondary, t)!,
       tertiary: Color.lerp(tertiary, other.tertiary, t)!,
@@ -391,11 +398,14 @@ class CircuitColorScheme extends ThemeExtension<CircuitColorScheme> {
       error: Color.lerp(error, other.error, t)!,
       onError: Color.lerp(onError, other.onError, t)!,
       errorContainer: Color.lerp(errorContainer, other.errorContainer, t)!,
-      onErrorContainer: Color.lerp(onErrorContainer, other.onErrorContainer, t)!,
+      onErrorContainer:
+          Color.lerp(onErrorContainer, other.onErrorContainer, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
       onSurface: Color.lerp(onSurface, other.onSurface, t)!,
-      surfaceContainer: Color.lerp(surfaceContainer, other.surfaceContainer, t)!,
-      onSurfaceVariant: Color.lerp(onSurfaceVariant, other.onSurfaceVariant, t)!,
+      surfaceContainer:
+          Color.lerp(surfaceContainer, other.surfaceContainer, t)!,
+      onSurfaceVariant:
+          Color.lerp(onSurfaceVariant, other.onSurfaceVariant, t)!,
       shadow: Color.lerp(shadow, other.shadow, t)!,
       outline: Color.lerp(outline, other.outline, t)!,
       wireActive: Color.lerp(wireActive, other.wireActive, t)!,

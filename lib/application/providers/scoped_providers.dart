@@ -1,13 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart'
+    as providers_v3;
 import 'package:sparkcircuit/core/services/game_state_reader.dart';
-import 'package:sparkcircuit/application/game_engine/v3/providers_v3.dart' as providers_v3;
 
 /// Scoped providers to break circular dependencies
 /// These provide clean interfaces without creating circular references
 
 /// Game state reader scope - provides read-only access to game state
 final scopedGameStateProvider = Provider<GameStateReader>((ref) {
-  final gameEngine = ref.watch(providers_v3.enhancedGameStateNotifierProvider.notifier);
+  final gameEngine =
+      ref.watch(providers_v3.enhancedGameStateNotifierProvider.notifier);
   return GameStateReaderImpl(gameEngine);
 });
 
@@ -20,6 +22,7 @@ final scopedStorageProvider = Provider<dynamic>((ref) {
 final scopedLevelServiceProvider = Provider<dynamic>((ref) {
   return ref.watch(providers_v3.levelServiceProvider);
 });
+
 /// UI state scope - provides UI state management without circular dependencies
 final scopedUIStateProvider = Provider<UIStateManager>((ref) {
   return UIStateManager();
@@ -36,13 +39,10 @@ class TestScopedProviders {
     return [
       if (gameStateReader != null)
         scopedGameStateProvider.overrideWithValue(gameStateReader),
-
       if (storageService != null)
         scopedStorageProvider.overrideWithValue(storageService),
-
       if (levelService != null)
         scopedLevelServiceProvider.overrideWithValue(levelService),
-
       if (uiStateManager != null)
         scopedUIStateProvider.overrideWithValue(uiStateManager),
     ];

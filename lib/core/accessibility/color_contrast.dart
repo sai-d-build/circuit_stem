@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 class ColorContrast {
   // Calculate contrast ratio between two colors
   static double ratio(Color foreground, Color background) {
-    final double l1 = _relativeLuminance(foreground);
-    final double l2 = _relativeLuminance(background);
+    final l1 = _relativeLuminance(foreground);
+    final l2 = _relativeLuminance(background);
 
     final double lighter = max(l1, l2);
     final double darker = min(l1, l2);
@@ -36,23 +36,24 @@ class ColorContrast {
   }
 
   // Validate if a color combination meets WCAG standards
-  static bool meetsWCAGStandard(Color foreground, Color background, {bool isLargeText = false}) {
+  static bool meetsWCAGStandard(Color foreground, Color background,
+      {bool isLargeText = false}) {
     final contrastRatio = ratio(foreground, background);
     final minRatio = isLargeText ? 3.0 : 4.5; // AA standard
     return contrastRatio >= minRatio;
   }
 
   // Get accessible color alternatives
-  static List<Color> getAccessibleAlternatives(Color original, Color background) {
+  static List<Color> getAccessibleAlternatives(
+      Color original, Color background) {
     final alternatives = <Color>[];
     final originalRed = (original.toARGB32() >> 16) & 0xFF;
     final originalGreen = (original.toARGB32() >> 8) & 0xFF;
     final originalBlue = original.toARGB32() & 0xFF;
     final originalOpacity = ((original.toARGB32() >> 24) & 0xFF) / 255.0;
 
-
     // Try different shades
-    for (double factor = 0.1; factor <= 0.9; factor += 0.1) {
+    for (var factor = 0.1; factor <= 0.9; factor += 0.1) {
       final lighter = Color.fromRGBO(
         (originalRed + (255 - originalRed) * factor).round().clamp(0, 255),
         (originalGreen + (255 - originalGreen) * factor).round().clamp(0, 255),

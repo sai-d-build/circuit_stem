@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:sparkcircuit/core/persistence/storage_service.dart';
 
@@ -57,7 +57,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify the test app renders
-      expect(find.text('GameCanvas Integration Test - Basic Rendering'), findsOneWidget);
+      expect(find.text('GameCanvas Integration Test - Basic Rendering'),
+          findsOneWidget);
       expect(find.text('Exception'), findsNothing);
     });
 
@@ -75,8 +76,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Test that mock storage service is working
-      final testKey = 'test_key';
-      final testValue = 'test_value';
+      const testKey = 'test_key';
+      const testValue = 'test_value';
 
       await mockStorageService.saveData(testKey, testValue);
       final retrievedValue = mockStorageService.readData<String>(testKey);
@@ -88,13 +89,13 @@ void main() {
 
 Widget createTestApp(MockStorageService mockStorageService) {
   // Simplified test app that just tests basic rendering
-  return ProviderScope(
+  return const ProviderScope(
     child: MaterialApp(
       home: Scaffold(
-        body: Container(
+        body: SizedBox(
           width: 800,
           height: 600,
-          child: const Text('GameCanvas Integration Test - Basic Rendering'),
+          child: Text('GameCanvas Integration Test - Basic Rendering'),
         ),
       ),
     ),

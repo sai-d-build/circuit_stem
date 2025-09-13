@@ -10,13 +10,15 @@ class InventoryCheckResult {
   final int totalCount;
   final String? reason;
 
-  const InventoryCheckResult._(this.isAvailable, this.availableCount, this.totalCount, this.reason);
+  const InventoryCheckResult._(
+      this.isAvailable, this.availableCount, this.totalCount, this.reason);
 
   factory InventoryCheckResult.available(int available, int total) =>
-    InventoryCheckResult._(true, available, total, null);
+      InventoryCheckResult._(true, available, total, null);
 
-  factory InventoryCheckResult.unavailable(int available, int total, String reason) =>
-    InventoryCheckResult._(false, available, total, reason);
+  factory InventoryCheckResult.unavailable(
+          int available, int total, String reason) =>
+      InventoryCheckResult._(false, available, total, reason);
 }
 
 /// Result of inventory consumption
@@ -25,13 +27,14 @@ class InventoryConsumptionResult {
   final int remainingCount;
   final String? errorMessage;
 
-  const InventoryConsumptionResult._(this.isSuccess, this.remainingCount, this.errorMessage);
+  const InventoryConsumptionResult._(
+      this.isSuccess, this.remainingCount, this.errorMessage);
 
   factory InventoryConsumptionResult.success(int remaining) =>
-    InventoryConsumptionResult._(true, remaining, null);
+      InventoryConsumptionResult._(true, remaining, null);
 
   factory InventoryConsumptionResult.failed(String errorMessage) =>
-    InventoryConsumptionResult._(false, 0, errorMessage);
+      InventoryConsumptionResult._(false, 0, errorMessage);
 }
 
 /// Abstract interface for component inventory service

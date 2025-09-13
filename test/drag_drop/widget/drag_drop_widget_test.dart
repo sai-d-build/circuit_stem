@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:sparkcircuit/presentation/features/game/widgets/game_canvas.dart';
-import 'package:sparkcircuit/application/providers.dart';
-import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
+import 'package:sparkcircuit/application/services/level_service.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
 import 'package:sparkcircuit/infrastructure/audio/audio_service.dart';
+import 'package:sparkcircuit/infrastructure/persistence/shared_preferences_storage_service.dart';
 import 'package:sparkcircuit/infrastructure/rendering/asset_manager.dart';
-import 'package:sparkcircuit/application/services/level_service.dart';
 
 // Mock classes for testing
-class MockSharedPreferencesStorageService extends Mock implements SharedPreferencesStorageService {}
+class MockSharedPreferencesStorageService extends Mock
+    implements SharedPreferencesStorageService {}
+
 class MockGridService extends Mock implements GridService {}
+
 class MockAudioService extends Mock implements AudioService {}
+
 class MockAssetManager extends Mock implements AssetManagerNotifier {}
+
 class MockLevelService extends Mock implements LevelService {}
 
 /// Test demonstrating the new CanvasInteractionWidget integration
@@ -24,7 +26,8 @@ void main() {
       // No setup needed for this basic test
     });
 
-    testWidgets('GameCanvas renders with CanvasInteractionWidget', (tester) async {
+    testWidgets('GameCanvas renders with CanvasInteractionWidget',
+        (tester) async {
       // Create a minimal test setup that avoids complex provider dependencies
       // Use a simple Scaffold with just the basic structure needed for the test
 
