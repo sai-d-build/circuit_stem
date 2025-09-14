@@ -1,4 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// import '../entity/grid_configuration.dart'; // COMMENTED OUT - import should not be in part file
 
 part of 'game_canvas_state.dart';
 
@@ -175,67 +176,6 @@ Map<String, dynamic> _$$GridPositionImplToJson(_$GridPositionImpl instance) =>
       'col': instance.col,
     };
 
-_$GridConfigurationImpl _$$GridConfigurationImplFromJson(Map json) =>
-    $checkedCreate(
-      r'_$GridConfigurationImpl',
-      json,
-      ($checkedConvert) {
-        final val = _$GridConfigurationImpl(
-          rows: $checkedConvert('rows', (v) => (v as num?)?.toInt() ?? 20),
-          cols: $checkedConvert('cols', (v) => (v as num?)?.toInt() ?? 20),
-          cellSize: $checkedConvert(
-              'cellSize', (v) => (v as num?)?.toDouble() ?? 60.0),
-        );
-        return val;
-      },
-    );
-
-Map<String, dynamic> _$$GridConfigurationImplToJson(
-        _$GridConfigurationImpl instance) =>
-    <String, dynamic>{
-      'rows': instance.rows,
-      'cols': instance.cols,
-      'cellSize': instance.cellSize,
-    };
-
-_$CircuitComponentImpl _$$CircuitComponentImplFromJson(Map json) =>
-    $checkedCreate(
-      r'_$CircuitComponentImpl',
-      json,
-      ($checkedConvert) {
-        final val = _$CircuitComponentImpl(
-          id: $checkedConvert('id', (v) => v as String),
-          type: $checkedConvert(
-              'type', (v) => $enumDecode(_$ComponentTypeEnumMap, v)),
-          row: $checkedConvert('row', (v) => (v as num).toInt()),
-          col: $checkedConvert('col', (v) => (v as num).toInt()),
-          properties: $checkedConvert(
-              'properties',
-              (v) =>
-                  (v as Map?)?.map(
-                    (k, e) => MapEntry(k as String, e),
-                  ) ??
-                  const {}),
-          isSelected: $checkedConvert('isSelected', (v) => v as bool? ?? false),
-          isHighlighted:
-              $checkedConvert('isHighlighted', (v) => v as bool? ?? false),
-        );
-        return val;
-      },
-    );
-
-Map<String, dynamic> _$$CircuitComponentImplToJson(
-        _$CircuitComponentImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'type': _$ComponentTypeEnumMap[instance.type]!,
-      'row': instance.row,
-      'col': instance.col,
-      'properties': instance.properties,
-      'isSelected': instance.isSelected,
-      'isHighlighted': instance.isHighlighted,
-    };
-
 _$CircuitWireImpl _$$CircuitWireImplFromJson(Map json) => $checkedCreate(
       r'_$CircuitWireImpl',
       json,
@@ -289,4 +229,42 @@ Map<String, dynamic> _$$GridCellImplToJson(_$GridCellImpl instance) =>
       'isOccupied': instance.isOccupied,
       'isHighlighted': instance.isHighlighted,
       'componentId': instance.componentId,
+    };
+
+_$CircuitComponentImpl _$$CircuitComponentImplFromJson(Map json) =>
+    $checkedCreate(
+      r'_$CircuitComponentImpl',
+      json,
+      ($checkedConvert) {
+        final val = _$CircuitComponentImpl(
+          id: $checkedConvert('id', (v) => v as String),
+          type: $checkedConvert(
+              'type', (v) => $enumDecode(_$ComponentTypeEnumMap, v)),
+          row: $checkedConvert('row', (v) => (v as num).toInt()),
+          col: $checkedConvert('col', (v) => (v as num).toInt()),
+          properties: $checkedConvert(
+              'properties',
+              (v) =>
+                  (v as Map?)?.map(
+                    (k, e) => MapEntry(k as String, e),
+                  ) ??
+                  const {}),
+          isSelected: $checkedConvert('isSelected', (v) => v as bool? ?? false),
+          isHighlighted:
+              $checkedConvert('isHighlighted', (v) => v as bool? ?? false),
+        );
+        return val;
+      },
+    );
+
+Map<String, dynamic> _$$CircuitComponentImplToJson(
+        _$CircuitComponentImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'type': _$ComponentTypeEnumMap[instance.type]!,
+      'row': instance.row,
+      'col': instance.col,
+      'properties': instance.properties,
+      'isSelected': instance.isSelected,
+      'isHighlighted': instance.isHighlighted,
     };

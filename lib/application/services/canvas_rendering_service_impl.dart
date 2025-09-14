@@ -1,4 +1,5 @@
 import 'package:sparkcircuit/application/services/interfaces/canvas_rendering_service.dart';
+import '../entity/grid_configuration.dart';
 import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
 

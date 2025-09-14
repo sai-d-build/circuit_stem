@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../entity/grid_configuration.dart';
 
 import 'package:flutter/material.dart';
 import 'package:sparkcircuit/core/services/coordinate_service.dart';

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import '../entity/grid_configuration.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -122,7 +123,7 @@ class CoordinateSystemService implements ICoordinateService {
   Offset localToGrid(Offset localPosition, CoordinateContext context) {
     // 🎯 PHASE 1: Remove legacy inline math, delegate to UnifiedCoordinateService
     final unifiedService = UnifiedCoordinateService();
-    final config = GridConfiguration.fromCanvas(
+    final config = GridConfiguration(
       rows: context.gridDimensions.height.toInt(),
       cols: context.gridDimensions.width.toInt(),
       cellSize: context.cellSize,
@@ -147,7 +148,7 @@ class CoordinateSystemService implements ICoordinateService {
   Offset gridToLocalFromOffset(Offset gridOffset, CoordinateContext context) {
     // 🎯 PHASE 1: Remove legacy inline math, delegate to UnifiedCoordinateService
     final unifiedService = UnifiedCoordinateService();
-    final config = GridConfiguration.fromCanvas(
+    final config = GridConfiguration(
       rows: context.gridDimensions.height.toInt(),
       cols: context.gridDimensions.width.toInt(),
       cellSize: context.cellSize,
@@ -183,7 +184,7 @@ class CoordinateSystemService implements ICoordinateService {
     try {
       // 🔧 FIX: Delegate to UnifiedCoordinateService to eliminate duplicate logic
       final unifiedService = UnifiedCoordinateService();
-      final config = GridConfiguration.fromCanvas(
+      final config = GridConfiguration(
         rows: context.gridDimensions.height.toInt(),
         cols: context.gridDimensions.width.toInt(),
         cellSize: context.cellSize,

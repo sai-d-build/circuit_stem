@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/entity/grid_configuration.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/providers/unified_providers.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
@@ -152,7 +153,7 @@ class WireRenderingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // TODO: GameState/grid configuration should be passed from the widget
     // For now, using reasonable defaults that match the game's typical grid size
-    const gridConfig = GridConfiguration(
+    final gridConfig = const GridConfiguration(
       rows: 20, // Standard game grid rows
       cols: 20, // Standard game grid columns
       cellSize: 60, // Standard cell size

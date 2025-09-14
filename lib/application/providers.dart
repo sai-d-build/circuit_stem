@@ -27,16 +27,8 @@ import 'use_cases/providers.dart' as use_case_providers;
 // Grid Service Provider
 final gridServiceProvider = Provider<GridService>((ref) => GridService());
 
-// Grid Configuration Providers
-final gridConfigurationProvider = Provider<GridConfiguration>((ref) {
-  return const GridConfiguration(
-    rows: 10,
-    cols: 15,
-    cellSize: GridConstants.defaultCellSize,
-    scale: 1,
-    panOffset: Offset.zero,
-  );
-});
+// Grid Configuration Provider - Use canonical provider from core/entity/grid_configuration.dart
+// Removed duplicate definition - now imported from core/entity/grid_configuration.dart
 
 final renderConfigurationProvider = Provider<RenderConfiguration>((ref) {
   return const RenderConfiguration(

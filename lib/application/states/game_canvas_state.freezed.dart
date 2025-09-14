@@ -1,4 +1,5 @@
 // coverage:ignore-file
+// import '../entity/grid_configuration.dart'; // COMMENTED OUT - import should not be in part file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
@@ -754,8 +755,6 @@ abstract class $ViewportStateCopyWith<$Res> {
       @OffsetConverter() Offset panOffset,
       Size canvasSize,
       GridConfiguration gridConfiguration});
-
-  $GridConfigurationCopyWith<$Res> get gridConfiguration;
 }
 
 /// @nodoc
@@ -797,16 +796,6 @@ class _$ViewportStateCopyWithImpl<$Res, $Val extends ViewportState>
               as GridConfiguration,
     ) as $Val);
   }
-
-  /// Create a copy of ViewportState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $GridConfigurationCopyWith<$Res> get gridConfiguration {
-    return $GridConfigurationCopyWith<$Res>(_value.gridConfiguration, (value) {
-      return _then(_value.copyWith(gridConfiguration: value) as $Val);
-    });
-  }
 }
 
 /// @nodoc
@@ -822,9 +811,6 @@ abstract class _$$ViewportStateImplCopyWith<$Res>
       @OffsetConverter() Offset panOffset,
       Size canvasSize,
       GridConfiguration gridConfiguration});
-
-  @override
-  $GridConfigurationCopyWith<$Res> get gridConfiguration;
 }
 
 /// @nodoc
@@ -977,8 +963,6 @@ abstract class $CanvasRenderingDataCopyWith<$Res> {
       List<GridCell> gridCells,
       GridConfiguration gridConfiguration,
       Map<String, dynamic> effectsData});
-
-  $GridConfigurationCopyWith<$Res> get gridConfiguration;
 }
 
 /// @nodoc
@@ -1025,16 +1009,6 @@ class _$CanvasRenderingDataCopyWithImpl<$Res, $Val extends CanvasRenderingData>
               as Map<String, dynamic>,
     ) as $Val);
   }
-
-  /// Create a copy of CanvasRenderingData
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $GridConfigurationCopyWith<$Res> get gridConfiguration {
-    return $GridConfigurationCopyWith<$Res>(_value.gridConfiguration, (value) {
-      return _then(_value.copyWith(gridConfiguration: value) as $Val);
-    });
-  }
 }
 
 /// @nodoc
@@ -1051,9 +1025,6 @@ abstract class _$$CanvasRenderingDataImplCopyWith<$Res>
       List<GridCell> gridCells,
       GridConfiguration gridConfiguration,
       Map<String, dynamic> effectsData});
-
-  @override
-  $GridConfigurationCopyWith<$Res> get gridConfiguration;
 }
 
 /// @nodoc
@@ -1396,491 +1367,6 @@ abstract class _GridPosition implements GridPosition {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$GridPositionImplCopyWith<_$GridPositionImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-GridConfiguration _$GridConfigurationFromJson(Map<String, dynamic> json) {
-  return _GridConfiguration.fromJson(json);
-}
-
-/// @nodoc
-mixin _$GridConfiguration {
-  int get rows => throw _privateConstructorUsedError;
-  int get cols => throw _privateConstructorUsedError;
-  double get cellSize => throw _privateConstructorUsedError;
-
-  /// Serializes this GridConfiguration to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of GridConfiguration
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $GridConfigurationCopyWith<GridConfiguration> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $GridConfigurationCopyWith<$Res> {
-  factory $GridConfigurationCopyWith(
-          GridConfiguration value, $Res Function(GridConfiguration) then) =
-      _$GridConfigurationCopyWithImpl<$Res, GridConfiguration>;
-  @useResult
-  $Res call({int rows, int cols, double cellSize});
-}
-
-/// @nodoc
-class _$GridConfigurationCopyWithImpl<$Res, $Val extends GridConfiguration>
-    implements $GridConfigurationCopyWith<$Res> {
-  _$GridConfigurationCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of GridConfiguration
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? rows = null,
-    Object? cols = null,
-    Object? cellSize = null,
-  }) {
-    return _then(_value.copyWith(
-      rows: null == rows
-          ? _value.rows
-          : rows // ignore: cast_nullable_to_non_nullable
-              as int,
-      cols: null == cols
-          ? _value.cols
-          : cols // ignore: cast_nullable_to_non_nullable
-              as int,
-      cellSize: null == cellSize
-          ? _value.cellSize
-          : cellSize // ignore: cast_nullable_to_non_nullable
-              as double,
-    ) as $Val);
-  }
-}
-
-/// @nodoc
-abstract class _$$GridConfigurationImplCopyWith<$Res>
-    implements $GridConfigurationCopyWith<$Res> {
-  factory _$$GridConfigurationImplCopyWith(_$GridConfigurationImpl value,
-          $Res Function(_$GridConfigurationImpl) then) =
-      __$$GridConfigurationImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({int rows, int cols, double cellSize});
-}
-
-/// @nodoc
-class __$$GridConfigurationImplCopyWithImpl<$Res>
-    extends _$GridConfigurationCopyWithImpl<$Res, _$GridConfigurationImpl>
-    implements _$$GridConfigurationImplCopyWith<$Res> {
-  __$$GridConfigurationImplCopyWithImpl(_$GridConfigurationImpl _value,
-      $Res Function(_$GridConfigurationImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of GridConfiguration
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? rows = null,
-    Object? cols = null,
-    Object? cellSize = null,
-  }) {
-    return _then(_$GridConfigurationImpl(
-      rows: null == rows
-          ? _value.rows
-          : rows // ignore: cast_nullable_to_non_nullable
-              as int,
-      cols: null == cols
-          ? _value.cols
-          : cols // ignore: cast_nullable_to_non_nullable
-              as int,
-      cellSize: null == cellSize
-          ? _value.cellSize
-          : cellSize // ignore: cast_nullable_to_non_nullable
-              as double,
-    ));
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$GridConfigurationImpl implements _GridConfiguration {
-  const _$GridConfigurationImpl(
-      {this.rows = 20, this.cols = 20, this.cellSize = 60.0});
-
-  factory _$GridConfigurationImpl.fromJson(Map<String, dynamic> json) =>
-      _$$GridConfigurationImplFromJson(json);
-
-  @override
-  @JsonKey()
-  final int rows;
-  @override
-  @JsonKey()
-  final int cols;
-  @override
-  @JsonKey()
-  final double cellSize;
-
-  @override
-  String toString() {
-    return 'GridConfiguration(rows: $rows, cols: $cols, cellSize: $cellSize)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$GridConfigurationImpl &&
-            (identical(other.rows, rows) || other.rows == rows) &&
-            (identical(other.cols, cols) || other.cols == cols) &&
-            (identical(other.cellSize, cellSize) ||
-                other.cellSize == cellSize));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, rows, cols, cellSize);
-
-  /// Create a copy of GridConfiguration
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$GridConfigurationImplCopyWith<_$GridConfigurationImpl> get copyWith =>
-      __$$GridConfigurationImplCopyWithImpl<_$GridConfigurationImpl>(
-          this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$GridConfigurationImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class _GridConfiguration implements GridConfiguration {
-  const factory _GridConfiguration(
-      {final int rows,
-      final int cols,
-      final double cellSize}) = _$GridConfigurationImpl;
-
-  factory _GridConfiguration.fromJson(Map<String, dynamic> json) =
-      _$GridConfigurationImpl.fromJson;
-
-  @override
-  int get rows;
-  @override
-  int get cols;
-  @override
-  double get cellSize;
-
-  /// Create a copy of GridConfiguration
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GridConfigurationImplCopyWith<_$GridConfigurationImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-CircuitComponent _$CircuitComponentFromJson(Map<String, dynamic> json) {
-  return _CircuitComponent.fromJson(json);
-}
-
-/// @nodoc
-mixin _$CircuitComponent {
-  String get id => throw _privateConstructorUsedError;
-  ComponentType get type => throw _privateConstructorUsedError;
-  int get row => throw _privateConstructorUsedError;
-  int get col => throw _privateConstructorUsedError;
-  Map<String, dynamic> get properties => throw _privateConstructorUsedError;
-  bool get isSelected => throw _privateConstructorUsedError;
-  bool get isHighlighted => throw _privateConstructorUsedError;
-
-  /// Serializes this CircuitComponent to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of CircuitComponent
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $CircuitComponentCopyWith<CircuitComponent> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $CircuitComponentCopyWith<$Res> {
-  factory $CircuitComponentCopyWith(
-          CircuitComponent value, $Res Function(CircuitComponent) then) =
-      _$CircuitComponentCopyWithImpl<$Res, CircuitComponent>;
-  @useResult
-  $Res call(
-      {String id,
-      ComponentType type,
-      int row,
-      int col,
-      Map<String, dynamic> properties,
-      bool isSelected,
-      bool isHighlighted});
-}
-
-/// @nodoc
-class _$CircuitComponentCopyWithImpl<$Res, $Val extends CircuitComponent>
-    implements $CircuitComponentCopyWith<$Res> {
-  _$CircuitComponentCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of CircuitComponent
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? type = null,
-    Object? row = null,
-    Object? col = null,
-    Object? properties = null,
-    Object? isSelected = null,
-    Object? isHighlighted = null,
-  }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _value.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ComponentType,
-      row: null == row
-          ? _value.row
-          : row // ignore: cast_nullable_to_non_nullable
-              as int,
-      col: null == col
-          ? _value.col
-          : col // ignore: cast_nullable_to_non_nullable
-              as int,
-      properties: null == properties
-          ? _value.properties
-          : properties // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>,
-      isSelected: null == isSelected
-          ? _value.isSelected
-          : isSelected // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isHighlighted: null == isHighlighted
-          ? _value.isHighlighted
-          : isHighlighted // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ) as $Val);
-  }
-}
-
-/// @nodoc
-abstract class _$$CircuitComponentImplCopyWith<$Res>
-    implements $CircuitComponentCopyWith<$Res> {
-  factory _$$CircuitComponentImplCopyWith(_$CircuitComponentImpl value,
-          $Res Function(_$CircuitComponentImpl) then) =
-      __$$CircuitComponentImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {String id,
-      ComponentType type,
-      int row,
-      int col,
-      Map<String, dynamic> properties,
-      bool isSelected,
-      bool isHighlighted});
-}
-
-/// @nodoc
-class __$$CircuitComponentImplCopyWithImpl<$Res>
-    extends _$CircuitComponentCopyWithImpl<$Res, _$CircuitComponentImpl>
-    implements _$$CircuitComponentImplCopyWith<$Res> {
-  __$$CircuitComponentImplCopyWithImpl(_$CircuitComponentImpl _value,
-      $Res Function(_$CircuitComponentImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of CircuitComponent
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? type = null,
-    Object? row = null,
-    Object? col = null,
-    Object? properties = null,
-    Object? isSelected = null,
-    Object? isHighlighted = null,
-  }) {
-    return _then(_$CircuitComponentImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
-          ? _value.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as ComponentType,
-      row: null == row
-          ? _value.row
-          : row // ignore: cast_nullable_to_non_nullable
-              as int,
-      col: null == col
-          ? _value.col
-          : col // ignore: cast_nullable_to_non_nullable
-              as int,
-      properties: null == properties
-          ? _value._properties
-          : properties // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>,
-      isSelected: null == isSelected
-          ? _value.isSelected
-          : isSelected // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isHighlighted: null == isHighlighted
-          ? _value.isHighlighted
-          : isHighlighted // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$CircuitComponentImpl implements _CircuitComponent {
-  const _$CircuitComponentImpl(
-      {required this.id,
-      required this.type,
-      required this.row,
-      required this.col,
-      final Map<String, dynamic> properties = const {},
-      this.isSelected = false,
-      this.isHighlighted = false})
-      : _properties = properties;
-
-  factory _$CircuitComponentImpl.fromJson(Map<String, dynamic> json) =>
-      _$$CircuitComponentImplFromJson(json);
-
-  @override
-  final String id;
-  @override
-  final ComponentType type;
-  @override
-  final int row;
-  @override
-  final int col;
-  final Map<String, dynamic> _properties;
-  @override
-  @JsonKey()
-  Map<String, dynamic> get properties {
-    if (_properties is EqualUnmodifiableMapView) return _properties;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(_properties);
-  }
-
-  @override
-  @JsonKey()
-  final bool isSelected;
-  @override
-  @JsonKey()
-  final bool isHighlighted;
-
-  @override
-  String toString() {
-    return 'CircuitComponent(id: $id, type: $type, row: $row, col: $col, properties: $properties, isSelected: $isSelected, isHighlighted: $isHighlighted)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$CircuitComponentImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.row, row) || other.row == row) &&
-            (identical(other.col, col) || other.col == col) &&
-            const DeepCollectionEquality()
-                .equals(other._properties, _properties) &&
-            (identical(other.isSelected, isSelected) ||
-                other.isSelected == isSelected) &&
-            (identical(other.isHighlighted, isHighlighted) ||
-                other.isHighlighted == isHighlighted));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      type,
-      row,
-      col,
-      const DeepCollectionEquality().hash(_properties),
-      isSelected,
-      isHighlighted);
-
-  /// Create a copy of CircuitComponent
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$CircuitComponentImplCopyWith<_$CircuitComponentImpl> get copyWith =>
-      __$$CircuitComponentImplCopyWithImpl<_$CircuitComponentImpl>(
-          this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$CircuitComponentImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class _CircuitComponent implements CircuitComponent {
-  const factory _CircuitComponent(
-      {required final String id,
-      required final ComponentType type,
-      required final int row,
-      required final int col,
-      final Map<String, dynamic> properties,
-      final bool isSelected,
-      final bool isHighlighted}) = _$CircuitComponentImpl;
-
-  factory _CircuitComponent.fromJson(Map<String, dynamic> json) =
-      _$CircuitComponentImpl.fromJson;
-
-  @override
-  String get id;
-  @override
-  ComponentType get type;
-  @override
-  int get row;
-  @override
-  int get col;
-  @override
-  Map<String, dynamic> get properties;
-  @override
-  bool get isSelected;
-  @override
-  bool get isHighlighted;
-
-  /// Create a copy of CircuitComponent
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$CircuitComponentImplCopyWith<_$CircuitComponentImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -2400,5 +1886,300 @@ abstract class _GridCell implements GridCell {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$GridCellImplCopyWith<_$GridCellImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+CircuitComponent _$CircuitComponentFromJson(Map<String, dynamic> json) {
+  return _CircuitComponent.fromJson(json);
+}
+
+/// @nodoc
+mixin _$CircuitComponent {
+  String get id => throw _privateConstructorUsedError;
+  ComponentType get type => throw _privateConstructorUsedError;
+  int get row => throw _privateConstructorUsedError;
+  int get col => throw _privateConstructorUsedError;
+  Map<String, dynamic> get properties => throw _privateConstructorUsedError;
+  bool get isSelected => throw _privateConstructorUsedError;
+  bool get isHighlighted => throw _privateConstructorUsedError;
+
+  /// Serializes this CircuitComponent to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of CircuitComponent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $CircuitComponentCopyWith<CircuitComponent> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $CircuitComponentCopyWith<$Res> {
+  factory $CircuitComponentCopyWith(
+          CircuitComponent value, $Res Function(CircuitComponent) then) =
+      _$CircuitComponentCopyWithImpl<$Res, CircuitComponent>;
+  @useResult
+  $Res call(
+      {String id,
+      ComponentType type,
+      int row,
+      int col,
+      Map<String, dynamic> properties,
+      bool isSelected,
+      bool isHighlighted});
+}
+
+/// @nodoc
+class _$CircuitComponentCopyWithImpl<$Res, $Val extends CircuitComponent>
+    implements $CircuitComponentCopyWith<$Res> {
+  _$CircuitComponentCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of CircuitComponent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? type = null,
+    Object? row = null,
+    Object? col = null,
+    Object? properties = null,
+    Object? isSelected = null,
+    Object? isHighlighted = null,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as ComponentType,
+      row: null == row
+          ? _value.row
+          : row // ignore: cast_nullable_to_non_nullable
+              as int,
+      col: null == col
+          ? _value.col
+          : col // ignore: cast_nullable_to_non_nullable
+              as int,
+      properties: null == properties
+          ? _value.properties
+          : properties // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+      isSelected: null == isSelected
+          ? _value.isSelected
+          : isSelected // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isHighlighted: null == isHighlighted
+          ? _value.isHighlighted
+          : isHighlighted // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$CircuitComponentImplCopyWith<$Res>
+    implements $CircuitComponentCopyWith<$Res> {
+  factory _$$CircuitComponentImplCopyWith(_$CircuitComponentImpl value,
+          $Res Function(_$CircuitComponentImpl) then) =
+      __$$CircuitComponentImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      ComponentType type,
+      int row,
+      int col,
+      Map<String, dynamic> properties,
+      bool isSelected,
+      bool isHighlighted});
+}
+
+/// @nodoc
+class __$$CircuitComponentImplCopyWithImpl<$Res>
+    extends _$CircuitComponentCopyWithImpl<$Res, _$CircuitComponentImpl>
+    implements _$$CircuitComponentImplCopyWith<$Res> {
+  __$$CircuitComponentImplCopyWithImpl(_$CircuitComponentImpl _value,
+      $Res Function(_$CircuitComponentImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of CircuitComponent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? type = null,
+    Object? row = null,
+    Object? col = null,
+    Object? properties = null,
+    Object? isSelected = null,
+    Object? isHighlighted = null,
+  }) {
+    return _then(_$CircuitComponentImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as ComponentType,
+      row: null == row
+          ? _value.row
+          : row // ignore: cast_nullable_to_non_nullable
+              as int,
+      col: null == col
+          ? _value.col
+          : col // ignore: cast_nullable_to_non_nullable
+              as int,
+      properties: null == properties
+          ? _value._properties
+          : properties // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+      isSelected: null == isSelected
+          ? _value.isSelected
+          : isSelected // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isHighlighted: null == isHighlighted
+          ? _value.isHighlighted
+          : isHighlighted // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$CircuitComponentImpl implements _CircuitComponent {
+  const _$CircuitComponentImpl(
+      {required this.id,
+      required this.type,
+      required this.row,
+      required this.col,
+      final Map<String, dynamic> properties = const {},
+      this.isSelected = false,
+      this.isHighlighted = false})
+      : _properties = properties;
+
+  factory _$CircuitComponentImpl.fromJson(Map<String, dynamic> json) =>
+      _$$CircuitComponentImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final ComponentType type;
+  @override
+  final int row;
+  @override
+  final int col;
+  final Map<String, dynamic> _properties;
+  @override
+  @JsonKey()
+  Map<String, dynamic> get properties {
+    if (_properties is EqualUnmodifiableMapView) return _properties;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_properties);
+  }
+
+  @override
+  @JsonKey()
+  final bool isSelected;
+  @override
+  @JsonKey()
+  final bool isHighlighted;
+
+  @override
+  String toString() {
+    return 'CircuitComponent(id: $id, type: $type, row: $row, col: $col, properties: $properties, isSelected: $isSelected, isHighlighted: $isHighlighted)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$CircuitComponentImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.row, row) || other.row == row) &&
+            (identical(other.col, col) || other.col == col) &&
+            const DeepCollectionEquality()
+                .equals(other._properties, _properties) &&
+            (identical(other.isSelected, isSelected) ||
+                other.isSelected == isSelected) &&
+            (identical(other.isHighlighted, isHighlighted) ||
+                other.isHighlighted == isHighlighted));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      type,
+      row,
+      col,
+      const DeepCollectionEquality().hash(_properties),
+      isSelected,
+      isHighlighted);
+
+  /// Create a copy of CircuitComponent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$CircuitComponentImplCopyWith<_$CircuitComponentImpl> get copyWith =>
+      __$$CircuitComponentImplCopyWithImpl<_$CircuitComponentImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$CircuitComponentImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _CircuitComponent implements CircuitComponent {
+  const factory _CircuitComponent(
+      {required final String id,
+      required final ComponentType type,
+      required final int row,
+      required final int col,
+      final Map<String, dynamic> properties,
+      final bool isSelected,
+      final bool isHighlighted}) = _$CircuitComponentImpl;
+
+  factory _CircuitComponent.fromJson(Map<String, dynamic> json) =
+      _$CircuitComponentImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  ComponentType get type;
+  @override
+  int get row;
+  @override
+  int get col;
+  @override
+  Map<String, dynamic> get properties;
+  @override
+  bool get isSelected;
+  @override
+  bool get isHighlighted;
+
+  /// Create a copy of CircuitComponent
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$CircuitComponentImplCopyWith<_$CircuitComponentImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

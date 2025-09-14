@@ -1,4 +1,5 @@
 import 'dart:ui';
+import '../entity/grid_configuration.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/grid_service.dart';
 
@@ -7,17 +8,8 @@ final gridServiceProvider = Provider<GridService>((ref) {
   return GridService(); // GridService is stateless and thread-safe
 });
 
-/// Provider for creating GridConfiguration from various contexts
-final gridConfigurationProvider = Provider<GridConfiguration>((ref) {
-  // Default configuration - should be overridden in specific contexts
-  return const GridConfiguration(
-    rows: 10,
-    cols: 15,
-    cellSize: GridConstants.defaultCellSize,
-    scale: 1,
-    panOffset: Offset.zero,
-  );
-});
+// GridConfigurationProvider has been moved to lib/core/entity/grid_configuration.dart for canonical definition
+// This file remains for backward compatibility and GridService provider only
 
 /// Provider for RenderConfiguration
 final renderConfigurationProvider = Provider<RenderConfiguration>((ref) {

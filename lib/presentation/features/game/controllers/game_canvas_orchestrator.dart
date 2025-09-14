@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import '../../../../../core/entity/grid_configuration.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/services/interfaces/canvas_rendering_service.dart';
 import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';

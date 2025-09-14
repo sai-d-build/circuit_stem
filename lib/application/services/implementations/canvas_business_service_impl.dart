@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/entity/grid_configuration.dart';
 import 'package:sparkcircuit/application/services/interfaces/canvas_business_service.dart';
 import 'package:sparkcircuit/application/services/interfaces/component_placement_service.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';

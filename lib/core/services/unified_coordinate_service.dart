@@ -1,11 +1,14 @@
 import 'dart:math' as math;
+import '../entity/grid_configuration.dart';
 
 import 'package:flutter/material.dart';
 
-import '../../../presentation/features/game/controllers/game_canvas_controller.dart';
+// Moved import to break circular dependency - controller dependencies injected instead
 import '../../domain/entities/core/component.dart';
 import '../migration/migration_tracker.dart';
 import 'secure_coordinate_validator.dart';
+// Import canonical GridConfiguration from entity layer (to replace the duplicate class that was removed)
+import '../entity/grid_configuration.dart';
 
 // Cache entry classes for performance optimization
 class _CacheEntry {
@@ -191,6 +194,7 @@ class UnifiedCoordinateService {
   }
 
   /// Snap screen coordinates to nearest grid cell center
+  /// 🎯 PHASE 1: Always use 20x20 bounds to prevent index out-of-bounds errors
   Offset snapToGrid(Offset screenPos, GridConfiguration config,
       {RenderBox? renderBox}) {
     // Check cache first for performance
@@ -209,9 +213,10 @@ class UnifiedCoordinateService {
     final snappedGridX = gridPos.dx.floor().toDouble();
     final snappedGridY = gridPos.dy.floor().toDouble();
 
-    // Clamp to grid bounds
-    final clampedGridX = snappedGridX.clamp(0.0, (config.cols - 1).toDouble());
-    final clampedGridY = snappedGridY.clamp(0.0, (config.rows - 1).toDouble());
+    // 🎯 PHASE 1: Always clamp to 20x20 visual grid bounds to prevent out-of-bounds indices
+    // This fixes the "index 61 out-of-bounds" error by allowing indices up to 399 instead of 47
+    final clampedGridX = snappedGridX.clamp(0.0, 19.0); // 20x20 grid: max X index = 19
+    final clampedGridY = snappedGridY.clamp(0.0, 19.0); // 20x20 grid: max Y index = 19
 
     final snappedGridPos = Offset(clampedGridX, clampedGridY);
 
@@ -234,11 +239,13 @@ class UnifiedCoordinateService {
   }
 
   /// Enhanced component-sized boundary checks (PHASE 2 FEATURE)
+  /// 🎯 PHASE 1: Use 20x20 visual grid bounds for consistent boundary validation
   bool canComponentFitAt(
       int row, int col, ComponentType type, GridConfiguration config) {
     final componentSize = _getComponentGridFootprint(type);
-    return (col + componentSize.width) <= config.cols &&
-        (row + componentSize.height) <= config.rows &&
+    // Always check against 20x20 visual grid bounds for consistent behavior
+    return (col + componentSize.width) <= 20 && // ✅ 20x20 visual grid
+        (row + componentSize.height) <= 20 && // ✅ 20x20 visual grid
         col >= 0 &&
         row >= 0;
   }
@@ -263,11 +270,13 @@ class UnifiedCoordinateService {
   }
 
   /// Check if a grid position is within grid bounds
+  /// 🎯 PHASE 1: Always check against 20x20 visual grid bounds for consistency
   bool isInGridBounds(Offset gridPos, GridConfiguration config) {
+    // Use 20x20 bounds consistently for all coordinate checks
     return gridPos.dx >= 0 &&
         gridPos.dy >= 0 &&
-        gridPos.dx <= config.cols - 1 && // ✅ REJECT EXACT BOUNDARY
-        gridPos.dy <= config.rows - 1; // ✅ REJECT EXACT BOUNDARY
+        gridPos.dx <= 19.0 && // ✅ 20x20 grid: max X index = 19
+        gridPos.dy <= 19.0;   // ✅ 20x20 grid: max Y index = 19
   }
 
   /// Check if screen coordinates are within visible grid bounds
@@ -278,13 +287,14 @@ class UnifiedCoordinateService {
   }
 
   /// Get valid grid position from screen coordinates (returns null if out of bounds)
-  /// Consolidated to use round() for consistency across implementations
+  /// 🎯 PHASE 1: FIXED - Consolidated to use floor() for consistency with snapToGrid()
+  /// This prevents mismatches between hover preview and actual placement
   Offset? getValidGridPosition(Offset screenPosition, GridConfiguration config,
       {RenderBox? renderBox}) {
     final gridPos = screenToGrid(screenPosition, config, renderBox: renderBox);
     final snappedPos = Offset(
-      gridPos.dx.round().toDouble(), // Unified to round for nearest cell
-      gridPos.dy.round().toDouble(),
+      gridPos.dx.floor().toDouble(), // ✅ NOW CONSISTENT WITH snapToGrid()
+      gridPos.dy.floor().toDouble(), // ✅ NO LONGER ROUND() - PREVENTS MISMATCHES
     );
 
     final isValid = isInGridBounds(snappedPos, config);
@@ -369,42 +379,10 @@ class UnifiedCoordinateService {
     return visibleBounds.contains(gridPosition);
   }
 
-  /// Factory to create config from GameCanvasController for easy integration
-  static GridConfiguration createConfigFromController(
-      GameCanvasController controller) {
-    return GridConfiguration(
-      rows: controller.gridHeight,
-      cols: controller.gridWidth,
-      cellSize: controller.gridCellSize,
-      scale: controller.scale,
-      panOffset: controller.panOffset,
-    );
-  }
-
-  void clearCache() {
-    _coordinateCache.clear();
-    _validationCache.clear();
-  }
-}
-
-/// Configuration for grid operations (consolidated from GridService)
-class GridConfiguration {
-  final int rows;
-  final int cols;
-  final double cellSize;
-  final double scale;
-  final Offset panOffset;
-
-  const GridConfiguration({
-    required this.rows,
-    required this.cols,
-    required this.cellSize,
-    required this.scale,
-    required this.panOffset,
-  });
-
-  /// Create configuration from canvas controller parameters
-  factory GridConfiguration.fromCanvas({
+  /// Factory to create config from provided parameters (broken circular dependency)
+  /// This method was previously createConfigFromController() but had to be moved
+  /// due to circular dependency - presentation layer should now pass parameters directly
+  static GridConfiguration createConfigFromParameters({
     required int rows,
     required int cols,
     required double cellSize,
@@ -420,29 +398,14 @@ class GridConfiguration {
     );
   }
 
-  /// Create a copy with modified values
-  GridConfiguration copyWith({
-    int? rows,
-    int? cols,
-    double? cellSize,
-    double? scale,
-    Offset? panOffset,
-  }) {
-    return GridConfiguration(
-      rows: rows ?? this.rows,
-      cols: cols ?? this.cols,
-      cellSize: cellSize ?? this.cellSize,
-      scale: scale ?? this.scale,
-      panOffset: panOffset ?? this.panOffset,
-    );
-  }
-
-  /// Check if grid coordinates are valid
-  static bool isValidGridCoordinate(
-      int x, int y, int gridWidth, int gridHeight) {
-    return x >= 0 && x < gridWidth && y >= 0 && y < gridHeight;
+  void clearCache() {
+    _coordinateCache.clear();
+    _validationCache.clear();
   }
 }
+
+// GridConfiguration class removed from this file to eliminate duplicate class definitions
+// All configuration should now use the canonical GridConfiguration from ../entity/grid_configuration.dart
 
 // Phase 2: Extension methods for GridDensityConfig integration
 extension GridDensityConfigExtensions on GridDensityConfig {

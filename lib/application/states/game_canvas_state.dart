@@ -1,6 +1,8 @@
 import 'dart:ui';
+// import '../entity/grid_configuration.dart'; // REMOVED - canonical import on next line is correct
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sparkcircuit/domain/entities/entities.dart';
+import '../../../core/entity/grid_configuration.dart';
 
 part 'game_canvas_state.freezed.dart';
 part 'game_canvas_state.g.dart';
@@ -111,35 +113,7 @@ class GridPosition with _$GridPosition {
       _$GridPositionFromJson(json);
 }
 
-@freezed
-class GridConfiguration with _$GridConfiguration {
-  const factory GridConfiguration({
-    @Default(20) int rows,
-    @Default(20) int cols,
-    @Default(60.0) double cellSize,
-  }) = _GridConfiguration;
 
-  factory GridConfiguration.standard() => const GridConfiguration();
-
-  factory GridConfiguration.fromJson(Map<String, dynamic> json) =>
-      _$GridConfigurationFromJson(json);
-}
-
-@freezed
-class CircuitComponent with _$CircuitComponent {
-  const factory CircuitComponent({
-    required String id,
-    required ComponentType type,
-    required int row,
-    required int col,
-    @Default({}) Map<String, dynamic> properties,
-    @Default(false) bool isSelected,
-    @Default(false) bool isHighlighted,
-  }) = _CircuitComponent;
-
-  factory CircuitComponent.fromJson(Map<String, dynamic> json) =>
-      _$CircuitComponentFromJson(json);
-}
 
 @freezed
 class CircuitWire with _$CircuitWire {
@@ -169,6 +143,22 @@ class GridCell with _$GridCell {
 
   factory GridCell.fromJson(Map<String, dynamic> json) =>
       _$GridCellFromJson(json);
+}
+
+@freezed
+class CircuitComponent with _$CircuitComponent {
+  const factory CircuitComponent({
+    required String id,
+    required ComponentType type,
+    required int row,
+    required int col,
+    @Default({}) Map<String, dynamic> properties,
+    @Default(false) bool isSelected,
+    @Default(false) bool isHighlighted,
+  }) = _CircuitComponent;
+
+  factory CircuitComponent.fromJson(Map<String, dynamic> json) =>
+      _$CircuitComponentFromJson(json);
 }
 
 enum GestureMode {

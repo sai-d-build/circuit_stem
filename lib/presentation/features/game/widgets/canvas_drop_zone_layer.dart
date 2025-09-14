@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/entity/grid_configuration.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sparkcircuit/application/providers/unified_providers.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';

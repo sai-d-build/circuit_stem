@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import '../entity/grid_configuration.dart';
 import 'dart:ui';
 
 import '../../../core/services/unified_coordinate_service.dart';

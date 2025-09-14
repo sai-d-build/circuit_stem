@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../lib/core/entity/grid_configuration.dart'
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
 

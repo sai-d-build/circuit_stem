@@ -1,4 +1,5 @@
 import 'dart:ui';
+import '../entity/grid_configuration.dart';
 
 import 'package:sparkcircuit/application/services/gestures/gesture_state_machine.dart';
 import 'package:sparkcircuit/application/services/interfaces/game_interaction_service.dart';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/entity/grid_configuration.dart';
 import 'package:sparkcircuit/application/states/game_canvas_state.dart';
 import 'package:sparkcircuit/application/transaction.dart';
 import 'package:sparkcircuit/application/use_cases/create_component_use_case.dart';
@@ -32,7 +33,7 @@ class PlacementServiceAdapter {
       final gameState = gameStateNotifier.state;
 
       // Create grid configuration for validation
-      final config = ucs.GridConfiguration(
+      final config = GridConfiguration(
         rows: gameState.grid.rows,
         cols: gameState.grid.cols,
         cellSize: 60, // Default cell size

@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../../../../core/entity/grid_configuration.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';

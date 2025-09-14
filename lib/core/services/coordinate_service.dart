@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sparkcircuit/presentation/features/game/controllers/game_canvas_controller.dart';
+import '../entity/grid_configuration.dart';
 import 'unified_coordinate_service.dart';
+import '../entity/grid_configuration.dart';
 
 /// Canonical coordinate conversion service that provides a single source of truth
 /// for all screen ↔ grid transformations in the application.
@@ -22,14 +23,20 @@ class CoordinateService {
     required this.gridHeight,
   });
 
-  /// Create from GameCanvasController (canonical source)
-  factory CoordinateService.fromController(GameCanvasController controller) {
+  /// Create from provided parameters (breaks circular dependency)
+  factory CoordinateService.fromParameters({
+    required double cellSize,
+    required double scale,
+    required Offset panOffset,
+    required int gridWidth,
+    required int gridHeight,
+  }) {
     return CoordinateService(
-      cellSize: controller.gridCellSize,
-      scale: controller.scale,
-      panOffset: controller.panOffset,
-      gridWidth: controller.gridWidth,
-      gridHeight: controller.gridHeight,
+      cellSize: cellSize,
+      scale: scale,
+      panOffset: panOffset,
+      gridWidth: gridWidth,
+      gridHeight: gridHeight,
     );
   }
 

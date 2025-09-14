@@ -5,8 +5,8 @@ import '../../domain/entities/core/component.dart';
 import '../../domain/entities/core/grid.dart';
 import 'unified_coordinate_service.dart';
 
-// Re-export GridConfiguration from unified_coordinate_service for backward compatibility
-export 'unified_coordinate_service.dart' show GridConfiguration;
+// Import canonical GridConfiguration from entity layer for consistent access
+import '../entity/grid_configuration.dart';
 
 /// Configuration for grid rendering
 class RenderConfiguration {

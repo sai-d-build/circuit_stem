@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../entity/grid_configuration.dart';
 import 'package:sparkcircuit/application/states/game_state.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
 import 'package:sparkcircuit/presentation/core/theme/app_theme.dart';
@@ -21,9 +22,10 @@ class DropZoneHighlightPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw highlights for valid drop positions
-    for (var row = 0; row < gameState.grid.rows; row++) {
-      for (var col = 0; col < gameState.grid.cols; col++) {
+    // 🎯 PHASE 3: Draw highlights for valid drop positions using 20x20 visual grid
+    // This replaces the limited gameplay bounds with full visual grid coverage
+    for (var row = 0; row < 20; row++) {  // ✅ Always use 20x20 visual grid
+      for (var col = 0; col < 20; col++) {  // ✅ Always use 20x20 visual grid
         final screenX = col * gridConfig.cellSize * gridConfig.scale +
             gridConfig.panOffset.dx;
         final screenY = row * gridConfig.cellSize * gridConfig.scale +
@@ -118,11 +120,9 @@ class DropZoneHighlightPainter extends CustomPainter {
   }
 
   bool _isValidDropPosition(int row, int col) {
-    // Check if position is within bounds
-    if (row < 0 ||
-        row >= gameState.grid.rows ||
-        col < 0 ||
-        col >= gameState.grid.cols) {
+    // 🎯 PHASE 3: Check if position is within 20x20 visual grid bounds
+    // This allows drops across the full visual canvas, not just gameplay area
+    if (row < 0 || row >= 20 || col < 0 || col >= 20) {  // ✅ Use 20x20 bounds
       return false;
     }
 

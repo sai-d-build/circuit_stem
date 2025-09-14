@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import '../../lib/core/entity/grid_configuration.dart'
 import 'package:sparkcircuit/core/services/coordinate_service.dart';
 import 'package:sparkcircuit/core/services/grid_service.dart';
 import 'package:sparkcircuit/core/services/unified_coordinate_service.dart';
